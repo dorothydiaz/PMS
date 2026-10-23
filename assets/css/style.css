@@ -2029,6 +2029,15 @@ body {
   text-align: center !important;
 }
 
+/* JO#: Dark Charcoal Label Cell (Rows 1-2, 54px tall) */
+.doc-jo-lbl {
+  font-size: 20px;
+  font-weight: 800 !important;
+  text-align: center !important;
+  letter-spacing: 0.5px !important;
+  line-height: 1 !important;
+}
+
 /* Clean White Value Cells */
 .doc-value-cell {
   background-color: #FFFFFF !important;

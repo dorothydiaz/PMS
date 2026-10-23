@@ -851,7 +851,8 @@
     pendingArtistSelected: 'Glen',
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
-    selectedTemplateElemId: null
+    selectedTemplateElemId: null,
+    customCellFonts: {}
   };
 
   function loadStateFromStorage() {
@@ -868,6 +869,7 @@
           });
           state.templateElements = parsed.templateElements || DEFAULT_TEMPLATE_ELEMENTS;
           state.attachments = parsed.attachments || DEFAULT_ATTACHMENTS;
+          state.customCellFonts = parsed.customCellFonts || {};
           return;
         }
       }
@@ -883,7 +885,8 @@
         salesReps: state.salesReps,
         requests: state.requests,
         templateElements: state.templateElements,
-        attachments: state.attachments
+        attachments: state.attachments,
+        customCellFonts: state.customCellFonts || {}
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
       pulseAutoSaveIndicator();
@@ -2152,26 +2155,40 @@
 
   function getCellFriendlyName(cell) {
     if (!cell) return 'Select Any Cell';
+    if (cell.id === 'docFieldJoLabel' || cell.classList.contains('doc-jo-lbl')) return 'JO# Label';
     if (cell.id === 'docFieldJoNumber' || cell.classList.contains('doc-jo-val')) return 'JO Number';
     if (cell.id === 'docFieldProjectName' || cell.classList.contains('doc-proj-cell')) return 'Project Name';
     if (cell.id === 'docFieldClientName' || cell.classList.contains('doc-client-cell')) return 'Client Name';
     if (cell.id === 'docFieldDueDate' || cell.classList.contains('doc-date-val')) return 'Due Date';
+    if (cell.id === 'docFieldDueDateLabel') return 'Due Date Label';
     if (cell.id === 'docFieldLocation') return 'Location';
+    if (cell.id === 'docFieldLocationLabel') return 'Location Label';
     if (cell.id === 'docFieldContactPerson') return 'Contact Person';
+    if (cell.id === 'docFieldContactPersonLabel') return 'Contact Person Label';
     if (cell.id === 'docFieldContactNumber') return 'Contact Number';
+    if (cell.id === 'docFieldContactNumberLabel') return 'Contact Number Label';
     if (cell.id === 'docFieldOrderDate') return 'Order Date';
+    if (cell.id === 'docFieldOrderDateLabel') return 'Order Date Label';
     if (cell.id === 'docFieldReleasingDate') return 'Releasing Date';
+    if (cell.id === 'docFieldReleasingDateLabel') return 'Releasing Date Label';
     if (cell.id === 'docFieldReleasingMode') return 'Releasing Mode';
+    if (cell.id === 'docFieldReleasingModeLabel') return 'Releasing Mode Label';
     if (cell.id === 'docFieldInstallers') return 'Installers';
+    if (cell.id === 'docFieldInstallersLabel') return 'Installers Label';
     if (cell.id === 'docFieldDuration') return 'Duration';
+    if (cell.id === 'docFieldDurationLabel') return 'Duration Label';
     if (cell.id === 'docFieldAddress') return 'Address';
+    if (cell.id === 'docFieldAddressLabel') return 'Address Label';
     if (cell.id === 'docFieldInCharge') return 'In-Charge';
+    if (cell.id === 'docFieldInChargeLabel') return 'In-Charge Label';
     if (cell.id === 'docFieldDrawnBy') return 'Drawn By';
+    if (cell.id === 'docFieldDrawnByLabel') return 'Drawn By Label';
     return (cell.textContent || 'Selected Cell').trim().slice(0, 16);
   }
 
   function getCellDefaultFontSize(cell) {
     if (!cell) return 13;
+    if (cell.id === 'docFieldJoLabel' || cell.classList.contains('doc-jo-lbl')) return 20;
     if (cell.classList.contains('doc-jo-val')) return 30;
     if (cell.classList.contains('doc-proj-cell')) return 30;
     if (cell.classList.contains('doc-client-cell')) return 26;
@@ -2225,6 +2242,7 @@
     if (!state.customCellFonts) state.customCellFonts = {};
     const key = cell.id || cell.className;
     state.customCellFonts[key] = clamped;
+    saveStateToStorage();
   }
 
   function autoFitCellText(cell) {
@@ -2323,6 +2341,18 @@
     if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || 'GLEN';
 
     renderAttachmentsList();
+
+    // Re-apply saved customized cell font sizes
+    if (state.customCellFonts) {
+      Object.entries(state.customCellFonts).forEach(([key, size]) => {
+        const target = document.getElementById(key);
+        if (target && size > 0) {
+          target.setAttribute('data-custom-size', size);
+          target.style.setProperty('font-size', size + 'px', 'important');
+        }
+      });
+    }
+
     setTimeout(autoFitDirectiveTexts, 20);
   }
 
@@ -2456,6 +2486,7 @@
   function generateDirectiveSVG(rec) {
     if (!rec) rec = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
 
+    const joLabelVal = document.getElementById('docFieldJoLabel')?.textContent?.trim() || 'JO#:';
     const joNumberVal = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec.joNumber || 'P260701373';
     const dueDateFormatted = document.getElementById('docFieldDueDate')?.textContent?.trim() || formatReadableDate(rec.designDeadline || rec.releasingDate);
     const releasingDateFormatted = document.getElementById('docFieldReleasingDate')?.textContent?.trim() || formatReadableDate(rec.releasingDate);
@@ -2485,11 +2516,15 @@
           if (computed && parseFloat(computed) > 0) return parseFloat(computed);
         }
       }
+      if (state.customCellFonts && state.customCellFonts[elementId] && state.customCellFonts[elementId] > 0) {
+        return state.customCellFonts[elementId];
+      }
       const len = (str || '').length;
       if (len <= maxChars) return base;
       return Math.max(min, Math.round((base * (maxChars / len)) * 10) / 10);
     };
 
+    const joLblSize = getSvgSize(joLabelVal, 6, 20, 12, 'docFieldJoLabel');
     const joSize = getSvgSize(joNumberVal, 10, 30, 16, 'docFieldJoNumber');
     const projSize = getSvgSize(projectNameVal, 12, 30, 15, 'docFieldProjectName');
     const clientSize = getSvgSize(clientVal, 14, 26, 14, 'docFieldClientName');
@@ -2507,6 +2542,7 @@
     const releasingModeSize = getSvgSize(releasingModeVal, 16, 13, 8.5, 'docFieldReleasingMode');
 
     // Dynamic vertical baseline calculations based on actual font size and cell height
+    const joLblY = Math.round(0 + (54 + joLblSize * 0.72) / 2);
     const joY = Math.round(0 + (54 + joSize * 0.72) / 2);
     const projY = Math.round(0 + (54 + projSize * 0.72) / 2);
     const clientY = Math.round(54 + (54 + clientSize * 0.72) / 2);
@@ -2538,7 +2574,7 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700;800;900&amp;display=swap');
       .cad-lbl-box { fill: #434343; stroke: #000000; stroke-width: 1.5px; }
-      .cad-lbl-txt { fill: #FFFFFF; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 800; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+      .cad-lbl-txt { fill: #FFFFFF; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
       .cad-val-box { fill: #FFFFFF; stroke: #000000; stroke-width: 1.5px; }
       .cad-val-txt { fill: #434343; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 700; text-transform: uppercase; }
       .cad-red-txt { fill: #FF0000; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 900; }
@@ -2553,7 +2589,7 @@
   <!-- ==================== ROWS 1 & 2 ==================== -->
   <!-- Col 1: JO#: (Rows 1-2, x=0, y=0, w=127, h=54) -->
   <rect x="0" y="0" width="127" height="54" class="cad-lbl-box" />
-  <text x="63.5" y="34" class="cad-lbl-txt center-txt" font-size="18" font-weight="900">JO#:</text>
+  <text x="63.5" y="${joLblY}" class="cad-lbl-txt center-txt" style="font-size: ${joLblSize}px !important; font-weight: 900;" font-size="${joLblSize}" font-weight="900">${escapeHTML(joLabelVal)}</text>
 
   <!-- Col 2: JO Value (Rows 1-2, x=127, y=0, w=202, h=54) -->
   <rect x="127" y="0" width="202" height="54" class="cad-val-box" />
@@ -2875,6 +2911,7 @@
     if (btnReset) {
       btnReset.addEventListener('click', () => {
         state.customCellFonts = {};
+        saveStateToStorage();
         const table = document.getElementById('directiveGridTable');
         if (table) {
           table.querySelectorAll('td').forEach(c => {
@@ -2925,7 +2962,7 @@
 
     const cellFontInput = document.getElementById('cellFontSizeInput');
     if (cellFontInput) {
-      cellFontInput.addEventListener('input', () => {
+      const handleCellFontChange = () => {
         const cell = getActiveOrTargetCell();
         if (cell) {
           const val = parseFloat(cellFontInput.value);
@@ -2933,7 +2970,9 @@
             setCellCustomFontSize(cell, val);
           }
         }
-      });
+      };
+      cellFontInput.addEventListener('input', handleCellFontChange);
+      cellFontInput.addEventListener('change', handleCellFontChange);
     }
 
     const btnCellReset = document.getElementById('btnCellFontReset');
@@ -2947,6 +2986,7 @@
           if (cellFontInput) cellFontInput.value = Math.round(getCellCurrentFontSize(cell));
           if (state.customCellFonts && cell.id) {
             delete state.customCellFonts[cell.id];
+            saveStateToStorage();
           }
           showToast(`Reset font size for ${getCellFriendlyName(cell)} to default (${Math.round(getCellCurrentFontSize(cell))}px)`);
         }
