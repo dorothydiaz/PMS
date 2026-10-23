@@ -2127,26 +2127,42 @@
     const input = document.getElementById('directiveLookupInput');
     if (input) input.value = rec.joNumber;
 
-    const reqIdEl = document.getElementById('docFieldRequestId');
-    if (reqIdEl) reqIdEl.textContent = rec.requestId || '-';
-    document.getElementById('docFieldJoNumber').textContent = rec.joNumber || '-';
-    document.getElementById('docFieldDueDate').textContent = formatReadableDate(rec.designDeadline || rec.releasingDate);
-    document.getElementById('docFieldLocation').textContent = rec.location || 'Manila Branch';
-    document.getElementById('docFieldProjectName').textContent = rec.projectName || 'SIGN PROJECT';
-    document.getElementById('docFieldClientName').textContent = rec.client || 'CLIENT NAME';
-    document.getElementById('docFieldInCharge').textContent = (rec.inCharge || rec.salesRep || 'DONA').toUpperCase();
-    document.getElementById('docFieldDrawnBy').textContent = (rec.drawnBy || rec.artist || 'GLEN').toUpperCase();
-    document.getElementById('docFieldContactPerson').textContent = rec.contactPerson || '-';
-    document.getElementById('docFieldContactNumber').textContent = rec.contactNumber || '-';
-    document.getElementById('docFieldOrderDate').textContent = formatDate(rec.orderDate);
-    document.getElementById('docFieldReleasingDate').textContent = formatReadableDate(rec.releasingDate);
-    document.getElementById('docFieldReleasingMode').textContent = (rec.releasingMode || 'PICKUP').toUpperCase();
-    document.getElementById('docFieldAddress').textContent = rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
-    document.getElementById('docFieldShortAddress').textContent = rec.location || 'Manila Branch';
-    document.getElementById('docFieldInstallers').textContent = rec.installers || '2 Installers';
-    document.getElementById('docFieldDuration').textContent = rec.duration || '1 Day (4 Hours)';
-    document.getElementById('docFieldPriority').textContent = (rec.priority || 'RUSH').toUpperCase();
-    document.getElementById('docFieldStatus').textContent = rec.projectStatus || 'Approved';
+    const setTxt = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = (val !== undefined && val !== null) ? val : '';
+    };
+
+    setTxt('docFieldRequestId', rec.requestId || 'LR-26-1230');
+    setTxt('docFieldJoNumber', rec.joNumber || 'P260701373');
+    setTxt('docFieldDueDate', formatReadableDate(rec.designDeadline || rec.releasingDate));
+    setTxt('docFieldLocation', rec.location || 'Manila Branch');
+    setTxt('docFieldProjectName', rec.projectName || 'URAL');
+    setTxt('docFieldClientName', rec.client || 'PAU ACILAC');
+    setTxt('docFieldInCharge', (rec.inCharge || rec.salesRep || 'DONA').toUpperCase());
+    setTxt('docFieldDrawnBy', (rec.drawnBy || rec.artist || 'GLEN').toUpperCase());
+    setTxt('docFieldContactPerson', rec.contactPerson || '-');
+    setTxt('docFieldContactNumber', rec.contactNumber || '639178805364');
+    setTxt('docFieldOrderDate', formatDate(rec.orderDate));
+    setTxt('docFieldReleasingDate', formatReadableDate(rec.releasingDate));
+    setTxt('docFieldReleasingMode', (rec.releasingMode || 'PICKUP').toUpperCase());
+    setTxt('docFieldAddress', rec.completeAddress || rec.location || 'Manila Branch');
+    setTxt('docFieldInstallers', rec.installers || '2 Installers');
+    setTxt('docFieldDuration', rec.duration || '1 Day (4 Hours)');
+
+    const priorityEl = document.getElementById('docFieldPriorityStatus');
+    if (priorityEl) {
+      priorityEl.innerHTML = `Priority: <strong>${escapeHTML(rec.priority || 'RUSH')}</strong> | Status: <strong>${escapeHTML(rec.status || 'Approved')}</strong>`;
+    }
+
+    const deliveryEl = document.getElementById('docFieldDeliveryAddress');
+    if (deliveryEl) {
+      const addr = rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
+      deliveryEl.innerHTML = `<strong>DELIVERY / SITE ADDRESS:</strong> ${escapeHTML(addr)}`;
+    }
+
+    // Update live drawing canvas mock
+    setTxt('mockSignTitle', rec.projectName || 'URAL');
+    setTxt('mockSignSub', rec.client || 'PAU ACILAC');
 
     const ctrlInst = document.getElementById('ctrlInstallers');
     const ctrlDur = document.getElementById('ctrlDuration');
@@ -2283,13 +2299,12 @@
   }
 
   // ==========================================================================
-  // VECTOR SVG GENERATOR (For Adobe Illustrator, CorelDRAW, Figma & Printing)
+  // VECTOR SVG GENERATOR (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity)
   // ==========================================================================
 
   function generateDirectiveSVG(rec) {
     if (!rec) rec = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
 
-    // Read live on-screen DOM fields if present so inline edits are captured in vector copy
     const requestIdVal = document.getElementById('docFieldRequestId')?.textContent?.trim() || rec.requestId || 'LR-26-1230';
     const joNumberVal = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec.joNumber || 'P260701373';
     const dueDateFormatted = document.getElementById('docFieldDueDate')?.textContent?.trim() || formatReadableDate(rec.designDeadline || rec.releasingDate);
@@ -2298,177 +2313,231 @@
     const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'GLEN').toUpperCase();
     const releasingModeVal = (document.getElementById('docFieldReleasingMode')?.textContent?.trim() || rec.releasingMode || 'PICKUP').toUpperCase();
     const locationVal = document.getElementById('docFieldLocation')?.textContent?.trim() || rec.location || 'Manila Branch';
-    const shortAddressVal = document.getElementById('docFieldShortAddress')?.textContent?.trim() || locationVal;
     const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '2 Installers';
     const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '1 Day (4 Hours)';
-    const priorityVal = (document.getElementById('docFieldPriority')?.textContent?.trim() || rec.priority || 'RUSH').toUpperCase();
-    const statusVal = document.getElementById('docFieldStatus')?.textContent?.trim() || rec.projectStatus || 'Approved';
-    const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
+    const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || rec.location || 'Manila Branch';
     const projectNameVal = document.getElementById('docFieldProjectName')?.textContent?.trim() || rec.projectName || 'URAL';
     const clientVal = document.getElementById('docFieldClientName')?.textContent?.trim() || rec.client || 'PAU ACILAC';
     const contactPersonVal = document.getElementById('docFieldContactPerson')?.textContent?.trim() || rec.contactPerson || '-';
     const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '639178805364';
     const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || formatDate(rec.orderDate);
+    const priorityVal = rec.priority || 'RUSH';
+    const statusVal = rec.status || 'Approved';
+    const deliverySiteVal = rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
 
-    // Sign Depot Logo Vector Snippet (Scalable SVG paths & text)
+    // Pure Vector Sign Depot Logo (No external images, pastes seamlessly in Corel/Illustrator)
     const logoSVG = `
       <g>
-        <rect x="0" y="0" width="70" height="22" rx="3" fill="#E53935" transform="rotate(-4 35 11)" />
-        <text x="35" y="15" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="10.5" text-anchor="middle" transform="rotate(-4 35 11)">Sign Depot</text>
-        <text x="73" y="7" fill="#000000" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6.5">TM</text>
+        <rect x="0" y="0" width="76" height="24" rx="3" fill="#E53935" transform="rotate(-4 38 12)" />
+        <text x="38" y="16" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="11" text-anchor="middle" transform="rotate(-4 38 12)">Sign Depot</text>
+        <text x="79" y="8" fill="#000000" font-family="Arial, sans-serif" font-weight="bold" font-size="7">TM</text>
       </g>
     `;
 
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 230" width="1000" height="230">
-  <style>
-    .label-cell { fill: #2B3442; stroke: #000000; stroke-width: 1; }
-    .label-text { fill: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: 10px; }
-    .val-cell { fill: #FFFFFF; stroke: #000000; stroke-width: 1; }
-    .val-text { fill: #000000; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; }
-    .red-bold { fill: #DC2626; font-family: Arial, Helvetica, sans-serif; font-weight: 900; }
-  </style>
+    // Note: Do NOT prepend <?xml ...?> so Illustrator & Photoshop treat it as vector graphic data rather than code text
+    return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 320" width="1000" height="320">
+  <defs>
+    <style>
+      .lbl-box { fill: #262D37; stroke: #000000; stroke-width: 1.5px; }
+      .lbl-txt { fill: #FFFFFF; font-family: Arial, 'Roboto Condensed', 'Oswald', sans-serif; font-weight: bold; font-size: 11.5px; letter-spacing: 0.3px; }
+      .val-box { fill: #FFFFFF; stroke: #000000; stroke-width: 1.5px; }
+      .val-txt { fill: #111111; font-family: Arial, 'Roboto Condensed', 'Oswald', sans-serif; font-size: 13px; font-weight: bold; }
+      .red-txt { fill: #E31B23; font-family: Arial, 'Roboto Condensed', 'Oswald', sans-serif; font-weight: 900; }
+      .center-txt { text-anchor: middle; }
+    </style>
+  </defs>
 
-  <!-- Canvas Background -->
-  <rect width="1000" height="230" fill="#FFFFFF" />
+  <!-- Sheet White Background -->
+  <rect width="1000" height="320" fill="#FFFFFF" />
 
-  <!-- Outer Main Table Border -->
-  <rect x="10" y="10" width="980" height="210" fill="none" stroke="#000000" stroke-width="2" />
+  <!-- TOP REQUEST ID NUMBER BADGE -->
+  <rect x="5" y="5" width="140" height="18" fill="#262D37" stroke="#262D37" stroke-width="1.5" />
+  <text x="75" y="17.5" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="9.5" text-anchor="middle" letter-spacing="0.5">REQUEST ID NUMBER</text>
+  <rect x="5" y="23" width="140" height="22" fill="#FFFFFF" stroke="#262D37" stroke-width="1.5" />
+  <text x="75" y="39" fill="#E31B23" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="14" text-anchor="middle" letter-spacing="0.5">${escapeHTML(requestIdVal)}</text>
 
-  <!-- ROW 1 -->
-  <!-- Col 1: JO#: -->
-  <rect x="10" y="10" width="85" height="35" class="label-cell" />
-  <text x="52" y="32" class="label-text" text-anchor="middle">JO#:</text>
-  <rect x="95" y="10" width="160" height="35" class="val-cell" />
-  <text x="175" y="36" class="red-bold" font-size="20" text-anchor="middle">${escapeHTML(joNumberVal)}</text>
+  <!-- MAIN TABLE OUTER BORDER (x=5, y=50, w=990, h=265) -->
+  <rect x="5" y="50" width="990" height="265" fill="#FFFFFF" stroke="#000000" stroke-width="2" />
 
-  <!-- Col 2: PROJECT & CLIENT (Merged Rows 1-3, h=105) -->
-  <rect x="255" y="10" width="335" height="105" class="val-cell" />
-  <text x="422" y="52" fill="#2B3442" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="24" letter-spacing="1" text-anchor="middle">${escapeHTML(projectNameVal)}</text>
-  <text x="422" y="86" fill="#2B3442" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="20" letter-spacing="0.5" text-anchor="middle">${escapeHTML(clientVal)}</text>
+  <!-- ROW 1 (y=50, h=44) -->
+  <!-- JO#: -->
+  <rect x="5" y="50" width="85" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="47.5" y="77" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="13" text-anchor="middle" class="lbl-txt center-txt">JO#:</text>
 
-  <!-- Col 3: CONTACT PERSON -->
-  <rect x="590" y="10" width="135" height="35" class="label-cell" />
-  <text x="600" y="32" class="label-text">CONTACT PERSON:</text>
-  <rect x="725" y="10" width="125" height="35" class="val-cell" />
-  <text x="735" y="32" class="val-text">${escapeHTML(contactPersonVal)}</text>
+  <!-- JO Number Value -->
+  <rect x="90" y="50" width="175" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="177.5" y="82" fill="#E31B23" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="28" text-anchor="middle" class="red-txt center-txt">${escapeHTML(joNumberVal)}</text>
 
-  <!-- Col 4: NUMBER OF INSTALLERS Header -->
-  <rect x="850" y="10" width="140" height="26" class="label-cell" />
-  <text x="920" y="27" class="label-text" font-size="8.5" text-anchor="middle">NUMBER OF INSTALLERS</text>
+  <!-- MERGED URAL & PAU ACILAC (Rows 1-3, x=265, y=50, w=350, h=132) -->
+  <rect x="265" y="50" width="350" height="132" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="440" y="100" fill="#262D37" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="34" letter-spacing="2" text-anchor="middle" class="center-txt">${escapeHTML(projectNameVal)}</text>
+  <text x="440" y="145" fill="#262D37" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="26" letter-spacing="1.5" text-anchor="middle" class="center-txt">${escapeHTML(clientVal)}</text>
 
-  <!-- ROW 2 -->
-  <!-- Col 1: DUE DATE -->
-  <rect x="10" y="45" width="85" height="35" class="label-cell" />
-  <text x="52" y="67" class="label-text" text-anchor="middle">DUE DATE:</text>
-  <rect x="95" y="45" width="160" height="35" class="val-cell" />
-  <text x="175" y="68" class="red-bold" font-size="12" text-anchor="middle">${escapeHTML(dueDateFormatted)}</text>
+  <!-- CONTACT PERSON: -->
+  <rect x="615" y="50" width="125" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="625" y="77" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="800" font-size="11.5" class="lbl-txt">CONTACT PERSON:</text>
+  <rect x="740" y="50" width="135" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="750" y="77" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="bold" font-size="13" class="val-txt">${escapeHTML(contactPersonVal)}</text>
 
-  <!-- Col 3: CONTACT NUMBER -->
-  <rect x="590" y="45" width="135" height="35" class="label-cell" />
-  <text x="600" y="67" class="label-text">CONTACT NUMBER:</text>
-  <rect x="725" y="45" width="125" height="35" class="val-cell" />
-  <text x="735" y="67" class="val-text">${escapeHTML(contactNumberVal)}</text>
+  <!-- NUMBER OF INSTALLERS Header -->
+  <rect x="875" y="50" width="120" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="935" y="77" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="9.5" text-anchor="middle" class="lbl-txt center-txt">NUMBER OF INSTALLERS</text>
 
-  <!-- Col 4: Installers Cell (Rows 2 & 3, h=79) -->
-  <rect x="850" y="36" width="140" height="79" class="val-cell" />
-  <rect x="865" y="44" width="110" height="26" rx="6" fill="#FFFFFF" stroke="#1F2937" stroke-width="1.5" />
-  <text x="920" y="61" class="val-text" font-size="12" text-anchor="middle">${escapeHTML(installersVal)}</text>
+  <!-- ROW 2 (y=94, h=44) -->
+  <!-- DUE DATE: -->
+  <rect x="5" y="94" width="85" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="47.5" y="121" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="12" text-anchor="middle" class="lbl-txt center-txt">DUE DATE:</text>
+  <rect x="90" y="94" width="175" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="177.5" y="122" fill="#E31B23" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="14.5" text-anchor="middle" class="red-txt center-txt">${escapeHTML(dueDateFormatted)}</text>
 
-  <!-- ROW 3 -->
-  <!-- Col 1: LOCATION -->
-  <rect x="10" y="80" width="85" height="35" class="label-cell" />
-  <text x="52" y="102" class="label-text" text-anchor="middle">LOCATION:</text>
-  <rect x="95" y="80" width="160" height="35" class="val-cell" />
-  <text x="105" y="102" class="val-text">${escapeHTML(locationVal)}</text>
+  <!-- CONTACT NUMBER: -->
+  <rect x="615" y="94" width="125" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="625" y="121" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="800" font-size="11.5" class="lbl-txt">CONTACT NUMBER:</text>
+  <rect x="740" y="94" width="135" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="750" y="121" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="bold" font-size="13" class="val-txt">${escapeHTML(contactNumberVal)}</text>
 
-  <!-- Col 3: ORDER DATE -->
-  <rect x="590" y="80" width="135" height="35" class="label-cell" />
-  <text x="600" y="102" class="label-text">ORDER DATE:</text>
-  <rect x="725" y="80" width="125" height="35" class="val-cell" />
-  <text x="735" y="102" class="val-text">${escapeHTML(orderDateVal)}</text>
+  <!-- INSTALLERS PILL BOX (Rows 2 & 3, x=875, y=94, w=120, h=88) -->
+  <rect x="875" y="94" width="120" height="88" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <rect x="885" y="120" width="100" height="36" rx="6" fill="#FFFFFF" stroke="#262D37" stroke-width="1.5" />
+  <text x="935" y="143" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="13" text-anchor="middle" class="val-txt center-txt">${escapeHTML(installersVal)}</text>
 
-  <!-- ROW 4 -->
-  <!-- Col 1: Triple Logos -->
-  <rect x="10" y="115" width="245" height="35" class="val-cell" />
-  <g transform="translate(18, 122) scale(0.72)">${logoSVG}</g>
-  <g transform="translate(98, 122) scale(0.72)">${logoSVG}</g>
-  <g transform="translate(178, 122) scale(0.72)">${logoSVG}</g>
+  <!-- ROW 3 (y=138, h=44) -->
+  <!-- LOCATION: -->
+  <rect x="5" y="138" width="85" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="47.5" y="165" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="12" text-anchor="middle" class="lbl-txt center-txt">LOCATION:</text>
+  <rect x="90" y="138" width="175" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="177.5" y="165" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="bold" font-size="13" text-anchor="middle" class="val-txt center-txt">${escapeHTML(locationVal)}</text>
 
-  <!-- Col 2: IN-CHARGE & DRAWN BY Subtable -->
-  <rect x="255" y="115" width="167" height="17" class="label-cell" />
-  <text x="338" y="127" class="label-text" text-anchor="middle" font-size="9">IN-CHARGE</text>
-  <rect x="255" y="132" width="167" height="18" class="val-cell" />
-  <text x="338" y="145" class="val-text" font-size="11.5" text-anchor="middle">${escapeHTML(inChargeVal)}</text>
+  <!-- ORDER DATE: -->
+  <rect x="615" y="138" width="125" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="625" y="165" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="800" font-size="11.5" class="lbl-txt">ORDER DATE:</text>
+  <rect x="740" y="138" width="135" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="750" y="165" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="bold" font-size="13" class="val-txt">${escapeHTML(orderDateVal)}</text>
 
-  <rect x="422" y="115" width="168" height="17" class="label-cell" />
-  <text x="506" y="127" class="label-text" text-anchor="middle" font-size="9">DRAWN BY:</text>
-  <rect x="422" y="132" width="168" height="18" class="val-cell" />
-  <text x="506" y="145" class="val-text" font-size="11.5" text-anchor="middle">${escapeHTML(drawnByVal)}</text>
+  <!-- ROW 4 (y=182, h=45) -->
+  <!-- 3 Vector Logos (Cols 1 & 2, w=260, h=45) -->
+  <rect x="5" y="182" width="260" height="45" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <g transform="translate(15, 193) scale(0.68)">${logoSVG}</g>
+  <g transform="translate(100, 193) scale(0.68)">${logoSVG}</g>
+  <g transform="translate(185, 193) scale(0.68)">${logoSVG}</g>
 
-  <!-- Col 3: RELEASING DATE -->
-  <rect x="590" y="115" width="135" height="35" class="label-cell" />
-  <text x="600" y="137" class="label-text">RELEASING DATE:</text>
-  <rect x="725" y="115" width="125" height="35" class="val-cell" />
-  <text x="735" y="137" class="val-text">${escapeHTML(releasingDateFormatted)}</text>
+  <!-- SUBTABLE: IN-CHARGE & DRAWN BY (Col 3, x=265, y=182, w=350, h=45) -->
+  <rect x="265" y="182" width="175" height="22" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="352.5" y="197" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="11" text-anchor="middle" class="lbl-txt center-txt">IN-CHARGE</text>
+  <rect x="440" y="182" width="175" height="22" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="527.5" y="197" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="11" text-anchor="middle" class="lbl-txt center-txt">DRAWN BY:</text>
 
-  <!-- Col 4: INSTALLATION DURATION Header -->
-  <rect x="850" y="115" width="140" height="26" class="label-cell" />
-  <text x="920" y="132" class="label-text" font-size="8.5" text-anchor="middle">INSTALLATION DURATION</text>
+  <rect x="265" y="204" width="175" height="23" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="352.5" y="220" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="13.5" text-anchor="middle" class="val-txt center-txt">${escapeHTML(inChargeVal)}</text>
+  <rect x="440" y="204" width="175" height="23" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="527.5" y="220" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="13.5" text-anchor="middle" class="val-txt center-txt">${escapeHTML(drawnByVal)}</text>
 
-  <!-- ROW 5 -->
-  <!-- Col 1: White empty cell -->
-  <rect x="10" y="150" width="245" height="35" class="val-cell" />
+  <!-- RELEASING DATE: -->
+  <rect x="615" y="182" width="125" height="45" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="625" y="210" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="800" font-size="11.5" class="lbl-txt">RELEASING DATE:</text>
+  <rect x="740" y="182" width="135" height="45" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="750" y="210" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="bold" font-size="13" class="val-txt">${escapeHTML(releasingDateFormatted)}</text>
 
-  <!-- Col 2: Priority & Status -->
-  <rect x="255" y="150" width="335" height="35" class="val-cell" />
-  <text x="422" y="171" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#1F2937" text-anchor="middle">Priority: <tspan font-weight="bold">${escapeHTML(priorityVal)}</tspan> | Status: <tspan font-weight="bold">${escapeHTML(statusVal)}</tspan></text>
+  <!-- INSTALLATION DURATION Header -->
+  <rect x="875" y="182" width="120" height="45" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="935" y="210" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="9.5" text-anchor="middle" class="lbl-txt center-txt">INSTALLATION DURATION</text>
 
-  <!-- Col 3: RELEASING MODE -->
-  <rect x="590" y="150" width="135" height="35" class="label-cell" />
-  <text x="600" y="172" class="label-text">RELEASING MODE:</text>
-  <rect x="725" y="150" width="125" height="35" class="val-cell" />
-  <text x="735" y="172" class="val-text">${escapeHTML(releasingModeVal)}</text>
+  <!-- ROW 5 (y=227, h=44) -->
+  <!-- Priority & Status Bar (Cols 1-3, x=5, y=227, w=610, h=44) -->
+  <rect x="5" y="227" width="610" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="310" y="254" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-size="12" text-anchor="middle" class="val-txt center-txt">Priority: <tspan font-weight="900">${escapeHTML(priorityVal)}</tspan> | Status: <tspan font-weight="900">${escapeHTML(statusVal)}</tspan></text>
 
-  <!-- Col 4: Duration Cell (Rows 5 & 6, h=79) -->
-  <rect x="850" y="141" width="140" height="79" class="val-cell" />
-  <rect x="860" y="150" width="120" height="26" rx="6" fill="#FFFFFF" stroke="#1F2937" stroke-width="1.5" />
-  <text x="920" y="167" class="val-text" font-size="12" text-anchor="middle">${escapeHTML(durationVal)}</text>
+  <!-- RELEASING MODE: -->
+  <rect x="615" y="227" width="125" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="625" y="254" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="800" font-size="11.5" class="lbl-txt">RELEASING MODE:</text>
+  <rect x="740" y="227" width="135" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="750" y="254" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="13" class="val-txt">${escapeHTML(releasingModeVal)}</text>
 
-  <!-- ROW 6 -->
-  <!-- DELIVERY / SITE ADDRESS (Cols 1, 2, 3 merged, w=580) -->
-  <rect x="10" y="185" width="580" height="35" class="val-cell" />
-  <text x="20" y="207" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#111827"><tspan font-weight="bold">DELIVERY / SITE ADDRESS: </tspan>${escapeHTML(addressVal)}</text>
+  <!-- DURATION PILL BOX (Rows 5 & 6, x=875, y=227, w=120, h=88) -->
+  <rect x="875" y="227" width="120" height="88" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <rect x="883" y="253" width="104" height="36" rx="6" fill="#FFFFFF" stroke="#262D37" stroke-width="1.5" />
+  <text x="935" y="276" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="900" font-size="12.5" text-anchor="middle" class="val-txt center-txt">${escapeHTML(durationVal)}</text>
 
-  <!-- ADDRESS: & Short Address -->
-  <rect x="590" y="185" width="135" height="35" class="label-cell" />
-  <text x="600" y="207" class="label-text">ADDRESS:</text>
-  <rect x="725" y="185" width="125" height="35" class="val-cell" />
-  <text x="735" y="207" class="val-text">${escapeHTML(shortAddressVal)}</text>
+  <!-- ROW 6 (y=271, h=44) -->
+  <!-- DELIVERY / SITE ADDRESS: (Cols 1-3, x=5, y=271, w=610, h=44) -->
+  <rect x="5" y="271" width="610" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="15" y="298" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-size="11.5" class="val-txt"><tspan font-weight="900">DELIVERY / SITE ADDRESS: </tspan><tspan font-weight="bold">${escapeHTML(deliverySiteVal)}</tspan></text>
+
+  <!-- ADDRESS: -->
+  <rect x="615" y="271" width="125" height="44" fill="#262D37" stroke="#000000" stroke-width="1.5" class="lbl-box" />
+  <text x="625" y="298" fill="#FFFFFF" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="800" font-size="11.5" class="lbl-txt">ADDRESS:</text>
+  <rect x="740" y="271" width="135" height="44" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" class="val-box" />
+  <text x="750" y="298" fill="#111111" font-family="Arial, 'Roboto Condensed', 'Oswald', sans-serif" font-weight="bold" font-size="13" class="val-txt">${escapeHTML(addressVal)}</text>
 </svg>`;
   }
 
   function setupDirectiveActions() {
-    // COPY AS VECTOR SVG (For Adobe Illustrator, CorelDRAW, Figma)
-    const handleCopyVector = () => {
+    // COPY AS VECTOR GRAPHIC (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity Designer)
+    const handleCopyVector = async () => {
       const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
-      const svgString = generateDirectiveSVG(cur);
+      const cleanSvg = generateDirectiveSVG(cur).trim();
+      
+      // Standard HTML clipboard fragment for Windows CF_HTML (Photoshop Smart Object & Corel/Illustrator Vector parse)
+      const htmlPayload = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><!--StartFragment-->${cleanSvg}<!--EndFragment--></body></html>`;
 
+      let copySuccess = false;
+
+      // 1. Try modern Asynchronous Clipboard API with rich multi-MIME payload
       if (navigator.clipboard && window.ClipboardItem) {
-        const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-        const textBlob = new Blob([svgString], { type: 'text/plain' });
-        navigator.clipboard.write([
-          new ClipboardItem({
-            'image/svg+xml': svgBlob,
-            'text/plain': textBlob
-          })
-        ]).then(() => {
-          showToast('Vector SVG copied! Ready to paste (Ctrl+V) into Illustrator, CorelDRAW, or Figma.');
-        }).catch(() => {
-          copyFallback(svgString);
-        });
+        try {
+          const svgBlob = new Blob([cleanSvg], { type: 'image/svg+xml' });
+          const htmlBlob = new Blob([htmlPayload], { type: 'text/html' });
+          const textBlob = new Blob([cleanSvg], { type: 'text/plain' });
+
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/svg+xml': svgBlob,
+              'text/html': htmlBlob,
+              'text/plain': textBlob
+            })
+          ]);
+          copySuccess = true;
+        } catch (mimeErr) {
+          // If browser rejects image/svg+xml in write, write text/html (CF_HTML) and text/plain
+          try {
+            const htmlBlob = new Blob([htmlPayload], { type: 'text/html' });
+            const textBlob = new Blob([cleanSvg], { type: 'text/plain' });
+
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'text/html': htmlBlob,
+                'text/plain': textBlob
+              })
+            ]);
+            copySuccess = true;
+          } catch (writeErr) {
+            console.warn('Clipboard write fallback triggered', writeErr);
+          }
+        }
+      }
+
+      // 2. Synchronous Clipboard Event Fallback (sets CF_HTML and CF_UNICODETEXT on Windows)
+      if (!copySuccess) {
+        try {
+          const copyHandler = (e) => {
+            e.preventDefault();
+            e.clipboardData.setData('text/html', htmlPayload);
+            e.clipboardData.setData('text/plain', cleanSvg);
+            try {
+              e.clipboardData.setData('image/svg+xml', cleanSvg);
+            } catch (ignore) {}
+          };
+          document.addEventListener('copy', copyHandler, { once: true });
+          copySuccess = document.execCommand('copy');
+        } catch (e) {
+          copySuccess = false;
+        }
+      }
+
+      if (copySuccess) {
+        showToast('Vector graphic copied! Ready to paste (Ctrl+V) directly as vector shapes or smart object in Photoshop, Illustrator, CorelDRAW, or Affinity.');
       } else {
-        copyFallback(svgString);
+        copyFallback(cleanSvg);
       }
     };
 
@@ -2477,7 +2546,7 @@
     if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
     if (btnQuickCopy) btnQuickCopy.addEventListener('click', handleCopyVector);
 
-    // DOWNLOAD VECTOR SVG FILE
+    // DOWNLOAD VECTOR SVG FILE (Direct 1-click fallback for drag & drop into Photoshop/Corel)
     const btnDownloadSVG = document.getElementById('btnDirectiveDownloadSVG');
     if (btnDownloadSVG) {
       btnDownloadSVG.addEventListener('click', () => {
@@ -2555,7 +2624,7 @@
     ta.select();
     try {
       document.execCommand('copy');
-      showToast('Copied to clipboard!');
+      showToast('Vector SVG copied to clipboard!');
     } catch (e) {
       showToast('Unable to copy automatically.', 'error');
     }

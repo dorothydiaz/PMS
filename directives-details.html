@@ -253,7 +253,10 @@
                 Download Vector (.svg)
               </button>
               <button class="btn btn-secondary btn-sm" id="btnDirectiveSaveDraft">Save Draft</button>
-              <button class="btn btn-primary btn-sm" id="btnDirectivePrint">Print / PDF</button>
+              <button class="btn btn-primary btn-sm" id="btnDirectivePrint" title="Print or save as PDF perfectly fitted to US Letter Landscape paper (11 × 8.5 inches)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print Landscape Letter (11" × 8.5")
+              </button>
               <button class="btn btn-secondary btn-sm" id="btnDirectiveReset">Reset</button>
             </div>
           </div>
@@ -265,14 +268,14 @@
               <div class="directive-sheet-landscape" id="printableDirectiveDocument">
                 <!-- Directive Top Quick Bar (Vector Ready) -->
                 <div class="doc-top-bar no-print">
-                  <div style="font-size: 11px; font-weight: 800; color: #176B55; display: flex; align-items: center; gap: 6px;">
-                    <span style="display: inline-block; width: 7px; height: 7px; background: #176B55; border-radius: 50%;"></span>
-                    <span>Landscape Letter Paper (11" × 8.5") • Direct In-Sheet Editable</span>
+                  <div class="doc-request-badge">
+                    <span class="doc-request-badge-title">REQUEST ID NUMBER</span>
+                    <span class="doc-request-badge-val" id="docFieldRequestId" contenteditable="true" title="Click to edit Request ID">LR-26-1230</span>
                   </div>
-                  <div class="doc-top-quick-actions" style="display: flex; gap: 8px; align-items: center;">
-                    <span style="font-size: 11px; font-weight: 700; color: #64748B;">Vector Ready</span>
-                    <button class="btn btn-green btn-sm" id="btnQuickCopyVector" data-tooltip="Copy as vector SVG for Illustrator, CorelDRAW, or Figma">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                  <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <span class="vector-status-indicator">• Vector Ready</span>
+                    <button class="btn btn-green btn-sm" id="btnQuickCopyVector" data-tooltip="Copy vector directly pasteable into Photoshop, Illustrator, CorelDRAW, or Affinity Designer">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                       Copy as Vector (SVG)
                     </button>
                   </div>
@@ -283,7 +286,7 @@
                   <colgroup>
                     <col style="width: 8.5%;">  <!-- Col 1: JO#, DUE DATE, LOCATION labels -->
                     <col style="width: 17.5%;"> <!-- Col 2: P260701373, JULY 30, 2026, Location values -->
-                    <col style="width: 35%;">   <!-- Col 3: URAL, PAU ACILAC, IN-CHARGE / DRAWN BY -->
+                    <col style="width: 35%;">   <!-- Col 3: URAL & PAU ACILAC (Rows 1-3), Personnel (Row 4), Priority & Address (Rows 5-6) -->
                     <col style="width: 12.5%;"> <!-- Col 4: CONTACT..., ORDER..., RELEASING... labels -->
                     <col style="width: 13.5%;"> <!-- Col 5: Contact, Phone, Dates, Mode values -->
                     <col style="width: 13%;">   <!-- Col 6: NUMBER OF INSTALLERS / INSTALLATION DURATION -->
@@ -291,76 +294,92 @@
                   <tbody>
                     <!-- ROW 1 -->
                     <tr>
-                      <td rowspan="2" class="doc-label-cell doc-cell-center">JO#:</td>
-                      <td rowspan="2" class="doc-value-cell doc-jo-val" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number">P260701373</td>
-                      <td rowspan="2" class="doc-value-cell doc-proj-name" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name">URAL</td>
+                      <td class="doc-label-cell doc-cell-center">JO#:</td>
+                      <td class="doc-value-cell doc-jo-val" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number">P260701373</td>
+                      <!-- URAL & PAU ACILAC centered, spanning Rows 1 to 3 -->
+                      <td rowspan="3" class="doc-value-cell doc-center-headline">
+                        <div class="doc-main-proj" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name">URAL</div>
+                        <div class="doc-main-client" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name">PAU ACILAC</div>
+                      </td>
                       <td class="doc-label-cell">CONTACT PERSON:</td>
                       <td class="doc-value-cell" id="docFieldContactPerson" contenteditable="true" title="Click to edit">-</td>
-                      <td class="doc-label-cell doc-cell-center" style="font-size: 11px;">NUMBER OF INSTALLERS</td>
+                      <td class="doc-label-cell doc-cell-center" style="font-size: 10px;">NUMBER OF INSTALLERS</td>
                     </tr>
 
                     <!-- ROW 2 -->
                     <tr>
+                      <td class="doc-label-cell doc-cell-center">DUE DATE:</td>
+                      <td class="doc-value-cell doc-date-val" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date">JULY 30, 2026</td>
                       <td class="doc-label-cell">CONTACT NUMBER:</td>
                       <td class="doc-value-cell" id="docFieldContactNumber" contenteditable="true" title="Click to edit">639178805364</td>
-                      <td rowspan="2" class="doc-value-cell doc-box-val" id="docFieldInstallers" contenteditable="true" title="Click to edit"></td>
+                      <!-- Installers Pill Box spanning Rows 2 & 3 -->
+                      <td rowspan="2" class="doc-value-cell doc-cell-center">
+                        <div class="doc-pill-box" id="docFieldInstallers" contenteditable="true" title="Click to edit Installers">2 Installers</div>
+                      </td>
                     </tr>
 
                     <!-- ROW 3 -->
                     <tr>
-                      <td class="doc-label-cell doc-cell-center">DUE DATE:</td>
-                      <td class="doc-value-cell doc-date-val" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date">JULY 30, 2026</td>
-                      <td rowspan="2" class="doc-value-cell doc-client-name" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name">PAU ACILAC</td>
+                      <td class="doc-label-cell doc-cell-center">LOCATION:</td>
+                      <td class="doc-value-cell doc-cell-center" id="docFieldLocation" contenteditable="true" title="Click to edit">Manila Branch</td>
                       <td class="doc-label-cell">ORDER DATE:</td>
                       <td class="doc-value-cell" id="docFieldOrderDate" contenteditable="true" title="Click to edit">23/10/2026</td>
                     </tr>
 
                     <!-- ROW 4 -->
                     <tr>
-                      <td class="doc-label-cell doc-cell-center">LOCATION:</td>
-                      <td class="doc-value-cell doc-cell-center" id="docFieldLocation" contenteditable="true" title="Click to edit"></td>
-                      <td class="doc-label-cell">RELEASING DATE:</td>
-                      <td class="doc-value-cell" id="docFieldReleasingDate" contenteditable="true" title="Click to edit">JULY 30, 2026</td>
-                      <td class="doc-label-cell doc-cell-center" style="font-size: 11px;">INSTALLATION DURATION</td>
-                    </tr>
-
-                    <!-- ROW 5 -->
-                    <tr>
-                      <!-- 3 Sign Depot Logos spanning Cols 1 & 2 across Rows 5 & 6 -->
-                      <td rowspan="2" colspan="2" class="doc-value-cell doc-logo-cell">
+                      <!-- 3 Sign Depot Logos spanning Cols 1 & 2 -->
+                      <td colspan="2" class="doc-value-cell doc-logo-cell">
                         <div class="doc-triple-logos">
                           <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
                           <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
                           <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
                         </div>
                       </td>
-                      <!-- IN-CHARGE / DRAWN BY Subtable spanning Rows 5 & 6 -->
-                      <td rowspan="2" style="padding: 0; vertical-align: stretch;">
+                      <!-- IN-CHARGE / DRAWN BY Subtable -->
+                      <td style="padding: 0; vertical-align: stretch;">
                         <table class="doc-personnel-table">
                           <colgroup>
                             <col style="width: 50%;">
                             <col style="width: 50%;">
                           </colgroup>
                           <tr>
-                            <td class="doc-label-cell doc-cell-center" style="border-bottom: 1.5px solid #000000;">IN-CHARGE</td>
-                            <td class="doc-label-cell doc-cell-center" style="border-bottom: 1.5px solid #000000; border-left: 1.5px solid #000000;">DRAWN BY:</td>
+                            <td class="doc-label-cell doc-cell-center" style="border-bottom: 1.5px solid #000000; padding: 2px 4px; font-size: 11px;">IN-CHARGE</td>
+                            <td class="doc-label-cell doc-cell-center" style="border-bottom: 1.5px solid #000000; border-left: 1.5px solid #000000; padding: 2px 4px; font-size: 11px;">DRAWN BY:</td>
                           </tr>
                           <tr>
-                            <td class="doc-value-cell doc-cell-center" style="font-weight: 800; font-size: 14px; text-transform: uppercase;" id="docFieldInCharge" contenteditable="true" title="Click to edit">DONA</td>
-                            <td class="doc-value-cell doc-cell-center" style="font-weight: 800; font-size: 14px; text-transform: uppercase; border-left: 1.5px solid #000000;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit">GLEN</td>
+                            <td class="doc-value-cell doc-cell-center" style="font-weight: 800; font-size: 13.5px; text-transform: uppercase;" id="docFieldInCharge" contenteditable="true" title="Click to edit">DONA</td>
+                            <td class="doc-value-cell doc-cell-center" style="font-weight: 800; font-size: 13.5px; text-transform: uppercase; border-left: 1.5px solid #000000;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit">GLEN</td>
                           </tr>
                         </table>
                       </td>
+                      <td class="doc-label-cell">RELEASING DATE:</td>
+                      <td class="doc-value-cell" id="docFieldReleasingDate" contenteditable="true" title="Click to edit">JULY 30, 2026</td>
+                      <td class="doc-label-cell doc-cell-center" style="font-size: 10px;">INSTALLATION DURATION</td>
+                    </tr>
+
+                    <!-- ROW 5 -->
+                    <tr>
+                      <!-- Priority & Status Bar spanning Cols 1 to 3 -->
+                      <td colspan="3" class="doc-value-cell doc-priority-cell" id="docFieldPriorityStatus" contenteditable="true" title="Click to edit Priority/Status">
+                        Priority: <strong>RUSH</strong> | Status: <strong>Approved</strong>
+                      </td>
                       <td class="doc-label-cell">RELEASING MODE:</td>
                       <td class="doc-value-cell" id="docFieldReleasingMode" contenteditable="true" title="Click to edit">PICKUP</td>
-                      <!-- Duration box spanning Rows 5 & 6 -->
-                      <td rowspan="2" class="doc-value-cell doc-box-val" id="docFieldDuration" contenteditable="true" title="Click to edit"></td>
+                      <!-- Duration Pill Box spanning Rows 5 & 6 -->
+                      <td rowspan="2" class="doc-value-cell doc-cell-center">
+                        <div class="doc-pill-box" id="docFieldDuration" contenteditable="true" title="Click to edit Duration">1 Day (4 Hours)</div>
+                      </td>
                     </tr>
 
                     <!-- ROW 6 -->
                     <tr>
+                      <!-- Delivery / Site Address spanning Cols 1 to 3 -->
+                      <td colspan="3" class="doc-value-cell doc-delivery-cell" id="docFieldDeliveryAddress" contenteditable="true" title="Click to edit Site Address">
+                        <strong>DELIVERY / SITE ADDRESS:</strong> Block 14 Lot 3, Ortigas Ave Extension, Pasig City
+                      </td>
                       <td class="doc-label-cell">ADDRESS:</td>
-                      <td class="doc-value-cell" id="docFieldAddress" contenteditable="true" title="Click to edit"></td>
+                      <td class="doc-value-cell" id="docFieldAddress" contenteditable="true" title="Click to edit">Manila Branch</td>
                     </tr>
                   </tbody>
                 </table>
