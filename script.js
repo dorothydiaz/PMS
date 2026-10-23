@@ -18,7 +18,7 @@
   ];
 
   const DEFAULT_SALES_REPS = [
-    'Dona', 'Marco', 'Sarah', 'Kevin', 'Dorothy'
+    'Dona', 'Marco', 'Sarah', 'Kevin'
   ];
 
   const PROJECT_STATUSES = [
@@ -253,8 +253,8 @@
       projectName: 'UNILAB LABORATORY SAFETY WAYFINDING',
       client: 'UNITED LABORATORIES INC.',
       artist: 'Rodel',
-      salesRep: 'Dorothy',
-      inCharge: 'DOROTHY',
+      salesRep: 'Marco',
+      inCharge: 'MARCO',
       drawnBy: 'RODEL',
       orderDate: '2026-10-05',
       designDeadline: '2026-10-19',
@@ -499,8 +499,8 @@
       projectName: 'UNIQLO GLASS STOREFRONT FROSTED GRAPHICS',
       client: 'FAST RETAILING PH',
       artist: 'Tim',
-      salesRep: 'Dorothy',
-      inCharge: 'DOROTHY',
+      salesRep: 'Sarah',
+      inCharge: 'SARAH',
       drawnBy: 'TIM',
       orderDate: '2026-02-10',
       designDeadline: '2026-02-20',
@@ -744,8 +744,8 @@
       projectName: 'GOLDILOCKS STOREFRONT FACIA',
       client: 'GOLDILOCKS BAKESHOP',
       artist: 'Bob',
-      salesRep: 'Dorothy',
-      inCharge: 'DOROTHY',
+      salesRep: 'Dona',
+      inCharge: 'DONA',
       drawnBy: 'BOB',
       orderDate: '2026-10-19',
       designDeadline: '2026-10-24',
