@@ -801,7 +801,7 @@
       size: '1.4 MB',
       dateAdded: '2026-10-23',
       storageType: 'Local Mock',
-      url: 'assets/sign-depot-logo.png'
+      url: 'assets/img/sign-depot-logo.png'
     },
     {
       id: 'att-2',
@@ -810,7 +810,7 @@
       size: '2.8 MB',
       dateAdded: '2026-10-23',
       storageType: 'Local Mock',
-      url: 'assets/sign-depot-logo.png'
+      url: 'assets/img/sign-depot-logo.png'
     },
     {
       id: 'att-3',
@@ -819,7 +819,7 @@
       size: '890 KB',
       dateAdded: '2026-10-23',
       storageType: 'Local Mock',
-      url: 'assets/sign-depot-logo.png'
+      url: 'assets/img/sign-depot-logo.png'
     }
   ];
 
@@ -3633,7 +3633,8 @@
       const att = state.attachments.find(a => a.id === id);
       if (!att) return;
       document.getElementById('attachmentModalTitle').textContent = att.name;
-      document.getElementById('attachmentModalImg').src = att.url;
+      const resolvedUrl = (isInsidePagesDir() && !att.url.startsWith('../') && !att.url.startsWith('http') && !att.url.startsWith('data:')) ? '../' + att.url : att.url;
+      document.getElementById('attachmentModalImg').src = resolvedUrl;
       document.getElementById('attachmentPreviewModal').classList.add('show');
     },
     deleteAttachment: (id) => {
