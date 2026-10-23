@@ -119,17 +119,22 @@ body {
 .brand-link {
   display: flex;
   align-items: center;
-  gap: 12px;
   text-decoration: none;
   color: var(--text-main);
   overflow: hidden;
 }
 
 .brand-logo-img {
-  height: 36px;
+  height: 38px;
+  max-width: 140px;
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.brand-link:hover .brand-logo-img {
+  transform: scale(1.03);
 }
 
 .brand-text {
@@ -1009,32 +1014,31 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  background: #FFFFFF;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 4px 8px;
+  gap: 7px;
+  background: #F1F5F9;
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
   font-family: inherit;
   font-size: 11.5px;
   font-weight: 700;
   color: var(--text-main);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   white-space: nowrap;
-  outline: none;
   max-width: 100%;
 }
 
 .custom-select-btn:hover {
-  background: #F8FAFC;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  background: #E2E8F0;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.08);
 }
 
 .custom-select-btn:focus,
 .custom-select-btn.is-active {
-  box-shadow: 0 0 0 2px rgba(23, 107, 85, 0.25), 0 2px 6px rgba(15, 23, 42, 0.1) !important;
-  background: #FFFFFF;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.35), 0 2px 5px rgba(15, 23, 42, 0.08) !important;
 }
 
 .custom-select-arrow {
@@ -1211,10 +1215,44 @@ body {
 .indicator-artist    { background: #6366F1; }
 .indicator-sales     { background: #8B5CF6; }
 
-/* Custom Badge Extras */
-.badge-artist { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; font-weight: 700; }
-.badge-sales  { background: #F5F3FF; color: #6D28D9; border: 1px solid #DDD6FE; font-weight: 700; }
-.badge-neutral { background: #F3F4F6; color: #374151; border: 1px solid #E5E7EB; }
+/* Custom Badge Extras (Soft Gray Pill with No Outlines) */
+.badge-artist {
+  background: #F1F5F9 !important;
+  color: #1E293B !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px 10px !important;
+  font-weight: 700;
+}
+.badge-artist:hover {
+  background: #E2E8F0 !important;
+}
+
+.badge-sales {
+  background: #F1F5F9 !important;
+  color: #1E293B !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px 10px !important;
+  font-weight: 700;
+}
+.badge-sales:hover {
+  background: #E2E8F0 !important;
+}
+
+.badge-neutral {
+  background: #F1F5F9 !important;
+  color: #334155 !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px 10px !important;
+}
+.badge-neutral:hover {
+  background: #E2E8F0 !important;
+}
 
 /* Backward compatibility for any remaining select fallback */
 .inline-select {
@@ -1330,16 +1368,17 @@ body {
   background: #FFFFFF;
 }
 
-/* Status Badges */
+/* Status Badges (Smooth Pill Shape, No Outlines) */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+  border: none !important;
 }
 
 .badge-pending { background: #FEF3C7; color: #92400E; }
@@ -1351,7 +1390,7 @@ body {
 .badge-on-hold { background: #F3F4F6; color: #4B5563; }
 .badge-not-started { background: #E5E7EB; color: #374151; }
 
-.badge-priority-rush { background: #FEE2E2; color: #B91C1C; font-weight: 800; border: 1px solid #FCA5A5; }
+.badge-priority-rush { background: #FEE2E2; color: #B91C1C; font-weight: 800; border: none !important; }
 .badge-priority-high { background: #FFEDD5; color: #C2410C; }
 .badge-priority-med { background: #FEF9C3; color: #854D0E; }
 .badge-priority-low { background: #F1F5F9; color: #475569; }
