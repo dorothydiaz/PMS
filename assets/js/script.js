@@ -32,7 +32,16 @@
   const PRIORITY_LEVELS = ['Rush', 'High', 'Medium', 'Low'];
   const APPROVAL_LEVELS = ['Approved', 'Pending', 'Revision Requested'];
   const FILE_SENT_LEVELS = ['Sent', 'Pending'];
-  const RELEASING_MODES = ['PICKUP', 'DELIVERY', 'INSTALLATION', 'COURIER'];
+  const RELEASING_MODES = ['INSTALL', 'DELIVER', 'PICKUP'];
+
+  function normalizeReleasingMode(mode) {
+    if (!mode) return 'PICKUP';
+    const m = String(mode).trim().toUpperCase();
+    if (m.startsWith('INST')) return 'INSTALL';
+    if (m.startsWith('DELIV')) return 'DELIVER';
+    if (m.startsWith('PICK')) return 'PICKUP';
+    return 'PICKUP';
+  }
 
   // Comprehensive Shared Mock Dataset (25+ real-world Sign Depot projects)
   const DEFAULT_REQUESTS = [
@@ -259,7 +268,7 @@
       orderDate: '2026-10-05',
       designDeadline: '2026-10-19',
       releasingDate: '2026-10-26',
-      releasingMode: 'COURIER',
+      releasingMode: 'DELIVER',
       location: 'Mandaluyong City',
       completeAddress: '66 United Street, Mandaluyong City',
       contactPerson: 'Dr. Evelyn Garcia',
@@ -830,7 +839,7 @@
   let state = {
     artists: [...DEFAULT_ARTISTS],
     salesReps: [...DEFAULT_SALES_REPS],
-    requests: JSON.parse(JSON.stringify(DEFAULT_REQUESTS)),
+    requests: JSON.parse(JSON.stringify(DEFAULT_REQUESTS)).map(r => ({ ...r, releasingMode: normalizeReleasingMode(r.releasingMode) })),
     templateElements: JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS)),
     attachments: [...DEFAULT_ATTACHMENTS],
     activeView: 'view-dashboard',
@@ -854,6 +863,9 @@
           state.artists = parsed.artists || DEFAULT_ARTISTS;
           state.salesReps = parsed.salesReps || DEFAULT_SALES_REPS;
           state.requests = parsed.requests;
+          state.requests.forEach(r => {
+            r.releasingMode = normalizeReleasingMode(r.releasingMode);
+          });
           state.templateElements = parsed.templateElements || DEFAULT_TEMPLATE_ELEMENTS;
           state.attachments = parsed.attachments || DEFAULT_ATTACHMENTS;
           return;
@@ -2199,7 +2211,7 @@
     setTxt('docFieldContactNumber', rec.contactNumber || '639178805364');
     setTxt('docFieldOrderDate', formatDate(rec.orderDate));
     setTxt('docFieldReleasingDate', formatReadableDate(rec.releasingDate));
-    setTxt('docFieldReleasingMode', (rec.releasingMode || 'PICKUP').toUpperCase());
+    setTxt('docFieldReleasingMode', normalizeReleasingMode(rec.releasingMode));
     setTxt('docFieldAddress', rec.completeAddress || rec.location || 'Manila Branch');
     setTxt('docFieldInstallers', rec.installers || '2 Installers');
     setTxt('docFieldDuration', rec.duration || '1 Day (4 Hours)');
@@ -2224,7 +2236,7 @@
 
     if (ctrlInst) ctrlInst.value = rec.installers || '2 Installers';
     if (ctrlDur) ctrlDur.value = rec.duration || '1 Day (4 Hours)';
-    if (ctrlMode) ctrlMode.value = rec.releasingMode || 'PICKUP';
+    if (ctrlMode) ctrlMode.value = normalizeReleasingMode(rec.releasingMode);
     if (ctrlNotes) ctrlNotes.value = rec.notes || '';
     if (ctrlInCharge) ctrlInCharge.value = rec.inCharge || rec.salesRep || 'DONA';
     if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || 'GLEN';
@@ -2255,7 +2267,7 @@
       ctrlMode.addEventListener('change', () => {
         const target = document.getElementById('docFieldReleasingMode');
         if (target) {
-          target.textContent = ctrlMode.value.toUpperCase();
+          target.textContent = normalizeReleasingMode(ctrlMode.value);
           autoFitCellText(target);
         }
       });
@@ -2368,7 +2380,7 @@
     const releasingDateFormatted = document.getElementById('docFieldReleasingDate')?.textContent?.trim() || formatReadableDate(rec.releasingDate);
     const inChargeVal = (document.getElementById('docFieldInCharge')?.textContent?.trim() || rec.inCharge || rec.salesRep || 'DONA').toUpperCase();
     const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'GLEN').toUpperCase();
-    const releasingModeVal = (document.getElementById('docFieldReleasingMode')?.textContent?.trim() || rec.releasingMode || 'PICKUP').toUpperCase();
+    const releasingModeVal = normalizeReleasingMode(document.getElementById('docFieldReleasingMode')?.textContent?.trim() || rec.releasingMode || 'PICKUP');
     const locationVal = document.getElementById('docFieldLocation')?.textContent?.trim() || rec.location || 'Manila Branch';
     const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '2 Installers';
     const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '1 Day (4 Hours)';
@@ -2606,7 +2618,7 @@
       }
 
       if (copySuccess) {
-        showToast('Vector graphic copied! Ready to paste (Ctrl+V) directly as vector shapes or smart object in Photoshop, Illustrator, CorelDRAW, or Affinity.');
+        showToast('SVG vector code copied (for Illustrator / Figma). For CorelDRAW: Click "Download Vector" & drag into Corel, or use "Copy Image" for Ctrl+V.');
       } else {
         copyFallback(cleanSvg);
       }
@@ -2617,7 +2629,47 @@
     if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
     if (btnQuickCopy) btnQuickCopy.addEventListener('click', handleCopyVector);
 
-    // DOWNLOAD VECTOR SVG FILE (Direct 1-click fallback for drag & drop into Photoshop/Corel)
+    // COPY HIGH-RESOLUTION IMAGE (Instant Ctrl+V for CorelDRAW, Photoshop, Chat)
+    const btnCopyPNG = document.getElementById('btnDirectiveCopyPNG');
+    if (btnCopyPNG) {
+      btnCopyPNG.addEventListener('click', () => {
+        const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
+        const svgString = generateDirectiveSVG(cur);
+        const img = new Image();
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1216 * 2;
+          canvas.height = 162 * 2;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.scale(2, 2);
+          ctx.drawImage(img, 0, 0);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob(async (blob) => {
+            try {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              showToast('High-res graphic copied! Ready to paste (Ctrl+V) directly in CorelDRAW.');
+            } catch (err) {
+              showToast('Clipboard permissions denied. Click "Download Vector" instead.', 'error');
+            }
+          }, 'image/png');
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          showToast('Failed to render graphic for clipboard.', 'error');
+        };
+        img.src = url;
+      });
+    }
+
+    // DOWNLOAD VECTOR SVG FILE (Direct 1-click for CorelDRAW Drag & Drop or Import)
     const btnDownloadSVG = document.getElementById('btnDirectiveDownloadSVG');
     if (btnDownloadSVG) {
       btnDownloadSVG.addEventListener('click', () => {
@@ -2630,7 +2682,7 @@
         a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast(`Downloaded vector SVG: Sign_Depot_Directive_${cur.joNumber}.svg`);
+        showToast(`Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.`);
       });
     }
 
@@ -2641,7 +2693,7 @@
         if (cur) {
           cur.installers = document.getElementById('ctrlInstallers').value;
           cur.duration = document.getElementById('ctrlDuration').value;
-          cur.releasingMode = document.getElementById('ctrlReleasingMode').value;
+          cur.releasingMode = normalizeReleasingMode(document.getElementById('ctrlReleasingMode').value);
           cur.notes = document.getElementById('ctrlNotes').value;
           cur.inCharge = document.getElementById('ctrlInCharge').value;
           cur.drawnBy = document.getElementById('ctrlDrawnBy').value;
@@ -2656,6 +2708,7 @@
       btnPrint.addEventListener('click', () => window.print());
     }
 
+    const btnReset = document.getElementById('btnDirectiveReset');
     if (btnReset) {
       btnReset.addEventListener('click', () => {
         window.SignDepotDirectiveFontScale = 1.0;
@@ -3510,7 +3563,7 @@
         const fileSent = document.getElementById('salesFormFileSent').value;
         const clientApproval = document.getElementById('salesFormClientApproval').value;
         const priority = document.getElementById('salesFormPriority').value;
-        const mode = document.getElementById('salesFormReleasingMode').value;
+        const mode = normalizeReleasingMode(document.getElementById('salesFormReleasingMode').value);
         const contactPerson = document.getElementById('salesFormContactPerson').value.trim();
         const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
         const address = document.getElementById('salesFormAddress').value.trim();
