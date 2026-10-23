@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Depot — Sales & Creative Production Operations Tracker</title>
+  <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="assets/sign-depot-logo.png">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation (Panze-Studio Modern Pill & Icon Layout) -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <a href="#dashboard" class="brand-link" id="brandHomeLink">
+          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
+          <div class="brand-text">
+            <span class="brand-title">Sign Depot</span>
+            <span class="brand-subtitle">Creative Operations</span>
+          </div>
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Operations</div>
+        
+        <a class="nav-item active" data-view="view-dashboard" title="Dashboard">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9"></rect>
+              <rect x="14" y="3" width="7" height="5"></rect>
+              <rect x="14" y="12" width="7" height="9"></rect>
+              <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Project Dashboard</span>
+        </a>
+
+        <a class="nav-item" data-view="view-sales-requests" title="Sales Requests">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Sales Requests</span>
+        </a>
+
+        <a class="nav-item" data-view="view-creatives-tracker" title="Creatives Tracker">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Creatives Tracker</span>
+        </a>
+
+        <a class="nav-item" data-view="view-artist-workload" title="Artist Workload">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Artist Workload</span>
+        </a>
+
+        <div class="nav-section-label">Directives</div>
+
+        <a class="nav-item" data-view="view-directives-details" title="Directives Details">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Directives Details</span>
+        </a>
+
+        <div class="nav-section-label">Pending Queues</div>
+
+        <a class="nav-item" data-view="view-pending-artist" title="Pending Artist">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Artist</span>
+        </a>
+
+        <a class="nav-item" data-view="view-pending-sales" title="Pending Sales">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Sales</span>
+        </a>
+
+        <div class="nav-section-label">Analytics & Config</div>
+
+        <a class="nav-item" data-view="view-monthly-output" title="Monthly Output">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Monthly Output</span>
+        </a>
+
+        <a class="nav-item" data-view="view-settings" title="Settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="badge-prototype">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Live Inline Editable
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper Area -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="page-header-info">
+            <span class="page-category-tag">Manage and track your operations</span>
+            <h1 class="module-title" id="moduleTitle">
+              Project Dashboard
+              <span class="module-badge" id="moduleCategoryBadge">Live Operations</span>
+            </h1>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Timeframe Pills (Today | This Week | This Month) like Panze -->
+          <div class="timeframe-pill-group">
+            <button class="timeframe-btn" data-timeframe="today">Today</button>
+            <button class="timeframe-btn" data-timeframe="week">This Week</button>
+            <button class="timeframe-btn active" data-timeframe="month">This Month</button>
+            <button class="timeframe-btn" data-timeframe="all">All Time</button>
+          </div>
+
+          <!-- Live Auto-Save Indicator -->
+          <div class="auto-save-pill" title="Every table edit is automatically saved">
+            <span class="auto-save-dot"></span>
+            <span>Auto-Saved</span>
+          </div>
+
+          <!-- Global Search -->
+          <div class="global-search-container">
+            <svg class="global-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="global-search-input" id="globalSearchInput" placeholder="Quick search..." autocomplete="off">
+            <div class="quick-search-results" id="quickSearchResults"></div>
+          </div>
+
+          <!-- User Menu -->
+          <div class="user-profile-menu">
+            <button class="user-profile-btn" id="userProfileBtn">
+              <div class="user-avatar">DC</div>
+              <div class="user-meta">
+                <span class="user-name">Ed</span>
+                <span class="user-role">Creative Lead</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="dropdown-popover" id="userProfileDropdown">
+              <div class="dropdown-item" id="btnQuickDirectiveSample">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Load Sample Directive (URAL)
+              </div>
+              <div class="dropdown-item" id="btnResetLocalStorage">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Reset Mock Data
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" id="btnGotoSettings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                System Settings
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Container with all 9 Module Panels -->
+      <main class="main-content">
+        <!-- MODULE 1: DASHBOARD (Ultra-Modern Panze Studio Layout) -->
+        <section class="view-panel active" id="view-dashboard">
+          <!-- KPI Summary Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Total Requests</span>
+                <span class="badge badge-ongoing">All Records</span>
+              </div>
+              <div class="kpi-value" id="kpiTotalRequests">0</div>
+              <div class="kpi-trend">Active production logs</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Pending Approval</span>
+                <span class="badge badge-pending">Queue</span>
+              </div>
+              <div class="kpi-value" id="kpiPendingApproval">0</div>
+              <div class="kpi-trend">Awaiting review</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Working / On-Going</span>
+                <span class="badge badge-ongoing">In Progress</span>
+              </div>
+              <div class="kpi-value" id="kpiWorking">0</div>
+              <div class="kpi-trend">Active drafting</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Completed</span>
+                <span class="badge badge-completed">Released</span>
+              </div>
+              <div class="kpi-value" id="kpiCompleted">0</div>
+              <div class="kpi-trend">Fabrication done</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Revising</span>
+                <span class="badge badge-revising">Feedback</span>
+              </div>
+              <div class="kpi-value" id="kpiRevising">0</div>
+              <div class="kpi-trend">Client alterations</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Overdue</span>
+                <span class="badge badge-priority-rush">Past Due</span>
+              </div>
+              <div class="kpi-value" id="kpiOverdue" style="color: var(--accent-red);">0</div>
+              <div class="kpi-trend">Needs attention</div>
+            </div>
+          </div>
+
+          <!-- Panze Studio 3-Column Spotlight -->
+          <div class="dashboard-panze-grid">
+            <!-- Left Column: "My Tasks" (Pastel Tinted Cards) -->
+            <div class="studio-card">
+              <div class="task-column-header">
+                <h3 style="font-size: 16px; font-weight: 800;">Active Tasks</h3>
+                <button class="circle-action-btn" id="btnPanzeAddTask" title="Add Task">+</button>
+              </div>
+
+              <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <button class="timeframe-btn active" style="font-size: 11px; padding: 4px 12px;">Active Queue</button>
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-left: auto;">
+                  <span class="badge badge-ongoing" id="panzeActiveTasksCountBadge">12</span>
+                  <span>Tasks</span>
+                </div>
+              </div>
+
+              <!-- Pastel Tinted Task Cards Container -->
+              <div id="panzeTasksCardList">
+                <!-- Dynamically populated task cards -->
+              </div>
+            </div>
+
+            <!-- Middle Column: "Projects Overview" (Donut Chart & Legend) -->
+            <div class="studio-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="task-column-header">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">Projects Overview</h3>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Real-time status breakdown</span>
+                </div>
+                <button class="circle-action-btn" onclick="window.SignDepotApp.switchView('view-creatives-tracker')" title="Open Tracker">↗</button>
+              </div>
+
+              <div class="donut-chart-wrap">
+                <div id="panzeDonutChartSvgContainer" style="width: 220px; height: 220px;"></div>
+                <div class="donut-legend" id="panzeDonutLegend"></div>
+              </div>
+
+              <div style="border-top: 1px solid var(--border-light); padding-top: 16px; margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 12.5px; font-weight: 700;">2026 Production Pace</span>
+                  <span style="font-size: 12px; font-weight: 800; color: var(--primary-green);">High Output</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Artist Capacity Overview -->
+            <div class="studio-card">
+              <div class="task-column-header">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">Artist Capacity</h3>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Live workload limits</span>
+                </div>
+                <button class="circle-action-btn" onclick="window.SignDepotApp.switchView('view-artist-workload')" title="Workload Details">↗</button>
+              </div>
+              <div id="dashboardWorkloadSummaryList">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Directly Inline Editable Recent Projects Table -->
+          <div class="studio-card">
+            <div class="section-header-row" style="margin-bottom: 14px;">
+              <div>
+                <h3 style="font-size: 17px; font-weight: 800;">Live Production Queue</h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                  ✨ <strong>Direct Inline Editing:</strong> Click any cell below to edit Project Name, Client, Artist, or Status. Changes auto-save instantly!
+                </p>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btnDashboardNewRequest">+ Add Project</button>
+            </div>
+
+            <div class="table-studio-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Req ID</th>
+                    <th>JO #</th>
+                    <th>Project Name (Editable)</th>
+                    <th>Client (Editable)</th>
+                    <th>Artist</th>
+                    <th>Deadline</th>
+                    <th>Project Status</th>
+                    <th>Priority</th>
+                    <th class="no-sort">Directive</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentProjectsBody">
+                  <!-- Populated dynamically with inline editable cells -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULE 2: SALES REQUESTS (Direct Inline Editable Table) -->
+        <section class="view-panel" id="view-sales-requests">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Sales Requests Management</h2>
+              <p>Directly click and edit any field inline. Press Enter or click outside to auto-save.</p>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-primary" id="btnSalesNewRequest">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Request
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Controls -->
+          <div class="filter-bar">
+            <div class="filter-group">
+              <input type="text" class="filter-input" id="salesSearchInput" placeholder="Search orders..." style="width: 220px;">
+              <select class="filter-input" id="salesFilterPriority">
+                <option value="">All Priorities</option>
+                <option value="Rush">Rush</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+              <select class="filter-input" id="salesFilterApproval">
+                <option value="">All Approvals</option>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Revision Requested">Revision Requested</option>
+              </select>
+              <select class="filter-input" id="salesFilterFileSent">
+                <option value="">File Sent Status</option>
+                <option value="Sent">File Sent</option>
+                <option value="Pending">File Pending</option>
+              </select>
+              <select class="filter-input" id="salesFilterSalesRep">
+                <option value="">All Sales Reps</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-secondary btn-sm" id="btnResetSalesFilters">Reset Filters</button>
+            </div>
+          </div>
+
+          <!-- Directly Inline Editable Sales Table -->
+          <div class="table-studio-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th data-sort="requestId">Req ID</th>
+                  <th data-sort="joNumber">JO #</th>
+                  <th data-sort="projectName">Project Name (Click to Edit)</th>
+                  <th data-sort="client">Client (Click to Edit)</th>
+                  <th data-sort="artist">Artist</th>
+                  <th data-sort="designDeadline">Deadline</th>
+                  <th data-sort="releasingDate">Releasing</th>
+                  <th data-sort="fileSent">File Sent</th>
+                  <th data-sort="clientApproval">Approval</th>
+                  <th data-sort="priority">Priority</th>
+                  <th data-sort="salesRep">Sales</th>
+                  <th class="no-sort">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="salesRequestsTableBody">
+                <!-- Dynamically rendered with inline editable inputs -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container" id="salesPagination">
+            <div class="pagination-info" id="salesPaginationInfo">Showing 0-0 of 0</div>
+            <div class="pagination-controls" id="salesPaginationControls"></div>
+          </div>
+        </section>
+
+        <!-- MODULE 3: CREATIVES TRACKER (Google Sheets Replica with Inline Editing) -->
+        <section class="view-panel" id="view-creatives-tracker">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Creatives Tracker</h2>
+              <p>Directly edit counts (Std/Prt/Spc), Statuses, Deadlines, and Remarks like Google Sheets</p>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-secondary btn-sm" id="btnQuickExportTrackerCSV">Export CSV</button>
+              <button class="btn btn-primary btn-sm" id="btnTrackerNewTask">+ Add Task</button>
+            </div>
+          </div>
+
+          <!-- Tracker Filters -->
+          <div class="filter-bar">
+            <div class="filter-group">
+              <input type="text" class="filter-input" id="trackerSearchInput" placeholder="Filter tasks..." style="width: 200px;">
+              <select class="filter-input" id="trackerFilterProjectStatus">
+                <option value="">All Project Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="On-going">On-going</option>
+                <option value="Approved">Approved</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+                <option value="On Hold">On Hold</option>
+              </select>
+              <select class="filter-input" id="trackerFilterDesignStatus">
+                <option value="">All Design Statuses</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+              </select>
+              <select class="filter-input" id="trackerFilterArtist">
+                <option value="">All Artists</option>
+              </select>
+              <select class="filter-input" id="trackerFilterOverdue">
+                <option value="">All Deadlines</option>
+                <option value="overdue">Overdue Only</option>
+                <option value="ontime">On Track Only</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-secondary btn-sm" id="btnResetTrackerFilters">Reset Filters</button>
+            </div>
+          </div>
+
+          <!-- Directly Inline Editable Creatives Tracker Table -->
+          <div class="table-studio-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th data-sort="requestId">Req ID</th>
+                  <th data-sort="artist">Artist</th>
+                  <th data-sort="projectName">Project Name (Editable)</th>
+                  <th data-sort="designDeadline">Deadline</th>
+                  <th data-sort="headApproval">Head Approval</th>
+                  <th data-sort="countStandard" title="Standard Count">Std</th>
+                  <th data-sort="countPrinting" title="Printing Count">Prt</th>
+                  <th data-sort="countSpecial" title="Special Count">Spc</th>
+                  <th data-sort="projectStatus">Project Status</th>
+                  <th data-sort="designStatus">Design Status</th>
+                  <th>Overdue</th>
+                  <th data-sort="revisionCount">Rev#</th>
+                  <th>Remarks (Editable)</th>
+                  <th data-sort="salesRep">Sales</th>
+                  <th class="no-sort">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="creativesTrackerTableBody">
+                <!-- Dynamically rendered with direct inputs -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination-container" id="trackerPagination">
+            <div class="pagination-info" id="trackerPaginationInfo">Showing 0-0 of 0</div>
+            <div class="pagination-controls" id="trackerPaginationControls"></div>
+          </div>
+        </section>
+
+        <!-- MODULE 4: ARTIST WORKLOAD -->
+        <section class="view-panel" id="view-artist-workload">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Artist Workload & Capacity Management</h2>
+              <p>Real-time assignment distribution across Bob, Edrian, Glen, Goodrich, Jules, Raven, Rodel, Tim, Seven</p>
+            </div>
+            <div class="section-actions">
+              <select class="filter-input" id="workloadFilterAvailability">
+                <option value="">All Availability</option>
+                <option value="Available">Available (0-3)</option>
+                <option value="Moderate">Moderate (4-7)</option>
+                <option value="Near Capacity">Near Capacity (8-9)</option>
+                <option value="Full">Full (10+)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="kpi-grid" id="artistWorkloadCardsGrid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+            <!-- Dynamically populated artist workload cards -->
+          </div>
+
+          <div class="studio-card" style="margin-top: 24px;">
+            <div class="section-header-row" style="margin-bottom: 12px;">
+              <div>
+                <h3 style="font-size: 16px; font-weight: 800;" id="workloadSelectedArtistTitle">All Active Artist Assignments</h3>
+                <span style="font-size: 12px; color: var(--text-secondary);">Direct inline re-assignment supported</span>
+              </div>
+              <input type="text" class="filter-input" id="workloadTableSearch" placeholder="Search tasks..." style="width: 220px;">
+            </div>
+
+            <div class="table-studio-wrap" style="margin-bottom: 0;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Req ID</th>
+                    <th>Artist (Reassign)</th>
+                    <th>Project Name (Editable)</th>
+                    <th>Category</th>
+                    <th>Deadline</th>
+                    <th>Project Status</th>
+                    <th>Design Status</th>
+                    <th>Revisions</th>
+                    <th>Directive</th>
+                  </tr>
+                </thead>
+                <tbody id="artistWorkloadDetailsTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULE 5: DIRECTIVES DETAILS (Sign Depot Document) -->
+        <section class="view-panel" id="view-directives-details">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Directives Details & Job Orders</h2>
+              <p>Printable Sign Depot production directive generator, template editor & attachments</p>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-secondary" id="btnDirectivesLoadSampleUral">Load Sample: URAL (P260701373)</button>
+            </div>
+          </div>
+
+          <div class="directive-lookup-card">
+            <label style="font-size: 13px; font-weight: 800; color: #0F172A;">
+              Search by J.O. Number, Project Name, or Request ID
+            </label>
+            <div class="lookup-flex">
+              <div class="lookup-input-wrap">
+                <svg class="lookup-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" class="lookup-input" id="directiveLookupInput" placeholder="e.g. P260701373, URAL, or LR-26-1230..." autocomplete="off">
+                <div class="autocomplete-box" id="directiveAutocompleteBox"></div>
+              </div>
+              <button class="btn btn-primary" id="btnDirectiveSearch">Load Job</button>
+              <button class="btn btn-secondary" id="btnDirectiveClear">Clear</button>
+              <span id="directiveLookupStatus" style="font-size: 13px; font-weight: 700; margin-left: 8px;"></span>
+            </div>
+          </div>
+
+          <div class="directive-toolbar no-print">
+            <div class="directive-tabs">
+              <button class="tab-btn active" data-subtab="tab-directive-preview" id="btnTabPreview">Directive Document</button>
+              <button class="tab-btn" data-subtab="tab-template-editor" id="btnTabEditor">Template Editor</button>
+              <button class="tab-btn" data-subtab="tab-attachments" id="btnTabAttachments">Attachments (<span id="attachmentsCountBadge">3</span>)</button>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-green btn-sm" id="btnDirectiveCopySVG" title="Copy as Vector SVG for Adobe Illustrator, CorelDRAW, Figma">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Copy as Vector (SVG)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnDirectiveDownloadSVG" title="Download .svg vector file">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Vector (.svg)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnDirectiveSaveDraft">Save Draft</button>
+              <button class="btn btn-primary btn-sm" id="btnDirectivePrint">Print / PDF</button>
+              <button class="btn btn-secondary btn-sm" id="btnDirectiveReset">Reset</button>
+            </div>
+          </div>
+
+          <!-- SUBTAB 1: DIRECTIVE PREVIEW (Exact Sign Depot Document Layout) -->
+          <div class="directive-subtab-content" id="tab-directive-preview">
+            <div class="directive-canvas-wrap">
+              <div class="directive-document" id="printableDirectiveDocument">
+                <!-- Top Request ID Number Box -->
+                <div class="doc-top-bar">
+                  <div class="doc-req-box">
+                    <div class="doc-req-label">REQUEST ID NUMBER</div>
+                    <div class="doc-req-value" id="docFieldRequestId">LR-26-1230</div>
+                  </div>
+                </div>
+
+                <!-- Main Directive Grid Table (Exact Match to Sign Depot Reference) -->
+                <table class="doc-grid-table">
+                  <colgroup>
+                    <col style="width: 85px;">
+                    <col style="width: 165px;">
+                    <col style="width: 340px;">
+                    <col style="width: 120px;">
+                    <col style="width: 140px;">
+                    <col style="width: 150px;">
+                  </colgroup>
+                  <tbody>
+                    <!-- Row 1 -->
+                    <tr>
+                      <td class="doc-label-cell">JO#:</td>
+                      <td class="doc-value-cell doc-jo-val" id="docFieldJoNumber">P260701373</td>
+                      <!-- Project Name & Client Name merged cell (Rows 1, 2, 3) -->
+                      <td rowspan="3" class="doc-value-cell" style="text-align: center; padding: 12px 14px;">
+                        <div class="doc-project-client-box">
+                          <div class="doc-proj-name" id="docFieldProjectName">URAL</div>
+                          <div class="doc-client-name" id="docFieldClientName">PAU ACILAC</div>
+                        </div>
+                      </td>
+                      <td class="doc-label-cell">CONTACT PERSON:</td>
+                      <td class="doc-value-cell" id="docFieldContactPerson">-</td>
+                      <td class="doc-label-cell" style="text-align: center; font-size: 9.5px;">NUMBER OF INSTALLERS</td>
+                    </tr>
+
+                    <!-- Row 2 -->
+                    <tr>
+                      <td class="doc-label-cell">DUE DATE:</td>
+                      <td class="doc-value-cell doc-date-val" id="docFieldDueDate">JULY 30, 2026</td>
+                      <td class="doc-label-cell">CONTACT NUMBER:</td>
+                      <td class="doc-value-cell" id="docFieldContactNumber" style="font-weight: 700;">639178805364</td>
+                      <!-- Installers Plain Cell (Rowspan 2, Height matching rows 2 and 3) -->
+                      <td rowspan="2" class="doc-value-cell" style="text-align: center; font-size: 13px; font-weight: 700; padding: 0;">
+                        <div class="doc-plain-editable" id="docFieldInstallers" contenteditable="true" style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                          2 Installers
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Row 3 -->
+                    <tr>
+                      <td class="doc-label-cell">LOCATION:</td>
+                      <td class="doc-value-cell" id="docFieldLocation">Manila Branch</td>
+                      <td class="doc-label-cell">ORDER DATE:</td>
+                      <td class="doc-value-cell" id="docFieldOrderDate" style="font-weight: 700;">23/10/2026</td>
+                    </tr>
+
+                    <!-- Row 4 -->
+                    <tr>
+                      <!-- 3 Logos Cell (Spanning Col 1 and 2 width of left section) -->
+                      <td colspan="2" class="doc-value-cell doc-logo-cell">
+                        <div class="doc-triple-logos">
+                          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
+                          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
+                          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
+                        </div>
+                      </td>
+                      <!-- IN-CHARGE & DRAWN BY Subtable -->
+                      <td style="padding: 0;">
+                        <table class="doc-personnel-table">
+                          <colgroup>
+                            <col style="width: 50%;">
+                            <col style="width: 50%;">
+                          </colgroup>
+                          <tr>
+                            <td class="doc-label-cell" style="text-align: center; font-size: 9.5px; height: 20px;">IN-CHARGE</td>
+                            <td class="doc-label-cell" style="text-align: center; font-size: 9.5px; height: 20px;">DRAWN BY:</td>
+                          </tr>
+                          <tr>
+                            <td class="doc-value-cell" style="text-align: center; font-weight: 800; font-size: 12px; height: 26px;" id="docFieldInCharge">DONA</td>
+                            <td class="doc-value-cell" style="text-align: center; font-weight: 800; font-size: 12px; height: 26px;" id="docFieldDrawnBy">GLEN</td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td class="doc-label-cell">RELEASING DATE:</td>
+                      <td class="doc-value-cell" id="docFieldReleasingDate" style="font-weight: 700;">JULY 30, 2026</td>
+                      <td class="doc-label-cell" style="text-align: center; font-size: 9.5px;">INSTALLATION DURATION</td>
+                    </tr>
+
+                    <!-- Row 5 -->
+                    <tr>
+                      <td colspan="2" class="doc-value-cell" style="background: #FFFFFF;"></td>
+                      <td class="doc-value-cell" style="background: #FFFFFF;"></td>
+                      <td class="doc-label-cell">RELEASING MODE:</td>
+                      <td class="doc-value-cell" id="docFieldReleasingMode" style="font-weight: 700;">PICKUP</td>
+                      <!-- Duration Plain Cell -->
+                      <td class="doc-value-cell" style="text-align: center; font-size: 13px; font-weight: 700; padding: 0;">
+                        <div class="doc-plain-editable" id="docFieldDuration" contenteditable="true" style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                          1 Day (4 Hours)
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Row 6 -->
+                    <tr>
+                      <td colspan="2" class="doc-value-cell" style="background: #FFFFFF;"></td>
+                      <td class="doc-value-cell" style="background: #FFFFFF;"></td>
+                      <td class="doc-label-cell">ADDRESS:</td>
+                      <td colspan="2" class="doc-value-cell" id="docFieldShortAddress">Manila Branch</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Live Adjustment Controls -->
+            <div class="studio-card directive-extra-notes" style="margin-top: 20px;">
+              <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 12px;">Live Directive Adjustment Controls</h4>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Number of Installers</label>
+                  <input type="text" class="form-control" id="ctrlInstallers" value="2 Installers">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Installation Duration</label>
+                  <input type="text" class="form-control" id="ctrlDuration" value="1 Day (4 Hours)">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Releasing Mode</label>
+                  <select class="form-control" id="ctrlReleasingMode">
+                    <option value="PICKUP">PICKUP</option>
+                    <option value="DELIVERY">DELIVERY</option>
+                    <option value="INSTALLATION">INSTALLATION</option>
+                    <option value="COURIER">COURIER</option>
+                  </select>
+                </div>
+                <div class="form-group col-span-2">
+                  <label class="form-label">Installation / Fabrication Notes</label>
+                  <textarea class="form-control" id="ctrlNotes" placeholder="Special fabrication requirements, acrylic thickness..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Assigned In-Charge</label>
+                  <input type="text" class="form-control" id="ctrlInCharge" value="DONA">
+                  <label class="form-label" style="margin-top: 6px;">Drawn By (Artist)</label>
+                  <input type="text" class="form-control" id="ctrlDrawnBy" value="GLEN">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 2: TEMPLATE EDITOR -->
+          <div class="directive-subtab-content template-editor-wrap" id="tab-template-editor">
+            <div class="template-editor-toolbar">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-primary btn-sm" id="btnTplAddElement">+ Add Text Element</button>
+                <button class="btn btn-secondary btn-sm" id="btnTplSaveTemplate">Save Layout</button>
+                <button class="btn btn-secondary btn-sm" id="btnTplResetDefault">Reset to Standard</button>
+              </div>
+              <span style="font-size: 12px; color: var(--text-secondary);">Click to select, drag to reposition, pull corner to resize</span>
+            </div>
+
+            <div class="template-properties-panel" id="templatePropsPanel">
+              <span style="font-size: 12px; font-weight: 800;">Element Properties:</span>
+              <input type="text" class="filter-input" id="propElemLabel" placeholder="Label" style="width: 140px;">
+              <input type="text" class="filter-input" id="propElemContent" placeholder="Text Content" style="width: 180px;">
+              <input type="number" class="filter-input" id="propElemFontSize" placeholder="Font px" style="width: 80px;" min="8" max="36">
+              <select class="filter-input" id="propElemAlign">
+                <option value="left">Left Align</option>
+                <option value="center">Center Align</option>
+                <option value="right">Right Align</option>
+              </select>
+              <button class="btn btn-danger btn-sm" id="btnTplDeleteElement">Delete</button>
+            </div>
+
+            <div class="canvas-bounds-wrapper">
+              <div class="interactive-template-canvas" id="interactiveTemplateCanvas"></div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 3: ATTACHMENTS PANEL -->
+          <div class="directive-subtab-content" id="tab-attachments" style="display: none;">
+            <div class="studio-card">
+              <div class="section-header-row">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">Project Attachments & Proofs</h3>
+                  <p>Design renders and vector assets for current directive</p>
+                </div>
+                <div class="section-actions">
+                  <input type="file" id="localAttachmentUploadInput" accept="image/*,.pdf" style="display: none;">
+                  <button class="btn btn-primary btn-sm" id="btnUploadLocalAttachment">Upload Local Proof</button>
+                </div>
+              </div>
+              <div class="attachments-grid" id="attachmentsGridContainer"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULE 6: PENDING PROJECTS — ARTIST -->
+        <section class="view-panel" id="view-pending-artist">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Pending Projects — Artist Queue</h2>
+              <p>Filter active creative production tasks awaiting design completion</p>
+            </div>
+            <div class="section-actions">
+              <select class="filter-input" id="pendingArtistSelect"></select>
+            </div>
+          </div>
+
+          <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Assigned Projects</span></div>
+              <div class="kpi-value" id="artistStatTotal">0</div>
+              <div class="kpi-trend">Total in queue</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Active / In Progress</span></div>
+              <div class="kpi-value" id="artistStatActive" style="color: var(--primary-green);">0</div>
+              <div class="kpi-trend">Currently drafting</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Overdue Deadlines</span></div>
+              <div class="kpi-value" id="artistStatOverdue" style="color: var(--accent-red);">0</div>
+              <div class="kpi-trend">Priority attention needed</div>
+            </div>
+          </div>
+
+          <div class="table-studio-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Req ID</th>
+                  <th>Project Name (Editable)</th>
+                  <th>Project Status</th>
+                  <th>Design Status</th>
+                  <th>Deadline</th>
+                  <th>Revisions</th>
+                  <th>Remarks (Editable)</th>
+                  <th>Directive</th>
+                </tr>
+              </thead>
+              <tbody id="pendingArtistTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- MODULE 7: PENDING PROJECTS — SALES -->
+        <section class="view-panel" id="view-pending-sales">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Pending Projects — Sales Queue</h2>
+              <p>Track orders awaiting sales approvals, release coordination & rush items</p>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-group">
+              <button class="btn btn-primary btn-sm sales-queue-tab active" data-queue="all">All Pending</button>
+              <button class="btn btn-secondary btn-sm sales-queue-tab" data-queue="approval">Pending Approval</button>
+              <button class="btn btn-secondary btn-sm sales-queue-tab" data-queue="files">Files to Follow</button>
+              <button class="btn btn-secondary btn-sm sales-queue-tab" data-queue="release">Awaiting Release</button>
+              <button class="btn btn-secondary btn-sm sales-queue-tab" data-queue="rush">Rush Projects</button>
+            </div>
+            <div class="filter-group">
+              <input type="text" class="filter-input" id="pendingSalesSearchInput" placeholder="Search queue..." style="width: 200px;">
+            </div>
+          </div>
+
+          <div class="table-studio-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Req ID</th>
+                  <th>JO Number</th>
+                  <th>Sales Rep</th>
+                  <th>Client (Editable)</th>
+                  <th>Project Name (Editable)</th>
+                  <th>Artist</th>
+                  <th>Client Approval</th>
+                  <th>File Sent</th>
+                  <th>Releasing Date</th>
+                  <th>Priority</th>
+                  <th>Current Status</th>
+                  <th class="no-sort">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="pendingSalesTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- MODULE 8: MONTHLY OUTPUT -->
+        <section class="view-panel" id="view-monthly-output">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Monthly Production Output Report</h2>
+              <p>Mandatory Counting Rule: Accurately counts completed artist assignments by month of completion</p>
+            </div>
+            <div class="section-actions">
+              <select class="filter-input" id="monthlyOutputYearSelect">
+                <option value="2026">Reporting Year 2026</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" id="btnExportMonthlyReportCSV">Export Output Summary</button>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Year-to-Date Output</span></div>
+              <div class="kpi-value" id="outputYtdTotal">0</div>
+              <div class="kpi-trend">Total completed assignments</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Current Month Output</span></div>
+              <div class="kpi-value" id="outputCurrentMonthTotal" style="color: var(--primary-green);">0</div>
+              <div class="kpi-trend">October 2026 completed jobs</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Top Artist</span></div>
+              <div class="kpi-value" id="outputTopArtistName" style="font-size: 20px;">-</div>
+              <div class="kpi-trend" id="outputTopArtistCount">0 completed jobs</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Monthly Average</span></div>
+              <div class="kpi-value" id="outputMonthlyAvg">0</div>
+              <div class="kpi-trend">Assignments per month</div>
+            </div>
+          </div>
+
+          <div class="studio-card" style="margin-bottom: 24px;">
+            <div class="section-header-row" style="margin-bottom: 12px;">
+              <h3 style="font-size: 16px; font-weight: 800;">2026 Completed Assignments Output per Month</h3>
+              <span style="font-size: 12px; color: var(--text-secondary);">Hover over bars for exact count</span>
+            </div>
+            <div class="svg-chart-container" id="monthlyChartSvgContainer"></div>
+          </div>
+
+          <div class="studio-card">
+            <div class="section-header-row" style="margin-bottom: 12px;">
+              <h3 style="font-size: 16px; font-weight: 800;">Artist Production Output Matrix (Jan — Dec 2026)</h3>
+              <span class="badge badge-completed">Verified Assignment Count</span>
+            </div>
+            <div class="table-studio-wrap" style="margin-bottom: 0;">
+              <table class="data-table" id="monthlyOutputMatrixTable">
+                <thead>
+                  <tr>
+                    <th>Artist</th>
+                    <th>Jan</th>
+                    <th>Feb</th>
+                    <th>Mar</th>
+                    <th>Apr</th>
+                    <th>May</th>
+                    <th>Jun</th>
+                    <th>Jul</th>
+                    <th>Aug</th>
+                    <th>Sep</th>
+                    <th>Oct</th>
+                    <th>Nov</th>
+                    <th>Dec</th>
+                    <th style="font-weight: 800; background: #EBF7F4; color: var(--primary-green);">Annual Total</th>
+                    <th>Rank</th>
+                  </tr>
+                </thead>
+                <tbody id="monthlyOutputTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULE 9: SETTINGS -->
+        <section class="view-panel" id="view-settings">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>System Settings & Configuration</h2>
+              <p>Manage roster of artists, sales reps, workload thresholds, and local test data storage</p>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="studio-card">
+              <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px;">Artist Roster & Capacity Limits</h3>
+              <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <input type="text" class="form-control" id="settingsNewArtistInput" placeholder="New artist name...">
+                <button class="btn btn-primary btn-sm" id="btnSettingsAddArtist">Add Artist</button>
+              </div>
+              <div id="settingsArtistList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+
+            <div class="studio-card">
+              <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px;">Sales Representatives</h3>
+              <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <input type="text" class="form-control" id="settingsNewSalesInput" placeholder="New sales rep name...">
+                <button class="btn btn-primary btn-sm" id="btnSettingsAddSales">Add Sales</button>
+              </div>
+              <div id="settingsSalesList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+
+            <div class="studio-card col-span-2">
+              <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px;">Browser LocalStorage Data Management</h3>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                All inline edits, new directives, drafts, and tasks are automatically persisted in your browser's local storage.
+              </p>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-secondary btn-sm" id="btnSettingsExportJson">Export Data JSON</button>
+                <button class="btn btn-secondary btn-sm" id="btnSettingsImportJson">Import Data JSON</button>
+                <input type="file" id="importJsonFileInput" accept=".json" style="display: none;">
+                <button class="btn btn-danger btn-sm" id="btnSettingsResetDefaults">Reset to Factory Defaults</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT SALES REQUEST -->
+  <div class="modal-backdrop" id="salesModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="salesModalTitle">New Sales Request</h3>
+        <button class="modal-close-btn" data-close-modal="salesModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="salesRequestForm">
+        <div class="modal-body">
+          <input type="hidden" id="salesFormId">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label required">Request ID</label>
+              <input type="text" class="form-control" id="salesFormReqId" required placeholder="e.g. LR-26-1230">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">J.O. Number (Manual Entry)</label>
+              <input type="text" class="form-control" id="salesFormJo" required placeholder="e.g. P260701373">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Project Name</label>
+              <input type="text" class="form-control" id="salesFormProject" required placeholder="e.g. URAL Acrylic Sign">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Client Name</label>
+              <input type="text" class="form-control" id="salesFormClient" required placeholder="e.g. PAU ACILAC">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Assigned Artist</label>
+              <select class="form-control" id="salesFormArtist" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Sales Representative</label>
+              <select class="form-control" id="salesFormSalesRep" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Design Deadline</label>
+              <input type="date" class="form-control" id="salesFormDeadline" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Releasing Date</label>
+              <input type="date" class="form-control" id="salesFormReleasingDate">
+            </div>
+            <div class="form-group">
+              <label class="form-label">File Sent Status</label>
+              <select class="form-control" id="salesFormFileSent">
+                <option value="Sent">File Sent</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Client Approval</label>
+              <select class="form-control" id="salesFormClientApproval">
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Revision Requested">Revision Requested</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority Level</label>
+              <select class="form-control" id="salesFormPriority">
+                <option value="Rush">Rush</option>
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mode of Releasing</label>
+              <select class="form-control" id="salesFormReleasingMode">
+                <option value="PICKUP">PICKUP</option>
+                <option value="DELIVERY">DELIVERY</option>
+                <option value="INSTALLATION">INSTALLATION</option>
+                <option value="COURIER">COURIER</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Person</label>
+              <input type="text" class="form-control" id="salesFormContactPerson" placeholder="Name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Number</label>
+              <input type="text" class="form-control" id="salesFormContactNumber" placeholder="e.g. 639178805364">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Complete Site / Delivery Address</label>
+              <input type="text" class="form-control" id="salesFormAddress" placeholder="Full address">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="salesModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveSalesRequest">Save Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT CREATIVE TASK -->
+  <div class="modal-backdrop" id="trackerModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="trackerModalTitle">Edit Creative Task</h3>
+        <button class="modal-close-btn" data-close-modal="trackerModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="trackerTaskForm">
+        <div class="modal-body">
+          <input type="hidden" id="trackerFormId">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label required">Request ID</label>
+              <input type="text" class="form-control" id="trackerFormReqId" required readonly style="background: #F1F5F9;">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Assigned Artist</label>
+              <select class="form-control" id="trackerFormArtist" required></select>
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label required">Project Name</label>
+              <input type="text" class="form-control" id="trackerFormProject" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Design Deadline</label>
+              <input type="date" class="form-control" id="trackerFormDeadline" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Artist Head Approval</label>
+              <select class="form-control" id="trackerFormHeadApproval">
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Needs Revision">Needs Revision</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project Status</label>
+              <select class="form-control" id="trackerFormProjectStatus">
+                <option value="Pending">Pending</option>
+                <option value="On-going">On-going</option>
+                <option value="Approved">Approved</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+                <option value="On Hold">On Hold</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Design Status</label>
+              <select class="form-control" id="trackerFormDesignStatus">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Standard Count</label>
+              <input type="number" class="form-control" id="trackerFormStd" min="0" value="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Printing Count</label>
+              <input type="number" class="form-control" id="trackerFormPrt" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Special Count</label>
+              <input type="number" class="form-control" id="trackerFormSpc" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Revision Count</label>
+              <input type="number" class="form-control" id="trackerFormRev" min="0" value="0">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Remarks</label>
+              <textarea class="form-control" id="trackerFormRemarks" placeholder="Production notes..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="trackerModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveTrackerTask">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PREVIEW ATTACHMENT -->
+  <div class="modal-backdrop" id="attachmentPreviewModal">
+    <div class="modal-container" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="attachmentModalTitle">Attachment Preview</h3>
+        <button class="modal-close-btn" data-close-modal="attachmentPreviewModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 16px; align-items: center; justify-content: center; background: #0F172A;">
+        <img id="attachmentModalImg" src="" alt="Proof Preview" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 4px;">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="attachmentPreviewModal">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Hub -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
