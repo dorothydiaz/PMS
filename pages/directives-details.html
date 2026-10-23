@@ -271,13 +271,14 @@
                 <!-- Directive Top Quick Bar (Vector Ready & Text Controls) -->
                 <div class="doc-top-bar no-print">
                   <div class="doc-top-quick-actions" style="display: flex; gap: 12px; align-items: center;">
-                    <!-- Adjustable Font Controls for Fixed Table Layout -->
-                    <div class="doc-font-controls" title="Adjust text sizes within fixed layout">
-                      <span class="font-ctrl-label">Font:</span>
-                      <button type="button" class="btn-font-scale" id="btnFontDec" title="Decrease font size (Ctrl+[)">A-</button>
-                      <span class="font-scale-num" id="fontScaleDisplay">100%</span>
-                      <button type="button" class="btn-font-scale" id="btnFontInc" title="Increase font size (Ctrl+])">A+</button>
-                      <button type="button" class="btn-font-scale" id="btnFontReset" title="Reset font sizes">Reset</button>
+                    <!-- Customized Per-Cell Font Size Controls -->
+                    <div class="doc-font-controls" id="cellFontControls" title="Customize font size for the selected cell">
+                      <span class="font-ctrl-cell-badge" id="selectedCellBadge" title="Click any cell in the table below to customize its font size">Select Any Cell</span>
+                      <button type="button" class="btn-font-scale" id="btnCellFontDec" title="Decrease font size of selected cell (Ctrl+[)">A-</button>
+                      <input type="number" id="cellFontSizeInput" class="cell-font-size-input" value="30" min="6" max="72" step="1" title="Type exact font size in px">
+                      <span class="font-ctrl-unit">px</span>
+                      <button type="button" class="btn-font-scale" id="btnCellFontInc" title="Increase font size of selected cell (Ctrl+])">A+</button>
+                      <button type="button" class="btn-font-scale" id="btnCellFontReset" title="Reset this cell to default font size">Reset</button>
                     </div>
 
                     <span class="vector-status-indicator">• Vector Ready</span>

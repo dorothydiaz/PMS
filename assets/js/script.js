@@ -2144,22 +2144,103 @@
     );
   }
 
-  window.SignDepotDirectiveFontScale = 1.0;
+  // ==========================================================================
+  // CUSTOMIZED PER-CELL FONT SIZE ENGINE (Customized per individual cell, not everything!)
+  // ==========================================================================
+
+  let activeDirectiveCell = null;
+
+  function getCellFriendlyName(cell) {
+    if (!cell) return 'Select Any Cell';
+    if (cell.id === 'docFieldJoNumber' || cell.classList.contains('doc-jo-val')) return 'JO Number';
+    if (cell.id === 'docFieldProjectName' || cell.classList.contains('doc-proj-cell')) return 'Project Name';
+    if (cell.id === 'docFieldClientName' || cell.classList.contains('doc-client-cell')) return 'Client Name';
+    if (cell.id === 'docFieldDueDate' || cell.classList.contains('doc-date-val')) return 'Due Date';
+    if (cell.id === 'docFieldLocation') return 'Location';
+    if (cell.id === 'docFieldContactPerson') return 'Contact Person';
+    if (cell.id === 'docFieldContactNumber') return 'Contact Number';
+    if (cell.id === 'docFieldOrderDate') return 'Order Date';
+    if (cell.id === 'docFieldReleasingDate') return 'Releasing Date';
+    if (cell.id === 'docFieldReleasingMode') return 'Releasing Mode';
+    if (cell.id === 'docFieldInstallers') return 'Installers';
+    if (cell.id === 'docFieldDuration') return 'Duration';
+    if (cell.id === 'docFieldAddress') return 'Address';
+    if (cell.id === 'docFieldInCharge') return 'In-Charge';
+    if (cell.id === 'docFieldDrawnBy') return 'Drawn By';
+    return (cell.textContent || 'Selected Cell').trim().slice(0, 16);
+  }
+
+  function getCellDefaultFontSize(cell) {
+    if (!cell) return 13;
+    if (cell.classList.contains('doc-jo-val')) return 30;
+    if (cell.classList.contains('doc-proj-cell')) return 30;
+    if (cell.classList.contains('doc-client-cell')) return 26;
+    if (cell.classList.contains('doc-date-val')) return 14.5;
+    if (cell.classList.contains('doc-person-val')) return 13.5;
+    if (cell.classList.contains('doc-box-val')) return 13;
+    if (cell.classList.contains('doc-label-cell')) return 11.5;
+    return 13;
+  }
+
+  function getCellCurrentFontSize(cell) {
+    if (!cell) return 13;
+    const custom = cell.getAttribute('data-custom-size');
+    if (custom) return parseFloat(custom);
+    const inline = cell.style.fontSize;
+    if (inline) return parseFloat(inline);
+    const computed = window.getComputedStyle(cell).fontSize;
+    return parseFloat(computed) || getCellDefaultFontSize(cell);
+  }
+
+  function selectDirectiveCell(cell) {
+    if (!cell) return;
+    const table = document.getElementById('directiveGridTable');
+    if (table) {
+      table.querySelectorAll('.directive-active-cell').forEach(c => c.classList.remove('directive-active-cell'));
+    }
+    activeDirectiveCell = cell;
+    cell.classList.add('directive-active-cell');
+
+    const badge = document.getElementById('selectedCellBadge');
+    if (badge) badge.textContent = getCellFriendlyName(cell);
+
+    const input = document.getElementById('cellFontSizeInput');
+    if (input) input.value = Math.round(getCellCurrentFontSize(cell));
+  }
+
+  function setCellCustomFontSize(cell, sizePx) {
+    if (!cell) {
+      cell = document.getElementById('docFieldProjectName') || document.querySelector('.doc-proj-cell');
+      if (cell) selectDirectiveCell(cell);
+    }
+    if (!cell) return;
+
+    const clamped = Math.max(6, Math.min(72, Math.round(sizePx * 10) / 10));
+    cell.setAttribute('data-custom-size', clamped);
+    cell.style.setProperty('font-size', clamped + 'px', 'important');
+
+    const input = document.getElementById('cellFontSizeInput');
+    if (input) input.value = Math.round(clamped);
+
+    if (!state.customCellFonts) state.customCellFonts = {};
+    const key = cell.id || cell.className;
+    state.customCellFonts[key] = clamped;
+  }
 
   function autoFitCellText(cell) {
     if (!cell) return;
     const baseSizeAttr = cell.getAttribute('data-base-size');
     let baseSize = baseSizeAttr ? parseFloat(baseSizeAttr) : null;
     if (!baseSize) {
-      if (cell.classList.contains('doc-jo-val')) baseSize = 30;
-      else if (cell.classList.contains('doc-proj-cell')) baseSize = 30;
-      else if (cell.classList.contains('doc-client-cell')) baseSize = 26;
-      else if (cell.classList.contains('doc-date-val')) baseSize = 14.5;
-      else if (cell.classList.contains('doc-person-val')) baseSize = 13.5;
-      else if (cell.classList.contains('doc-box-val')) baseSize = 13;
-      else if (cell.classList.contains('doc-label-cell')) baseSize = 11.5;
-      else baseSize = 13;
+      baseSize = getCellDefaultFontSize(cell);
       cell.setAttribute('data-base-size', baseSize);
+    }
+
+    // If customized for this specific cell, prioritize the customized font size!
+    const customSizeAttr = cell.getAttribute('data-custom-size');
+    if (customSizeAttr) {
+      cell.style.setProperty('font-size', customSizeAttr + 'px', 'important');
+      return;
     }
 
     const minSize = cell.classList.contains('doc-jo-val') ? 14 :
@@ -2167,10 +2248,10 @@
                     cell.classList.contains('doc-client-cell') ? 11 :
                     cell.classList.contains('doc-date-val') ? 9 : 8;
 
-    let targetSize = Math.max(minSize, Math.round(baseSize * (window.SignDepotDirectiveFontScale || 1.0) * 10) / 10);
+    let targetSize = baseSize;
     cell.style.setProperty('font-size', targetSize + 'px', 'important');
 
-    // Auto-shrink font size if text overflows cell bounds
+    // Auto-shrink font size ONLY if text overflows cell bounds
     let guard = 0;
     while (guard < 35 && (cell.scrollWidth > cell.clientWidth || cell.scrollHeight > cell.clientHeight) && targetSize > minSize) {
       targetSize = Math.max(minSize, Math.round((targetSize - 0.5) * 10) / 10);
@@ -2391,24 +2472,33 @@
     const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '639178805364';
     const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || formatDate(rec.orderDate);
 
-    // Font auto-scaling for SVG text so long strings never overflow cell bounds
-    const getSvgSize = (str, maxChars, base, min) => {
+    // Font sizing for SVG: Uses customized per-cell font sizes if manually set, otherwise auto-scales
+    const getSvgSize = (str, maxChars, base, min, elementId) => {
+      if (elementId) {
+        const el = document.getElementById(elementId);
+        if (el) {
+          const custom = el.getAttribute('data-custom-size');
+          if (custom) return parseFloat(custom);
+          const inline = el.style.fontSize;
+          if (inline) return parseFloat(inline);
+        }
+      }
       const len = (str || '').length;
       if (len <= maxChars) return base;
       return Math.max(min, Math.round((base * (maxChars / len)) * 10) / 10);
     };
 
-    const joSize = getSvgSize(joNumberVal, 10, 32, 16);
-    const projSize = getSvgSize(projectNameVal, 12, 32, 15);
-    const clientSize = getSvgSize(clientVal, 14, 28, 14);
-    const addressSize = getSvgSize(addressVal, 22, 13, 8.5);
-    const personSize = getSvgSize(contactPersonVal, 20, 13, 9);
-    const phoneSize = getSvgSize(contactNumberVal, 18, 13, 9);
-    const inChargeSize = getSvgSize(inChargeVal, 14, 14, 9);
-    const drawnBySize = getSvgSize(drawnByVal, 14, 14, 9);
-    const installersSize = getSvgSize(installersVal, 14, 14, 9);
-    const durationSize = getSvgSize(durationVal, 14, 14, 9);
-    const dueSize = getSvgSize(dueDateFormatted, 16, 15, 9);
+    const joSize = getSvgSize(joNumberVal, 10, 32, 16, 'docFieldJoNumber');
+    const projSize = getSvgSize(projectNameVal, 12, 32, 15, 'docFieldProjectName');
+    const clientSize = getSvgSize(clientVal, 14, 28, 14, 'docFieldClientName');
+    const addressSize = getSvgSize(addressVal, 22, 13, 8.5, 'docFieldAddress');
+    const personSize = getSvgSize(contactPersonVal, 20, 13, 9, 'docFieldContactPerson');
+    const phoneSize = getSvgSize(contactNumberVal, 18, 13, 9, 'docFieldContactNumber');
+    const inChargeSize = getSvgSize(inChargeVal, 14, 14, 9, 'docFieldInCharge');
+    const drawnBySize = getSvgSize(drawnByVal, 14, 14, 9, 'docFieldDrawnBy');
+    const installersSize = getSvgSize(installersVal, 14, 14, 9, 'docFieldInstallers');
+    const durationSize = getSvgSize(durationVal, 14, 14, 9, 'docFieldDuration');
+    const dueSize = getSvgSize(dueDateFormatted, 16, 15, 9, 'docFieldDueDate');
 
     // Pure Vector Sign Depot Logo
     const logoSVG = `
@@ -2711,52 +2801,119 @@
     const btnReset = document.getElementById('btnDirectiveReset');
     if (btnReset) {
       btnReset.addEventListener('click', () => {
-        window.SignDepotDirectiveFontScale = 1.0;
-        updateFontDisplay();
+        state.customCellFonts = {};
+        const table = document.getElementById('directiveGridTable');
+        if (table) {
+          table.querySelectorAll('td').forEach(c => {
+            c.removeAttribute('data-custom-size');
+            c.style.removeProperty('font-size');
+          });
+        }
         renderDirectivePreview(state.currentDirectiveJo);
-        showToast('Directive preview reset.');
+        showToast('All cell font sizes reset to standard defaults.');
       });
     }
 
-    // Font Size Adjustments (A-, A+, Reset) for Fixed Table Layout
-    const fontDisplay = document.getElementById('fontScaleDisplay');
-    const updateFontDisplay = () => {
-      if (fontDisplay) {
-        fontDisplay.textContent = `${Math.round((window.SignDepotDirectiveFontScale || 1.0) * 100)}%`;
+    // CUSTOMIZED PER-CELL FONT SIZE CONTROLS (Customized per individual cell, not everything!)
+    const getActiveOrTargetCell = () => {
+      if (activeDirectiveCell && document.body.contains(activeDirectiveCell)) {
+        return activeDirectiveCell;
       }
+      const defaultCell = document.getElementById('docFieldProjectName') || document.querySelector('.doc-proj-cell') || document.querySelector('.doc-value-cell');
+      if (defaultCell) selectDirectiveCell(defaultCell);
+      return defaultCell;
     };
 
-    const btnDec = document.getElementById('btnFontDec');
-    if (btnDec) {
-      btnDec.addEventListener('click', () => {
-        window.SignDepotDirectiveFontScale = Math.max(0.60, Math.round(((window.SignDepotDirectiveFontScale || 1.0) - 0.05) * 100) / 100);
-        updateFontDisplay();
-        autoFitDirectiveTexts();
+    const btnCellDec = document.getElementById('btnCellFontDec');
+    if (btnCellDec) {
+      btnCellDec.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const current = getCellCurrentFontSize(cell);
+          const next = Math.max(6, Math.round(current - 1));
+          setCellCustomFontSize(cell, next);
+          showToast(`Font size for ${getCellFriendlyName(cell)}: ${next}px`);
+        }
       });
     }
 
-    const btnInc = document.getElementById('btnFontInc');
-    if (btnInc) {
-      btnInc.addEventListener('click', () => {
-        window.SignDepotDirectiveFontScale = Math.min(1.40, Math.round(((window.SignDepotDirectiveFontScale || 1.0) + 0.05) * 100) / 100);
-        updateFontDisplay();
-        autoFitDirectiveTexts();
+    const btnCellInc = document.getElementById('btnCellFontInc');
+    if (btnCellInc) {
+      btnCellInc.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const current = getCellCurrentFontSize(cell);
+          const next = Math.min(72, Math.round(current + 1));
+          setCellCustomFontSize(cell, next);
+          showToast(`Font size for ${getCellFriendlyName(cell)}: ${next}px`);
+        }
       });
     }
 
-    const btnResetScale = document.getElementById('btnFontReset');
-    if (btnResetScale) {
-      btnResetScale.addEventListener('click', () => {
-        window.SignDepotDirectiveFontScale = 1.0;
-        updateFontDisplay();
-        autoFitDirectiveTexts();
-        showToast('Font sizes reset to 100%');
+    const cellFontInput = document.getElementById('cellFontSizeInput');
+    if (cellFontInput) {
+      cellFontInput.addEventListener('input', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const val = parseFloat(cellFontInput.value);
+          if (!isNaN(val) && val >= 6 && val <= 72) {
+            setCellCustomFontSize(cell, val);
+          }
+        }
       });
     }
 
-    // Live auto-fit when typing in contenteditable table cells
+    const btnCellReset = document.getElementById('btnCellFontReset');
+    if (btnCellReset) {
+      btnCellReset.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          cell.removeAttribute('data-custom-size');
+          cell.style.removeProperty('font-size');
+          autoFitCellText(cell);
+          if (cellFontInput) cellFontInput.value = Math.round(getCellCurrentFontSize(cell));
+          if (state.customCellFonts && cell.id) {
+            delete state.customCellFonts[cell.id];
+          }
+          showToast(`Reset font size for ${getCellFriendlyName(cell)} to default (${Math.round(getCellCurrentFontSize(cell))}px)`);
+        }
+      });
+    }
+
+    // Cell selection & hotkey listeners on the directive CAD table
     const gridTable = document.getElementById('directiveGridTable');
     if (gridTable) {
+      gridTable.addEventListener('click', (e) => {
+        const targetCell = e.target.closest('td');
+        if (targetCell) {
+          selectDirectiveCell(targetCell);
+        }
+      });
+
+      gridTable.addEventListener('focusin', (e) => {
+        const targetCell = e.target.closest('td');
+        if (targetCell) {
+          selectDirectiveCell(targetCell);
+        }
+      });
+
+      // Hotkeys: Ctrl+[ decreases active cell font, Ctrl+] increases active cell font
+      gridTable.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && (e.key === '[' || e.key === ']')) {
+          e.preventDefault();
+          const targetCell = e.target.closest('td') || getActiveOrTargetCell();
+          if (targetCell) {
+            selectDirectiveCell(targetCell);
+            const current = getCellCurrentFontSize(targetCell);
+            const step = e.key === '[' ? -1 : 1;
+            const next = Math.max(6, Math.min(72, Math.round(current + step)));
+            setCellCustomFontSize(targetCell, next);
+            showToast(`${getCellFriendlyName(targetCell)} font: ${next}px`);
+          }
+        }
+      });
+
+      // Live auto-fit when typing in contenteditable table cells
       gridTable.addEventListener('input', (e) => {
         const targetCell = e.target.closest('td');
         if (targetCell) autoFitCellText(targetCell);

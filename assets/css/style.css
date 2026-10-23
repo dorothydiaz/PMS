@@ -1877,7 +1877,7 @@ body {
   background: #FFFFFF;
 }
 
-/* Adjustable Font Controls for Fixed Table Layout */
+/* Customized Per-Cell Font Controls */
 .doc-font-controls {
   display: inline-flex;
   align-items: center;
@@ -1887,10 +1887,44 @@ body {
   border-radius: var(--radius-full);
 }
 
-.font-ctrl-label {
+.font-ctrl-cell-badge {
   font-size: 11px;
-  font-weight: 700;
-  color: #475569;
+  font-weight: 800;
+  color: #0F172A;
+  background: #E2E8F0;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.cell-font-size-input {
+  width: 38px;
+  height: 22px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  border: none;
+  background: #FFFFFF;
+  border-radius: 4px;
+  color: #0F172A;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.cell-font-size-input:focus {
+  outline: 1.5px solid var(--primary-green);
+}
+
+.font-ctrl-unit {
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748B;
+  margin-left: -2px;
+  margin-right: 2px;
 }
 
 .btn-font-scale {
@@ -1910,12 +1944,11 @@ body {
   background: #E2E8F0;
 }
 
-.font-scale-num {
-  font-size: 11px;
-  font-weight: 700;
-  color: #0F172A;
-  min-width: 34px;
-  text-align: center;
+/* Active Highlight for the cell being customized */
+.directive-active-cell {
+  outline: 2px solid #176B55 !important;
+  outline-offset: -2px !important;
+  background-color: #FEF9C3 !important;
 }
 
 .vector-status-indicator {
