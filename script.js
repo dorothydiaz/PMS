@@ -1431,11 +1431,24 @@
     'view-settings': 'settings.html'
   };
 
+  function isInsidePagesDir() {
+    const p = window.location.pathname.toLowerCase().replace(/\\/g, '/');
+    return p.includes('/pages/') || p.endsWith('/pages');
+  }
+
+  function getPageUrl(filename) {
+    const inside = isInsidePagesDir();
+    if (filename === 'index.html') {
+      return inside ? '../index.html' : 'index.html';
+    }
+    return inside ? filename : 'pages/' + filename;
+  }
+
   function detectCurrentPage() {
     const bodyPage = document.body.getAttribute('data-page');
     if (bodyPage && PAGE_MAP[bodyPage]) return bodyPage;
 
-    const path = window.location.pathname.toLowerCase();
+    const path = window.location.pathname.toLowerCase().replace(/\\/g, '/');
     const filename = path.split('/').pop() || 'index.html';
     for (const [viewId, pageFile] of Object.entries(PAGE_MAP)) {
       if (filename === pageFile.toLowerCase()) return viewId;
@@ -1451,7 +1464,7 @@
     if (!targetPanel) {
       const targetPage = PAGE_MAP[viewId];
       if (targetPage) {
-        window.location.href = targetPage;
+        window.location.href = getPageUrl(targetPage);
         return;
       }
     }
@@ -3330,7 +3343,7 @@
         if (document.getElementById('view-settings')) {
           switchView('view-settings');
         } else {
-          window.location.href = 'settings.html';
+          window.location.href = getPageUrl('settings.html');
         }
         profDropdown.classList.remove('show');
       };
@@ -3561,7 +3574,7 @@
         switchView('view-directives-details');
         renderDirectivePreview(jo);
       } else {
-        window.location.href = 'directives-details.html?jo=' + encodeURIComponent(jo);
+        window.location.href = getPageUrl('directives-details.html') + '?jo=' + encodeURIComponent(jo);
       }
     },
     selectAutocompleteJo: (jo) => {
@@ -3663,8 +3676,8 @@
         const viewId = item.getAttribute('data-view');
 
         if (href && href !== '#' && !href.startsWith('javascript:')) {
-          const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
-          const targetFile = href.toLowerCase();
+          const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+          const targetFile = (href.replace(/\\/g, '/').split('?')[0].split('/').pop() || 'index.html').toLowerCase();
           if (targetFile !== currentFile) {
             // Allow native browser navigation across distinct HTML pages
             return;
@@ -3679,7 +3692,7 @@
     const brandHomeLink = document.getElementById('brandHomeLink');
     if (brandHomeLink) {
       brandHomeLink.addEventListener('click', (e) => {
-        const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
         if (currentFile !== 'index.html') {
           return; // Allow native navigation to index.html
         }
