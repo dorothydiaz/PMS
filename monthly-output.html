@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Depot — Monthly Production Output</title>
+  <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="assets/sign-depot-logo.png">
+</head>
+<body data-page="view-monthly-output">
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="brand-link" id="brandHomeLink">
+          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
+          <div class="brand-text">
+            <span class="brand-title">Sign Depot</span>
+            <span class="brand-subtitle">Creative Operations</span>
+          </div>
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Operations</div>
+        
+        <a class="nav-item" href="index.html" data-view="view-dashboard" title="Dashboard">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9"></rect>
+              <rect x="14" y="3" width="7" height="5"></rect>
+              <rect x="14" y="12" width="7" height="9"></rect>
+              <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Project Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="sales-requests.html" data-view="view-sales-requests" title="Sales Requests">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Sales Requests</span>
+        </a>
+
+        <a class="nav-item" href="creatives-tracker.html" data-view="view-creatives-tracker" title="Creatives Tracker">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Creatives Tracker</span>
+        </a>
+
+        <a class="nav-item" href="artist-workload.html" data-view="view-artist-workload" title="Artist Workload">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Artist Workload</span>
+        </a>
+
+        <div class="nav-section-label">Directives</div>
+
+        <a class="nav-item" href="directives-details.html" data-view="view-directives-details" title="Directives Details">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Directives Details</span>
+        </a>
+
+        <div class="nav-section-label">Pending Queues</div>
+
+        <a class="nav-item" href="pending-artist.html" data-view="view-pending-artist" title="Pending Artist">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Artist</span>
+        </a>
+
+        <a class="nav-item" href="pending-sales.html" data-view="view-pending-sales" title="Pending Sales">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Sales</span>
+        </a>
+
+        <div class="nav-section-label">Analytics & Config</div>
+
+        <a class="nav-item active" href="monthly-output.html" data-view="view-monthly-output" title="Monthly Output">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Monthly Output</span>
+        </a>
+
+        <a class="nav-item" href="settings.html" data-view="view-settings" title="Settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="badge-prototype">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Live Inline Editable
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper Area -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="page-header-info">
+            <span class="page-category-tag">Analytics & Production Reports</span>
+            <h1 class="module-title" id="moduleTitle">
+              Monthly Output
+              <span class="module-badge" id="moduleCategoryBadge">Reporting</span>
+            </h1>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="timeframe-pill-group">
+            <button class="timeframe-btn" data-timeframe="today">Today</button>
+            <button class="timeframe-btn" data-timeframe="week">This Week</button>
+            <button class="timeframe-btn active" data-timeframe="month">This Month</button>
+            <button class="timeframe-btn" data-timeframe="all">All Time</button>
+          </div>
+
+          <div class="auto-save-pill" title="Every table edit is automatically saved">
+            <span class="auto-save-dot"></span>
+            <span>Auto-Saved</span>
+          </div>
+
+          <!-- Quick Global Search Input -->
+          <div class="search-box">
+            <span class="search-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+            <input type="text" id="globalSearchInput" placeholder="Quick search JO, client, rep..." autocomplete="off">
+            <div class="quick-search-dropdown" id="quickSearchResults"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Views Container -->
+      <main class="main-content">
+        <!-- MODULE 8: MONTHLY OUTPUT -->
+        <section class="view-panel active" id="view-monthly-output">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Monthly Production Output Report</h2>
+              <p>Mandatory Counting Rule: Accurately counts completed artist assignments by month of completion</p>
+            </div>
+            <div class="section-actions">
+              <select class="filter-input" id="monthlyOutputYearSelect">
+                <option value="2026">Reporting Year 2026</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" id="btnExportMonthlyReportCSV">Export Output Summary</button>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Year-to-Date Output</span></div>
+              <div class="kpi-value" id="outputYtdTotal">0</div>
+              <div class="kpi-trend">Total completed assignments</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Current Month Output</span></div>
+              <div class="kpi-value" id="outputCurrentMonthTotal" style="color: var(--primary-green);">0</div>
+              <div class="kpi-trend">October 2026 completed jobs</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Top Artist</span></div>
+              <div class="kpi-value" id="outputTopArtistName" style="font-size: 20px;">-</div>
+              <div class="kpi-trend" id="outputTopArtistCount">0 completed jobs</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Monthly Average</span></div>
+              <div class="kpi-value" id="outputMonthlyAvg">0</div>
+              <div class="kpi-trend">Assignments per month</div>
+            </div>
+          </div>
+
+          <div class="studio-card" style="margin-bottom: 24px;">
+            <div class="section-header-row" style="margin-bottom: 12px;">
+              <h3 style="font-size: 16px; font-weight: 800;">2026 Completed Assignments Output per Month</h3>
+              <span style="font-size: 12px; color: var(--text-secondary);">Hover over bars for exact count</span>
+            </div>
+            <div class="svg-chart-container" id="monthlyChartSvgContainer"></div>
+          </div>
+
+          <div class="studio-card">
+            <div class="section-header-row" style="margin-bottom: 12px;">
+              <h3 style="font-size: 16px; font-weight: 800;">Artist Production Output Matrix (Jan — Dec 2026)</h3>
+              <span class="badge badge-completed">Verified Assignment Count</span>
+            </div>
+            <div class="table-studio-wrap" style="margin-bottom: 0;">
+              <table class="data-table" id="monthlyOutputMatrixTable">
+                <thead>
+                  <tr>
+                    <th>Artist</th>
+                    <th>Jan</th>
+                    <th>Feb</th>
+                    <th>Mar</th>
+                    <th>Apr</th>
+                    <th>May</th>
+                    <th>Jun</th>
+                    <th>Jul</th>
+                    <th>Aug</th>
+                    <th>Sep</th>
+                    <th>Oct</th>
+                    <th>Nov</th>
+                    <th>Dec</th>
+                    <th style="font-weight: 800; background: #EBF7F4; color: var(--primary-green);">Annual Total</th>
+                    <th>Rank</th>
+                  </tr>
+                </thead>
+                <tbody id="monthlyOutputTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Notification Hub -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

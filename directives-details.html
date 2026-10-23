@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Depot — Directives Details</title>
+  <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="assets/sign-depot-logo.png">
+</head>
+<body data-page="view-directives-details">
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="brand-link" id="brandHomeLink">
+          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
+          <div class="brand-text">
+            <span class="brand-title">Sign Depot</span>
+            <span class="brand-subtitle">Creative Operations</span>
+          </div>
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Operations</div>
+        
+        <a class="nav-item" href="index.html" data-view="view-dashboard" title="Dashboard">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9"></rect>
+              <rect x="14" y="3" width="7" height="5"></rect>
+              <rect x="14" y="12" width="7" height="9"></rect>
+              <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Project Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="sales-requests.html" data-view="view-sales-requests" title="Sales Requests">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Sales Requests</span>
+        </a>
+
+        <a class="nav-item" href="creatives-tracker.html" data-view="view-creatives-tracker" title="Creatives Tracker">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Creatives Tracker</span>
+        </a>
+
+        <a class="nav-item" href="artist-workload.html" data-view="view-artist-workload" title="Artist Workload">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Artist Workload</span>
+        </a>
+
+        <div class="nav-section-label">Directives</div>
+
+        <a class="nav-item active" href="directives-details.html" data-view="view-directives-details" title="Directives Details">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Directives Details</span>
+        </a>
+
+        <div class="nav-section-label">Pending Queues</div>
+
+        <a class="nav-item" href="pending-artist.html" data-view="view-pending-artist" title="Pending Artist">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Artist</span>
+        </a>
+
+        <a class="nav-item" href="pending-sales.html" data-view="view-pending-sales" title="Pending Sales">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Sales</span>
+        </a>
+
+        <div class="nav-section-label">Analytics & Config</div>
+
+        <a class="nav-item" href="monthly-output.html" data-view="view-monthly-output" title="Monthly Output">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Monthly Output</span>
+        </a>
+
+        <a class="nav-item" href="settings.html" data-view="view-settings" title="Settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="badge-prototype">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Live Inline Editable
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper Area -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="page-header-info">
+            <span class="page-category-tag">Manage and track your operations</span>
+            <h1 class="module-title" id="moduleTitle">
+              Directives Details
+              <span class="module-badge" id="moduleCategoryBadge">Printable Job Orders</span>
+            </h1>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="timeframe-pill-group">
+            <button class="timeframe-btn" data-timeframe="today">Today</button>
+            <button class="timeframe-btn" data-timeframe="week">This Week</button>
+            <button class="timeframe-btn active" data-timeframe="month">This Month</button>
+            <button class="timeframe-btn" data-timeframe="all">All Time</button>
+          </div>
+
+          <div class="auto-save-pill" title="Every table edit is automatically saved">
+            <span class="auto-save-dot"></span>
+            <span>Auto-Saved</span>
+          </div>
+
+          <div class="global-search-container">
+            <svg class="global-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="global-search-input" id="globalSearchInput" placeholder="Quick search..." autocomplete="off">
+            <div class="quick-search-results" id="quickSearchResults"></div>
+          </div>
+
+          <div class="user-profile-menu">
+            <button class="user-profile-btn" id="userProfileBtn">
+              <div class="user-avatar">DC</div>
+              <div class="user-meta">
+                <span class="user-name">Ed</span>
+                <span class="user-role">Creative Lead</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="dropdown-popover" id="userProfileDropdown">
+              <div class="dropdown-item" id="btnQuickDirectiveSample">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Load Sample Directive (URAL)
+              </div>
+              <div class="dropdown-item" id="btnResetLocalStorage">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Reset Mock Data
+              </div>
+              <div class="dropdown-divider"></div>
+              <a href="settings.html" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                System Settings
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- MODULE 5: DIRECTIVES DETAILS (Sign Depot Document) -->
+        <section class="view-panel active" id="view-directives-details">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>Directives Details & Job Orders</h2>
+              <p>Printable Sign Depot production directive generator, template editor & attachments</p>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-secondary" id="btnDirectivesLoadSampleUral">Load Sample: URAL (P260701373)</button>
+            </div>
+          </div>
+
+          <div class="directive-lookup-card">
+            <label style="font-size: 13px; font-weight: 800; color: #0F172A;">
+              Search by J.O. Number, Project Name, or Request ID
+            </label>
+            <div class="lookup-flex">
+              <div class="lookup-input-wrap">
+                <svg class="lookup-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" class="lookup-input" id="directiveLookupInput" placeholder="e.g. P260701373, URAL, or LR-26-1230..." autocomplete="off">
+                <div class="autocomplete-box" id="directiveAutocompleteBox"></div>
+              </div>
+              <button class="btn btn-primary" id="btnDirectiveSearch">Load Job</button>
+              <button class="btn btn-secondary" id="btnDirectiveClear">Clear</button>
+              <span id="directiveLookupStatus" style="font-size: 13px; font-weight: 700; margin-left: 8px;"></span>
+            </div>
+          </div>
+
+          <div class="directive-toolbar no-print">
+            <div class="directive-tabs">
+              <button class="tab-btn active" data-subtab="tab-directive-preview" id="btnTabPreview">Directive Document</button>
+              <button class="tab-btn" data-subtab="tab-template-editor" id="btnTabEditor">Template Editor</button>
+              <button class="tab-btn" data-subtab="tab-attachments" id="btnTabAttachments">Attachments (<span id="attachmentsCountBadge">3</span>)</button>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-green btn-sm" id="btnDirectiveCopySVG" title="Copy as Vector SVG for Adobe Illustrator, CorelDRAW, Figma">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Copy as Vector (SVG)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnDirectiveDownloadSVG" title="Download .svg vector file">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Vector (.svg)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnDirectiveSaveDraft">Save Draft</button>
+              <button class="btn btn-primary btn-sm" id="btnDirectivePrint">Print / PDF</button>
+              <button class="btn btn-secondary btn-sm" id="btnDirectiveReset">Reset</button>
+            </div>
+          </div>
+
+          <!-- SUBTAB 1: DIRECTIVE PREVIEW (Exact Sign Depot Document Layout) -->
+          <div class="directive-subtab-content" id="tab-directive-preview">
+            <div class="directive-canvas-wrap">
+              <div class="directive-document" id="printableDirectiveDocument">
+                <!-- Directive Top Quick Bar (Vector Ready) -->
+                <div class="doc-top-bar no-print" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                  <div class="doc-top-quick-actions" style="display: flex; gap: 8px; align-items: center;">
+                    <span style="font-size: 11px; font-weight: 700; color: #6B7280;">• Vector Ready</span>
+                    <button class="btn btn-green btn-sm" id="btnQuickCopyVector" data-tooltip="Copy as vector to paste into Illustrator, CorelDRAW, or Figma">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                      Copy as Vector (SVG)
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Main Directive Grid Table (Exact Match to Sign Depot Reference) -->
+                <table class="doc-grid-table">
+                  <colgroup>
+                    <col style="width: 8.5%;">
+                    <col style="width: 16.5%;">
+                    <col style="width: 34%;">
+                    <col style="width: 13.5%;">
+                    <col style="width: 13.5%;">
+                    <col style="width: 14%;">
+                  </colgroup>
+                  <tbody>
+                    <!-- Row 1 -->
+                    <tr>
+                      <td class="doc-label-cell">JO#:</td>
+                      <td class="doc-value-cell doc-jo-val" id="docFieldJoNumber">P260701373</td>
+                      <!-- Project Name & Client Name merged cell (Rows 1, 2, 3) -->
+                      <td rowspan="3" class="doc-value-cell" style="text-align: center; padding: 12px 14px;">
+                        <div class="doc-project-client-box">
+                          <div class="doc-proj-name" id="docFieldProjectName">URAL</div>
+                          <div class="doc-client-name" id="docFieldClientName">PAU ACILAC</div>
+                        </div>
+                      </td>
+                      <td class="doc-label-cell">CONTACT PERSON:</td>
+                      <td class="doc-value-cell" id="docFieldContactPerson">-</td>
+                      <td class="doc-label-cell" style="text-align: center; font-size: 9px; letter-spacing: 0.3px;">NUMBER OF INSTALLERS</td>
+                    </tr>
+
+                    <!-- Row 2 -->
+                    <tr>
+                      <td class="doc-label-cell">DUE DATE:</td>
+                      <td class="doc-value-cell doc-date-val" id="docFieldDueDate">JULY 30, 2026</td>
+                      <td class="doc-label-cell">CONTACT NUMBER:</td>
+                      <td class="doc-value-cell" id="docFieldContactNumber" style="font-weight: 700;">639178805364</td>
+                      <!-- Installers Pill Cell (Rowspan 2, Height matching rows 2 and 3) -->
+                      <td rowspan="2" class="doc-value-cell" style="text-align: center; padding: 6px 4px; vertical-align: top;">
+                        <div class="doc-pill-box" id="docFieldInstallers" contenteditable="true" title="Click to edit inline">
+                          2 Installers
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Row 3 -->
+                    <tr>
+                      <td class="doc-label-cell">LOCATION:</td>
+                      <td class="doc-value-cell" id="docFieldLocation">Manila Branch</td>
+                      <td class="doc-label-cell">ORDER DATE:</td>
+                      <td class="doc-value-cell" id="docFieldOrderDate" style="font-weight: 700;">23/10/2026</td>
+                    </tr>
+
+                    <!-- Row 4 -->
+                    <tr>
+                      <!-- 3 Logos Cell (Spanning Col 1 and 2 width of left section) -->
+                      <td colspan="2" class="doc-value-cell doc-logo-cell">
+                        <div class="doc-triple-logos">
+                          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
+                          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
+                          <img src="assets/sign-depot-logo.png" alt="Sign Depot Logo">
+                        </div>
+                      </td>
+                      <!-- IN-CHARGE & DRAWN BY Subtable -->
+                      <td style="padding: 0;">
+                        <table class="doc-personnel-table">
+                          <colgroup>
+                            <col style="width: 50%;">
+                            <col style="width: 50%;">
+                          </colgroup>
+                          <tr>
+                            <td class="doc-label-cell" style="text-align: center; font-size: 9.5px; height: 20px;">IN-CHARGE</td>
+                            <td class="doc-label-cell" style="text-align: center; font-size: 9.5px; height: 20px;">DRAWN BY:</td>
+                          </tr>
+                          <tr>
+                            <td class="doc-value-cell" style="text-align: center; font-weight: 800; font-size: 12px; height: 26px;" id="docFieldInCharge">DONA</td>
+                            <td class="doc-value-cell" style="text-align: center; font-weight: 800; font-size: 12px; height: 26px;" id="docFieldDrawnBy">GLEN</td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td class="doc-label-cell">RELEASING DATE:</td>
+                      <td class="doc-value-cell" id="docFieldReleasingDate" style="font-weight: 700;">JULY 30, 2026</td>
+                      <td class="doc-label-cell" style="text-align: center; font-size: 9px; letter-spacing: 0.3px;">INSTALLATION DURATION</td>
+                    </tr>
+
+                    <!-- Row 5 -->
+                    <tr>
+                      <td colspan="2" class="doc-value-cell" style="background: #FFFFFF;"></td>
+                      <td class="doc-value-cell doc-status-sub-cell">
+                        Priority: <b id="docFieldPriority">RUSH</b> | Status: <b id="docFieldStatus">Approved</b>
+                      </td>
+                      <td class="doc-label-cell">RELEASING MODE:</td>
+                      <td class="doc-value-cell" id="docFieldReleasingMode" style="font-weight: 700;">PICKUP</td>
+                      <!-- Duration Pill Cell (Rowspan 2, Height matching rows 5 and 6) -->
+                      <td rowspan="2" class="doc-value-cell" style="text-align: center; padding: 6px 4px; vertical-align: top;">
+                        <div class="doc-pill-box" id="docFieldDuration" contenteditable="true" title="Click to edit inline">
+                          1 Day (4 Hours)
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Row 6 -->
+                    <tr>
+                      <td colspan="3" class="doc-value-cell doc-address-cell">
+                        <strong>DELIVERY / SITE ADDRESS:</strong> <span id="docFieldAddress">Block 14 Lot 3, Ortigas Ave Extension, Pasig City</span>
+                      </td>
+                      <td class="doc-label-cell">ADDRESS:</td>
+                      <td class="doc-value-cell" id="docFieldShortAddress" style="font-weight: 600;">Manila Branch</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Live Adjustment Controls -->
+            <div class="studio-card directive-extra-notes" style="margin-top: 20px;">
+              <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 12px;">Live Directive Adjustment Controls</h4>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Number of Installers</label>
+                  <input type="text" class="form-control" id="ctrlInstallers" value="2 Installers">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Installation Duration</label>
+                  <input type="text" class="form-control" id="ctrlDuration" value="1 Day (4 Hours)">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Releasing Mode</label>
+                  <select class="form-control" id="ctrlReleasingMode">
+                    <option value="PICKUP">PICKUP</option>
+                    <option value="DELIVERY">DELIVERY</option>
+                    <option value="INSTALLATION">INSTALLATION</option>
+                    <option value="COURIER">COURIER</option>
+                  </select>
+                </div>
+                <div class="form-group col-span-2">
+                  <label class="form-label">Installation / Fabrication Notes</label>
+                  <textarea class="form-control" id="ctrlNotes" placeholder="Special fabrication requirements, acrylic thickness..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Assigned In-Charge</label>
+                  <input type="text" class="form-control" id="ctrlInCharge" value="DONA">
+                  <label class="form-label" style="margin-top: 6px;">Drawn By (Artist)</label>
+                  <input type="text" class="form-control" id="ctrlDrawnBy" value="GLEN">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 2: TEMPLATE EDITOR -->
+          <div class="directive-subtab-content template-editor-wrap" id="tab-template-editor">
+            <div class="template-editor-toolbar">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-primary btn-sm" id="btnTplAddElement">+ Add Text Element</button>
+                <button class="btn btn-secondary btn-sm" id="btnTplSaveTemplate">Save Layout</button>
+                <button class="btn btn-secondary btn-sm" id="btnTplResetDefault">Reset to Standard</button>
+              </div>
+              <span style="font-size: 12px; color: var(--text-secondary);">Click to select, drag to reposition, pull corner to resize</span>
+            </div>
+
+            <div class="template-properties-panel" id="templatePropsPanel">
+              <span style="font-size: 12px; font-weight: 800;">Element Properties:</span>
+              <input type="text" class="filter-input" id="propElemLabel" placeholder="Label" style="width: 140px;">
+              <input type="text" class="filter-input" id="propElemContent" placeholder="Text Content" style="width: 180px;">
+              <input type="number" class="filter-input" id="propElemFontSize" placeholder="Font px" style="width: 80px;" min="8" max="36">
+              <select class="filter-input" id="propElemAlign">
+                <option value="left">Left Align</option>
+                <option value="center">Center Align</option>
+                <option value="right">Right Align</option>
+              </select>
+              <button class="btn btn-danger btn-sm" id="btnTplDeleteElement">Delete</button>
+            </div>
+
+            <div class="canvas-bounds-wrapper">
+              <div class="interactive-template-canvas" id="interactiveTemplateCanvas"></div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 3: ATTACHMENTS PANEL -->
+          <div class="directive-subtab-content" id="tab-attachments" style="display: none;">
+            <div class="studio-card">
+              <div class="section-header-row">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">Project Attachments & Proofs</h3>
+                  <p>Design renders and vector assets for current directive</p>
+                </div>
+                <div class="section-actions">
+                  <input type="file" id="localAttachmentUploadInput" accept="image/*,.pdf" style="display: none;">
+                  <button class="btn btn-primary btn-sm" id="btnUploadLocalAttachment">Upload Local Proof</button>
+                </div>
+              </div>
+              <div class="attachments-grid" id="attachmentsGridContainer"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: PREVIEW ATTACHMENT -->
+  <div class="modal-backdrop" id="attachmentPreviewModal">
+    <div class="modal-container" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="attachmentModalTitle">Attachment Preview</h3>
+        <button class="modal-close-btn" data-close-modal="attachmentPreviewModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 16px; align-items: center; justify-content: center; background: #0F172A;">
+        <img id="attachmentModalImg" src="" alt="Proof Preview" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 4px;">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="attachmentPreviewModal">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Hub -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

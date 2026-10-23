@@ -18,14 +18,22 @@ This application is built with **zero external dependencies, zero build steps, a
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Structure (Multi-Page Architecture)
 
 ```
 d:\DOROTHY\PMS\PMS\
 │
-├── index.html                   # Main application shell with all 9 functional views & modals
-├── style.css                    # Enterprise frosted white glassmorphism styling & print stylesheet
-├── script.js                    # Unified state engine, reactive calculations, drag-resize & persistence
+├── index.html                   # Project Dashboard (Main Overview & Live Editable Queue)
+├── sales-requests.html          # Sales Requests (Live Editable Grid, Filters & New Orders)
+├── creatives-tracker.html       # Creatives Production Tracker (Stages, Proof Links & Revisions)
+├── artist-workload.html         # Artist Workload & Capacity Balancing (KPIs, Charts & Roster)
+├── directives-details.html      # Job Directive & Spec Sheet (Printable / Exportable Routing Sheet)
+├── pending-artist.html          # Pending Projects — Artist Queue
+├── pending-sales.html           # Pending Projects — Sales Queue
+├── monthly-output.html          # Monthly Production Output Report (YTD & 12-Month Matrix)
+├── settings.html                # System Settings (Artist/Sales Rosters & Data Backup)
+├── style.css                    # Unified clean minimalist styling, shadows & print stylesheet
+├── script.js                    # Unified reactive engine, cross-page state sync & routing
 ├── assets/
 │   └── sign-depot-logo.png      # Official Sign Depot company logo (unaltered)
 └── README.md                    # Project documentation & run guide

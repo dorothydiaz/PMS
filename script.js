@@ -946,17 +946,355 @@
       onkeydown="window.SignDepotApp.handleInlineTextKey(event, this)">${escapeHTML(currentValue || '')}</span>`;
   }
 
-  // Generates directly editable dropdown select HTML
+  // Badge styling resolver for custom dropdown pills
+  function getBadgeClassForValue(fieldName, val) {
+    if (!val) return 'badge-neutral';
+    const v = String(val).toLowerCase();
+    if (fieldName === 'artist') return 'badge-artist';
+    if (fieldName === 'salesRep') return 'badge-sales';
+    if (['completed', 'approved', 'sent'].includes(v)) return 'badge-completed';
+    if (['in progress', 'on-going', 'working'].includes(v)) return 'badge-ongoing';
+    if (['pending', 'for review', 'revising', 'needs revision', 'queue'].includes(v)) return 'badge-pending';
+    if (['rush', 'high'].includes(v)) return 'badge-priority-rush';
+    if (['medium', 'med'].includes(v)) return 'badge-priority-med';
+    if (['not started', 'draft', 'low'].includes(v)) return 'badge-not-started';
+    return 'badge-neutral';
+  }
+
+  // Dot indicator styling resolver for dropdown options
+  function getIndicatorClass(fieldName, val) {
+    if (!val) return 'indicator-neutral';
+    const v = String(val).toLowerCase();
+    if (fieldName === 'artist') return 'indicator-artist';
+    if (fieldName === 'salesRep') return 'indicator-sales';
+    if (['completed', 'approved', 'sent'].includes(v)) return 'indicator-completed';
+    if (['in progress', 'on-going', 'working'].includes(v)) return 'indicator-ongoing';
+    if (['pending', 'for review', 'revising', 'needs revision', 'queue'].includes(v)) return 'indicator-pending';
+    if (['rush', 'high'].includes(v)) return 'indicator-rush';
+    return 'indicator-neutral';
+  }
+
+  // Generates directly editable custom themed dropdown trigger HTML
   function renderInlineSelect(reqId, fieldName, currentValue, optionsList) {
-    const opts = optionsList.map(opt => `
-      <option value="${opt}" ${opt === currentValue ? 'selected' : ''}>${opt}</option>
-    `).join('');
+    const badgeClass = getBadgeClassForValue(fieldName, currentValue);
+    const safeOptions = JSON.stringify(optionsList).replace(/"/g, '&quot;');
+    const safeVal = escapeHTML(currentValue || 'Select');
     return `
-      <select class="inline-select" data-req-id="${reqId}" data-field="${fieldName}"
-        onchange="window.SignDepotApp.handleInlineSelectChange(this)">
-        ${opts}
-      </select>
+      <button type="button" class="custom-select-btn ${badgeClass}"
+        data-req-id="${reqId}"
+        data-field="${fieldName}"
+        data-current="${escapeHTML(currentValue || '')}"
+        data-options="${safeOptions}"
+        data-tooltip="Click to change ${fieldName}"
+        onclick="window.SignDepotApp.openCustomDropdown(this, event)">
+        <span class="custom-select-label">${safeVal}</span>
+        <svg class="custom-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
     `;
+  }
+
+  // ==========================================================================
+  // CUSTOM THEMED DROPDOWN ENGINE (Floating Popover with Drop Shadows & Search)
+  // ==========================================================================
+
+  let activeDropdownTrigger = null;
+
+  function closeCustomDropdown() {
+    const popover = document.getElementById('sdCustomDropdownMenu');
+    if (popover) {
+      popover.classList.remove('show');
+      popover.style.display = 'none';
+    }
+    if (activeDropdownTrigger) {
+      activeDropdownTrigger.classList.remove('is-active');
+      activeDropdownTrigger = null;
+    }
+  }
+
+  function openCustomDropdown(triggerBtn, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (activeDropdownTrigger === triggerBtn) {
+      closeCustomDropdown();
+      return;
+    }
+
+    closeCustomDropdown();
+
+    let popover = document.getElementById('sdCustomDropdownMenu');
+    if (!popover) {
+      popover = document.createElement('div');
+      popover.id = 'sdCustomDropdownMenu';
+      popover.className = 'sd-custom-dropdown-popover';
+      popover.innerHTML = `
+        <div class="sd-dropdown-header" id="sdDropdownHeader" style="display: none;">
+          <input type="text" class="sd-dropdown-search" id="sdDropdownSearch" placeholder="Filter options..." autocomplete="off">
+        </div>
+        <div class="sd-dropdown-options" id="sdDropdownOptions"></div>
+      `;
+      document.body.appendChild(popover);
+    }
+
+    const optionsContainer = document.getElementById('sdDropdownOptions');
+    const headerContainer = document.getElementById('sdDropdownHeader');
+    const searchInput = document.getElementById('sdDropdownSearch');
+
+    let optionsList = [];
+    try {
+      optionsList = JSON.parse(triggerBtn.getAttribute('data-options') || '[]');
+    } catch (err) {
+      optionsList = [];
+    }
+
+    const fieldName = triggerBtn.getAttribute('data-field') || '';
+    const currentVal = triggerBtn.getAttribute('data-current') || '';
+    const reqId = triggerBtn.getAttribute('data-req-id') || '';
+
+    // Show search filter if 6 or more items (e.g. for artists or long lists)
+    if (optionsList.length >= 6) {
+      headerContainer.style.display = 'block';
+      searchInput.value = '';
+      setTimeout(() => searchInput.focus(), 60);
+    } else {
+      headerContainer.style.display = 'none';
+    }
+
+    const renderOptions = (filterText = '') => {
+      const q = filterText.toLowerCase();
+      const filtered = optionsList.filter(opt => {
+        const label = typeof opt === 'object' ? opt.label : String(opt);
+        return label.toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        optionsContainer.innerHTML = '<div style="padding: 10px; font-size: 11.5px; color: var(--text-muted); text-align: center;">No matches found</div>';
+        return;
+      }
+
+      optionsContainer.innerHTML = filtered.map(opt => {
+        const val = typeof opt === 'object' ? opt.value : String(opt);
+        const label = typeof opt === 'object' ? opt.label : String(opt);
+        const isSelected = String(val) === String(currentVal);
+        const indicator = getIndicatorClass(fieldName, val);
+        return `
+          <div class="custom-dropdown-opt ${isSelected ? 'selected' : ''}" data-val="${escapeHTML(val)}" data-label="${escapeHTML(label)}">
+            <span class="opt-indicator ${indicator}"></span>
+            <span class="opt-label">${escapeHTML(label)}</span>
+            ${isSelected ? '<svg class="opt-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      optionsContainer.querySelectorAll('.custom-dropdown-opt').forEach(optEl => {
+        optEl.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const selectedVal = optEl.getAttribute('data-val');
+          const selectedLabel = optEl.getAttribute('data-label');
+          selectCustomDropdownValue(triggerBtn, reqId, fieldName, selectedVal, selectedLabel);
+        });
+      });
+    };
+
+    renderOptions();
+
+    if (searchInput) {
+      searchInput.oninput = () => renderOptions(searchInput.value.trim());
+      searchInput.onkeydown = (ev) => {
+        if (ev.key === 'Escape') closeCustomDropdown();
+        if (ev.key === 'Enter') {
+          const first = optionsContainer.querySelector('.custom-dropdown-opt');
+          if (first) {
+            const val = first.getAttribute('data-val');
+            const lbl = first.getAttribute('data-label');
+            selectCustomDropdownValue(triggerBtn, reqId, fieldName, val, lbl);
+          }
+        }
+      };
+    }
+
+    activeDropdownTrigger = triggerBtn;
+    triggerBtn.classList.add('is-active');
+
+    popover.style.display = 'block';
+    popover.classList.add('show');
+
+    // Precision positioning relative to document
+    const rect = triggerBtn.getBoundingClientRect();
+    const popoverRect = popover.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+    let top = rect.bottom + scrollTop + 4;
+    let left = rect.left + scrollLeft;
+
+    if (rect.bottom + popoverRect.height + 10 > window.innerHeight && rect.top - popoverRect.height > 0) {
+      top = rect.top + scrollTop - popoverRect.height - 4;
+    }
+
+    if (rect.left + popoverRect.width > window.innerWidth - 10) {
+      left = rect.right + scrollLeft - popoverRect.width;
+    }
+
+    popover.style.top = `${Math.max(10, top)}px`;
+    popover.style.left = `${Math.max(10, left)}px`;
+  }
+
+  function selectCustomDropdownValue(triggerBtn, reqId, fieldName, selectedVal, selectedLabel) {
+    closeCustomDropdown();
+    if (!triggerBtn) return;
+
+    triggerBtn.setAttribute('data-current', selectedVal);
+    const labelSpan = triggerBtn.querySelector('.custom-select-label');
+    if (labelSpan) labelSpan.textContent = selectedLabel || selectedVal;
+
+    if (reqId) {
+      triggerBtn.className = `custom-select-btn ${getBadgeClassForValue(fieldName, selectedVal)} cell-just-saved`;
+      updateRequestField(reqId, fieldName, selectedVal, triggerBtn);
+      showToast(`Updated ${fieldName} to ${selectedVal}.`);
+    } else if (triggerBtn._nativeSelect) {
+      triggerBtn._nativeSelect.value = selectedVal;
+      triggerBtn._nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      if (selectedVal) {
+        triggerBtn.classList.add('has-value');
+      } else {
+        triggerBtn.classList.remove('has-value');
+      }
+    }
+  }
+
+  function initCustomDropdownEngine() {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#sdCustomDropdownMenu') && !e.target.closest('.custom-select-btn') && !e.target.closest('.custom-filter-dropdown-btn')) {
+        closeCustomDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCustomDropdown();
+    });
+  }
+
+  // Upgrades toolbar filter <select> elements into sleek custom dropdown buttons
+  function upgradeAllFilterSelects() {
+    const selects = document.querySelectorAll('select.filter-input');
+    selects.forEach(sel => {
+      if (sel._customUpgraded) return;
+      sel._customUpgraded = true;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'custom-filter-dropdown-btn';
+      if (sel.value) btn.classList.add('has-value');
+
+      const currentText = sel.options[sel.selectedIndex]?.text || 'Filter';
+      btn.innerHTML = `
+        <span class="custom-select-label">${escapeHTML(currentText)}</span>
+        <svg class="custom-select-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      `;
+
+      btn._nativeSelect = sel;
+
+      const getOptionsArray = () => {
+        return Array.from(sel.options).map(o => ({ value: o.value, label: o.text }));
+      };
+
+      btn.addEventListener('click', (e) => {
+        const opts = getOptionsArray();
+        btn.setAttribute('data-options', JSON.stringify(opts));
+        btn.setAttribute('data-current', sel.value);
+        btn.setAttribute('data-field', sel.id);
+        openCustomDropdown(btn, e);
+      });
+
+      sel.style.display = 'none';
+      sel.parentNode.insertBefore(btn, sel.nextSibling);
+
+      sel.addEventListener('change', () => {
+        const txt = sel.options[sel.selectedIndex]?.text || 'Filter';
+        const lbl = btn.querySelector('.custom-select-label');
+        if (lbl) lbl.textContent = txt;
+        if (sel.value) {
+          btn.classList.add('has-value');
+        } else {
+          btn.classList.remove('has-value');
+        }
+      });
+    });
+  }
+
+  // ==========================================================================
+  // CUSTOM THEMED TOOLTIP ENGINE (Instant Smooth Minimalist Tooltips)
+  // ==========================================================================
+
+  function initCustomTooltipEngine() {
+    let tooltip = document.getElementById('sdGlobalTooltip');
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.id = 'sdGlobalTooltip';
+      tooltip.className = 'sd-custom-tooltip';
+      tooltip.setAttribute('role', 'tooltip');
+      document.body.appendChild(tooltip);
+    }
+
+    const convertTitles = () => {
+      document.querySelectorAll('[title]').forEach(el => {
+        const t = el.getAttribute('title');
+        if (t && t.trim()) {
+          el.setAttribute('data-tooltip', t.trim());
+          el.removeAttribute('title');
+        }
+      });
+    };
+
+    convertTitles();
+
+    const observer = new MutationObserver(() => convertTitles());
+    observer.observe(document.body, { childList: true, subtree: true, attributeFilter: ['title'] });
+
+    document.addEventListener('mouseover', (e) => {
+      const target = e.target.closest('[data-tooltip]');
+      if (!target) {
+        tooltip.classList.remove('show');
+        return;
+      }
+
+      const text = target.getAttribute('data-tooltip');
+      if (!text || !text.trim()) return;
+
+      tooltip.textContent = text;
+      tooltip.className = 'sd-custom-tooltip';
+
+      const rect = target.getBoundingClientRect();
+      const tipRect = tooltip.getBoundingClientRect();
+
+      let top = rect.top - 30;
+      let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+
+      if (top < 10) {
+        top = rect.bottom + 8;
+        tooltip.classList.add('pos-bottom');
+      }
+      if (left < 8) left = 8;
+      if (left + tipRect.width > window.innerWidth - 8) {
+        left = window.innerWidth - tipRect.width - 8;
+      }
+
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+      tooltip.classList.add('show');
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const target = e.target.closest('[data-tooltip]');
+      if (target) {
+        tooltip.classList.remove('show');
+      }
+    });
+
+    window.addEventListener('scroll', () => tooltip.classList.remove('show'), { passive: true });
   }
 
   // Generates directly editable date picker HTML
@@ -1078,11 +1416,45 @@
   }
 
   // ==========================================================================
-  // NAVIGATION & VIEW SWITCHER
+  // NAVIGATION & MULTI-PAGE VIEW ROUTER
   // ==========================================================================
+
+  const PAGE_MAP = {
+    'view-dashboard': 'index.html',
+    'view-sales-requests': 'sales-requests.html',
+    'view-creatives-tracker': 'creatives-tracker.html',
+    'view-artist-workload': 'artist-workload.html',
+    'view-directives-details': 'directives-details.html',
+    'view-pending-artist': 'pending-artist.html',
+    'view-pending-sales': 'pending-sales.html',
+    'view-monthly-output': 'monthly-output.html',
+    'view-settings': 'settings.html'
+  };
+
+  function detectCurrentPage() {
+    const bodyPage = document.body.getAttribute('data-page');
+    if (bodyPage && PAGE_MAP[bodyPage]) return bodyPage;
+
+    const path = window.location.pathname.toLowerCase();
+    const filename = path.split('/').pop() || 'index.html';
+    for (const [viewId, pageFile] of Object.entries(PAGE_MAP)) {
+      if (filename === pageFile.toLowerCase()) return viewId;
+    }
+    return 'view-dashboard';
+  }
 
   function switchView(viewId) {
     state.activeView = viewId;
+
+    // Check if the target view panel exists on the current page
+    const targetPanel = document.getElementById(viewId);
+    if (!targetPanel) {
+      const targetPage = PAGE_MAP[viewId];
+      if (targetPage) {
+        window.location.href = targetPage;
+        return;
+      }
+    }
 
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
       if (item.getAttribute('data-view') === viewId) {
@@ -1154,6 +1526,9 @@
         renderSettings();
         break;
     }
+
+    // Ensure all filter selects in the active view are upgraded to custom themed buttons
+    upgradeAllFilterSelects();
   }
 
   // ==========================================================================
@@ -1658,7 +2033,7 @@
           <span class="badge ${a.avail.class}">${a.avail.text}</span>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#F8FAFC; padding:8px 10px; border-radius:var(--radius-md); text-align:center; margin-bottom:12px;">
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#F8FAFC; border:1px solid var(--border-light); padding:8px 10px; border-radius:var(--radius-md); text-align:center; margin-bottom:12px;">
           <div>
             <div style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Standard</div>
             <div style="font-size:14px; font-weight:800; color:var(--primary-green);">${a.std}</div>
@@ -1752,7 +2127,8 @@
     const input = document.getElementById('directiveLookupInput');
     if (input) input.value = rec.joNumber;
 
-    document.getElementById('docFieldRequestId').textContent = rec.requestId || '-';
+    const reqIdEl = document.getElementById('docFieldRequestId');
+    if (reqIdEl) reqIdEl.textContent = rec.requestId || '-';
     document.getElementById('docFieldJoNumber').textContent = rec.joNumber || '-';
     document.getElementById('docFieldDueDate').textContent = formatReadableDate(rec.designDeadline || rec.releasingDate);
     document.getElementById('docFieldLocation').textContent = rec.location || 'Manila Branch';
@@ -1765,12 +2141,12 @@
     document.getElementById('docFieldOrderDate').textContent = formatDate(rec.orderDate);
     document.getElementById('docFieldReleasingDate').textContent = formatReadableDate(rec.releasingDate);
     document.getElementById('docFieldReleasingMode').textContent = (rec.releasingMode || 'PICKUP').toUpperCase();
-    document.getElementById('docFieldAddress').textContent = rec.completeAddress || 'Pasig City';
-    document.getElementById('docFieldShortAddress').textContent = rec.location || 'Pasig City';
+    document.getElementById('docFieldAddress').textContent = rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
+    document.getElementById('docFieldShortAddress').textContent = rec.location || 'Manila Branch';
     document.getElementById('docFieldInstallers').textContent = rec.installers || '2 Installers';
     document.getElementById('docFieldDuration').textContent = rec.duration || '1 Day (4 Hours)';
-    document.getElementById('docFieldPriority').textContent = (rec.priority || 'NORMAL').toUpperCase();
-    document.getElementById('docFieldStatus').textContent = rec.projectStatus || 'Active';
+    document.getElementById('docFieldPriority').textContent = (rec.priority || 'RUSH').toUpperCase();
+    document.getElementById('docFieldStatus').textContent = rec.projectStatus || 'Approved';
 
     const ctrlInst = document.getElementById('ctrlInstallers');
     const ctrlDur = document.getElementById('ctrlDuration');
@@ -1911,169 +2287,195 @@
   // ==========================================================================
 
   function generateDirectiveSVG(rec) {
-    if (!rec) rec = state.requests[0];
-    const dueDateFormatted = formatReadableDate(rec.designDeadline || rec.releasingDate);
-    const releasingDateFormatted = formatReadableDate(rec.releasingDate);
-    const inChargeVal = (rec.inCharge || rec.salesRep || 'DONA').toUpperCase();
-    const drawnByVal = (rec.drawnBy || rec.artist || 'GLEN').toUpperCase();
-    const releasingModeVal = (rec.releasingMode || 'PICKUP').toUpperCase();
-    const locationVal = rec.location || 'Manila Branch';
-    const installersVal = rec.installers || '2 Installers';
-    const durationVal = rec.duration || '1 Day (4 Hours)';
+    if (!rec) rec = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
 
-    // Sign Depot Logo Vector Snippet (Scalable SVG paths)
+    // Read live on-screen DOM fields if present so inline edits are captured in vector copy
+    const requestIdVal = document.getElementById('docFieldRequestId')?.textContent?.trim() || rec.requestId || 'LR-26-1230';
+    const joNumberVal = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec.joNumber || 'P260701373';
+    const dueDateFormatted = document.getElementById('docFieldDueDate')?.textContent?.trim() || formatReadableDate(rec.designDeadline || rec.releasingDate);
+    const releasingDateFormatted = document.getElementById('docFieldReleasingDate')?.textContent?.trim() || formatReadableDate(rec.releasingDate);
+    const inChargeVal = (document.getElementById('docFieldInCharge')?.textContent?.trim() || rec.inCharge || rec.salesRep || 'DONA').toUpperCase();
+    const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'GLEN').toUpperCase();
+    const releasingModeVal = (document.getElementById('docFieldReleasingMode')?.textContent?.trim() || rec.releasingMode || 'PICKUP').toUpperCase();
+    const locationVal = document.getElementById('docFieldLocation')?.textContent?.trim() || rec.location || 'Manila Branch';
+    const shortAddressVal = document.getElementById('docFieldShortAddress')?.textContent?.trim() || locationVal;
+    const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '2 Installers';
+    const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '1 Day (4 Hours)';
+    const priorityVal = (document.getElementById('docFieldPriority')?.textContent?.trim() || rec.priority || 'RUSH').toUpperCase();
+    const statusVal = document.getElementById('docFieldStatus')?.textContent?.trim() || rec.projectStatus || 'Approved';
+    const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
+    const projectNameVal = document.getElementById('docFieldProjectName')?.textContent?.trim() || rec.projectName || 'URAL';
+    const clientVal = document.getElementById('docFieldClientName')?.textContent?.trim() || rec.client || 'PAU ACILAC';
+    const contactPersonVal = document.getElementById('docFieldContactPerson')?.textContent?.trim() || rec.contactPerson || '-';
+    const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '639178805364';
+    const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || formatDate(rec.orderDate);
+
+    // Sign Depot Logo Vector Snippet (Scalable SVG paths & text)
     const logoSVG = `
       <g>
-        <rect x="0" y="0" width="70" height="24" rx="3" fill="#E53935" transform="rotate(-4 35 12)" />
-        <text x="35" y="16" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="900" font-size="11" text-anchor="middle" transform="rotate(-4 35 12)">Sign Depot</text>
-        <text x="74" y="8" fill="#000000" font-family="Arial, sans-serif" font-weight="bold" font-size="7">TM</text>
+        <rect x="0" y="0" width="70" height="22" rx="3" fill="#E53935" transform="rotate(-4 35 11)" />
+        <text x="35" y="15" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="10.5" text-anchor="middle" transform="rotate(-4 35 11)">Sign Depot</text>
+        <text x="73" y="7" fill="#000000" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6.5">TM</text>
       </g>
     `;
 
     return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 290" width="1020" height="290">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 230" width="1000" height="230">
   <style>
-    .label-cell { fill: #374151; stroke: #000000; stroke-width: 1; }
-    .label-text { fill: #FFFFFF; font-family: Arial, sans-serif; font-weight: bold; font-size: 10px; }
+    .label-cell { fill: #2B3442; stroke: #000000; stroke-width: 1; }
+    .label-text { fill: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: 10px; }
     .val-cell { fill: #FFFFFF; stroke: #000000; stroke-width: 1; }
-    .val-text { fill: #000000; font-family: Arial, sans-serif; font-size: 11px; font-weight: bold; }
-    .red-bold { fill: #DC2626; font-family: Arial, sans-serif; font-weight: 900; }
+    .val-text { fill: #000000; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; }
+    .red-bold { fill: #DC2626; font-family: Arial, Helvetica, sans-serif; font-weight: 900; }
   </style>
 
   <!-- Canvas Background -->
-  <rect width="1020" height="290" fill="#FFFFFF" />
-
-  <!-- Top Request ID Number Box -->
-  <rect x="10" y="10" width="140" height="20" class="label-cell" />
-  <text x="80" y="24" class="label-text" text-anchor="middle" font-size="9.5">REQUEST ID NUMBER</text>
-  <rect x="10" y="30" width="140" height="24" class="val-cell" />
-  <text x="80" y="47" class="red-bold" text-anchor="middle" font-size="14">${escapeHTML(rec.requestId)}</text>
+  <rect width="1000" height="230" fill="#FFFFFF" />
 
   <!-- Outer Main Table Border -->
-  <rect x="10" y="65" width="1000" height="210" fill="none" stroke="#000000" stroke-width="2" />
+  <rect x="10" y="10" width="980" height="210" fill="none" stroke="#000000" stroke-width="2" />
 
-  <!-- COLUMN 1 (x: 10 to 260, w: 250) -->
-  <!-- JO#: -->
-  <rect x="10" y="65" width="85" height="42" class="label-cell" />
-  <text x="52" y="90" class="label-text" text-anchor="middle">JO#:</text>
-  <rect x="95" y="65" width="165" height="42" class="val-cell" />
-  <text x="177" y="95" class="red-bold" font-size="22" text-anchor="middle">${escapeHTML(rec.joNumber)}</text>
+  <!-- ROW 1 -->
+  <!-- Col 1: JO#: -->
+  <rect x="10" y="10" width="85" height="35" class="label-cell" />
+  <text x="52" y="32" class="label-text" text-anchor="middle">JO#:</text>
+  <rect x="95" y="10" width="160" height="35" class="val-cell" />
+  <text x="175" y="36" class="red-bold" font-size="20" text-anchor="middle">${escapeHTML(joNumberVal)}</text>
 
-  <!-- DUE DATE: -->
-  <rect x="10" y="107" width="85" height="34" class="label-cell" />
-  <text x="52" y="128" class="label-text" text-anchor="middle">DUE DATE:</text>
-  <rect x="95" y="107" width="165" height="34" class="val-cell" />
-  <text x="177" y="129" class="red-bold" font-size="12" text-anchor="middle">${escapeHTML(dueDateFormatted)}</text>
+  <!-- Col 2: PROJECT & CLIENT (Merged Rows 1-3, h=105) -->
+  <rect x="255" y="10" width="335" height="105" class="val-cell" />
+  <text x="422" y="52" fill="#2B3442" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="24" letter-spacing="1" text-anchor="middle">${escapeHTML(projectNameVal)}</text>
+  <text x="422" y="86" fill="#2B3442" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="20" letter-spacing="0.5" text-anchor="middle">${escapeHTML(clientVal)}</text>
 
-  <!-- LOCATION: -->
-  <rect x="10" y="141" width="85" height="34" class="label-cell" />
-  <text x="52" y="162" class="label-text" text-anchor="middle">LOCATION:</text>
-  <rect x="95" y="141" width="165" height="34" class="val-cell" />
-  <text x="105" y="162" class="val-text">${escapeHTML(locationVal)}</text>
+  <!-- Col 3: CONTACT PERSON -->
+  <rect x="590" y="10" width="135" height="35" class="label-cell" />
+  <text x="600" y="32" class="label-text">CONTACT PERSON:</text>
+  <rect x="725" y="10" width="125" height="35" class="val-cell" />
+  <text x="735" y="32" class="val-text">${escapeHTML(contactPersonVal)}</text>
 
-  <!-- TRIPLE LOGOS (Row 4) -->
-  <rect x="10" y="175" width="250" height="100" class="val-cell" />
-  <g transform="translate(18, 215) scale(0.9)">${logoSVG}</g>
-  <g transform="translate(98, 215) scale(0.9)">${logoSVG}</g>
-  <g transform="translate(178, 215) scale(0.9)">${logoSVG}</g>
+  <!-- Col 4: NUMBER OF INSTALLERS Header -->
+  <rect x="850" y="10" width="140" height="26" class="label-cell" />
+  <text x="920" y="27" class="label-text" font-size="8.5" text-anchor="middle">NUMBER OF INSTALLERS</text>
 
-  <!-- COLUMN 2 (x: 260 to 600, w: 340) -->
-  <!-- PROJECT & CLIENT NAME (Merged Top) -->
-  <rect x="260" y="65" width="340" height="110" class="val-cell" />
-  <text x="430" y="112" fill="#374151" font-family="Arial, sans-serif" font-weight="900" font-size="26" letter-spacing="1" text-anchor="middle">${escapeHTML(rec.projectName)}</text>
-  <text x="430" y="148" fill="#374151" font-family="Arial, sans-serif" font-weight="800" font-size="22" letter-spacing="0.5" text-anchor="middle">${escapeHTML(rec.client)}</text>
+  <!-- ROW 2 -->
+  <!-- Col 1: DUE DATE -->
+  <rect x="10" y="45" width="85" height="35" class="label-cell" />
+  <text x="52" y="67" class="label-text" text-anchor="middle">DUE DATE:</text>
+  <rect x="95" y="45" width="160" height="35" class="val-cell" />
+  <text x="175" y="68" class="red-bold" font-size="12" text-anchor="middle">${escapeHTML(dueDateFormatted)}</text>
 
-  <!-- IN-CHARGE & DRAWN BY (Row 4) -->
-  <!-- Sub-col 1: In-Charge -->
-  <rect x="260" y="175" width="170" height="24" class="label-cell" />
-  <text x="345" y="191" class="label-text" text-anchor="middle" font-size="9.5">IN-CHARGE</text>
-  <rect x="260" y="199" width="170" height="76" class="val-cell" />
-  <text x="345" y="242" class="val-text" font-size="14" text-anchor="middle">${escapeHTML(inChargeVal)}</text>
+  <!-- Col 3: CONTACT NUMBER -->
+  <rect x="590" y="45" width="135" height="35" class="label-cell" />
+  <text x="600" y="67" class="label-text">CONTACT NUMBER:</text>
+  <rect x="725" y="45" width="125" height="35" class="val-cell" />
+  <text x="735" y="67" class="val-text">${escapeHTML(contactNumberVal)}</text>
 
-  <!-- Sub-col 2: Drawn By -->
-  <rect x="430" y="175" width="170" height="24" class="label-cell" />
-  <text x="515" y="191" class="label-text" text-anchor="middle" font-size="9.5">DRAWN BY:</text>
-  <rect x="430" y="199" width="170" height="76" class="val-cell" />
-  <text x="515" y="242" class="val-text" font-size="14" text-anchor="middle">${escapeHTML(drawnByVal)}</text>
+  <!-- Col 4: Installers Cell (Rows 2 & 3, h=79) -->
+  <rect x="850" y="36" width="140" height="79" class="val-cell" />
+  <rect x="865" y="44" width="110" height="26" rx="6" fill="#FFFFFF" stroke="#1F2937" stroke-width="1.5" />
+  <text x="920" y="61" class="val-text" font-size="12" text-anchor="middle">${escapeHTML(installersVal)}</text>
 
-  <!-- COLUMN 3 (x: 600 to 860, w: 260) - 6 Rows -->
-  <!-- 1. Contact Person -->
-  <rect x="600" y="65" width="120" height="35" class="label-cell" />
-  <text x="610" y="87" class="label-text" font-size="9.5">CONTACT PERSON:</text>
-  <rect x="720" y="65" width="140" height="35" class="val-cell" />
-  <text x="730" y="87" class="val-text">${escapeHTML(rec.contactPerson || '-')}</text>
+  <!-- ROW 3 -->
+  <!-- Col 1: LOCATION -->
+  <rect x="10" y="80" width="85" height="35" class="label-cell" />
+  <text x="52" y="102" class="label-text" text-anchor="middle">LOCATION:</text>
+  <rect x="95" y="80" width="160" height="35" class="val-cell" />
+  <text x="105" y="102" class="val-text">${escapeHTML(locationVal)}</text>
 
-  <!-- 2. Contact Number -->
-  <rect x="600" y="100" width="120" height="35" class="label-cell" />
-  <text x="610" y="122" class="label-text" font-size="9.5">CONTACT NUMBER:</text>
-  <rect x="720" y="100" width="140" height="35" class="val-cell" />
-  <text x="730" y="122" class="val-text">${escapeHTML(rec.contactNumber || '-')}</text>
+  <!-- Col 3: ORDER DATE -->
+  <rect x="590" y="80" width="135" height="35" class="label-cell" />
+  <text x="600" y="102" class="label-text">ORDER DATE:</text>
+  <rect x="725" y="80" width="125" height="35" class="val-cell" />
+  <text x="735" y="102" class="val-text">${escapeHTML(orderDateVal)}</text>
 
-  <!-- 3. Order Date -->
-  <rect x="600" y="135" width="120" height="35" class="label-cell" />
-  <text x="610" y="157" class="label-text" font-size="9.5">ORDER DATE:</text>
-  <rect x="720" y="135" width="140" height="35" class="val-cell" />
-  <text x="730" y="157" class="val-text">${formatDate(rec.orderDate)}</text>
+  <!-- ROW 4 -->
+  <!-- Col 1: Triple Logos -->
+  <rect x="10" y="115" width="245" height="35" class="val-cell" />
+  <g transform="translate(18, 122) scale(0.72)">${logoSVG}</g>
+  <g transform="translate(98, 122) scale(0.72)">${logoSVG}</g>
+  <g transform="translate(178, 122) scale(0.72)">${logoSVG}</g>
 
-  <!-- 4. Releasing Date -->
-  <rect x="600" y="170" width="120" height="35" class="label-cell" />
-  <text x="610" y="192" class="label-text" font-size="9.5">RELEASING DATE:</text>
-  <rect x="720" y="170" width="140" height="35" class="val-cell" />
-  <text x="730" y="192" class="val-text">${escapeHTML(releasingDateFormatted)}</text>
+  <!-- Col 2: IN-CHARGE & DRAWN BY Subtable -->
+  <rect x="255" y="115" width="167" height="17" class="label-cell" />
+  <text x="338" y="127" class="label-text" text-anchor="middle" font-size="9">IN-CHARGE</text>
+  <rect x="255" y="132" width="167" height="18" class="val-cell" />
+  <text x="338" y="145" class="val-text" font-size="11.5" text-anchor="middle">${escapeHTML(inChargeVal)}</text>
 
-  <!-- 5. Releasing Mode -->
-  <rect x="600" y="205" width="120" height="35" class="label-cell" />
-  <text x="610" y="227" class="label-text" font-size="9.5">RELEASING MODE:</text>
-  <rect x="720" y="205" width="140" height="35" class="val-cell" />
-  <text x="730" y="227" class="val-text">${escapeHTML(releasingModeVal)}</text>
+  <rect x="422" y="115" width="168" height="17" class="label-cell" />
+  <text x="506" y="127" class="label-text" text-anchor="middle" font-size="9">DRAWN BY:</text>
+  <rect x="422" y="132" width="168" height="18" class="val-cell" />
+  <text x="506" y="145" class="val-text" font-size="11.5" text-anchor="middle">${escapeHTML(drawnByVal)}</text>
 
-  <!-- 6. Address -->
-  <rect x="600" y="240" width="120" height="35" class="label-cell" />
-  <text x="610" y="262" class="label-text" font-size="9.5">ADDRESS:</text>
-  <rect x="720" y="240" width="140" height="35" class="val-cell" />
-  <text x="730" y="262" class="val-text">${escapeHTML(locationVal)}</text>
+  <!-- Col 3: RELEASING DATE -->
+  <rect x="590" y="115" width="135" height="35" class="label-cell" />
+  <text x="600" y="137" class="label-text">RELEASING DATE:</text>
+  <rect x="725" y="115" width="125" height="35" class="val-cell" />
+  <text x="735" y="137" class="val-text">${escapeHTML(releasingDateFormatted)}</text>
 
-  <!-- COLUMN 4 (x: 860 to 1010, w: 150) -->
-  <!-- Top: NUMBER OF INSTALLERS -->
-  <rect x="860" y="65" width="150" height="26" class="label-cell" />
-  <text x="935" y="82" class="label-text" font-size="9" text-anchor="middle">NUMBER OF INSTALLERS</text>
-  <rect x="860" y="91" width="150" height="79" class="val-cell" />
-  <text x="935" y="136" class="val-text" font-size="13" text-anchor="middle">${escapeHTML(installersVal)}</text>
+  <!-- Col 4: INSTALLATION DURATION Header -->
+  <rect x="850" y="115" width="140" height="26" class="label-cell" />
+  <text x="920" y="132" class="label-text" font-size="8.5" text-anchor="middle">INSTALLATION DURATION</text>
 
-  <!-- Bottom: INSTALLATION DURATION -->
-  <rect x="860" y="170" width="150" height="26" class="label-cell" />
-  <text x="935" y="187" class="label-text" font-size="9" text-anchor="middle">INSTALLATION DURATION</text>
-  <rect x="860" y="196" width="150" height="79" class="val-cell" />
-  <text x="935" y="241" class="val-text" font-size="13" text-anchor="middle">${escapeHTML(durationVal)}</text>
+  <!-- ROW 5 -->
+  <!-- Col 1: White empty cell -->
+  <rect x="10" y="150" width="245" height="35" class="val-cell" />
+
+  <!-- Col 2: Priority & Status -->
+  <rect x="255" y="150" width="335" height="35" class="val-cell" />
+  <text x="422" y="171" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#1F2937" text-anchor="middle">Priority: <tspan font-weight="bold">${escapeHTML(priorityVal)}</tspan> | Status: <tspan font-weight="bold">${escapeHTML(statusVal)}</tspan></text>
+
+  <!-- Col 3: RELEASING MODE -->
+  <rect x="590" y="150" width="135" height="35" class="label-cell" />
+  <text x="600" y="172" class="label-text">RELEASING MODE:</text>
+  <rect x="725" y="150" width="125" height="35" class="val-cell" />
+  <text x="735" y="172" class="val-text">${escapeHTML(releasingModeVal)}</text>
+
+  <!-- Col 4: Duration Cell (Rows 5 & 6, h=79) -->
+  <rect x="850" y="141" width="140" height="79" class="val-cell" />
+  <rect x="860" y="150" width="120" height="26" rx="6" fill="#FFFFFF" stroke="#1F2937" stroke-width="1.5" />
+  <text x="920" y="167" class="val-text" font-size="12" text-anchor="middle">${escapeHTML(durationVal)}</text>
+
+  <!-- ROW 6 -->
+  <!-- DELIVERY / SITE ADDRESS (Cols 1, 2, 3 merged, w=580) -->
+  <rect x="10" y="185" width="580" height="35" class="val-cell" />
+  <text x="20" y="207" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#111827"><tspan font-weight="bold">DELIVERY / SITE ADDRESS: </tspan>${escapeHTML(addressVal)}</text>
+
+  <!-- ADDRESS: & Short Address -->
+  <rect x="590" y="185" width="135" height="35" class="label-cell" />
+  <text x="600" y="207" class="label-text">ADDRESS:</text>
+  <rect x="725" y="185" width="125" height="35" class="val-cell" />
+  <text x="735" y="207" class="val-text">${escapeHTML(shortAddressVal)}</text>
 </svg>`;
   }
 
   function setupDirectiveActions() {
     // COPY AS VECTOR SVG (For Adobe Illustrator, CorelDRAW, Figma)
-    const btnCopySVG = document.getElementById('btnDirectiveCopySVG');
-    if (btnCopySVG) {
-      btnCopySVG.addEventListener('click', () => {
-        const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
-        const svgString = generateDirectiveSVG(cur);
+    const handleCopyVector = () => {
+      const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
+      const svgString = generateDirectiveSVG(cur);
 
-        if (navigator.clipboard && window.ClipboardItem) {
-          const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-          const textBlob = new Blob([svgString], { type: 'text/plain' });
-          navigator.clipboard.write([
-            new ClipboardItem({
-              'image/svg+xml': svgBlob,
-              'text/plain': textBlob
-            })
-          ]).then(() => {
-            showToast('Vector SVG copied! You can now paste directly into Illustrator or Figma.');
-          }).catch(() => {
-            copyFallback(svgString);
-          });
-        } else {
+      if (navigator.clipboard && window.ClipboardItem) {
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+        const textBlob = new Blob([svgString], { type: 'text/plain' });
+        navigator.clipboard.write([
+          new ClipboardItem({
+            'image/svg+xml': svgBlob,
+            'text/plain': textBlob
+          })
+        ]).then(() => {
+          showToast('Vector SVG copied! Ready to paste (Ctrl+V) into Illustrator, CorelDRAW, or Figma.');
+        }).catch(() => {
           copyFallback(svgString);
-        }
-      });
-    }
+        });
+      } else {
+        copyFallback(svgString);
+      }
+    };
+
+    const btnCopySVG = document.getElementById('btnDirectiveCopySVG');
+    const btnQuickCopy = document.getElementById('btnQuickCopyVector');
+    if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
+    if (btnQuickCopy) btnQuickCopy.addEventListener('click', handleCopyVector);
 
     // DOWNLOAD VECTOR SVG FILE
     const btnDownloadSVG = document.getElementById('btnDirectiveDownloadSVG');
@@ -2856,7 +3258,11 @@
     const btnGotoSettings = document.getElementById('btnGotoSettings');
     if (btnGotoSettings) {
       btnGotoSettings.onclick = () => {
-        switchView('view-settings');
+        if (document.getElementById('view-settings')) {
+          switchView('view-settings');
+        } else {
+          window.location.href = 'settings.html';
+        }
         profDropdown.classList.remove('show');
       };
     }
@@ -3027,6 +3433,8 @@
 
   window.SignDepotApp = {
     switchView: switchView,
+    openCustomDropdown: (btn, ev) => openCustomDropdown(btn, ev),
+    closeCustomDropdown: () => closeCustomDropdown(),
 
     // Direct Inline Editing Handlers
     handleInlineTextBlur: (el) => {
@@ -3078,8 +3486,14 @@
     },
 
     openDirectiveForJo: (jo) => {
-      switchView('view-directives-details');
-      renderDirectivePreview(jo);
+      state.currentDirectiveJo = jo;
+      saveStateToStorage();
+      if (document.getElementById('view-directives-details')) {
+        switchView('view-directives-details');
+        renderDirectivePreview(jo);
+      } else {
+        window.location.href = 'directives-details.html?jo=' + encodeURIComponent(jo);
+      }
     },
     selectAutocompleteJo: (jo) => {
       const box = document.getElementById('directiveAutocompleteBox');
@@ -3176,15 +3590,30 @@
   function initEventListeners() {
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
       item.addEventListener('click', (e) => {
-        e.preventDefault();
+        const href = item.getAttribute('href');
         const viewId = item.getAttribute('data-view');
-        switchView(viewId);
+
+        if (href && href !== '#' && !href.startsWith('javascript:')) {
+          const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+          const targetFile = href.toLowerCase();
+          if (targetFile !== currentFile) {
+            // Allow native browser navigation across distinct HTML pages
+            return;
+          }
+        }
+
+        e.preventDefault();
+        if (viewId) switchView(viewId);
       });
     });
 
     const brandHomeLink = document.getElementById('brandHomeLink');
     if (brandHomeLink) {
       brandHomeLink.addEventListener('click', (e) => {
+        const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (currentFile !== 'index.html') {
+          return; // Allow native navigation to index.html
+        }
         e.preventDefault();
         switchView('view-dashboard');
       });
@@ -3459,7 +3888,22 @@
     setupGlobalSearch();
     setupModals();
 
-    switchView('view-dashboard');
+    initCustomDropdownEngine();
+    upgradeAllFilterSelects();
+    initCustomTooltipEngine();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const joParam = urlParams.get('jo');
+    if (joParam) {
+      state.currentDirectiveJo = joParam;
+    }
+
+    const currentView = detectCurrentPage();
+    switchView(currentView);
+
+    if (currentView === 'view-directives-details') {
+      renderDirectivePreview(state.currentDirectiveJo || 'P260701373');
+    }
   }
 
   if (document.readyState === 'loading') {
