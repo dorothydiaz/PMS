@@ -2472,15 +2472,17 @@
     const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '639178805364';
     const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || formatDate(rec.orderDate);
 
-    // Font sizing for SVG: Uses customized per-cell font sizes if manually set, otherwise auto-scales
+    // Font sizing for SVG: Uses customized per-cell font sizes if manually set or computed from live DOM table
     const getSvgSize = (str, maxChars, base, min, elementId) => {
       if (elementId) {
         const el = document.getElementById(elementId);
         if (el) {
           const custom = el.getAttribute('data-custom-size');
-          if (custom) return parseFloat(custom);
+          if (custom && parseFloat(custom) > 0) return parseFloat(custom);
           const inline = el.style.fontSize;
-          if (inline) return parseFloat(inline);
+          if (inline && parseFloat(inline) > 0) return parseFloat(inline);
+          const computed = window.getComputedStyle(el).fontSize;
+          if (computed && parseFloat(computed) > 0) return parseFloat(computed);
         }
       }
       const len = (str || '').length;
@@ -2488,17 +2490,38 @@
       return Math.max(min, Math.round((base * (maxChars / len)) * 10) / 10);
     };
 
-    const joSize = getSvgSize(joNumberVal, 10, 32, 16, 'docFieldJoNumber');
-    const projSize = getSvgSize(projectNameVal, 12, 32, 15, 'docFieldProjectName');
-    const clientSize = getSvgSize(clientVal, 14, 28, 14, 'docFieldClientName');
+    const joSize = getSvgSize(joNumberVal, 10, 30, 16, 'docFieldJoNumber');
+    const projSize = getSvgSize(projectNameVal, 12, 30, 15, 'docFieldProjectName');
+    const clientSize = getSvgSize(clientVal, 14, 26, 14, 'docFieldClientName');
     const addressSize = getSvgSize(addressVal, 22, 13, 8.5, 'docFieldAddress');
     const personSize = getSvgSize(contactPersonVal, 20, 13, 9, 'docFieldContactPerson');
     const phoneSize = getSvgSize(contactNumberVal, 18, 13, 9, 'docFieldContactNumber');
-    const inChargeSize = getSvgSize(inChargeVal, 14, 14, 9, 'docFieldInCharge');
-    const drawnBySize = getSvgSize(drawnByVal, 14, 14, 9, 'docFieldDrawnBy');
-    const installersSize = getSvgSize(installersVal, 14, 14, 9, 'docFieldInstallers');
-    const durationSize = getSvgSize(durationVal, 14, 14, 9, 'docFieldDuration');
-    const dueSize = getSvgSize(dueDateFormatted, 16, 15, 9, 'docFieldDueDate');
+    const inChargeSize = getSvgSize(inChargeVal, 14, 13, 9, 'docFieldInCharge');
+    const drawnBySize = getSvgSize(drawnByVal, 14, 13, 9, 'docFieldDrawnBy');
+    const installersSize = getSvgSize(installersVal, 14, 13, 9, 'docFieldInstallers');
+    const durationSize = getSvgSize(durationVal, 14, 13, 9, 'docFieldDuration');
+    const dueSize = getSvgSize(dueDateFormatted, 16, 14.5, 9, 'docFieldDueDate');
+    const locationSize = getSvgSize(locationVal, 18, 13, 8.5, 'docFieldLocation');
+    const orderDateSize = getSvgSize(orderDateVal, 16, 13, 8.5, 'docFieldOrderDate');
+    const releasingDateSize = getSvgSize(releasingDateFormatted, 16, 13, 8.5, 'docFieldReleasingDate');
+    const releasingModeSize = getSvgSize(releasingModeVal, 16, 13, 8.5, 'docFieldReleasingMode');
+
+    // Dynamic vertical baseline calculations based on actual font size and cell height
+    const joY = Math.round(0 + (54 + joSize * 0.72) / 2);
+    const projY = Math.round(0 + (54 + projSize * 0.72) / 2);
+    const clientY = Math.round(54 + (54 + clientSize * 0.72) / 2);
+    const dueY = Math.round(54 + (27 + dueSize * 0.72) / 2);
+    const installersY = Math.round(27 + (54 + installersSize * 0.72) / 2);
+    const durationY = Math.round(108 + (54 + durationSize * 0.72) / 2);
+    const inChargeY = Math.round(135 + (27 + inChargeSize * 0.72) / 2);
+    const drawnByY = Math.round(135 + (27 + drawnBySize * 0.72) / 2);
+    const addressY = Math.round(135 + (27 + addressSize * 0.72) / 2);
+    const personY = Math.round(0 + (27 + personSize * 0.72) / 2);
+    const phoneY = Math.round(27 + (27 + phoneSize * 0.72) / 2);
+    const locationY = Math.round(81 + (27 + locationSize * 0.72) / 2);
+    const orderDateY = Math.round(54 + (27 + orderDateSize * 0.72) / 2);
+    const releasingDateY = Math.round(81 + (27 + releasingDateSize * 0.72) / 2);
+    const releasingModeY = Math.round(108 + (27 + releasingModeSize * 0.72) / 2);
 
     // Pure Vector Sign Depot Logo
     const logoSVG = `
@@ -2513,11 +2536,12 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1216 162" width="1216" height="162">
   <defs>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700;800;900&amp;display=swap');
       .cad-lbl-box { fill: #434343; stroke: #000000; stroke-width: 1.5px; }
-      .cad-lbl-txt { fill: #FFFFFF; font-family: 'Roboto Condensed', 'Oswald', Arial, sans-serif; font-weight: 800; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+      .cad-lbl-txt { fill: #FFFFFF; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 800; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.3px; }
       .cad-val-box { fill: #FFFFFF; stroke: #000000; stroke-width: 1.5px; }
-      .cad-val-txt { fill: #434343; font-family: 'Roboto Condensed', 'Oswald', Arial, sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; }
-      .cad-red-txt { fill: #FF0000; font-family: 'Roboto Condensed', 'Oswald', Arial, sans-serif; font-weight: 900; }
+      .cad-val-txt { fill: #434343; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 700; text-transform: uppercase; }
+      .cad-red-txt { fill: #FF0000; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 900; }
       .center-txt { text-anchor: middle; }
     </style>
   </defs>
@@ -2533,11 +2557,11 @@
 
   <!-- Col 2: JO Value (Rows 1-2, x=127, y=0, w=202, h=54) -->
   <rect x="127" y="0" width="202" height="54" class="cad-val-box" />
-  <text x="228" y="38" class="cad-red-txt center-txt" font-size="${joSize}">${escapeHTML(joNumberVal)}</text>
+  <text x="228" y="${joY}" class="cad-red-txt center-txt" style="font-size: ${joSize}px !important; font-weight: 900;" font-size="${joSize}" font-weight="900">${escapeHTML(joNumberVal)}</text>
 
   <!-- Col 3: URAL Project (Rows 1-2, x=329, y=0, w=405, h=54) -->
   <rect x="329" y="0" width="405" height="54" class="cad-val-box" />
-  <text x="531.5" y="38" class="cad-val-txt center-txt" font-size="${projSize}" font-weight="900" letter-spacing="1.5">${escapeHTML(projectNameVal)}</text>
+  <text x="531.5" y="${projY}" class="cad-val-txt center-txt" style="font-size: ${projSize}px !important; font-weight: 900; letter-spacing: 1.5px;" font-size="${projSize}" font-weight="900" letter-spacing="1.5">${escapeHTML(projectNameVal)}</text>
 
   <!-- Col 4 (Row 1): CONTACT PERSON: (x=734, y=0, w=106, h=27) -->
   <rect x="734" y="0" width="106" height="27" class="cad-lbl-box" />
@@ -2545,7 +2569,7 @@
 
   <!-- Col 5 (Row 1): Contact Person Value (x=840, y=0, w=202, h=27) -->
   <rect x="840" y="0" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="18" class="cad-val-txt" font-size="${personSize}">${escapeHTML(contactPersonVal)}</text>
+  <text x="848" y="${personY}" class="cad-val-txt" style="font-size: ${personSize}px !important;" font-size="${personSize}">${escapeHTML(contactPersonVal)}</text>
 
   <!-- Col 6 (Row 1): NUMBER OF INSTALLERS Header (x=1042, y=0, w=174, h=27) -->
   <rect x="1042" y="0" width="174" height="27" class="cad-lbl-box" />
@@ -2557,11 +2581,11 @@
 
   <!-- Col 5 (Row 2): Contact Number Value (x=840, y=27, w=202, h=27) -->
   <rect x="840" y="27" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="45" class="cad-val-txt" font-size="${phoneSize}">${escapeHTML(contactNumberVal)}</text>
+  <text x="848" y="${phoneY}" class="cad-val-txt" style="font-size: ${phoneSize}px !important;" font-size="${phoneSize}">${escapeHTML(contactNumberVal)}</text>
 
   <!-- Col 6 (Rows 2-3): NUMBER OF INSTALLERS Value Box (x=1042, y=27, w=174, h=54) -->
   <rect x="1042" y="27" width="174" height="54" class="cad-val-box" />
-  <text x="1129" y="59" class="cad-val-txt center-txt" font-size="${installersSize}" font-weight="800">${escapeHTML(installersVal)}</text>
+  <text x="1129" y="${installersY}" class="cad-val-txt center-txt" style="font-size: ${installersSize}px !important; font-weight: 800;" font-size="${installersSize}" font-weight="800">${escapeHTML(installersVal)}</text>
 
   <!-- ==================== ROWS 3 & 4 ==================== -->
   <!-- Col 1 (Row 3): DUE DATE: (x=0, y=54, w=127, h=27) -->
@@ -2570,11 +2594,11 @@
 
   <!-- Col 2 (Row 3): Due Date Value (x=127, y=54, w=202, h=27) -->
   <rect x="127" y="54" width="202" height="27" class="cad-val-box" />
-  <text x="228" y="72" class="cad-red-txt center-txt" font-size="${dueSize}" font-weight="800">${escapeHTML(dueDateFormatted)}</text>
+  <text x="228" y="${dueY}" class="cad-red-txt center-txt" style="font-size: ${dueSize}px !important; font-weight: 800;" font-size="${dueSize}" font-weight="800">${escapeHTML(dueDateFormatted)}</text>
 
   <!-- Col 3: PAU ACILAC Client (Rows 3-4, x=329, y=54, w=405, h=54) -->
   <rect x="329" y="54" width="405" height="54" class="cad-val-box" />
-  <text x="531.5" y="90" class="cad-val-txt center-txt" font-size="${clientSize}" font-weight="900" letter-spacing="1.5">${escapeHTML(clientVal)}</text>
+  <text x="531.5" y="${clientY}" class="cad-val-txt center-txt" style="font-size: ${clientSize}px !important; font-weight: 900; letter-spacing: 1.5px;" font-size="${clientSize}" font-weight="900" letter-spacing="1.5">${escapeHTML(clientVal)}</text>
 
   <!-- Col 4 (Row 3): ORDER DATE: (x=734, y=54, w=106, h=27) -->
   <rect x="734" y="54" width="106" height="27" class="cad-lbl-box" />
@@ -2582,7 +2606,7 @@
 
   <!-- Col 5 (Row 3): Order Date Value (x=840, y=54, w=202, h=27) -->
   <rect x="840" y="54" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="72" class="cad-val-txt">${escapeHTML(orderDateVal)}</text>
+  <text x="848" y="${orderDateY}" class="cad-val-txt" style="font-size: ${orderDateSize}px !important;" font-size="${orderDateSize}">${escapeHTML(orderDateVal)}</text>
 
   <!-- Col 1 (Row 4): LOCATION: (x=0, y=81, w=127, h=27) -->
   <rect x="0" y="81" width="127" height="27" class="cad-lbl-box" />
@@ -2590,7 +2614,7 @@
 
   <!-- Col 2 (Row 4): Location Value (x=127, y=81, w=202, h=27) -->
   <rect x="127" y="81" width="202" height="27" class="cad-val-box" />
-  <text x="228" y="99" class="cad-val-txt center-txt">${escapeHTML(locationVal)}</text>
+  <text x="228" y="${locationY}" class="cad-val-txt center-txt" style="font-size: ${locationSize}px !important;" font-size="${locationSize}">${escapeHTML(locationVal)}</text>
 
   <!-- Col 4 (Row 4): RELEASING DATE: (x=734, y=81, w=106, h=27) -->
   <rect x="734" y="81" width="106" height="27" class="cad-lbl-box" />
@@ -2598,7 +2622,7 @@
 
   <!-- Col 5 (Row 4): Releasing Date Value (x=840, y=81, w=202, h=27) -->
   <rect x="840" y="81" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="99" class="cad-val-txt">${escapeHTML(releasingDateFormatted)}</text>
+  <text x="848" y="${releasingDateY}" class="cad-val-txt" style="font-size: ${releasingDateSize}px !important;" font-size="${releasingDateSize}">${escapeHTML(releasingDateFormatted)}</text>
 
   <!-- Col 6 (Row 4): INSTALLATION DURATION Header (x=1042, y=81, w=174, h=27) -->
   <rect x="1042" y="81" width="174" height="27" class="cad-lbl-box" />
@@ -2618,9 +2642,9 @@
   <text x="632.75" y="126" class="cad-lbl-txt center-txt" font-size="12" font-weight="900">DRAWN BY:</text>
 
   <rect x="329" y="135" width="202.5" height="27" class="cad-val-box" />
-  <text x="430.25" y="153" class="cad-val-txt center-txt" font-size="${inChargeSize}" font-weight="800">${escapeHTML(inChargeVal)}</text>
+  <text x="430.25" y="${inChargeY}" class="cad-val-txt center-txt" style="font-size: ${inChargeSize}px !important; font-weight: 800;" font-size="${inChargeSize}" font-weight="800">${escapeHTML(inChargeVal)}</text>
   <rect x="531.5" y="135" width="202.5" height="27" class="cad-val-box" />
-  <text x="632.75" y="153" class="cad-val-txt center-txt" font-size="${drawnBySize}" font-weight="800">${escapeHTML(drawnByVal)}</text>
+  <text x="632.75" y="${drawnByY}" class="cad-val-txt center-txt" style="font-size: ${drawnBySize}px !important; font-weight: 800;" font-size="${drawnBySize}" font-weight="800">${escapeHTML(drawnByVal)}</text>
 
   <!-- Col 4 (Row 5): RELEASING MODE: (x=734, y=108, w=106, h=27) -->
   <rect x="734" y="108" width="106" height="27" class="cad-lbl-box" />
@@ -2628,11 +2652,11 @@
 
   <!-- Col 5 (Row 5): Releasing Mode Value (x=840, y=108, w=202, h=27) -->
   <rect x="840" y="108" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="126" class="cad-val-txt" font-weight="900">${escapeHTML(releasingModeVal)}</text>
+  <text x="848" y="${releasingModeY}" class="cad-val-txt" style="font-size: ${releasingModeSize}px !important; font-weight: 900;" font-size="${releasingModeSize}" font-weight="900">${escapeHTML(releasingModeVal)}</text>
 
   <!-- Col 6 (Rows 5-6): INSTALLATION DURATION Value Box (x=1042, y=108, w=174, h=54) -->
   <rect x="1042" y="108" width="174" height="54" class="cad-val-box" />
-  <text x="1129" y="140" class="cad-val-txt center-txt" font-size="${durationSize}" font-weight="800">${escapeHTML(durationVal)}</text>
+  <text x="1129" y="${durationY}" class="cad-val-txt center-txt" style="font-size: ${durationSize}px !important; font-weight: 800;" font-size="${durationSize}" font-weight="800">${escapeHTML(durationVal)}</text>
 
   <!-- Col 4 (Row 6): ADDRESS: (x=734, y=135, w=106, h=27) -->
   <rect x="734" y="135" width="106" height="27" class="cad-lbl-box" />
@@ -2640,7 +2664,7 @@
 
   <!-- Col 5 (Row 6): Address Value (x=840, y=135, w=202, h=27) -->
   <rect x="840" y="135" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="153" class="cad-val-txt" font-size="${addressSize}">${escapeHTML(addressVal)}</text>
+  <text x="848" y="${addressY}" class="cad-val-txt" style="font-size: ${addressSize}px !important;" font-size="${addressSize}">${escapeHTML(addressVal)}</text>
 </svg>`;
   }
 
@@ -2719,41 +2743,90 @@
     if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
     if (btnQuickCopy) btnQuickCopy.addEventListener('click', handleCopyVector);
 
-    // COPY HIGH-RESOLUTION IMAGE (Instant Ctrl+V for CorelDRAW, Photoshop, Chat)
+    // COPY ULTRA-HD 4K IMAGE (Instant Ctrl+V for CorelDRAW, Photoshop, Affinity, Illustrator, Chat)
     const btnCopyPNG = document.getElementById('btnDirectiveCopyPNG');
     if (btnCopyPNG) {
-      btnCopyPNG.addEventListener('click', () => {
+      btnCopyPNG.addEventListener('click', (e) => {
         const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
         const svgString = generateDirectiveSVG(cur);
+        
+        // 4K Ultra-High Definition resolution: 4864 × 648 px (scale = 4, over 4K UHD 3840px width)
+        const scale = 4;
+        const targetWidth = 1216 * scale;  // 4864px
+        const targetHeight = 162 * scale;  // 648px
+        
+        // Ensure the root SVG attributes specify the target 4K dimensions so the browser natively rasterizes vector geometry at 4K
+        const svg4K = svgString
+          .replace(/width="1216"/, `width="${targetWidth}"`)
+          .replace(/height="162"/, `height="${targetHeight}"`);
+
         const img = new Image();
-        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(svgBlob);
 
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          canvas.width = 1216 * 2;
-          canvas.height = 162 * 2;
-          const ctx = canvas.getContext('2d');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d', { alpha: false });
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
-          ctx.scale(2, 2);
-          ctx.drawImage(img, 0, 0);
+          
+          // Pure crisp white background fill
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          
+          // Render native 4K vector graphics
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
           URL.revokeObjectURL(url);
 
           canvas.toBlob(async (blob) => {
-            try {
-              await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-              ]);
-              showToast('High-res graphic copied! Ready to paste (Ctrl+V) directly in CorelDRAW.');
-            } catch (err) {
-              showToast('Clipboard permissions denied. Click "Download Vector" instead.', 'error');
+            if (!blob) {
+              showToast('Failed to generate 4K image data.', 'error');
+              return;
             }
-          }, 'image/png');
+
+            // If Shift key is held, also trigger direct download of the 4K PNG file
+            if (e.shiftKey) {
+              const dlUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(dlUrl);
+              showToast('4K Ultra-HD PNG downloaded (4864 × 648 px)!');
+              return;
+            }
+
+            try {
+              if (navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ 'image/png': blob })
+                ]);
+                showToast('Ultra-HD 4K image copied (4864 × 648 px)! Ready to paste (Ctrl+V) directly in Corel, PS, Affinity, or Illustrator.');
+              } else {
+                throw new Error('Clipboard API unavailable');
+              }
+            } catch (err) {
+              // Automatic download fallback if clipboard access is blocked
+              const dlUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(dlUrl);
+              showToast('Clipboard access restricted. Downloaded 4K PNG file instead.', 'info');
+            }
+          }, 'image/png', 1.0);
         };
+
         img.onerror = () => {
           URL.revokeObjectURL(url);
-          showToast('Failed to render graphic for clipboard.', 'error');
+          showToast('Failed to render 4K graphic for clipboard.', 'error');
         };
         img.src = url;
       });
