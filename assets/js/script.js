@@ -2173,10 +2173,6 @@
       deliveryEl.innerHTML = `<strong>DELIVERY / SITE ADDRESS:</strong> ${escapeHTML(addr)}`;
     }
 
-    // Update live drawing canvas mock
-    setTxt('mockSignTitle', rec.projectName || 'URAL');
-    setTxt('mockSignSub', rec.client || 'PAU ACILAC');
-
     const ctrlInst = document.getElementById('ctrlInstallers');
     const ctrlDur = document.getElementById('ctrlDuration');
     const ctrlMode = document.getElementById('ctrlReleasingMode');

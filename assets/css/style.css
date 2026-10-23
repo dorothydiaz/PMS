@@ -1626,7 +1626,7 @@ body {
   background: #FFFFFF;
   width: 100%;
   max-width: 10.4in;
-  min-height: 7.8in;
+  min-height: auto;
   box-sizing: border-box;
   box-shadow: var(--shadow-sheet);
   border: none;
@@ -2260,8 +2260,8 @@ textarea.form-control {
   .directive-sheet-landscape { 
     width: 100% !important; 
     max-width: 10.5in !important; 
-    height: 7.9in !important;
-    max-height: 7.9in !important;
+    height: auto !important;
+    max-height: none !important;
     box-shadow: none !important; 
     border: none !important; 
     padding: 0 !important;
