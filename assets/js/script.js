@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Sign Depot — Sales & Creative Production Tracker
  * Frontend Application Engine (Vanilla JS, Local Persistence)
  * With Panze Studio Aesthetic & Direct Inline Editable Tables
@@ -883,6 +883,8 @@
     workloadPerPage: initialRowsPerPage,
     dashboardSearch: '',
     dashboardStatus: '',
+    dashboardDeadline: '',
+    dashboardKpiFilter: '',
     dashboardPage: 1,
     dashboardPerPage: initialRowsPerPage,
     monthlyOutputPage: 1,
@@ -1702,6 +1704,26 @@
     renderDashboardRecentProjectsTable();
   }
 
+  function getKpiFilteredRequests(type) {
+    const reqs = state.requests || [];
+    if (type === 'pending') {
+      return reqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
+    }
+    if (type === 'working') {
+      return reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
+    }
+    if (type === 'completed') {
+      return reqs.filter(r => r.projectStatus === 'Completed');
+    }
+    if (type === 'revising') {
+      return reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
+    }
+    if (type === 'overdue') {
+      return reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+    }
+    return reqs; // 'all'
+  }
+
   function updateDashboardKPIs() {
     const reqs = state.requests;
     const totalRequests = reqs.length;
@@ -1977,6 +1999,58 @@
         return true;
       });
     }
+
+    if (state.dashboardKpiFilter && state.dashboardKpiFilter !== 'all') {
+      const kf = state.dashboardKpiFilter;
+      if (kf === 'pending') {
+        list = list.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
+      } else if (kf === 'working') {
+        list = list.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
+      } else if (kf === 'completed') {
+        list = list.filter(r => r.projectStatus === 'Completed');
+      } else if (kf === 'revising') {
+        list = list.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
+      } else if (kf === 'overdue') {
+        list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+      }
+    }
+
+    // Sync active KPI filter banner & card highlights
+    const kpiBanner = document.getElementById('activeKpiFilterBanner');
+    if (kpiBanner) {
+      if (state.dashboardKpiFilter && state.dashboardKpiFilter !== 'all') {
+        const labels = {
+          pending: 'Pending Approval',
+          working: 'Working / On-Going',
+          completed: 'Completed',
+          revising: 'Revising',
+          overdue: 'Overdue'
+        };
+        const label = labels[state.dashboardKpiFilter] || state.dashboardKpiFilter;
+        kpiBanner.style.display = 'inline-flex';
+        kpiBanner.innerHTML = `
+          <span>Filtered by: <strong>${escapeHTML(label)}</strong> (${list.length} records)</span>
+          <button class="clear-kpi-btn" title="Clear filter" onclick="window.SignDepotApp.handleKpiCardClick('all')">&times;</button>
+        `;
+      } else {
+        kpiBanner.style.display = 'none';
+        kpiBanner.innerHTML = '';
+      }
+    }
+
+    const kpiCardMap = {
+      all: document.getElementById('kpiCardTotal'),
+      pending: document.getElementById('kpiCardPending'),
+      working: document.getElementById('kpiCardWorking'),
+      completed: document.getElementById('kpiCardCompleted'),
+      revising: document.getElementById('kpiCardRevising'),
+      overdue: document.getElementById('kpiCardOverdue')
+    };
+    Object.entries(kpiCardMap).forEach(([k, card]) => {
+      if (!card) return;
+      const isAct = (state.dashboardKpiFilter || 'all') === k;
+      card.classList.toggle('active', isAct);
+    });
 
     const page = state.dashboardPage || 1;
     const perPage = state.dashboardPerPage || 10;
@@ -4405,7 +4479,7 @@
           </div>
 
           <div class="alert-item-meta">
-            <span class="alert-meta-point">Client: <strong>${escapeHTML(r.client || 'â€”')}</strong></span>
+            <span class="alert-meta-point">Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
             <span class="alert-meta-point">Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
             <span class="alert-meta-point">Status: <span class="badge badge-ongoing" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
           </div>
@@ -4431,6 +4505,144 @@
 
   window.SignDepotApp = {
     switchView: switchView,
+
+    // KPI Cards Clickable & Viewable Public API
+    handleKpiCardClick: (type) => {
+      if (state.dashboardKpiFilter === type && type !== 'all') {
+        state.dashboardKpiFilter = 'all';
+      } else {
+        state.dashboardKpiFilter = type;
+      }
+
+      // Reset specific conflicting filters if any
+      const statusSelect = document.getElementById('dashboardFilterStatus');
+      if (statusSelect) statusSelect.value = '';
+      state.dashboardStatus = '';
+      
+      const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+      if (deadlineSelect && type !== 'overdue') {
+        deadlineSelect.value = '';
+        state.dashboardDeadline = '';
+      }
+
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+
+      // Smooth scroll to table
+      const queueSection = document.getElementById('liveProductionQueueCard');
+      if (queueSection) {
+        queueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      const labels = {
+        all: 'All Requests',
+        pending: 'Pending Approval',
+        working: 'Working / On-Going',
+        completed: 'Completed',
+        revising: 'Revising',
+        overdue: 'Overdue'
+      };
+      showToast(`Showing ${labels[state.dashboardKpiFilter] || 'All'} in Production Queue`, 'info');
+    },
+
+    openKpiQuickView: (type) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      const content = document.getElementById('kpiModalContent');
+      const title = document.getElementById('kpiModalTitle');
+      const badge = document.getElementById('kpiModalBadge');
+      const footerCount = document.getElementById('kpiModalFooterCount');
+      const filterBtn = document.getElementById('btnKpiModalFilterTable');
+      if (!modal || !content) return;
+
+      const items = getKpiFilteredRequests(type);
+
+      const metaMap = {
+        all: { title: 'Total Active Requests', badge: 'All Records', badgeClass: 'badge-ongoing' },
+        pending: { title: 'Pending Approval Queue', badge: 'Queue', badgeClass: 'badge-pending' },
+        working: { title: 'Working & On-Going Projects', badge: 'In Progress', badgeClass: 'badge-ongoing' },
+        completed: { title: 'Completed Projects', badge: 'Released', badgeClass: 'badge-completed' },
+        revising: { title: 'Client Revision Requests', badge: 'Feedback', badgeClass: 'badge-revising' },
+        overdue: { title: 'Past Due / Overdue Projects', badge: 'Past Due', badgeClass: 'badge-priority-rush' }
+      };
+
+      const meta = metaMap[type] || metaMap['all'];
+      if (title) title.textContent = meta.title;
+      if (badge) {
+        badge.textContent = meta.badge;
+        badge.className = `badge ${meta.badgeClass}`;
+      }
+      if (footerCount) {
+        footerCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'project' : 'projects'}`;
+      }
+
+      if (items.length === 0) {
+        content.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 8px;">
+              <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div style="font-size: 15px; font-weight: 700; color: #1E293B;">No Projects in this Category</div>
+            <p style="font-size: 13px; margin-top: 4px;">There are currently no active projects matching "${meta.title}".</p>
+          </div>
+        `;
+      } else {
+        content.innerHTML = items.map(r => {
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          let deadlinePill = '';
+          if (alertInfo.status === 'overdue') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-overdue">${alertInfo.pillText}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-today">Today</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-soon">${alertInfo.pillText}</span>`;
+          }
+
+          return `
+            <div class="kpi-modal-item">
+              <div class="kpi-modal-item-left">
+                <div class="kpi-modal-item-title-row">
+                  <span class="kpi-modal-req">${escapeHTML(r.requestId)}</span>
+                  <span class="kpi-modal-jo">${escapeHTML(r.joNumber)}</span>
+                  <span class="kpi-modal-name" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+                  ${deadlinePill}
+                </div>
+                <div class="kpi-modal-meta">
+                  <span>Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+                  <span>Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+                  <span>Sales: <strong>${escapeHTML(r.salesRep || '-')}</strong></span>
+                  <span>Status: <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
+                </div>
+              </div>
+              <div class="kpi-modal-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.viewProjectInQueue('${r.id}')" title="Find in Live Table">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  Table
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
+                  Directive
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (filterBtn) {
+        filterBtn.onclick = () => {
+          modal.classList.remove('show');
+          window.SignDepotApp.handleKpiCardClick(type);
+        };
+        filterBtn.textContent = `Filter Queue (${items.length})`;
+      }
+
+      modal.classList.add('show');
+    },
+
+    viewProjectInQueue: (reqId) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (modal) modal.classList.remove('show');
+      window.SignDepotApp.filterByDeadlineProject(reqId);
+    },
 
     // Deadline Alert Center Public API
     setAlertTab: (tab) => {
@@ -4505,7 +4717,7 @@
             setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
           }
         }, 150);
-        showToast(`Viewing ${rec.requestId} â€” ${rec.projectName}`, 'info');
+        showToast(`Viewing ${rec.requestId} - ${rec.projectName}`, 'info');
       } else {
         if (document.getElementById('trackerSearchInput')) {
           state.trackerFilter.search = rec.requestId;
@@ -5178,6 +5390,7 @@
     if (dashStatus) {
       dashStatus.addEventListener('change', () => {
         state.dashboardStatus = dashStatus.value;
+        if (state.dashboardStatus) state.dashboardKpiFilter = '';
         state.dashboardPage = 1;
         renderDashboardRecentProjectsTable();
       });
@@ -5345,7 +5558,7 @@
       const overdueCount = activeAlerts.filter(a => a.status === 'overdue').length;
       const todayCount = activeAlerts.filter(a => a.status === 'today').length;
       if (overdueCount > 0 || todayCount > 0) {
-        let msg = 'âš ï¸ Deadline Reminder: ';
+        let msg = 'Deadline Reminder: ';
         if (overdueCount > 0 && todayCount > 0) {
           msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due & ${todayCount} due today!`;
         } else if (overdueCount > 0) {

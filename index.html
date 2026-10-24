@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Sales & Creative Production Operations Tracker</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261024_alerts1">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261024_kpi1">
   <link rel="icon" type="image/png" href="assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-dashboard">
@@ -215,59 +215,96 @@
         <!-- MODULE 1: DASHBOARD (Ultra-Modern Panze Studio Layout) -->
         <section class="view-panel active" id="view-dashboard">
           <!-- KPI Summary Cards Grid -->
+          <!-- Interactive KPI Metrics Grid (Clickable & Viewable) -->
           <div class="kpi-grid">
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpiCardTotal" onclick="window.SignDepotApp.handleKpiCardClick('all')" title="Click to filter queue by All Records">
               <div class="kpi-header">
                 <span>Total Requests</span>
                 <span class="badge badge-ongoing">All Records</span>
               </div>
               <div class="kpi-value" id="kpiTotalRequests">0</div>
-              <div class="kpi-trend">Active production logs</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Active production logs</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('all')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpiCardPending" onclick="window.SignDepotApp.handleKpiCardClick('pending')" title="Click to filter queue by Pending Approval">
               <div class="kpi-header">
                 <span>Pending Approval</span>
                 <span class="badge badge-pending">Queue</span>
               </div>
               <div class="kpi-value" id="kpiPendingApproval">0</div>
-              <div class="kpi-trend">Awaiting review</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Awaiting review</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('pending')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpiCardWorking" onclick="window.SignDepotApp.handleKpiCardClick('working')" title="Click to filter queue by Working / On-Going">
               <div class="kpi-header">
                 <span>Working / On-Going</span>
                 <span class="badge badge-ongoing">In Progress</span>
               </div>
               <div class="kpi-value" id="kpiWorking">0</div>
-              <div class="kpi-trend">Active drafting</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Active drafting</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('working')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpiCardCompleted" onclick="window.SignDepotApp.handleKpiCardClick('completed')" title="Click to filter queue by Completed">
               <div class="kpi-header">
                 <span>Completed</span>
                 <span class="badge badge-completed">Released</span>
               </div>
               <div class="kpi-value" id="kpiCompleted">0</div>
-              <div class="kpi-trend">Fabrication done</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Fabrication done</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('completed')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpiCardRevising" onclick="window.SignDepotApp.handleKpiCardClick('revising')" title="Click to filter queue by Revising">
               <div class="kpi-header">
                 <span>Revising</span>
                 <span class="badge badge-revising">Feedback</span>
               </div>
               <div class="kpi-value" id="kpiRevising">0</div>
-              <div class="kpi-trend">Client alterations</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Client alterations</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('revising')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpiCardOverdue" onclick="window.SignDepotApp.handleKpiCardClick('overdue')" title="Click to filter queue by Overdue">
               <div class="kpi-header">
                 <span>Overdue</span>
                 <span class="badge badge-priority-rush">Past Due</span>
               </div>
               <div class="kpi-value" id="kpiOverdue" style="color: var(--accent-red);">0</div>
-              <div class="kpi-trend">Needs attention</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Needs attention</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('overdue')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -377,7 +414,7 @@
           </div>
 
           <!-- Bottom: Directly Inline Editable Recent Projects Table -->
-          <div class="studio-card">
+          <div class="studio-card" id="liveProductionQueueCard">
             <div class="section-header-row" style="margin-bottom: 14px;">
               <div>
                 <h3 style="font-size: 17px; font-weight: 800;">Live Production Queue</h3>
@@ -385,7 +422,10 @@
                   ✨ <strong>Direct Inline Editing:</strong> Click any cell below to edit Project Name, Client, Artist, or Status. Changes auto-save instantly!
                 </p>
               </div>
-              <button class="btn btn-primary btn-sm" id="btnDashboardNewRequest">+ Add Project</button>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div id="activeKpiFilterBanner" class="active-kpi-filter-pill" style="display: none;"></div>
+                <button class="btn btn-primary btn-sm" id="btnDashboardNewRequest">+ Add Project</button>
+              </div>
             </div>
 
             <!-- Filter & Rows Per Page Controls -->
@@ -652,6 +692,33 @@
     </div>
   </div>
 
+  <!-- MODAL: KPI QUICK-VIEW DRAWER/POPUP -->
+  <div class="modal-backdrop" id="kpiQuickViewModal">
+    <div class="modal-container" style="max-width: 840px; width: 92%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="badge badge-ongoing" id="kpiModalBadge">Active</span>
+          <h3 class="modal-title" id="kpiModalTitle" style="font-size: 16px; font-weight: 800;">KPI Projects View</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="kpiQuickViewModal" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 16px 22px; max-height: 62vh; overflow-y: auto;">
+        <div id="kpiModalContent">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;" id="kpiModalFooterCount">Showing 0 records</span>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" data-close-modal="kpiQuickViewModal">Close</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnKpiModalFilterTable">Filter Queue Table</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: PREVIEW ATTACHMENT -->
   <div class="modal-backdrop" id="attachmentPreviewModal">
     <div class="modal-container" style="max-width: 800px;">
@@ -674,7 +741,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Modular Component Loader & Core Application Scripts -->
-  <script src="pages/includes/components.js?v=20261024_alerts1"></script>
-  <script src="assets/js/script.js?v=20261024_alerts1"></script>
+  <script src="pages/includes/components.js?v=20261024_kpi1"></script>
+  <script src="assets/js/script.js?v=20261024_kpi1"></script>
 </body>
 </html>
