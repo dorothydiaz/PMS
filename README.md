@@ -24,18 +24,23 @@ This application is built with **zero external dependencies, zero build steps, a
 d:\DOROTHY\PMS\PMS\
 │
 ├── index.html                   # Project Dashboard (Main Overview & Live Editable Queue)
-├── sales-requests.html          # Sales Requests (Live Editable Grid, Filters & New Orders)
-├── creatives-tracker.html       # Creatives Production Tracker (Stages, Proof Links & Revisions)
-├── artist-workload.html         # Artist Workload & Capacity Balancing (KPIs, Charts & Roster)
-├── directives-details.html      # Job Directive & Spec Sheet (Printable / Exportable Routing Sheet)
-├── pending-artist.html          # Pending Projects — Artist Queue
-├── pending-sales.html           # Pending Projects — Sales Queue
-├── monthly-output.html          # Monthly Production Output Report (YTD & 12-Month Matrix)
-├── settings.html                # System Settings (Artist/Sales Rosters & Data Backup)
-├── style.css                    # Unified clean minimalist styling, shadows & print stylesheet
-├── script.js                    # Unified reactive engine, cross-page state sync & routing
+├── pages/
+│   ├── sales-requests.html      # Sales Requests (Live Editable Grid, Filters & New Orders)
+│   ├── creatives-tracker.html   # Creatives Production Tracker (Stages, Proof Links & Revisions)
+│   ├── artist-workload.html     # Artist Workload & Capacity Balancing (KPIs, Charts & Roster)
+│   ├── directives-details.html  # Job Directive & Spec Sheet (Printable / Exportable Routing Sheet)
+│   ├── pending-artist.html      # Pending Projects — Artist Queue
+│   ├── pending-sales.html       # Pending Projects — Sales Queue
+│   ├── monthly-output.html      # Monthly Production Output Report (YTD & 12-Month Matrix)
+│   ├── settings.html            # System Settings (Artist/Sales Rosters & Data Backup)
+│   └── includes/
+│       ├── sidebar.html         # Modular Universal Sidebar Component
+│       ├── navbar.html          # Modular Universal Topbar Component
+│       └── components.js        # Universal Component Loader & Navigation Engine
 ├── assets/
-│   └── sign-depot-logo.png      # Official Sign Depot company logo (unaltered)
+│   ├── css/style.css            # Unified clean minimalist styling, shadows & print stylesheet
+│   ├── js/script.js             # Unified reactive engine, cross-page state sync & routing
+│   └── img/sign-depot-logo.png  # Official Sign Depot company logo (unaltered)
 └── README.md                    # Project documentation & run guide
 ```
 

@@ -4098,8 +4098,120 @@
   // ==========================================================================
 
   function initEventListeners() {
+    // Sidebar Desktop Collapse Toggle & Mobile Offcanvas Drawer
+    function ensureMobileBackdrop() {
+      let backdrop = document.querySelector('.sidebar-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(backdrop);
+      }
+      return backdrop;
+    }
+
+    function closeMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      const backdrop = document.querySelector('.sidebar-backdrop');
+      if (appSidebar) appSidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+
+    function openMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      const backdrop = ensureMobileBackdrop();
+      if (appSidebar) appSidebar.classList.add('mobile-open');
+      if (backdrop) backdrop.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+
+    function toggleMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      if (appSidebar && appSidebar.classList.contains('mobile-open')) {
+        closeMobileSidebar();
+      } else {
+        openMobileSidebar();
+      }
+    }
+
+    function toggleDesktopSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      if (!appSidebar) return;
+      appSidebar.classList.toggle('collapsed');
+      const isCollapsed = appSidebar.classList.contains('collapsed');
+      try {
+        localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', isCollapsed ? '1' : '0');
+      } catch (err) {}
+    }
+
+    // Delegated click handler for 100% reliable clicks on buttons and child SVGs
+    document.addEventListener('click', (e) => {
+      const mobileBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn');
+      if (mobileBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMobileSidebar();
+        return;
+      }
+
+      const closeBtn = e.target.closest('#sidebarCloseBtn, .sidebar-close-btn');
+      if (closeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileSidebar();
+        return;
+      }
+
+      const collapseBtn = e.target.closest('#sidebarCollapseBtn, .sidebar-collapse-btn');
+      if (collapseBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.innerWidth <= 992) {
+          closeMobileSidebar();
+        } else {
+          toggleDesktopSidebar();
+        }
+        return;
+      }
+
+      if (e.target.closest('.sidebar-backdrop')) {
+        closeMobileSidebar();
+        return;
+      }
+
+      if (e.target.closest('.sidebar-nav .nav-item') && window.innerWidth <= 992) {
+        closeMobileSidebar();
+      }
+    });
+
+    // Restore desktop collapsed preference
+    try {
+      if (window.innerWidth > 992 && localStorage.getItem('SIGN_DEPOT_SIDEBAR_COLLAPSED') === '1') {
+        const appSidebar = document.getElementById('appSidebar');
+        if (appSidebar) appSidebar.classList.add('collapsed');
+      }
+    } catch (err) {}
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMobileSidebar();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        closeMobileSidebar();
+      } else {
+        const appSidebar = document.getElementById('appSidebar');
+        if (appSidebar) appSidebar.classList.remove('collapsed');
+      }
+    });
+
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
       item.addEventListener('click', (e) => {
+        if (window.innerWidth <= 992) {
+          closeMobileSidebar();
+        }
         const href = item.getAttribute('href');
         const viewId = item.getAttribute('data-view');
 
@@ -4390,6 +4502,9 @@
   }
 
   function initApp() {
+    if (window.SignDepotNav && typeof window.SignDepotNav.renderComponents === 'function') {
+      window.SignDepotNav.renderComponents();
+    }
     loadStateFromStorage();
     initEventListeners();
     setupDirectiveControlsSync();
