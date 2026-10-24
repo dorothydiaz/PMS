@@ -51,22 +51,9 @@ require_once __DIR__ . '/includes/sidebar.php';
               <button class="tab-btn" data-subtab="tab-attachments" id="btnTabAttachments">Attachments (<span id="attachmentsCountBadge">3</span>)</button>
             </div>
             <div class="section-actions">
-              <button class="btn btn-green btn-sm" id="btnDirectiveDownloadSVG" title="Download .svg vector file — Drag & drop directly into CorelDRAW or use File > Import (Ctrl+I)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Download Vector (.svg) — Best for CorelDRAW
-              </button>
               <button class="btn btn-secondary btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (4864 × 648 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator. (Hold Shift to download .png file)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                 Copy Image 4K (Ctrl+V)
-              </button>
-              <button class="btn btn-secondary btn-sm" id="btnDirectiveCopySVG" title="Copy SVG code for Adobe Illustrator, Figma, or Affinity Designer">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                Copy SVG Code
-              </button>
-              <button class="btn btn-secondary btn-sm" id="btnDirectiveSaveDraft">Save Draft</button>
-              <button class="btn btn-primary btn-sm" id="btnDirectivePrint" title="Print or save as PDF perfectly fitted to US Letter Landscape paper (11 × 8.5 inches)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                Print Landscape Letter (11" × 8.5")
               </button>
               <button class="btn btn-secondary btn-sm" id="btnDirectiveReset">Reset</button>
             </div>

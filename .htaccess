@@ -1,0 +1,25 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /PMS/PMS/
+
+    # Redirect /pages/ or /pages/index.php to main dashboard
+    RewriteRule ^pages/?$ index.php [R=301,L]
+    RewriteRule ^pages/index\.php$ index.php [R=301,L]
+
+    # If requested URI exists as a real file or directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Check if file exists with .php in current location
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.*)$ $1.php [L]
+
+    # Check if file requested without pages/ exists in pages/ folder with .php
+    RewriteCond %{DOCUMENT_ROOT}/PMS/PMS/pages/$1.php -f
+    RewriteRule ^([a-zA-Z0-9_-]+)$ pages/$1.php [L]
+
+    # Check if file exists in pages/ with .php
+    RewriteCond %{DOCUMENT_ROOT}/PMS/PMS/pages/$1.php -f
+    RewriteRule ^pages/([a-zA-Z0-9_-]+)$ pages/$1.php [L]
+</IfModule>

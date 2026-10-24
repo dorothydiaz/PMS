@@ -8700,7 +8700,9 @@
       sessionStorage.setItem('SIGN_DEPOT_ACTIVE_KPI', type);
       const currentPath = window.location.pathname.replace(/\\/g, '/');
       const isInsidePagesFolder = currentPath.toLowerCase().includes('/pages/');
-      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-tracker.html?kpi=' + encodeURIComponent(type);
+      const isPhp = window.location.pathname.endsWith('.php') || typeof window.PMS_API_URL !== 'undefined';
+      const ext = isPhp ? '.php' : '.html';
+      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-tracker' + ext + '?kpi=' + encodeURIComponent(type);
       window.location.href = targetUrl;
     },
 
