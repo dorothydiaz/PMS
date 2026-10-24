@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Sales & Creative Production Operations Tracker</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261024_kpi1">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261024_kpi2">
   <link rel="icon" type="image/png" href="assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-dashboard">
@@ -215,9 +215,9 @@
         <!-- MODULE 1: DASHBOARD (Ultra-Modern Panze Studio Layout) -->
         <section class="view-panel active" id="view-dashboard">
           <!-- KPI Summary Cards Grid -->
-          <!-- Interactive KPI Metrics Grid (Clickable & Viewable) -->
+          <!-- Interactive KPI Metrics Grid (Clickable & Navigates to Tracker Table) -->
           <div class="kpi-grid">
-            <div class="kpi-card" id="kpiCardTotal" onclick="window.SignDepotApp.handleKpiCardClick('all')" title="Click to filter queue by All Records">
+            <div class="kpi-card" id="kpiCardTotal" onclick="window.SignDepotApp.navigateToPageTable('all')" title="Click to view All Records in Creatives Tracker table">
               <div class="kpi-header">
                 <span>Total Requests</span>
                 <span class="badge badge-ongoing">All Records</span>
@@ -232,7 +232,7 @@
               </div>
             </div>
 
-            <div class="kpi-card" id="kpiCardPending" onclick="window.SignDepotApp.handleKpiCardClick('pending')" title="Click to filter queue by Pending Approval">
+            <div class="kpi-card" id="kpiCardPending" onclick="window.SignDepotApp.navigateToPageTable('pending')" title="Click to view Pending Approval in Creatives Tracker table">
               <div class="kpi-header">
                 <span>Pending Approval</span>
                 <span class="badge badge-pending">Queue</span>
@@ -247,7 +247,7 @@
               </div>
             </div>
 
-            <div class="kpi-card" id="kpiCardWorking" onclick="window.SignDepotApp.handleKpiCardClick('working')" title="Click to filter queue by Working / On-Going">
+            <div class="kpi-card" id="kpiCardWorking" onclick="window.SignDepotApp.navigateToPageTable('working')" title="Click to view Working / On-Going in Creatives Tracker table">
               <div class="kpi-header">
                 <span>Working / On-Going</span>
                 <span class="badge badge-ongoing">In Progress</span>
@@ -262,22 +262,22 @@
               </div>
             </div>
 
-            <div class="kpi-card" id="kpiCardCompleted" onclick="window.SignDepotApp.handleKpiCardClick('completed')" title="Click to filter queue by Completed">
+            <div class="kpi-card" id="kpiCardApproved" onclick="window.SignDepotApp.navigateToPageTable('approved')" title="Click to view Approved in Creatives Tracker table">
               <div class="kpi-header">
-                <span>Completed</span>
-                <span class="badge badge-completed">Released</span>
+                <span>Approved</span>
+                <span class="badge badge-approved">Approved</span>
               </div>
-              <div class="kpi-value" id="kpiCompleted">0</div>
+              <div class="kpi-value" id="kpiApproved">0</div>
               <div class="kpi-footer-row">
-                <div class="kpi-trend">Fabrication done</div>
-                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('completed')">
+                <div class="kpi-trend">Production cleared</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('approved')">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                   <span>View</span>
                 </button>
               </div>
             </div>
 
-            <div class="kpi-card" id="kpiCardRevising" onclick="window.SignDepotApp.handleKpiCardClick('revising')" title="Click to filter queue by Revising">
+            <div class="kpi-card" id="kpiCardRevising" onclick="window.SignDepotApp.navigateToPageTable('revising')" title="Click to view Revising in Creatives Tracker table">
               <div class="kpi-header">
                 <span>Revising</span>
                 <span class="badge badge-revising">Feedback</span>
@@ -292,7 +292,7 @@
               </div>
             </div>
 
-            <div class="kpi-card" id="kpiCardOverdue" onclick="window.SignDepotApp.handleKpiCardClick('overdue')" title="Click to filter queue by Overdue">
+            <div class="kpi-card" id="kpiCardOverdue" onclick="window.SignDepotApp.navigateToPageTable('overdue')" title="Click to view Overdue in Creatives Tracker table">
               <div class="kpi-header">
                 <span>Overdue</span>
                 <span class="badge badge-priority-rush">Past Due</span>
@@ -741,7 +741,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Modular Component Loader & Core Application Scripts -->
-  <script src="pages/includes/components.js?v=20261024_kpi1"></script>
-  <script src="assets/js/script.js?v=20261024_kpi1"></script>
+  <script src="pages/includes/components.js?v=20261024_kpi2"></script>
+  <script src="assets/js/script.js?v=20261024_kpi2"></script>
 </body>
 </html>

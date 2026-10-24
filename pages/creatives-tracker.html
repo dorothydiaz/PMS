@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Creatives Tracker</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_kpi1">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_kpi2">
   <link rel="icon" type="image/png" href="../assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-creatives-tracker">
@@ -215,8 +215,78 @@
               <p>Directly edit counts (Std/Prt/Spc), Statuses, Deadlines, and Remarks like Google Sheets</p>
             </div>
             <div class="section-actions">
+              <div id="trackerKpiFilterBanner" class="active-kpi-filter-pill" style="display: none;"></div>
               <button class="btn btn-secondary btn-sm" id="btnQuickExportTrackerCSV">Export CSV</button>
               <button class="btn btn-primary btn-sm" id="btnTrackerNewTask">+ Add Task</button>
+            </div>
+          </div>
+
+          <!-- Interactive KPI Metrics Grid for Creatives Tracker Table -->
+          <div class="kpi-grid" style="margin-bottom: 18px;">
+            <div class="kpi-card" id="trackerKpiCardTotal" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('all')" title="Filter by All Records">
+              <div class="kpi-header">
+                <span>Total Requests</span>
+                <span class="badge badge-ongoing">All Records</span>
+              </div>
+              <div class="kpi-value" id="kpiTotalRequestsTracker">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">All active orders</div>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="trackerKpiCardPending" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('pending')" title="Filter by Pending Approval">
+              <div class="kpi-header">
+                <span>Pending Approval</span>
+                <span class="badge badge-pending">Queue</span>
+              </div>
+              <div class="kpi-value" id="kpiPendingApprovalTracker">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Awaiting review</div>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="trackerKpiCardWorking" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('working')" title="Filter by Working / On-Going">
+              <div class="kpi-header">
+                <span>Working / On-Going</span>
+                <span class="badge badge-ongoing">In Progress</span>
+              </div>
+              <div class="kpi-value" id="kpiWorkingTracker">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Active drafting</div>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="trackerKpiCardApproved" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('approved')" title="Filter by Approved">
+              <div class="kpi-header">
+                <span>Approved</span>
+                <span class="badge badge-approved">Approved</span>
+              </div>
+              <div class="kpi-value" id="kpiApprovedTracker">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Production cleared</div>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="trackerKpiCardRevising" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('revising')" title="Filter by Revising">
+              <div class="kpi-header">
+                <span>Revising</span>
+                <span class="badge badge-revising">Feedback</span>
+              </div>
+              <div class="kpi-value" id="kpiRevisingTracker">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Client alterations</div>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="trackerKpiCardOverdue" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('overdue')" title="Filter by Overdue">
+              <div class="kpi-header">
+                <span>Overdue</span>
+                <span class="badge badge-priority-rush">Past Due</span>
+              </div>
+              <div class="kpi-value" id="kpiOverdueTracker" style="color: var(--accent-red);">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Needs attention</div>
+              </div>
             </div>
           </div>
 
@@ -410,7 +480,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="includes/components.js?v=20261024_kpi1"></script>
-  <script src="../assets/js/script.js?v=20261024_kpi1"></script>
+  <script src="includes/components.js?v=20261024_kpi2"></script>
+  <script src="../assets/js/script.js?v=20261024_kpi2"></script>
 </body>
 </html>

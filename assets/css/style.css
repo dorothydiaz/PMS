@@ -986,33 +986,41 @@ body {
   transform: translateY(-2px);
 }
 
-.kpi-card#kpiCardPending.active {
+.kpi-card#kpiCardPending.active,
+.kpi-card#trackerKpiCardPending.active {
   border-color: #D97706 !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #FFFBEB 100%) !important;
   box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15), 0 8px 20px -3px rgba(217, 119, 6, 0.12) !important;
 }
 
-.kpi-card#kpiCardWorking.active {
+.kpi-card#kpiCardWorking.active,
+.kpi-card#trackerKpiCardWorking.active {
   border-color: #3B82F6 !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #EFF6FF 100%) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 8px 20px -3px rgba(59, 130, 246, 0.12) !important;
 }
 
+.kpi-card#kpiCardApproved.active,
+.kpi-card#trackerKpiCardApproved.active,
 .kpi-card#kpiCardCompleted.active {
   border-color: #059669 !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #ECFDF5 100%) !important;
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15), 0 8px 20px -3px rgba(5, 150, 105, 0.12) !important;
 }
 
-.kpi-card#kpiCardRevising.active {
+.kpi-card#kpiCardRevising.active,
+.kpi-card#trackerKpiCardRevising.active {
   border-color: #8B5CF6 !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #F5F3FF 100%) !important;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15), 0 8px 20px -3px rgba(139, 92, 246, 0.12) !important;
 }
 
-.kpi-card#kpiCardOverdue.active {
+.kpi-card#kpiCardOverdue.active,
+.kpi-card#trackerKpiCardOverdue.active {
   border-color: #E11D48 !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #FFF1F2 100%) !important;
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15), 0 8px 20px -3px rgba(225, 29, 72, 0.12) !important;
+}
   box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15), 0 8px 20px -3px rgba(225, 29, 72, 0.12) !important;
 }
 

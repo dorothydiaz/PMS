@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sign Depot — Sales & Creative Production Tracker
  * Frontend Application Engine (Vanilla JS, Local Persistence)
  * With Panze Studio Aesthetic & Direct Inline Editable Tables
@@ -886,6 +886,7 @@
     dashboardDeadline: '',
     dashboardKpiFilter: '',
     dashboardPage: 1,
+    trackerKpiFilter: 'all',
     dashboardPerPage: initialRowsPerPage,
     monthlyOutputPage: 1,
     monthlyOutputPerPage: initialRowsPerPage,
@@ -1712,8 +1713,8 @@
     if (type === 'working') {
       return reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
     }
-    if (type === 'completed') {
-      return reqs.filter(r => r.projectStatus === 'Completed');
+    if (type === 'approved' || type === 'completed') {
+      return reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved');
     }
     if (type === 'revising') {
       return reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
@@ -1729,16 +1730,26 @@
     const totalRequests = reqs.length;
     const pendingApproval = reqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
     const working = reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
-    const completed = reqs.filter(r => r.projectStatus === 'Completed').length;
+    const approved = reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
     const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
     const overdue = reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus)).length;
 
-    document.getElementById('kpiTotalRequests').textContent = totalRequests;
-    document.getElementById('kpiPendingApproval').textContent = pendingApproval;
-    document.getElementById('kpiWorking').textContent = working;
-    document.getElementById('kpiCompleted').textContent = completed;
-    document.getElementById('kpiRevising').textContent = revising;
-    document.getElementById('kpiOverdue').textContent = overdue;
+    // Dashboard elements
+    const elTot = document.getElementById('kpiTotalRequests'); if (elTot) elTot.textContent = totalRequests;
+    const elPend = document.getElementById('kpiPendingApproval'); if (elPend) elPend.textContent = pendingApproval;
+    const elWork = document.getElementById('kpiWorking'); if (elWork) elWork.textContent = working;
+    const elAppr = document.getElementById('kpiApproved'); if (elAppr) elAppr.textContent = approved;
+    const elComp = document.getElementById('kpiCompleted'); if (elComp) elComp.textContent = approved;
+    const elRev = document.getElementById('kpiRevising'); if (elRev) elRev.textContent = revising;
+    const elOver = document.getElementById('kpiOverdue'); if (elOver) elOver.textContent = overdue;
+
+    // Creatives Tracker KPI elements
+    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = totalRequests;
+    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = pendingApproval;
+    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = working;
+    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = approved;
+    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = revising;
+    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = overdue;
   }
 
   // Panze Left Column: Soft Pastel Tinted Task Cards
@@ -2223,9 +2234,63 @@
 
   function renderCreativesTracker() {
     populateTrackerFiltersDropdowns();
+    updateDashboardKPIs();
 
     let list = [...state.requests];
     const { search, projectStatus, designStatus, artist, overdue, sortField, sortDir, page, perPage } = state.trackerFilter;
+
+    // Apply KPI filter if active on Creatives Tracker
+    if (state.trackerKpiFilter && state.trackerKpiFilter !== 'all') {
+      const kf = state.trackerKpiFilter;
+      if (kf === 'pending') {
+        list = list.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
+      } else if (kf === 'working') {
+        list = list.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
+      } else if (kf === 'approved') {
+        list = list.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved');
+      } else if (kf === 'revising') {
+        list = list.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
+      } else if (kf === 'overdue') {
+        list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+      }
+    }
+
+    // Sync active KPI filter banner & card highlights on Creatives Tracker
+    const kpiBanner = document.getElementById('trackerKpiFilterBanner');
+    if (kpiBanner) {
+      if (state.trackerKpiFilter && state.trackerKpiFilter !== 'all') {
+        const labels = {
+          pending: 'Pending Approval',
+          working: 'Working / On-Going',
+          approved: 'Approved',
+          revising: 'Revising',
+          overdue: 'Overdue'
+        };
+        const label = labels[state.trackerKpiFilter] || state.trackerKpiFilter;
+        kpiBanner.style.display = 'inline-flex';
+        kpiBanner.innerHTML = `
+          <span>Filtered: <strong>${escapeHTML(label)}</strong> (${list.length} tasks)</span>
+          <button class="clear-kpi-btn" title="Clear filter" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('all')">&times; Show All</button>
+        `;
+      } else {
+        kpiBanner.style.display = 'none';
+        kpiBanner.innerHTML = '';
+      }
+    }
+
+    const trackerKpiCardMap = {
+      all: document.getElementById('trackerKpiCardTotal'),
+      pending: document.getElementById('trackerKpiCardPending'),
+      working: document.getElementById('trackerKpiCardWorking'),
+      approved: document.getElementById('trackerKpiCardApproved'),
+      revising: document.getElementById('trackerKpiCardRevising'),
+      overdue: document.getElementById('trackerKpiCardOverdue')
+    };
+    Object.entries(trackerKpiCardMap).forEach(([k, card]) => {
+      if (!card) return;
+      const isAct = (state.trackerKpiFilter || 'all') === k;
+      card.classList.toggle('active', isAct);
+    });
 
     if (search) {
       const q = search.toLowerCase();
@@ -4507,6 +4572,62 @@
     switchView: switchView,
 
     // KPI Cards Clickable & Viewable Public API
+    navigateToPageTable: (type) => {
+      sessionStorage.setItem('SIGN_DEPOT_ACTIVE_KPI', type);
+      const currentPath = window.location.pathname.replace(/\\/g, '/');
+      const isInsidePagesFolder = currentPath.toLowerCase().includes('/pages/');
+      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-tracker.html?kpi=' + encodeURIComponent(type);
+      window.location.href = targetUrl;
+    },
+
+    applyKpiFilterToCreativesTracker: (type) => {
+      if (state.trackerKpiFilter === type && type !== 'all') {
+        state.trackerKpiFilter = 'all';
+      } else {
+        state.trackerKpiFilter = type || 'all';
+      }
+
+      state.trackerFilter.page = 1;
+
+      // Reset dropdown inputs to match cleanly
+      const statusSelect = document.getElementById('trackerFilterProjectStatus');
+      const overdueSelect = document.getElementById('trackerFilterOverdue');
+      if (statusSelect) statusSelect.value = '';
+      if (overdueSelect) overdueSelect.value = '';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.overdue = '';
+
+      renderCreativesTracker();
+
+      const labels = {
+        all: 'All Requests',
+        pending: 'Pending Approval',
+        working: 'Working / On-Going',
+        approved: 'Approved',
+        revising: 'Revising',
+        overdue: 'Overdue'
+      };
+      showToast(`Showing ${labels[state.trackerKpiFilter] || 'All'} in Creatives Tracker`, 'info');
+    },
+
+    clearTrackerKpiFilter: () => {
+      state.trackerKpiFilter = 'all';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.designStatus = '';
+      state.trackerFilter.artist = '';
+      state.trackerFilter.overdue = '';
+      state.trackerFilter.search = '';
+      state.trackerFilter.page = 1;
+      const statusSel = document.getElementById('trackerFilterProjectStatus');
+      if (statusSel) statusSel.value = '';
+      const overdueSel = document.getElementById('trackerFilterOverdue');
+      if (overdueSel) overdueSel.value = '';
+      const searchInput = document.getElementById('trackerSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderCreativesTracker();
+      showToast('Showing all tasks in Creatives Tracker', 'info');
+    },
+
     handleKpiCardClick: (type) => {
       if (state.dashboardKpiFilter === type && type !== 'all') {
         state.dashboardKpiFilter = 'all';
@@ -4560,7 +4681,8 @@
         all: { title: 'Total Active Requests', badge: 'All Records', badgeClass: 'badge-ongoing' },
         pending: { title: 'Pending Approval Queue', badge: 'Queue', badgeClass: 'badge-pending' },
         working: { title: 'Working & On-Going Projects', badge: 'In Progress', badgeClass: 'badge-ongoing' },
-        completed: { title: 'Completed Projects', badge: 'Released', badgeClass: 'badge-completed' },
+        approved: { title: 'Approved Projects', badge: 'Approved', badgeClass: 'badge-approved' },
+        completed: { title: 'Approved Projects', badge: 'Approved', badgeClass: 'badge-approved' },
         revising: { title: 'Client Revision Requests', badge: 'Feedback', badgeClass: 'badge-revising' },
         overdue: { title: 'Past Due / Overdue Projects', badge: 'Past Due', badgeClass: 'badge-priority-rush' }
       };
@@ -4630,9 +4752,9 @@
       if (filterBtn) {
         filterBtn.onclick = () => {
           modal.classList.remove('show');
-          window.SignDepotApp.handleKpiCardClick(type);
+          window.SignDepotApp.navigateToPageTable(type);
         };
-        filterBtn.textContent = `Filter Queue (${items.length})`;
+        filterBtn.textContent = `Open in Tracker Table (${items.length}) â†—`;
       }
 
       modal.classList.add('show');
@@ -5541,6 +5663,13 @@
     const joParam = urlParams.get('jo');
     if (joParam) {
       state.currentDirectiveJo = joParam;
+    }
+
+    const kpiParam = urlParams.get('kpi') || sessionStorage.getItem('SIGN_DEPOT_ACTIVE_KPI');
+    if (kpiParam) {
+      sessionStorage.removeItem('SIGN_DEPOT_ACTIVE_KPI');
+      state.trackerKpiFilter = kpiParam;
+      state.dashboardKpiFilter = kpiParam;
     }
 
     const currentView = detectCurrentPage();
