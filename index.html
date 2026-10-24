@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Depot — Sales & Creative Production Operations Tracker</title>
+  <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261024_uifix">
+  <link rel="icon" type="image/png" href="assets/img/sign-depot-logo.png">
+</head>
+<body data-page="view-dashboard">
+  <div class="app-container">
+    <!-- Sidebar Navigation (Panze-Studio Modern Pill & Icon Layout) -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="brand-link" id="brandHomeLink" title="Sign Depot">
+          <img src="assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+            <path d="M9 3v18"></path>
+            <polyline class="toggle-arrow" points="15 9 12 12 15 15"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Operations</div>
+        
+        <a class="nav-item active" href="index.html" data-view="view-dashboard" title="Dashboard">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9"></rect>
+              <rect x="14" y="3" width="7" height="5"></rect>
+              <rect x="14" y="12" width="7" height="9"></rect>
+              <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Project Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="pages/sales-requests.html" data-view="view-sales-requests" title="Sales Requests">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Sales Requests</span>
+        </a>
+
+        <a class="nav-item" href="pages/creatives-tracker.html" data-view="view-creatives-tracker" title="Creatives Tracker">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Creatives Tracker</span>
+        </a>
+
+        <a class="nav-item" href="pages/artist-workload.html" data-view="view-artist-workload" title="Artist Workload">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Artist Workload</span>
+        </a>
+
+        <div class="nav-section-label">Directives</div>
+
+        <a class="nav-item" href="pages/directives-details.html" data-view="view-directives-details" title="Directives Details">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Directives Details</span>
+        </a>
+
+        <div class="nav-section-label">Pending Queues</div>
+
+        <a class="nav-item" href="pages/pending-artist.html" data-view="view-pending-artist" title="Pending Artist">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Artist</span>
+        </a>
+
+        <a class="nav-item" href="pages/pending-sales.html" data-view="view-pending-sales" title="Pending Sales">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Pending — Sales</span>
+        </a>
+
+        <div class="nav-section-label">Analytics & Config</div>
+
+        <a class="nav-item" href="pages/monthly-output.html" data-view="view-monthly-output" title="Monthly Output">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Monthly Output</span>
+        </a>
+
+        <a class="nav-item" href="pages/settings.html" data-view="view-settings" title="Settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="badge-prototype">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Live Inline Editable
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper Area -->
+    <div class="main-wrapper">
+      <!-- Universal Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="page-header-info">
+            <span class="page-category-tag">Operations Overview</span>
+            <h1 class="module-title" id="moduleTitle">
+              Project Dashboard
+              <span class="module-badge" id="moduleCategoryBadge">Live Status</span>
+            </h1>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Timeframe Pills (Today | This Week | This Month) like Panze -->
+          <div class="timeframe-pill-group">
+            <button class="timeframe-btn" data-timeframe="today">Today</button>
+            <button class="timeframe-btn" data-timeframe="week">This Week</button>
+            <button class="timeframe-btn active" data-timeframe="month">This Month</button>
+            <button class="timeframe-btn" data-timeframe="all">All Time</button>
+          </div>
+
+          <!-- Live Auto-Save Indicator -->
+          <div class="auto-save-pill" >
+            <span class="auto-save-dot"></span>
+            <span>Auto-Saved</span>
+          </div>
+
+          <!-- Global Search -->
+          <div class="global-search-container">
+            <svg class="global-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="global-search-input" id="globalSearchInput" placeholder="Quick search..." autocomplete="off">
+            <div class="quick-search-results" id="quickSearchResults"></div>
+          </div>
+
+          <!-- User Menu -->
+          <div class="user-profile-menu">
+            <button class="user-profile-btn" id="userProfileBtn">
+              <div class="user-avatar">DC</div>
+              <div class="user-meta">
+                <span class="user-name">Ed</span>
+                <span class="user-role">Creative Lead</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="dropdown-popover" id="userProfileDropdown">
+              <div class="dropdown-item" id="btnQuickDirectiveSample">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Load Sample Directive (URAL)
+              </div>
+              <div class="dropdown-item" id="btnResetLocalStorage">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Reset Mock Data
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" id="btnGotoSettings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                System Settings
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Container with Project Dashboard View -->
+      <main class="main-content">
+        <!-- MODULE 1: DASHBOARD (Ultra-Modern Panze Studio Layout) -->
+        <section class="view-panel active" id="view-dashboard">
+          <!-- KPI Summary Cards Grid -->
+          <!-- Interactive KPI Metrics Grid (Clickable & Navigates to Tracker Table) -->
+          <div class="kpi-grid">
+            <div class="kpi-card" id="kpiCardTotal" onclick="window.SignDepotApp.navigateToPageTable('all')" title="Click to view All Records in Creatives Tracker table">
+              <div class="kpi-header">
+                <span>Total Requests</span>
+                <span class="badge badge-ongoing">All Records</span>
+              </div>
+              <div class="kpi-value" id="kpiTotalRequests">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Active production logs</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('all')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="kpiCardPending" onclick="window.SignDepotApp.navigateToPageTable('pending')" title="Click to view Pending Approval in Creatives Tracker table">
+              <div class="kpi-header">
+                <span>Pending Approval</span>
+                <span class="badge badge-pending">Queue</span>
+              </div>
+              <div class="kpi-value" id="kpiPendingApproval">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Awaiting review</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('pending')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="kpiCardWorking" onclick="window.SignDepotApp.navigateToPageTable('working')" title="Click to view Working / On-Going in Creatives Tracker table">
+              <div class="kpi-header">
+                <span>Working / On-Going</span>
+                <span class="badge badge-ongoing">In Progress</span>
+              </div>
+              <div class="kpi-value" id="kpiWorking">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Active drafting</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('working')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="kpiCardApproved" onclick="window.SignDepotApp.navigateToPageTable('approved')" title="Click to view Approved in Creatives Tracker table">
+              <div class="kpi-header">
+                <span>Approved</span>
+                <span class="badge badge-approved">Approved</span>
+              </div>
+              <div class="kpi-value" id="kpiApproved">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Production cleared</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('approved')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="kpiCardRevising" onclick="window.SignDepotApp.navigateToPageTable('revising')" title="Click to view Revising in Creatives Tracker table">
+              <div class="kpi-header">
+                <span>Revising</span>
+                <span class="badge badge-revising">Feedback</span>
+              </div>
+              <div class="kpi-value" id="kpiRevising">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Client alterations</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('revising')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="kpi-card" id="kpiCardOverdue" onclick="window.SignDepotApp.navigateToPageTable('overdue')" title="Click to view Overdue in Creatives Tracker table">
+              <div class="kpi-header">
+                <span>Overdue</span>
+                <span class="badge badge-priority-rush">Past Due</span>
+              </div>
+              <div class="kpi-value" id="kpiOverdue" style="color: var(--accent-red);">0</div>
+              <div class="kpi-footer-row">
+                <div class="kpi-trend">Needs attention</div>
+                <button class="kpi-quick-btn" title="Quick View" onclick="event.stopPropagation(); window.SignDepotApp.openKpiQuickView('overdue')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panze Studio 3-Column Spotlight -->
+          <div class="dashboard-panze-grid">
+            <!-- Left Column: "My Tasks" (Pastel Tinted Cards) -->
+            <div class="studio-card">
+              <div class="task-column-header">
+                <h3 style="font-size: 16px; font-weight: 800;">Active Tasks</h3>
+                <button class="circle-action-btn" id="btnPanzeAddTask" title="Add Task">+</button>
+              </div>
+
+              <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <button class="timeframe-btn active" style="font-size: 11px; padding: 4px 12px;">Active Queue</button>
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-left: auto;">
+                  <span class="badge badge-ongoing" id="panzeActiveTasksCountBadge">12</span>
+                  <span>Tasks</span>
+                </div>
+              </div>
+
+              <!-- Pastel Tinted Task Cards Container -->
+              <div id="panzeTasksCardList">
+                <!-- Dynamically populated task cards -->
+              </div>
+            </div>
+
+            <!-- Middle Column: "Projects Overview" (Donut Chart & Legend) -->
+            <div class="studio-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="task-column-header">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">Projects Overview</h3>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Real-time status breakdown</span>
+                </div>
+                <button class="circle-action-btn" onclick="window.SignDepotApp.switchView('view-creatives-tracker')" title="Open Tracker">↗</button>
+              </div>
+
+              <div class="donut-chart-wrap">
+                <div id="panzeDonutChartSvgContainer" style="width: 220px; height: 220px;"></div>
+                <div class="donut-legend" id="panzeDonutLegend"></div>
+              </div>
+
+              <div style="border-top: 1px solid var(--border-light); padding-top: 16px; margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 12.5px; font-weight: 700;">2026 Production Pace</span>
+                  <span style="font-size: 12px; font-weight: 800; color: var(--primary-green);">High Output</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Artist Capacity Overview -->
+            <div class="studio-card">
+              <div class="task-column-header">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">Artist Capacity</h3>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Live workload limits</span>
+                </div>
+                <button class="circle-action-btn" onclick="window.SignDepotApp.switchView('view-artist-workload')" title="Workload Details">↗</button>
+              </div>
+              <div id="dashboardWorkloadSummaryList">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Directly Inline Editable Recent Projects Table -->
+          <div class="studio-card" id="liveProductionQueueCard">
+            <div class="section-header-row" style="margin-bottom: 14px;">
+              <div>
+                <h3 style="font-size: 17px; font-weight: 800;">Live Production Queue</h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                  ✨ <strong>Direct Inline Editing:</strong> Click any cell below to edit Project Name, Client, Artist, or Status. Changes auto-save instantly!
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div id="activeKpiFilterBanner" class="active-kpi-filter-pill" style="display: none;"></div>
+                <button class="btn btn-primary btn-sm" id="btnDashboardNewRequest">+ Add Project</button>
+              </div>
+            </div>
+
+            <!-- Filter & Rows Per Page Controls -->
+            <div class="filter-bar" style="margin-bottom: 14px;">
+              <div class="filter-group">
+                <input type="text" class="filter-input" id="dashboardSearchInput" placeholder="Search live orders..." style="width: 220px;">
+                <select class="filter-input" id="dashboardFilterStatus">
+                  <option value="">All Statuses</option>
+                  <option value="Approved">Approved</option>
+                  <option value="On-going">On-going</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Completed">Completed</option>
+                </select>
+                <select class="filter-input" id="dashboardFilterDeadline" title="Filter by Deadline Status">
+                  <option value="">All Deadlines</option>
+                  <option value="overdue">🔴 Past Due</option>
+                  <option value="today">🟠 Due Today</option>
+                  <option value="soon">🟡 Almost Due (48h)</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <div class="filter-rows-wrap">
+                  <label for="dashboardFilterPerPage">Show:</label>
+                  <select class="filter-input rows-filter-select" id="dashboardFilterPerPage" title="Rows to display">
+                    <option value="10" selected>10 rows</option>
+                    <option value="15">15 rows</option>
+                    <option value="20">20 rows</option>
+                    <option value="25">25 rows</option>
+                    <option value="30">30 rows</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-studio-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Req ID</th>
+                    <th>JO #</th>
+                    <th>Project Name (Editable)</th>
+                    <th>Client (Editable)</th>
+                    <th>Artist</th>
+                    <th>Deadline</th>
+                    <th>Project Status</th>
+                    <th>Priority</th>
+                    <th class="no-sort">Directive</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentProjectsBody">
+                  <!-- Populated dynamically with inline editable cells -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Dashboard Pagination Container -->
+            <div class="pagination-container" id="dashboardPagination" style="margin-top: 14px;">
+              <div class="pagination-info-group">
+                <div class="pagination-info" id="dashboardPaginationInfo">Showing 0-0 of 0</div>
+                <div class="pagination-rows-select-wrap">
+                  <label for="dashboardPaginationPerPage">Show:</label>
+                  <select class="filter-input-sm" id="dashboardPaginationPerPage" title="Rows to display">
+                    <option value="10" selected>10 rows</option>
+                    <option value="15">15 rows</option>
+                    <option value="20">20 rows</option>
+                    <option value="25">25 rows</option>
+                    <option value="30">30 rows</option>
+                  </select>
+                </div>
+              </div>
+              <div class="pagination-controls" id="dashboardPaginationControls"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT SALES REQUEST -->
+  <div class="modal-backdrop" id="salesModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="salesModalTitle">New Sales Request</h3>
+        <button class="modal-close-btn" data-close-modal="salesModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="salesRequestForm">
+        <div class="modal-body">
+          <input type="hidden" id="salesFormId">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label required">Request ID</label>
+              <input type="text" class="form-control" id="salesFormReqId" required placeholder="e.g. LR-26-1230">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">J.O. Number (Manual Entry)</label>
+              <input type="text" class="form-control" id="salesFormJo" required placeholder="e.g. P260701373">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Project Name</label>
+              <input type="text" class="form-control" id="salesFormProject" required placeholder="e.g. URAL Acrylic Sign">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Client Name</label>
+              <input type="text" class="form-control" id="salesFormClient" required placeholder="e.g. PAU ACILAC">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Assigned Artist</label>
+              <select class="form-control" id="salesFormArtist" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Sales Representative</label>
+              <select class="form-control" id="salesFormSalesRep" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Design Deadline</label>
+              <input type="date" class="form-control" id="salesFormDeadline" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Releasing Date</label>
+              <input type="date" class="form-control" id="salesFormReleasingDate">
+            </div>
+            <div class="form-group">
+              <label class="form-label">File Sent Status</label>
+              <select class="form-control" id="salesFormFileSent">
+                <option value="Sent">File Sent</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Client Approval</label>
+              <select class="form-control" id="salesFormClientApproval">
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Revision Requested">Revision Requested</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority Level</label>
+              <select class="form-control" id="salesFormPriority">
+                <option value="Rush">Rush</option>
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mode of Releasing</label>
+              <select class="form-control" id="salesFormReleasingMode">
+                <option value="INSTALL">INSTALL</option>
+                <option value="DELIVER">DELIVER</option>
+                <option value="PICKUP">PICKUP</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Person</label>
+              <input type="text" class="form-control" id="salesFormContactPerson" placeholder="Name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Number</label>
+              <input type="text" class="form-control" id="salesFormContactNumber" placeholder="e.g. 639178805364">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Complete Site / Delivery Address</label>
+              <input type="text" class="form-control" id="salesFormAddress" placeholder="Full address">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="salesModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveSalesRequest">Save Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT CREATIVE TASK -->
+  <div class="modal-backdrop" id="trackerModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="trackerModalTitle">Edit Creative Task</h3>
+        <button class="modal-close-btn" data-close-modal="trackerModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="trackerTaskForm">
+        <div class="modal-body">
+          <input type="hidden" id="trackerFormId">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label required">Request ID</label>
+              <input type="text" class="form-control" id="trackerFormReqId" required readonly style="background: #F1F5F9;">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Assigned Artist</label>
+              <select class="form-control" id="trackerFormArtist" required></select>
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label required">Project Name</label>
+              <input type="text" class="form-control" id="trackerFormProject" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Design Deadline</label>
+              <input type="date" class="form-control" id="trackerFormDeadline" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Artist Head Approval</label>
+              <select class="form-control" id="trackerFormHeadApproval">
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Needs Revision">Needs Revision</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project Status</label>
+              <select class="form-control" id="trackerFormProjectStatus">
+                <option value="Pending">Pending</option>
+                <option value="On-going">On-going</option>
+                <option value="Approved">Approved</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+                <option value="On Hold">On Hold</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Design Status</label>
+              <select class="form-control" id="trackerFormDesignStatus">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Standard Count</label>
+              <input type="number" class="form-control" id="trackerFormStd" min="0" value="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Printing Count</label>
+              <input type="number" class="form-control" id="trackerFormPrt" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Special Count</label>
+              <input type="number" class="form-control" id="trackerFormSpc" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Revision Count</label>
+              <input type="number" class="form-control" id="trackerFormRev" min="0" value="0">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Remarks</label>
+              <textarea class="form-control" id="trackerFormRemarks" placeholder="Production notes..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="trackerModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveTrackerTask">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: KPI QUICK-VIEW DRAWER/POPUP -->
+  <div class="modal-backdrop" id="kpiQuickViewModal">
+    <div class="modal-container" style="max-width: 840px; width: 92%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="badge badge-ongoing" id="kpiModalBadge">Active</span>
+          <h3 class="modal-title" id="kpiModalTitle" style="font-size: 16px; font-weight: 800;">KPI Projects View</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="kpiQuickViewModal" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 16px 22px; max-height: 62vh; overflow-y: auto;">
+        <div id="kpiModalContent">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;" id="kpiModalFooterCount">Showing 0 records</span>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" data-close-modal="kpiQuickViewModal">Close</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnKpiModalFilterTable">Filter Queue Table</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PREVIEW ATTACHMENT -->
+  <div class="modal-backdrop" id="attachmentPreviewModal">
+    <div class="modal-container" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="attachmentModalTitle">Attachment Preview</h3>
+        <button class="modal-close-btn" data-close-modal="attachmentPreviewModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 16px; align-items: center; justify-content: center; background: #0F172A;">
+        <img id="attachmentModalImg" src="" alt="Proof Preview" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 4px;">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="attachmentPreviewModal">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Hub -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Modular Component Loader & Core Application Scripts -->
+  <script src="pages/includes/components.js?v=20261024_uifix"></script>
+  <script src="assets/js/script.js?v=20261024_uifix"></script>
+</body>
+</html>
