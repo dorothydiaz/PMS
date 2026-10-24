@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Sign Depot — Sales & Creative Production Tracker
  * Frontend Application Engine (Vanilla JS, Local Persistence)
  * With Panze Studio Aesthetic & Direct Inline Editable Tables
@@ -1330,6 +1330,17 @@
     observer.observe(document.body, { childList: true, subtree: true, attributeFilter: ['title'] });
 
     document.addEventListener('mouseover', (e) => {
+      // Suppress tooltips if deadline alert dropdown or any modal is open
+      const alertDd = document.getElementById('deadlineAlertDropdown');
+      if (alertDd && alertDd.classList.contains('show')) {
+        tooltip.classList.remove('show');
+        return;
+      }
+      if (e.target.closest('#deadlineAlertContainer, .deadline-alert-dropdown, .deadline-alert-btn')) {
+        tooltip.classList.remove('show');
+        return;
+      }
+
       const target = e.target.closest('[data-tooltip]');
       if (!target) {
         tooltip.classList.remove('show');
@@ -1372,26 +1383,13 @@
     window.addEventListener('scroll', () => tooltip.classList.remove('show'), { passive: true });
   }
 
-  // Generates directly editable date picker HTML with responsive deadline urgency pill
+  // Generates directly editable date picker HTML
   function renderInlineDate(reqId, fieldName, currentDateValue, projectStatus) {
-    let pillHtml = '';
-    if (fieldName === 'designDeadline' && currentDateValue) {
-      const alertInfo = getDeadlineAlertStatus(currentDateValue, projectStatus);
-      if (alertInfo.status === 'overdue') {
-        pillHtml = `<span class="deadline-pill deadline-pill-overdue" title="${escapeHTML(alertInfo.diffText)}">${escapeHTML(alertInfo.pillText)}</span>`;
-      } else if (alertInfo.status === 'today') {
-        pillHtml = `<span class="deadline-pill deadline-pill-today" title="Due today">Today</span>`;
-      } else if (alertInfo.status === 'soon') {
-        pillHtml = `<span class="deadline-pill deadline-pill-soon" title="${escapeHTML(alertInfo.diffText)}">${escapeHTML(alertInfo.pillText)}</span>`;
-      }
-    }
-
     return `
       <div class="inline-date-cell-wrap">
         <input type="date" class="inline-date-input" value="${currentDateValue || ''}"
           data-req-id="${reqId}" data-field="${fieldName}"
           onchange="window.SignDepotApp.handleInlineDateChange(this)">
-        ${pillHtml}
       </div>
     `;
   }
@@ -4537,8 +4535,11 @@
         <div class="deadline-alert-item ${sevClass}" data-req-id="${r.id}">
           <div class="alert-item-header">
             <div class="alert-item-left">
-              <span class="alert-jo-badge">${escapeHTML(r.requestId || r.joNumber || r.id)}</span>
-              <span class="alert-project-title" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+              <div class="alert-item-topline">
+                <span class="alert-jo-badge">${escapeHTML(r.requestId || r.joNumber || r.id)}</span>
+                <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:1px 6px;">${escapeHTML(r.projectStatus)}</span>
+              </div>
+              <h4 class="alert-project-title" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</h4>
             </div>
             <span class="deadline-pill ${pillClass}">${escapeHTML(a.diffText)}</span>
           </div>
@@ -4546,17 +4547,16 @@
           <div class="alert-item-meta">
             <span class="alert-meta-point">Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
             <span class="alert-meta-point">Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
-            <span class="alert-meta-point">Status: <span class="badge badge-ongoing" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
           </div>
 
           <div class="alert-item-actions">
-            <button class="alert-action-btn" onclick="window.SignDepotApp.filterByDeadlineProject('${r.id}')" title="Find and highlight in table">
+            <button class="alert-action-btn btn-view-table" onclick="window.SignDepotApp.filterByDeadlineProject('${r.id}')" title="Find and highlight in table">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              View in Table
+              <span>View in Table</span>
             </button>
-            <button class="alert-action-btn" onclick="window.SignDepotApp.openDirectiveForRequest('${r.id}')" title="Open Job Order Blueprint">
+            <button class="alert-action-btn btn-view-directive" onclick="window.SignDepotApp.openDirectiveForRequest('${r.id}')" title="Open Job Order Blueprint">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
-              Directive
+              <span>Directive</span>
             </button>
           </div>
         </div>
@@ -5556,6 +5556,8 @@
         e.stopPropagation();
         if (alertDropdown) {
           alertDropdown.classList.toggle('show');
+          const globalTip = document.getElementById('sdGlobalTooltip');
+          if (globalTip) globalTip.classList.remove('show');
         }
         return;
       }

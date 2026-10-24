@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sign Depot Creative Operations — Modular Component Loader (Sidebar & Navbar)
  * File: pages/includes/components.js
  * Automatically renders, binds, and manages responsive navigation for all pages
@@ -254,7 +254,7 @@
     </div>
 
     <!-- Live Auto-Save Indicator -->
-    <div class="auto-save-pill" title="Every table edit is automatically saved">
+    <div class="auto-save-pill" >
       <span class="auto-save-dot"></span>
       <span>Auto-Saved</span>
     </div>
