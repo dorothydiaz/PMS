@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Creatives Tracker</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_rows1">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_alerts1">
   <link rel="icon" type="image/png" href="../assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-creatives-tracker">
@@ -245,10 +245,12 @@
               <select class="filter-input" id="trackerFilterArtist">
                 <option value="">All Artists</option>
               </select>
-              <select class="filter-input" id="trackerFilterOverdue">
+              <select class="filter-input" id="trackerFilterOverdue" title="Filter by Deadline Status">
                 <option value="">All Deadlines</option>
-                <option value="overdue">Overdue Only</option>
-                <option value="ontime">On Track Only</option>
+                <option value="overdue">🔴 Past Due</option>
+                <option value="today">🟠 Due Today</option>
+                <option value="soon">🟡 Almost Due (48h)</option>
+                <option value="ontime">🟢 On Track</option>
               </select>
             </div>
             <div class="filter-group">
@@ -408,7 +410,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="includes/components.js?v=20261024_rows1"></script>
-  <script src="../assets/js/script.js?v=20261024_rows1"></script>
+  <script src="includes/components.js?v=20261024_alerts1"></script>
+  <script src="../assets/js/script.js?v=20261024_alerts1"></script>
 </body>
 </html>

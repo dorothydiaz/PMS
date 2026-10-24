@@ -996,6 +996,7 @@
     }
 
     saveStateToStorage();
+    updateDeadlineAlertCenter();
 
     // Dynamically refresh dependent views if on Dashboard, Workload or Output
     if (state.activeView === 'view-dashboard') {
@@ -1368,12 +1369,27 @@
     window.addEventListener('scroll', () => tooltip.classList.remove('show'), { passive: true });
   }
 
-  // Generates directly editable date picker HTML
-  function renderInlineDate(reqId, fieldName, currentDateValue) {
+  // Generates directly editable date picker HTML with responsive deadline urgency pill
+  function renderInlineDate(reqId, fieldName, currentDateValue, projectStatus) {
+    let pillHtml = '';
+    if (fieldName === 'designDeadline' && currentDateValue) {
+      const alertInfo = getDeadlineAlertStatus(currentDateValue, projectStatus);
+      if (alertInfo.status === 'overdue') {
+        pillHtml = `<span class="deadline-pill deadline-pill-overdue" title="${escapeHTML(alertInfo.diffText)}">${escapeHTML(alertInfo.pillText)}</span>`;
+      } else if (alertInfo.status === 'today') {
+        pillHtml = `<span class="deadline-pill deadline-pill-today" title="Due today">Today</span>`;
+      } else if (alertInfo.status === 'soon') {
+        pillHtml = `<span class="deadline-pill deadline-pill-soon" title="${escapeHTML(alertInfo.diffText)}">${escapeHTML(alertInfo.pillText)}</span>`;
+      }
+    }
+
     return `
-      <input type="date" class="inline-date-input" value="${currentDateValue || ''}"
-        data-req-id="${reqId}" data-field="${fieldName}"
-        onchange="window.SignDepotApp.handleInlineDateChange(this)">
+      <div class="inline-date-cell-wrap">
+        <input type="date" class="inline-date-input" value="${currentDateValue || ''}"
+          data-req-id="${reqId}" data-field="${fieldName}"
+          onchange="window.SignDepotApp.handleInlineDateChange(this)">
+        ${pillHtml}
+      </div>
     `;
   }
 
@@ -1447,11 +1463,70 @@
     return dateStr.toUpperCase();
   }
 
+  // Real-time Deadline Alert Calculation based on user local date
+  function getDeadlineAlertStatus(deadlineStr, projectStatus) {
+    if (!deadlineStr || projectStatus === 'Completed') {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    const parts = String(deadlineStr).trim().split('-');
+    if (parts.length < 3) {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    const dYear = parseInt(parts[0], 10);
+    const dMonth = parseInt(parts[1], 10) - 1;
+    const dDay = parseInt(parts[2], 10);
+    if (isNaN(dYear) || isNaN(dMonth) || isNaN(dDay)) {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    const targetDate = new Date(dYear, dMonth, dDay);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffDays = Math.round((targetDate.getTime() - today.getTime()) / msPerDay);
+
+    if (diffDays < 0) {
+      const daysAgo = Math.abs(diffDays);
+      return {
+        status: 'overdue',
+        label: 'Past Due',
+        diffDays,
+        diffText: daysAgo === 1 ? '1 day past due' : `${daysAgo} days past due`,
+        pillText: daysAgo === 1 ? '1d overdue' : `${daysAgo}d overdue`
+      };
+    } else if (diffDays === 0) {
+      return {
+        status: 'today',
+        label: 'Due Today',
+        diffDays,
+        diffText: 'Due today',
+        pillText: 'Today'
+      };
+    } else if (diffDays <= 2) {
+      const daysLeft = diffDays;
+      return {
+        status: 'soon',
+        label: 'Almost Due',
+        diffDays,
+        diffText: daysLeft === 1 ? 'Due tomorrow' : `Due in ${daysLeft} days`,
+        pillText: daysLeft === 1 ? 'Tomorrow' : `In ${daysLeft}d`
+      };
+    } else {
+      return {
+        status: 'ontrack',
+        label: 'On Track',
+        diffDays,
+        diffText: `Due in ${diffDays} days`,
+        pillText: `${diffDays}d`
+      };
+    }
+  }
+
   function isOverdue(deadlineStr, projectStatus) {
-    if (!deadlineStr || projectStatus === 'Completed') return false;
-    const deadline = new Date(deadlineStr + 'T23:59:59');
-    const now = new Date('2026-10-23T11:45:00');
-    return deadline < now;
+    return getDeadlineAlertStatus(deadlineStr, projectStatus).status === 'overdue';
   }
 
   function getStatusBadgeClass(status) {
@@ -1892,6 +1967,16 @@
     if (status) {
       list = list.filter(r => r.projectStatus === status);
     }
+    const deadlineFilter = state.dashboardDeadline || '';
+    if (deadlineFilter) {
+      list = list.filter(r => {
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+        if (deadlineFilter === 'overdue') return info.status === 'overdue';
+        if (deadlineFilter === 'today') return info.status === 'today';
+        if (deadlineFilter === 'soon') return info.status === 'soon';
+        return true;
+      });
+    }
 
     const page = state.dashboardPage || 1;
     const perPage = state.dashboardPerPage || 10;
@@ -1916,13 +2001,13 @@
     }
 
     tbody.innerHTML = pagedList.map(r => `
-      <tr>
+      <tr data-req-id="${r.id}">
         <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
         <td><strong style="color:var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
         <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
         <td>${renderEditableCell(r.id, 'client', r.client)}</td>
         <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
-        <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline)}</td>
+        <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
         <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
         <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
         <td>
@@ -1958,6 +2043,15 @@
     if (approval) list = list.filter(r => r.clientApproval === approval);
     if (fileSent) list = list.filter(r => r.fileSent === fileSent);
     if (salesRep) list = list.filter(r => r.salesRep === salesRep);
+    if (state.salesFilter.deadline) {
+      list = list.filter(r => {
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+        if (state.salesFilter.deadline === 'overdue') return info.status === 'overdue';
+        if (state.salesFilter.deadline === 'today') return info.status === 'today';
+        if (state.salesFilter.deadline === 'soon') return info.status === 'soon';
+        return true;
+      });
+    }
 
     // Sort
     list.sort((a, b) => {
@@ -1989,13 +2083,13 @@
         tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:var(--text-muted);">No sales requests match the current filters.</td></tr>`;
       } else {
         tbody.innerHTML = pagedList.map(r => `
-          <tr>
+          <tr data-req-id="${r.id}">
             <td><strong style="color: var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
             <td><strong style="color: var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
             <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
             <td>${renderEditableCell(r.id, 'client', r.client)}</td>
             <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
-            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline)}</td>
+            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
             <td>${renderInlineDate(r.id, 'releasingDate', r.releasingDate)}</td>
             <td>${renderInlineSelect(r.id, 'fileSent', r.fileSent, FILE_SENT_LEVELS)}</td>
             <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval, APPROVAL_LEVELS)}</td>
@@ -2071,8 +2165,16 @@
     if (projectStatus) list = list.filter(r => r.projectStatus === projectStatus);
     if (designStatus) list = list.filter(r => r.designStatus === designStatus);
     if (artist) list = list.filter(r => r.artist === artist);
-    if (overdue === 'overdue') list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus));
-    if (overdue === 'ontime') list = list.filter(r => !isOverdue(r.designDeadline, r.projectStatus));
+    if (overdue) {
+      list = list.filter(r => {
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+        if (overdue === 'overdue') return info.status === 'overdue';
+        if (overdue === 'today') return info.status === 'today';
+        if (overdue === 'soon') return info.status === 'soon';
+        if (overdue === 'ontime') return info.status === 'ontrack' || (!isOverdue(r.designDeadline, r.projectStatus) && info.status !== 'soon' && info.status !== 'today');
+        return true;
+      });
+    }
 
     list.sort((a, b) => {
       let valA = a[sortField] || '';
@@ -2103,13 +2205,22 @@
         tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; padding:30px; color:var(--text-muted);">No tasks match the filters.</td></tr>`;
       } else {
         tbody.innerHTML = pagedList.map(r => {
-          const pastDue = isOverdue(r.designDeadline, r.projectStatus);
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          let deadlineStatusBadge = '<span style="color:#10B981; font-weight:700; font-size:11px;">ON TRACK</span>';
+          if (alertInfo.status === 'overdue') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-overdue">${escapeHTML(alertInfo.diffText)}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-today">Due Today</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText)}</span>`;
+          }
+
           return `
-            <tr>
+            <tr data-req-id="${r.id}">
               <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
               <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
               <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
-              <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline)}</td>
+              <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
               <td>${renderInlineSelect(r.id, 'headApproval', r.headApproval || 'Pending', ['Approved', 'Pending', 'Needs Revision'])}</td>
               <td style="text-align:center;">${renderInlineNumber(r.id, 'countStandard', r.countStandard)}</td>
               <td style="text-align:center;">${renderInlineNumber(r.id, 'countPrinting', r.countPrinting)}</td>
@@ -2117,7 +2228,7 @@
               <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
               <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus, DESIGN_STATUSES)}</td>
               <td>
-                ${pastDue ? '<span class="badge badge-priority-rush">OVERDUE</span>' : '<span style="color:#10B981; font-weight:700; font-size:11px;">ON TRACK</span>'}
+                ${deadlineStatusBadge}
               </td>
               <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
               <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
@@ -2286,7 +2397,7 @@
             <td>
               ${r.countSpecial > 0 ? '<span class="badge badge-priority-high">Special</span>' : r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-not-started">Standard</span>'}
             </td>
-            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline)}</td>
+            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
             <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
             <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus, DESIGN_STATUSES)}</td>
             <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
@@ -3555,7 +3666,7 @@
             <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
             <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
             <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus, DESIGN_STATUSES)}</td>
-            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline)}</td>
+            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
             <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
             <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
             <td>
@@ -4157,11 +4268,300 @@
   }
 
   // ==========================================================================
+  // DEADLINE REMINDER ALERTS & NOTIFICATION CENTER ENGINE
+  // ==========================================================================
+
+  let currentAlertTab = 'all';
+
+  function updateDeadlineAlertCenter() {
+    const requests = state.requests || [];
+    
+    // Categorize active requests
+    const overdueList = [];
+    const todayList = [];
+    const soonList = [];
+
+    requests.forEach(r => {
+      if (r.projectStatus === 'Completed') return;
+      const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+      if (alertInfo.status === 'overdue') {
+        overdueList.push({ request: r, alert: alertInfo });
+      } else if (alertInfo.status === 'today') {
+        todayList.push({ request: r, alert: alertInfo });
+      } else if (alertInfo.status === 'soon') {
+        soonList.push({ request: r, alert: alertInfo });
+      }
+    });
+
+    const allAlerts = [...overdueList, ...todayList, ...soonList];
+    const totalCount = allAlerts.length;
+
+    // 1. Update Topbar Bell Badge
+    const badgeEl = document.getElementById('deadlineAlertBadge');
+    if (badgeEl) {
+      badgeEl.textContent = totalCount;
+      if (totalCount > 0) {
+        badgeEl.style.display = 'inline-flex';
+        badgeEl.className = 'deadline-alert-badge has-alerts' + (overdueList.length > 0 ? ' badge-overdue' : '');
+      } else {
+        badgeEl.style.display = 'none';
+      }
+    }
+
+    // 2. Update Dropdown Header & Tab Counts
+    const totalPill = document.getElementById('deadlineAlertTotalPill');
+    if (totalPill) {
+      totalPill.textContent = `${totalCount} Alert${totalCount === 1 ? '' : 's'}`;
+      totalPill.className = 'deadline-alert-total-pill' + (overdueList.length > 0 ? ' pill-overdue' : '');
+    }
+
+    const countTabAll = document.getElementById('countTabAll');
+    if (countTabAll) countTabAll.textContent = totalCount;
+
+    const countTabOverdue = document.getElementById('countTabOverdue');
+    if (countTabOverdue) countTabOverdue.textContent = overdueList.length;
+
+    const countTabToday = document.getElementById('countTabToday');
+    if (countTabToday) countTabToday.textContent = todayList.length;
+
+    const countTabSoon = document.getElementById('countTabSoon');
+    if (countTabSoon) countTabSoon.textContent = soonList.length;
+
+    // 3. Render Dropdown Alert Items
+    renderAlertDrawerItems(allAlerts, overdueList, todayList, soonList);
+
+    // 4. Update Dashboard Widget (if on index / dashboard)
+    const widgetOverdue = document.getElementById('widgetCountOverdue');
+    if (widgetOverdue) {
+      widgetOverdue.textContent = overdueList.length;
+      const subOverdue = document.getElementById('widgetSubOverdue');
+      if (subOverdue) subOverdue.textContent = overdueList.length > 0 ? `${overdueList.length} past deadline` : 'No overdue projects';
+    }
+
+    const widgetToday = document.getElementById('widgetCountToday');
+    if (widgetToday) {
+      widgetToday.textContent = todayList.length;
+      const subToday = document.getElementById('widgetSubToday');
+      if (subToday) subToday.textContent = todayList.length > 0 ? `${todayList.length} due today` : 'None due today';
+    }
+
+    const widgetSoon = document.getElementById('widgetCountSoon');
+    if (widgetSoon) {
+      widgetSoon.textContent = soonList.length;
+      const subSoon = document.getElementById('widgetSubSoon');
+      if (subSoon) subSoon.textContent = soonList.length > 0 ? `${soonList.length} due in next 48h` : 'None in next 48h';
+    }
+
+    const widgetTotalPill = document.getElementById('widgetTotalAlertsPill');
+    if (widgetTotalPill) {
+      if (totalCount > 0) {
+        widgetTotalPill.textContent = `${totalCount} Action Required`;
+        widgetTotalPill.className = 'deadline-pill ' + (overdueList.length > 0 ? 'deadline-pill-overdue' : 'deadline-pill-today');
+      } else {
+        widgetTotalPill.textContent = `All On Track`;
+        widgetTotalPill.className = 'deadline-pill deadline-pill-ontrack';
+      }
+    }
+  }
+
+  function renderAlertDrawerItems(allAlerts, overdueList, todayList, soonList) {
+    const listEl = document.getElementById('deadlineAlertList');
+    if (!listEl) return;
+
+    let itemsToRender = [];
+    if (currentAlertTab === 'overdue') itemsToRender = overdueList;
+    else if (currentAlertTab === 'today') itemsToRender = todayList;
+    else if (currentAlertTab === 'soon') itemsToRender = soonList;
+    else itemsToRender = allAlerts;
+
+    if (itemsToRender.length === 0) {
+      listEl.innerHTML = `
+        <div class="deadline-empty-state">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <div class="empty-state-title">No Pending Alerts</div>
+          <p class="empty-state-desc">All project milestones for this category are on schedule.</p>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = itemsToRender.map(item => {
+      const r = item.request;
+      const a = item.alert;
+      const sevClass = a.status === 'overdue' ? 'sev-overdue' : (a.status === 'today' ? 'sev-today' : 'sev-soon');
+      const pillClass = a.status === 'overdue' ? 'deadline-pill-overdue' : (a.status === 'today' ? 'deadline-pill-today' : 'deadline-pill-soon');
+
+      return `
+        <div class="deadline-alert-item ${sevClass}" data-req-id="${r.id}">
+          <div class="alert-item-header">
+            <div class="alert-item-left">
+              <span class="alert-jo-badge">${escapeHTML(r.requestId || r.joNumber || r.id)}</span>
+              <span class="alert-project-title" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+            </div>
+            <span class="deadline-pill ${pillClass}">${escapeHTML(a.diffText)}</span>
+          </div>
+
+          <div class="alert-item-meta">
+            <span class="alert-meta-point">Client: <strong>${escapeHTML(r.client || 'â€”')}</strong></span>
+            <span class="alert-meta-point">Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+            <span class="alert-meta-point">Status: <span class="badge badge-ongoing" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
+          </div>
+
+          <div class="alert-item-actions">
+            <button class="alert-action-btn" onclick="window.SignDepotApp.filterByDeadlineProject('${r.id}')" title="Find and highlight in table">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              View in Table
+            </button>
+            <button class="alert-action-btn" onclick="window.SignDepotApp.openDirectiveForRequest('${r.id}')" title="Open Job Order Blueprint">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
+              Directive
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ==========================================================================
   // PUBLIC API (Exposed on window.SignDepotApp)
   // ==========================================================================
 
   window.SignDepotApp = {
     switchView: switchView,
+
+    // Deadline Alert Center Public API
+    setAlertTab: (tab) => {
+      currentAlertTab = tab;
+      document.querySelectorAll('.deadline-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-alert-tab') === tab);
+      });
+      updateDeadlineAlertCenter();
+    },
+
+    toggleDeadlineAlertDrawer: (force) => {
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (!dropdown) return;
+      if (typeof force === 'boolean') {
+        dropdown.classList.toggle('show', force);
+      } else {
+        dropdown.classList.toggle('show');
+      }
+    },
+
+    filterDashboardDeadlines: (type) => {
+      const select = document.getElementById('dashboardFilterDeadline');
+      const cards = {
+        overdue: document.getElementById('cardFilterOverdue'),
+        today: document.getElementById('cardFilterToday'),
+        soon: document.getElementById('cardFilterSoon')
+      };
+
+      if (state.dashboardDeadline === type) {
+        state.dashboardDeadline = '';
+        if (select) select.value = '';
+        Object.values(cards).forEach(c => c && c.classList.remove('active'));
+      } else {
+        state.dashboardDeadline = type;
+        if (select) select.value = type;
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === type);
+        });
+      }
+
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+
+    filterByDeadlineProject: (reqId) => {
+      const rec = state.requests.find(r => r.id === reqId);
+      if (!rec) return;
+
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (dropdown) dropdown.classList.remove('show');
+
+      const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+
+      if (currentFile === 'index.html' || currentFile === '') {
+        state.dashboardSearch = rec.requestId;
+        state.dashboardStatus = '';
+        state.dashboardDeadline = '';
+        const searchInput = document.getElementById('dashboardSearchInput');
+        if (searchInput) searchInput.value = rec.requestId;
+        const statusSelect = document.getElementById('dashboardFilterStatus');
+        if (statusSelect) statusSelect.value = '';
+        const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+        if (deadlineSelect) deadlineSelect.value = '';
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+
+        setTimeout(() => {
+          const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+          if (row) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            row.classList.add('table-row-highlight');
+            setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+          }
+        }, 150);
+        showToast(`Viewing ${rec.requestId} â€” ${rec.projectName}`, 'info');
+      } else {
+        if (document.getElementById('trackerSearchInput')) {
+          state.trackerFilter.search = rec.requestId;
+          state.trackerFilter.projectStatus = '';
+          state.trackerFilter.designStatus = '';
+          state.trackerFilter.artist = '';
+          state.trackerFilter.overdue = '';
+          state.trackerFilter.page = 1;
+          const tSearch = document.getElementById('trackerSearchInput');
+          if (tSearch) tSearch.value = rec.requestId;
+          renderCreativesTracker();
+          setTimeout(() => {
+            const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('table-row-highlight');
+              setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+            }
+          }, 150);
+          showToast(`Viewing ${rec.requestId} in Creatives Tracker`, 'info');
+        } else if (document.getElementById('salesSearchInput')) {
+          state.salesFilter.search = rec.requestId;
+          state.salesFilter.priority = '';
+          state.salesFilter.approval = '';
+          state.salesFilter.fileSent = '';
+          state.salesFilter.salesRep = '';
+          state.salesFilter.deadline = '';
+          state.salesFilter.page = 1;
+          const sSearch = document.getElementById('salesSearchInput');
+          if (sSearch) sSearch.value = rec.requestId;
+          renderSalesRequests();
+          setTimeout(() => {
+            const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('table-row-highlight');
+              setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+            }
+          }, 150);
+          showToast(`Viewing ${rec.requestId} in Sales Requests`, 'info');
+        } else {
+          window.SignDepotApp.openDirectiveForJo(rec.joNumber);
+        }
+      }
+    },
+
+    openDirectiveForRequest: (reqId) => {
+      const rec = state.requests.find(r => r.id === reqId);
+      if (rec && rec.joNumber) {
+        const dropdown = document.getElementById('deadlineAlertDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+        window.SignDepotApp.openDirectiveForJo(rec.joNumber);
+      }
+    },
+
+    updateDeadlineAlertCenter: () => updateDeadlineAlertCenter(),
     openCustomDropdown: (btn, ev) => openCustomDropdown(btn, ev),
     closeCustomDropdown: () => closeCustomDropdown(),
 
@@ -4782,6 +5182,62 @@
         renderDashboardRecentProjectsTable();
       });
     }
+
+    // Dashboard Deadline Filter listener
+    const dashDeadline = document.getElementById('dashboardFilterDeadline');
+    if (dashDeadline) {
+      dashDeadline.addEventListener('change', () => {
+        state.dashboardDeadline = dashDeadline.value;
+        state.dashboardPage = 1;
+        const cards = {
+          overdue: document.getElementById('cardFilterOverdue'),
+          today: document.getElementById('cardFilterToday'),
+          soon: document.getElementById('cardFilterSoon')
+        };
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === state.dashboardDeadline);
+        });
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    // Sales Requests Deadline Filter listener
+    const salesDeadline = document.getElementById('salesFilterDeadline');
+    if (salesDeadline) {
+      salesDeadline.addEventListener('change', () => {
+        state.salesFilter.deadline = salesDeadline.value;
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    }
+
+    // Topbar Deadline Alert Notification Drawer & Tab Switching
+    document.addEventListener('click', (e) => {
+      const bellBtn = e.target.closest('#deadlineAlertBtn, .deadline-alert-btn');
+      const alertDropdown = document.getElementById('deadlineAlertDropdown');
+
+      if (bellBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (alertDropdown) {
+          alertDropdown.classList.toggle('show');
+        }
+        return;
+      }
+
+      const tabBtn = e.target.closest('.deadline-tab-btn');
+      if (tabBtn && tabBtn.getAttribute('data-alert-tab')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const tab = tabBtn.getAttribute('data-alert-tab');
+        window.SignDepotApp.setAlertTab(tab);
+        return;
+      }
+
+      if (alertDropdown && alertDropdown.classList.contains('show') && !e.target.closest('#deadlineAlertContainer')) {
+        alertDropdown.classList.remove('show');
+      }
+    });
   }
 
   function exportTrackerCsv() {
@@ -4880,6 +5336,26 @@
     if (currentView === 'view-directives-details') {
       renderDirectivePreview(state.currentDirectiveJo || 'P260701373');
     }
+
+    updateDeadlineAlertCenter();
+
+    // Non-intrusive reminder alert on load if urgent items exist
+    setTimeout(() => {
+      const activeAlerts = (state.requests || []).filter(r => r.projectStatus !== 'Completed').map(r => getDeadlineAlertStatus(r.designDeadline, r.projectStatus));
+      const overdueCount = activeAlerts.filter(a => a.status === 'overdue').length;
+      const todayCount = activeAlerts.filter(a => a.status === 'today').length;
+      if (overdueCount > 0 || todayCount > 0) {
+        let msg = 'âš ï¸ Deadline Reminder: ';
+        if (overdueCount > 0 && todayCount > 0) {
+          msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due & ${todayCount} due today!`;
+        } else if (overdueCount > 0) {
+          msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due requiring immediate attention!`;
+        } else {
+          msg += `${todayCount} project${todayCount > 1 ? 's' : ''} due today!`;
+        }
+        showToast(msg, overdueCount > 0 ? 'error' : 'info');
+      }
+    }, 1200);
   }
 
   if (document.readyState === 'loading') {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Sales & Creative Production Operations Tracker</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261024_rows1">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261024_alerts1">
   <link rel="icon" type="image/png" href="assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-dashboard">
@@ -332,6 +332,50 @@
             </div>
           </div>
 
+          <!-- Deadline Reminder Alert Banner Widget (Right above Live Production Queue) -->
+          <div class="deadline-banner-widget" id="deadlineDashboardWidget">
+            <div class="deadline-widget-header">
+              <div class="deadline-widget-title">
+                <span class="deadline-widget-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                </span>
+                <div>
+                  <h3 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text-primary);">Deadline Attention & Reminders</h3>
+                  <span style="font-size: 11.5px; color: var(--text-secondary);" id="deadlineWidgetSubtext">Real-time status tracking for active projects</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="deadline-pill deadline-pill-overdue" id="widgetTotalAlertsPill">0 Needs Action</span>
+              </div>
+            </div>
+            <div class="deadline-widget-grid">
+              <div class="deadline-summary-card card-overdue" id="cardFilterOverdue" onclick="window.SignDepotApp.filterDashboardDeadlines('overdue')">
+                <div class="summary-card-top">
+                  <span class="summary-card-label">Past Due / Overdue</span>
+                  <span class="badge badge-priority-rush">Critical</span>
+                </div>
+                <div class="summary-card-count" id="widgetCountOverdue">0</div>
+                <div class="summary-card-sub" id="widgetSubOverdue">No overdue projects</div>
+              </div>
+              <div class="deadline-summary-card card-today" id="cardFilterToday" onclick="window.SignDepotApp.filterDashboardDeadlines('today')">
+                <div class="summary-card-top">
+                  <span class="summary-card-label">Due Today</span>
+                  <span class="badge badge-urgent">Urgent</span>
+                </div>
+                <div class="summary-card-count" id="widgetCountToday">0</div>
+                <div class="summary-card-sub" id="widgetSubToday">Due before end of day</div>
+              </div>
+              <div class="deadline-summary-card card-soon" id="cardFilterSoon" onclick="window.SignDepotApp.filterDashboardDeadlines('soon')">
+                <div class="summary-card-top">
+                  <span class="summary-card-label">Almost Due (Next 48h)</span>
+                  <span class="badge badge-ongoing">Approaching</span>
+                </div>
+                <div class="summary-card-count" id="widgetCountSoon">0</div>
+                <div class="summary-card-sub" id="widgetSubSoon">Due within 1–2 days</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Bottom: Directly Inline Editable Recent Projects Table -->
           <div class="studio-card">
             <div class="section-header-row" style="margin-bottom: 14px;">
@@ -354,6 +398,12 @@
                   <option value="On-going">On-going</option>
                   <option value="Pending">Pending</option>
                   <option value="Completed">Completed</option>
+                </select>
+                <select class="filter-input" id="dashboardFilterDeadline" title="Filter by Deadline Status">
+                  <option value="">All Deadlines</option>
+                  <option value="overdue">🔴 Past Due</option>
+                  <option value="today">🟠 Due Today</option>
+                  <option value="soon">🟡 Almost Due (48h)</option>
                 </select>
               </div>
               <div class="filter-group">
@@ -624,7 +674,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Modular Component Loader & Core Application Scripts -->
-  <script src="pages/includes/components.js?v=20261024_rows1"></script>
-  <script src="assets/js/script.js?v=20261024_rows1"></script>
+  <script src="pages/includes/components.js?v=20261024_alerts1"></script>
+  <script src="assets/js/script.js?v=20261024_alerts1"></script>
 </body>
 </html>
