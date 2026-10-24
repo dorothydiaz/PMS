@@ -3,7 +3,7 @@
  * Sign Depotâ„¢ Operations PMS â€” Creatives Tracker
  */
 
-require_once __DIR__ . '/config.php';
+require_once dirname(__DIR__) . '/config.php';
 
 $pageTitle = 'Creatives Tracker';
 $currentPage = 'creatives-tracker';
@@ -26,7 +26,6 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div class="section-actions">
               <div id="trackerKpiFilterBanner" class="active-kpi-filter-pill" style="display: none;"></div>
               <button class="btn btn-secondary btn-sm" id="btnQuickExportTrackerCSV">Export CSV</button>
-              <button class="btn btn-primary btn-sm" id="btnTrackerNewTask">+ Add Task</button>
             </div>
           </div>
 
@@ -119,7 +118,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="In Progress">In Progress</option>
                 <option value="For Review">For Review</option>
                 <option value="Revising">Revising</option>
-                <option value="Completed">Completed</option>
+                <option value="Submitted">Submitted</option>
               </select>
               <select class="filter-input" id="trackerFilterArtist">
                 <option value="">All Artists</option>

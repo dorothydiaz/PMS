@@ -3,7 +3,7 @@
  * Sign Depotâ„¢ Operations PMS â€” Artist Workload
  */
 
-require_once __DIR__ . '/config.php';
+require_once dirname(__DIR__) . '/config.php';
 
 $pageTitle = 'Artist Workload';
 $currentPage = 'artist-workload';
@@ -21,7 +21,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="section-header-row">
             <div class="section-title-wrap">
               <h2>Artist Workload & Capacity Management</h2>
-              <p>Real-time assignment distribution across Bob, Edrian, Glen, Goodrich, Jules, Raven, Rodel, Tim, Seven</p>
+              <p>Real-time assignment distribution across Bob, Edrian, Glen, Goodrich, Jules, Raven, Tim, Seven</p>
             </div>
             <div class="section-actions">
               <select class="filter-input" id="workloadFilterAvailability">
@@ -42,7 +42,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div class="section-header-row" style="margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
               <div>
                 <h3 style="font-size: 16px; font-weight: 800;" id="workloadSelectedArtistTitle">All Active Artist Assignments</h3>
-                <span style="font-size: 12px; color: var(--text-secondary);">Direct inline re-assignment supported</span>
+                <span style="font-size: 12px; color: var(--text-secondary);">Read-only active assignment overview</span>
               </div>
               <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <input type="text" class="filter-input" id="workloadTableSearch" placeholder="Search tasks..." style="width: 200px;">
@@ -64,8 +64,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <thead>
                   <tr>
                     <th>Req ID</th>
-                    <th>Artist (Reassign)</th>
-                    <th>Project Name (Editable)</th>
+                    <th>Artist</th>
+                    <th>Project Name</th>
                     <th>Category</th>
                     <th>Deadline</th>
                     <th>Project Status</th>

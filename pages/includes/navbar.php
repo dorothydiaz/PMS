@@ -4,15 +4,13 @@
  * File: pages/includes/navbar.php
  */
 $base = function_exists('getBasePath') ? getBasePath() : '../';
+$pagesBase = function_exists('getPagesPath') ? getPagesPath() : (($base === './') ? './pages/' : './');
 $pageTitle = $pageTitle ?? 'Project Dashboard';
 $pageCategory = $pageCategory ?? 'Operations Overview';
 $pageBadge = $pageBadge ?? 'MySQL Live';
 ?>
 <header class="topbar" id="appTopbar">
   <div class="topbar-left">
-    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation" title="Toggle Navigation Menu">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
     <div class="page-header-info">
       <span class="page-category-tag" id="pageCategoryTag"><?= htmlspecialchars($pageCategory) ?></span>
       <h1 class="module-title" id="moduleTitle">
@@ -69,7 +67,7 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
 
         <div class="deadline-alert-footer">
           <span class="deadline-alert-footer-note">Real-time status based on local time</span>
-          <a href="<?= $base ?>creatives-tracker.php" class="deadline-alert-view-all">View Tracker &rarr;</a>
+          <a href="<?= $pagesBase ?>creatives-tracker.php" class="deadline-alert-view-all">View Tracker &rarr;</a>
         </div>
       </div>
     </div>
@@ -82,28 +80,48 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
     </div>
 
     <!-- User Menu -->
+    <?php
+    $u = function_exists('getCurrentUser') ? getCurrentUser() : null;
+    $userName = $u['full_name'] ?? 'User';
+    $userRole = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
+    $userAvatar = $u && !empty($u['avatar_url']) 
+        ? '<img src="' . htmlspecialchars($u['avatar_url']) . '" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">' 
+        : strtoupper(substr($userName, 0, 2));
+    ?>
     <div class="user-profile-menu">
       <button class="user-profile-btn" id="userProfileBtn" aria-label="User Profile Menu">
-        <div class="user-avatar">DC</div>
+        <div class="user-avatar"><?= $userAvatar ?></div>
         <div class="user-meta">
-          <span class="user-name">Ed</span>
-          <span class="user-role">Creative Lead</span>
+          <span class="user-name"><?= htmlspecialchars($userName) ?></span>
+          <span class="user-role"><?= htmlspecialchars($userRole) ?></span>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
       <div class="dropdown-popover" id="userProfileDropdown">
-        <a href="<?= $base ?>directives-details.php" class="dropdown-item" id="btnQuickDirectiveSample" style="text-decoration:none; color:inherit;">
+        <div style="padding: 10px 14px; border-bottom: 1px solid #E2E8F0; margin-bottom: 4px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0F172A;"><?= htmlspecialchars($userName) ?></div>
+          <div style="font-size: 11px; color: #64748B;"><?= htmlspecialchars($u['email'] ?? '') ?></div>
+        </div>
+        <?php if (function_exists('hasPermission') && hasPermission('access-control', 'r')): ?>
+        <a href="<?= $pagesBase ?>access-control.php" class="dropdown-item" style="text-decoration:none; color:inherit;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          Access Control (RBAC)
+        </a>
+        <?php endif; ?>
+        <a href="<?= $pagesBase ?>directives-details.php" class="dropdown-item" id="btnQuickDirectiveSample" style="text-decoration:none; color:inherit;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
           Directives Blueprint Sheet
         </a>
-        <a href="<?= $base ?>database/import.php" class="dropdown-item" style="text-decoration:none; color:inherit;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-          MySQL Database Status
-        </a>
-        <div class="dropdown-divider"></div>
-        <a href="<?= $base ?>settings.php" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
+        <?php if (function_exists('hasPermission') && hasPermission('settings', 'r')): ?>
+        <a href="<?= $pagesBase ?>settings.php" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           System Settings
+        </a>
+        <?php endif; ?>
+        <div class="dropdown-divider"></div>
+        <a href="<?= $base ?>logout.php" class="dropdown-item" style="text-decoration:none; color:#DC2626; font-weight:700;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Sign Out (<?= htmlspecialchars($u['username'] ?? 'User') ?>)
         </a>
       </div>
     </div>

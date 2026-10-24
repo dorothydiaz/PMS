@@ -19,6 +19,12 @@ define('DB_CHARSET', 'utf8mb4');
 define('APP_NAME', 'Sign Depot Operations PMS');
 define('APP_ROOT', __DIR__);
 
+// OAuth Configuration (Google SSO)
+define('OAUTH_GOOGLE_ENABLED', true);
+define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: '');
+define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET') ?: '');
+define('GOOGLE_REDIRECT_URI', 'http://localhost/PMS/PMS/oauth.php?provider=google');
+
 /**
  * Returns a singleton PDO connection
  */
@@ -96,4 +102,15 @@ function getBasePath() {
         return '../';
     }
     return './';
+}
+
+/**
+ * Get active relative path to the pages/ directory depending on script depth
+ */
+function getPagesPath() {
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    if (strpos($script, '/pages/') !== false) {
+        return './';
+    }
+    return './pages/';
 }

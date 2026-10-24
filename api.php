@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/auth.php';
 
 $pdo = getDbConnection();
 if (!$pdo) {
@@ -38,30 +39,43 @@ switch ($action) {
     case 'get_stats':
         try {
             $today = date('Y-m-d');
+            $currUser = getCurrentUser();
+            $artistClause = "";
+            $baseParams = [];
+            if ($currUser && $currUser['role'] === 'artist' && !empty($currUser['assigned_artist'])) {
+                $artistClause = " AND LOWER(artist) = LOWER(:assignedArtist)";
+                $baseParams[':assignedArtist'] = $currUser['assigned_artist'];
+            }
 
             // Total Requests
-            $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE 1=1 $artistClause");
+            $stmt->execute($baseParams);
             $total = (int)$stmt->fetchColumn();
 
             // Pending Approval
-            $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests WHERE client_approval = 'Pending' OR project_status = 'Pending'");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (client_approval = 'Pending' OR project_status = 'Pending') $artistClause");
+            $stmt->execute($baseParams);
             $pending = (int)$stmt->fetchColumn();
 
             // Working / Ongoing
-            $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests WHERE project_status IN ('On-going', 'Ongoing', 'In Progress', 'Working')");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (project_status IN ('On-going', 'Ongoing', 'In Progress', 'Working')) $artistClause");
+            $stmt->execute($baseParams);
             $ongoing = (int)$stmt->fetchColumn();
 
             // Approved
-            $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests WHERE client_approval = 'Approved' OR project_status = 'Approved'");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (client_approval = 'Approved' OR project_status = 'Approved') $artistClause");
+            $stmt->execute($baseParams);
             $approved = (int)$stmt->fetchColumn();
 
             // Revising
-            $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests WHERE project_status = 'Revising' OR design_status = 'Revising'");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (project_status = 'Revising' OR design_status = 'Revising') $artistClause");
+            $stmt->execute($baseParams);
             $revising = (int)$stmt->fetchColumn();
 
             // Overdue
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE design_deadline != '' AND design_deadline < :today AND project_status NOT IN ('Completed', 'Approved')");
-            $stmt->execute([':today' => $today]);
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE design_deadline != '' AND design_deadline < :today AND project_status NOT IN ('Completed', 'Approved') $artistClause");
+            $odParams = array_merge($baseParams, [':today' => $today]);
+            $stmt->execute($odParams);
             $overdue = (int)$stmt->fetchColumn();
 
             sendJsonResponse([
@@ -127,11 +141,17 @@ switch ($action) {
                 }
             }
 
-            // Artist filter
-            $artist = trim($_GET['artist'] ?? $bodyData['artist'] ?? '');
-            if (!empty($artist)) {
-                $where[] = "artist = :artist";
-                $params[':artist'] = $artist;
+            // Artist filter (artists are strictly scoped to their own assigned projects)
+            $currUser = getCurrentUser();
+            if ($currUser && $currUser['role'] === 'artist' && !empty($currUser['assigned_artist'])) {
+                $where[] = "LOWER(artist) = LOWER(:assignedArtist)";
+                $params[':assignedArtist'] = $currUser['assigned_artist'];
+            } else {
+                $artist = trim($_GET['artist'] ?? $bodyData['artist'] ?? '');
+                if (!empty($artist)) {
+                    $where[] = "artist = :artist";
+                    $params[':artist'] = $artist;
+                }
             }
 
             // Sales rep filter
@@ -207,7 +227,13 @@ switch ($action) {
     case 'get_all_requests':
         // For client-side dataset initialization if requested
         try {
-            $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC LIMIT 500");
+            $currUser = getCurrentUser();
+            if ($currUser && $currUser['role'] === 'artist' && !empty($currUser['assigned_artist'])) {
+                $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE LOWER(artist) = LOWER(:assignedArtist) ORDER BY id DESC LIMIT 500");
+                $stmt->execute([':assignedArtist' => $currUser['assigned_artist']]);
+            } else {
+                $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC LIMIT 500");
+            }
             $rows = $stmt->fetchAll();
             $formatted = array_map(function($r) {
                 return [
@@ -427,6 +453,237 @@ switch ($action) {
             $stmt = $pdo->query("SELECT * FROM directives ORDER BY slot_number ASC");
             $directives = $stmt->fetchAll();
             sendJsonResponse(['success' => true, 'data' => $directives]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    // =========================================================================
+    // AUTHENTICATION & ACCESS CONTROL (USERS & RBAC)
+    // =========================================================================
+
+    case 'auth_get_current_user':
+        sendJsonResponse([
+            'success' => true,
+            'isLoggedIn' => isLoggedIn(),
+            'user' => getCurrentUser()
+        ]);
+        break;
+
+    case 'users_list':
+        if (!isSuperAdmin()) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin privileges required.'], 403);
+        }
+        try {
+            $stmt = $pdo->query("SELECT id, username, email, full_name, role, assigned_artist, status, permissions, oauth_provider, avatar_url, created_at, updated_at FROM users ORDER BY id ASC");
+            $rows = $stmt->fetchAll();
+            $users = array_map(function($u) {
+                $perms = [];
+                if (!empty($u['permissions'])) {
+                    $perms = is_array($u['permissions']) ? $u['permissions'] : (json_decode($u['permissions'], true) ?: []);
+                }
+                $u['permissions'] = $perms;
+                return $u;
+            }, $rows);
+            sendJsonResponse(['success' => true, 'data' => $users]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'users_create':
+        if (!isSuperAdmin()) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin privileges required.'], 403);
+        }
+        try {
+            $fullName = trim($bodyData['full_name'] ?? '');
+            $username = trim($bodyData['username'] ?? '');
+            $email = trim($bodyData['email'] ?? '');
+            $password = $bodyData['password'] ?? '';
+            $role = trim($bodyData['role'] ?? 'user');
+            $status = trim($bodyData['status'] ?? 'active');
+
+            if (empty($fullName) || empty($username) || empty($email) || empty($password)) {
+                sendJsonResponse(['success' => false, 'error' => 'All fields including password are required.'], 400);
+            }
+
+            // Check if username or email already exists
+            $checkStmt = $pdo->prepare("SELECT id FROM users WHERE username = :u OR email = :e LIMIT 1");
+            $checkStmt->execute([':u' => $username, ':e' => $email]);
+            if ($checkStmt->fetch()) {
+                sendJsonResponse(['success' => false, 'error' => 'A user with this username or email already exists.'], 400);
+            }
+
+            // Default permissions based on role
+            $defaultPerms = [
+                'dashboard' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+                'sales-requests' => ['c' => ($role === 'sales'), 'r' => true, 'u' => ($role === 'sales'), 'd' => ($role === 'sales')],
+                'creatives-tracker' => ['c' => ($role === 'artist'), 'r' => true, 'u' => ($role === 'artist'), 'd' => false],
+                'artist-workload' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+                'directives-details' => ['c' => ($role === 'artist'), 'r' => true, 'u' => ($role === 'artist'), 'd' => false],
+                'monthly-output' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+                'reports' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+                'access-control' => ['c' => ($role === 'super_admin'), 'r' => ($role === 'super_admin'), 'u' => ($role === 'super_admin'), 'd' => ($role === 'super_admin')],
+                'audit-trail' => ['c' => false, 'r' => ($role === 'super_admin' || $role === 'admin'), 'u' => false, 'd' => false],
+                'settings' => ['c' => ($role === 'super_admin' || $role === 'admin'), 'r' => ($role === 'super_admin' || $role === 'admin'), 'u' => ($role === 'super_admin' || $role === 'admin'), 'd' => false]
+            ];
+
+            if ($role === 'super_admin' || $role === 'admin') {
+                foreach ($defaultPerms as $k => $v) {
+                    $defaultPerms[$k] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
+                }
+            }
+
+            $assignedArtist = trim($bodyData['assigned_artist'] ?? '');
+            if (empty($assignedArtist) && $role === 'artist') {
+                $known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Edrian', 'Russel', 'Gilbert', 'Benjie'];
+                foreach ($known as $k) {
+                    if (stripos($username, $k) !== false || stripos($fullName, $k) !== false) {
+                        $assignedArtist = $k;
+                        break;
+                    }
+                }
+                if (empty($assignedArtist) && (stripos($username, 'ed') !== false || stripos($fullName, 'ed') !== false)) {
+                    $assignedArtist = 'Edrian';
+                }
+            }
+
+            $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+            $insertStmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, full_name, role, assigned_artist, status, permissions)
+                VALUES (:u, :e, :p, :fn, :role, :aa, :status, :perms)");
+            $insertStmt->execute([
+                ':u' => $username,
+                ':e' => $email,
+                ':p' => $passwordHash,
+                ':fn' => $fullName,
+                ':role' => $role,
+                ':aa' => $assignedArtist ?: null,
+                ':status' => $status,
+                ':perms' => json_encode($defaultPerms)
+            ]);
+
+            sendJsonResponse(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'users_update':
+        if (!isSuperAdmin()) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin privileges required.'], 403);
+        }
+        try {
+            $id = (int)($bodyData['id'] ?? 0);
+            if ($id <= 0) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid user ID'], 400);
+            }
+
+            $fullName = trim($bodyData['full_name'] ?? '');
+            $username = trim($bodyData['username'] ?? '');
+            $email = trim($bodyData['email'] ?? '');
+            $role = trim($bodyData['role'] ?? 'user');
+            $status = trim($bodyData['status'] ?? 'active');
+            $assignedArtist = trim($bodyData['assigned_artist'] ?? '');
+            $password = $bodyData['password'] ?? '';
+
+            // Check duplicate email or username for OTHER users
+            $chk = $pdo->prepare("SELECT id FROM users WHERE (username = :u OR email = :e) AND id != :id LIMIT 1");
+            $chk->execute([':u' => $username, ':e' => $email, ':id' => $id]);
+            if ($chk->fetch()) {
+                sendJsonResponse(['success' => false, 'error' => 'Username or Email is already taken by another account.'], 400);
+            }
+
+            if (!empty($password)) {
+                $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+                $stmt = $pdo->prepare("UPDATE users SET full_name = :fn, username = :u, email = :e, role = :role, assigned_artist = :aa, status = :st, password_hash = :ph WHERE id = :id");
+                $stmt->execute([
+                    ':fn' => $fullName,
+                    ':u' => $username,
+                    ':e' => $email,
+                    ':role' => $role,
+                    ':aa' => $assignedArtist ?: null,
+                    ':st' => $status,
+                    ':ph' => $passwordHash,
+                    ':id' => $id
+                ]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE users SET full_name = :fn, username = :u, email = :e, role = :role, assigned_artist = :aa, status = :st WHERE id = :id");
+                $stmt->execute([
+                    ':fn' => $fullName,
+                    ':u' => $username,
+                    ':e' => $email,
+                    ':role' => $role,
+                    ':aa' => $assignedArtist ?: null,
+                    ':st' => $status,
+                    ':id' => $id
+                ]);
+            }
+
+            // If the updated user is currently logged in, update session
+            if (!empty($_SESSION['pms_user']) && $_SESSION['pms_user']['id'] == $id) {
+                $_SESSION['pms_user']['full_name'] = $fullName;
+                $_SESSION['pms_user']['username'] = $username;
+                $_SESSION['pms_user']['email'] = $email;
+                $_SESSION['pms_user']['role'] = $role;
+                $_SESSION['pms_user']['assigned_artist'] = $assignedArtist ?: null;
+            }
+
+            sendJsonResponse(['success' => true]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'users_delete':
+        if (!isSuperAdmin()) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin privileges required.'], 403);
+        }
+        try {
+            $id = (int)($bodyData['id'] ?? 0);
+            $current = getCurrentUser();
+            if ($current && $current['id'] == $id) {
+                sendJsonResponse(['success' => false, 'error' => 'You cannot delete your own account.'], 400);
+            }
+
+            // Don't delete super_admin
+            $chk = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+            $chk->execute([$id]);
+            $targetRole = $chk->fetchColumn();
+            if ($targetRole === 'super_admin') {
+                sendJsonResponse(['success' => false, 'error' => 'The Super Admin account cannot be deleted.'], 400);
+            }
+
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$id]);
+            sendJsonResponse(['success' => true]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'users_update_permissions':
+        if (!isSuperAdmin()) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin privileges required.'], 403);
+        }
+        try {
+            $id = (int)($bodyData['id'] ?? 0);
+            $perms = $bodyData['permissions'] ?? [];
+            if ($id <= 0 || !is_array($perms)) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid permissions payload'], 400);
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET permissions = :p WHERE id = :id");
+            $stmt->execute([
+                ':p' => json_encode($perms),
+                ':id' => $id
+            ]);
+
+            // If the updated user is the current session user, update session as well
+            if (!empty($_SESSION['pms_user']) && $_SESSION['pms_user']['id'] == $id) {
+                $_SESSION['pms_user']['permissions'] = $perms;
+            }
+
+            sendJsonResponse(['success' => true]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }

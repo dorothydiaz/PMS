@@ -3,8 +3,12 @@
  * Sign Depot Creative Operations — Modular Sidebar Component
  * File: pages/includes/sidebar.php
  */
+require_once dirname(__DIR__, 2) . '/includes/auth.php';
 $base = function_exists('getBasePath') ? getBasePath() : '../';
+$pagesBase = function_exists('getPagesPath') ? getPagesPath() : (($base === './') ? './pages/' : './');
 $cur = $currentPage ?? 'dashboard';
+$u = getCurrentUser();
+$roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
 ?>
 <aside class="sidebar" id="appSidebar">
   <div class="sidebar-brand">
@@ -31,8 +35,9 @@ $cur = $currentPage ?? 'dashboard';
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-section-label">Operations</div>
-    
+    <!-- 1. HOME -->
+    <div class="nav-section-label">HOME</div>
+    <?php if (hasPermission('dashboard', 'r')): ?>
     <a class="nav-item <?= ($cur === 'dashboard') ? 'active' : '' ?>" href="<?= $base ?>index.php" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -42,10 +47,15 @@ $cur = $currentPage ?? 'dashboard';
           <rect x="3" y="16" width="7" height="5"></rect>
         </svg>
       </span>
-      <span class="nav-label">Project Dashboard</span>
+      <span class="nav-label">Dashboard</span>
     </a>
+    <?php endif; ?>
 
-    <a class="nav-item <?= ($cur === 'sales-requests') ? 'active' : '' ?>" href="<?= $base ?>sales-requests.php" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
+    <!-- 2. SALES -->
+    <?php if (hasPermission('sales-requests', 'r')): ?>
+    <div class="nav-section-label">SALES</div>
+
+    <a class="nav-item <?= ($cur === 'sales-requests') ? 'active' : '' ?>" href="<?= $pagesBase ?>sales-requests.php" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -57,8 +67,14 @@ $cur = $currentPage ?? 'dashboard';
       </span>
       <span class="nav-label">Sales Requests</span>
     </a>
+    <?php endif; ?>
 
-    <a class="nav-item <?= ($cur === 'creatives-tracker') ? 'active' : '' ?>" href="<?= $base ?>creatives-tracker.php" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
+    <!-- 3. DESIGN -->
+    <?php if (hasPermission('creatives-tracker', 'r') || hasPermission('artist-workload', 'r') || hasPermission('directives-details', 'r')): ?>
+    <div class="nav-section-label">DESIGN</div>
+
+    <?php if (hasPermission('creatives-tracker', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'creatives-tracker') ? 'active' : '' ?>" href="<?= $pagesBase ?>creatives-tracker.php" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"></path>
@@ -67,8 +83,10 @@ $cur = $currentPage ?? 'dashboard';
       </span>
       <span class="nav-label">Creatives Tracker</span>
     </a>
+    <?php endif; ?>
 
-    <a class="nav-item <?= ($cur === 'artist-workload') ? 'active' : '' ?>" href="<?= $base ?>artist-workload.php" data-view="view-artist-workload" data-page="view-artist-workload" title="Artist Workload">
+    <?php if (hasPermission('artist-workload', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'artist-workload') ? 'active' : '' ?>" href="<?= $pagesBase ?>artist-workload.php" data-view="view-artist-workload" data-page="view-artist-workload" title="Artist Workload">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -79,10 +97,10 @@ $cur = $currentPage ?? 'dashboard';
       </span>
       <span class="nav-label">Artist Workload</span>
     </a>
+    <?php endif; ?>
 
-    <div class="nav-section-label">Directives</div>
-
-    <a class="nav-item <?= ($cur === 'directives-details') ? 'active' : '' ?>" href="<?= $base ?>directives-details.php" data-view="view-directives-details" data-page="view-directives-details" title="Directives Details">
+    <?php if (hasPermission('directives-details', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'directives-details') ? 'active' : '' ?>" href="<?= $pagesBase ?>directives-details.php" data-view="view-directives-details" data-page="view-directives-details" title="Directive Details">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -90,36 +108,17 @@ $cur = $currentPage ?? 'dashboard';
           <rect x="6" y="14" width="12" height="8"></rect>
         </svg>
       </span>
-      <span class="nav-label">Directives Details</span>
+      <span class="nav-label">Directive Details</span>
     </a>
+    <?php endif; ?>
+    <?php endif; ?>
 
-    <div class="nav-section-label">Pending Queues</div>
+    <!-- 4. ANALYTICS & REPORTS -->
+    <?php if (hasPermission('monthly-output', 'r') || hasPermission('reports', 'r')): ?>
+    <div class="nav-section-label">ANALYTICS & REPORTS</div>
 
-    <a class="nav-item <?= ($cur === 'pending-artist') ? 'active' : '' ?>" href="<?= $base ?>pending-artist.php" data-view="view-pending-artist" data-page="view-pending-artist" title="Pending Artist">
-      <span class="nav-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-      </span>
-      <span class="nav-label">Pending — Artist</span>
-    </a>
-
-    <a class="nav-item <?= ($cur === 'pending-sales') ? 'active' : '' ?>" href="<?= $base ?>pending-sales.php" data-view="view-pending-sales" data-page="view-pending-sales" title="Pending Sales">
-      <span class="nav-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <line x1="19" y1="8" x2="19" y2="14"></line>
-          <line x1="22" y1="11" x2="16" y2="11"></line>
-        </svg>
-      </span>
-      <span class="nav-label">Pending — Sales</span>
-    </a>
-
-    <div class="nav-section-label">Analytics & Config</div>
-
-    <a class="nav-item <?= ($cur === 'monthly-output') ? 'active' : '' ?>" href="<?= $base ?>monthly-output.php" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
+    <?php if (hasPermission('monthly-output', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'monthly-output') ? 'active' : '' ?>" href="<?= $pagesBase ?>monthly-output.php" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -129,8 +128,49 @@ $cur = $currentPage ?? 'dashboard';
       </span>
       <span class="nav-label">Monthly Output</span>
     </a>
+    <?php endif; ?>
 
-    <a class="nav-item <?= ($cur === 'settings') ? 'active' : '' ?>" href="<?= $base ?>settings.php" data-view="view-settings" data-page="view-settings" title="Settings">
+    <?php if (hasPermission('reports', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'reports') ? 'active' : '' ?>" href="<?= $pagesBase ?>reports.php" data-view="view-reports" data-page="view-reports" title="Reports">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+          <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+        </svg>
+      </span>
+      <span class="nav-label">Reports</span>
+    </a>
+    <?php endif; ?>
+    <?php endif; ?>
+
+    <!-- 5. ADMINISTRATION -->
+    <?php if (hasPermission('access-control', 'r') || hasPermission('audit-trail', 'r') || hasPermission('settings', 'r')): ?>
+    <div class="nav-section-label">ADMINISTRATION</div>
+
+    <?php if (hasPermission('access-control', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'access-control') ? 'active' : '' ?>" href="<?= $pagesBase ?>access-control.php" data-view="view-access-control" data-page="view-access-control" title="Access Control">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+      </span>
+      <span class="nav-label">Access Control</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (hasPermission('audit-trail', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'audit-trail') ? 'active' : '' ?>" href="<?= $pagesBase ?>audit-trail.php" data-view="view-audit-trail" data-page="view-audit-trail" title="Audit Trail">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      </span>
+      <span class="nav-label">Audit Trail</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (hasPermission('settings', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'settings') ? 'active' : '' ?>" href="<?= $pagesBase ?>settings.php" data-view="view-settings" data-page="view-settings" title="Settings">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -139,12 +179,14 @@ $cur = $currentPage ?? 'dashboard';
       </span>
       <span class="nav-label">Settings</span>
     </a>
+    <?php endif; ?>
+    <?php endif; ?>
   </nav>
 
   <div class="sidebar-footer">
-    <div class="system-status-pill">
+    <div class="system-status-pill" title="Role: <?= htmlspecialchars($roleName) ?>">
       <span class="status-indicator-dot online"></span>
-      <span class="status-text">MySQL Live</span>
+      <span class="status-text"><?= htmlspecialchars($roleName) ?></span>
     </div>
   </div>
 </aside>

@@ -13,30 +13,39 @@
 
   const STORAGE_KEY = 'SIGN_DEPOT_OPS_DATA_V2';
 
-  const DEFAULT_ARTISTS = ['Bob', 'Edrian', 'Glen', 'Goodrich', 'Jules', 'Raven', 'Rodel', 'Tim', 'Seven'];
+  const DEFAULT_ARTISTS = ['Bob', 'Edrian', 'Glen', 'Goodrich', 'Jules', 'Raven', 'Tim', 'Seven'];
 
-  const DEFAULT_SALES_REPS = ['DONA', 'JEN', 'JANET', 'FLORA', 'JOYCE', 'MARIEL', 'MAE', 'JAY', 'KIM', 'SHELLA', 'SHEENA', 'SOL'];
+  const DEFAULT_SALES_REPS = ['Dona', 'Jen', 'Janet', 'Flora', 'Joyce', 'Mariel', 'Mae', 'Jay', 'Kim', 'Shella', 'Sheena', 'Sol'];
 
   const PROJECT_STATUSES = [
     'Pending', 'On-going', 'Approved', 'For Review', 'Revising', 'Completed', 'On Hold'
   ];
 
   const DESIGN_STATUSES = [
-    'Not Started', 'In Progress', 'For Review', 'Revising', 'Completed'
+    'Not Started', 'In Progress', 'For Review', 'Revising', 'Submitted'
   ];
 
   const PRIORITY_LEVELS = ['Rush', 'High', 'Medium', 'Low'];
   const APPROVAL_LEVELS = ['Approved', 'Pending', 'Revision Requested'];
-  const FILE_SENT_LEVELS = ['Sent', 'Pending'];
-  const RELEASING_MODES = ['INSTALL', 'DELIVER', 'PICKUP'];
+  const FILE_SENT_LEVELS = ['File Sent', 'Pending', 'To Follow'];
+  const RELEASING_MODES = ['Install', 'Deliver', 'Pickup'];
+
+  function toTitleCase(str) {
+    if (!str) return '';
+    return String(str)
+      .toLowerCase()
+      .split(' ')
+      .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : '')
+      .join(' ');
+  }
 
   function normalizeReleasingMode(mode) {
-    if (!mode) return 'PICKUP';
+    if (!mode) return 'Pickup';
     const m = String(mode).trim().toUpperCase();
-    if (m.startsWith('INST')) return 'INSTALL';
-    if (m.startsWith('DELIV')) return 'DELIVER';
-    if (m.startsWith('PICK')) return 'PICKUP';
-    return 'PICKUP';
+    if (m.startsWith('INST')) return 'Install';
+    if (m.startsWith('DELIV')) return 'Deliver';
+    if (m.startsWith('PICK')) return 'Pickup';
+    return 'Pickup';
   }
 
   // Comprehensive Shared Mock Dataset (25+ real-world Sign Depot projects)
@@ -4925,8 +4934,7 @@
     attachments: [...DEFAULT_ATTACHMENTS],
     activeView: 'view-dashboard',
     currentDirectiveJo: 'P261001348',
-    timeframe: 'month',
-    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage },
+    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
     trackerFilter: { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: initialRowsPerPage },
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
@@ -4964,9 +4972,22 @@
             console.log('Purging stale mock data from localStorage, loading live spreadsheet dataset...');
             localStorage.removeItem(STORAGE_KEY);
           } else {
+            parsed.requests.forEach(r => {
+              if (r.designStatus === 'Completed') r.designStatus = 'Submitted';
+              if (r.salesRep) r.salesRep = toTitleCase(r.salesRep);
+              if (r.artist) r.artist = toTitleCase(r.artist);
+              if (r.releasingMode) r.releasingMode = normalizeReleasingMode(r.releasingMode);
+              if (r.fileSent) {
+                const fs = r.fileSent.trim().toLowerCase();
+                if (fs === 'file sent' || fs === 'filesent') r.fileSent = 'File Sent';
+                else if (fs === 'pending') r.fileSent = 'Pending';
+                else if (fs === 'to follow' || fs === 'tofollow') r.fileSent = 'To Follow';
+                else r.fileSent = toTitleCase(r.fileSent);
+              }
+            });
             state.requests = parsed.requests;
-            if (parsed.artists) state.artists = parsed.artists;
-            if (parsed.salesReps) state.salesReps = parsed.salesReps;
+            if (parsed.artists) state.artists = parsed.artists.filter(a => a !== 'Rodel' && a !== 'Benjie').map(toTitleCase);
+            if (parsed.salesReps) state.salesReps = parsed.salesReps.map(toTitleCase);
             if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
             
             const storedRows = getStoredRowsPerPage();
@@ -4987,8 +5008,21 @@
 
     // 2. Use genuine live spreadsheet default dataset
     state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
-    state.artists = DEFAULT_ARTISTS;
-    state.salesReps = DEFAULT_SALES_REPS;
+    state.requests.forEach(r => {
+      if (r.designStatus === 'Completed') r.designStatus = 'Submitted';
+      if (r.salesRep) r.salesRep = toTitleCase(r.salesRep);
+      if (r.artist) r.artist = toTitleCase(r.artist);
+      if (r.releasingMode) r.releasingMode = normalizeReleasingMode(r.releasingMode);
+      if (r.fileSent) {
+        const fs = r.fileSent.trim().toLowerCase();
+        if (fs === 'file sent' || fs === 'filesent') r.fileSent = 'File Sent';
+        else if (fs === 'pending') r.fileSent = 'Pending';
+        else if (fs === 'to follow' || fs === 'tofollow') r.fileSent = 'To Follow';
+        else r.fileSent = toTitleCase(r.fileSent);
+      }
+    });
+    state.artists = DEFAULT_ARTISTS.map(toTitleCase);
+    state.salesReps = DEFAULT_SALES_REPS.map(toTitleCase);
     saveStateToStorage();
 
     // 3. If running in PHP environment with live MySQL backend, sync live records
@@ -4997,6 +5031,19 @@
         .then(res => res.json())
         .then(res => {
           if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            res.data.forEach(r => {
+              if (r.designStatus === 'Completed') r.designStatus = 'Submitted';
+              if (r.salesRep) r.salesRep = toTitleCase(r.salesRep);
+              if (r.artist) r.artist = toTitleCase(r.artist);
+              if (r.releasingMode) r.releasingMode = normalizeReleasingMode(r.releasingMode);
+              if (r.fileSent) {
+                const fs = r.fileSent.trim().toLowerCase();
+                if (fs === 'file sent' || fs === 'filesent') r.fileSent = 'File Sent';
+                else if (fs === 'pending') r.fileSent = 'Pending';
+                else if (fs === 'to follow' || fs === 'tofollow') r.fileSent = 'To Follow';
+                else r.fileSent = toTitleCase(r.fileSent);
+              }
+            });
             state.requests = res.data;
             saveStateToStorage();
             if (state.activeView === 'view-dashboard') {
@@ -5118,7 +5165,7 @@
     const v = String(val).toLowerCase();
     if (fieldName === 'artist') return 'badge-artist';
     if (fieldName === 'salesRep') return 'badge-sales';
-    if (['completed', 'approved', 'sent'].includes(v)) return 'badge-completed';
+    if (['completed', 'approved', 'sent', 'submitted'].includes(v)) return 'badge-completed';
     if (['in progress', 'on-going', 'working'].includes(v)) return 'badge-ongoing';
     if (['pending', 'for review', 'revising', 'needs revision', 'queue'].includes(v)) return 'badge-pending';
     if (['rush', 'high'].includes(v)) return 'badge-priority-rush';
@@ -5131,11 +5178,11 @@
   function getIndicatorClass(fieldName, val) {
     if (!val) return 'indicator-neutral';
     const v = String(val).toLowerCase();
-    if (fieldName === 'artist') return 'indicator-artist';
-    if (fieldName === 'salesRep') return 'indicator-sales';
-    if (['completed', 'approved', 'sent'].includes(v)) return 'indicator-completed';
-    if (['in progress', 'on-going', 'working'].includes(v)) return 'indicator-ongoing';
-    if (['pending', 'for review', 'revising', 'needs revision', 'queue'].includes(v)) return 'indicator-pending';
+    if (fieldName === 'artist' || fieldName === 'salesFormArtist' || fieldName === 'trackerFormArtist' || fieldName === 'trackerFilterArtist') return 'indicator-artist';
+    if (fieldName === 'salesRep' || fieldName === 'salesFormSalesRep' || fieldName === 'salesFilterSalesRep') return 'indicator-sales';
+    if (['completed', 'approved', 'sent', 'file sent', 'submitted'].includes(v)) return 'indicator-completed';
+    if (['in progress', 'on-going', 'working', 'install', 'deliver'].includes(v)) return 'indicator-ongoing';
+    if (['pending', 'for review', 'revising', 'needs revision', 'queue', 'to follow'].includes(v)) return 'indicator-pending';
     if (['rush', 'high'].includes(v)) return 'indicator-rush';
     return 'indicator-neutral';
   }
@@ -5170,6 +5217,8 @@
     if (popover) {
       popover.classList.remove('show');
       popover.style.display = 'none';
+      popover.style.minWidth = '';
+      popover.style.maxWidth = '';
     }
     if (activeDropdownTrigger) {
       activeDropdownTrigger.classList.remove('is-active');
@@ -5289,6 +5338,15 @@
 
     // Precision positioning relative to document
     const rect = triggerBtn.getBoundingClientRect();
+    const isFormDropdown = triggerBtn.classList.contains('custom-form-dropdown-btn');
+    if (isFormDropdown) {
+      popover.style.minWidth = `${rect.width}px`;
+      popover.style.maxWidth = `${Math.max(rect.width, 320)}px`;
+    } else {
+      popover.style.minWidth = '';
+      popover.style.maxWidth = '';
+    }
+
     const popoverRect = popover.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
@@ -5333,7 +5391,10 @@
 
   function initCustomDropdownEngine() {
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('#sdCustomDropdownMenu') && !e.target.closest('.custom-select-btn') && !e.target.closest('.custom-filter-dropdown-btn')) {
+      if (!e.target.closest('#sdCustomDropdownMenu') && 
+          !e.target.closest('.custom-select-btn') && 
+          !e.target.closest('.custom-filter-dropdown-btn') && 
+          !e.target.closest('.custom-form-dropdown-btn')) {
         closeCustomDropdown();
       }
     });
@@ -5388,6 +5449,86 @@
           btn.classList.remove('has-value');
         }
       });
+    });
+  }
+
+  // Upgrades form <select class="form-control"> elements into sleek custom studio dropdowns
+  function upgradeAllFormSelects() {
+    const selects = document.querySelectorAll('select.form-control');
+    selects.forEach(sel => {
+      // Normalize option text to Title Case if it's all uppercase
+      Array.from(sel.options).forEach(opt => {
+        let txt = opt.textContent || opt.value || '';
+        if (txt && txt === txt.toUpperCase() && txt.length > 1) {
+          opt.textContent = toTitleCase(txt);
+        }
+      });
+
+      if (sel._customFormUpgraded && sel._formDropdownBtn) {
+        syncFormDropdownBtn(sel);
+        return;
+      }
+      sel._customFormUpgraded = true;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'custom-form-dropdown-btn';
+      if (sel.id) btn.id = `btnDropdown_${sel.id}`;
+      sel._formDropdownBtn = btn;
+      btn._nativeSelect = sel;
+
+      sel.style.display = 'none';
+      sel.parentNode.insertBefore(btn, sel.nextSibling);
+
+      syncFormDropdownBtn(sel);
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Refresh options in case they were dynamically populated
+        const opts = Array.from(sel.options).map(o => {
+          let label = o.text || o.value;
+          if (label && label === label.toUpperCase() && label.length > 1) {
+            label = toTitleCase(label);
+          }
+          return { value: o.value, label: label };
+        });
+
+        btn.setAttribute('data-options', JSON.stringify(opts));
+        btn.setAttribute('data-current', sel.value);
+        btn.setAttribute('data-field', sel.id);
+        openCustomDropdown(btn, e);
+      });
+
+      sel.addEventListener('change', () => {
+        syncFormDropdownBtn(sel);
+      });
+    });
+  }
+
+  function syncFormDropdownBtn(sel) {
+    if (!sel || !sel._formDropdownBtn) return;
+    const btn = sel._formDropdownBtn;
+    const selectedOpt = sel.options[sel.selectedIndex];
+    let label = selectedOpt ? (selectedOpt.text || selectedOpt.value) : (sel.value || '-- Select --');
+    if (label && label === label.toUpperCase() && label.length > 1) {
+      label = toTitleCase(label);
+    }
+    btn.innerHTML = `
+      <span class="custom-select-label">${escapeHTML(label || '-- Select --')}</span>
+      <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    `;
+    if (sel.value) {
+      btn.classList.add('has-value');
+    } else {
+      btn.classList.remove('has-value');
+    }
+  }
+
+  function syncAllFormDropdowns() {
+    document.querySelectorAll('select.form-control').forEach(sel => {
+      syncFormDropdownBtn(sel);
     });
   }
 
@@ -5522,7 +5663,32 @@
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(20px)';
       setTimeout(() => toast.remove(), 300);
-    }, 3200);
+    }, 3500);
+  }
+
+  window.showToast = showToast;
+
+  function getLoggedInArtist() {
+    const u = window.PMS_CURRENT_USER;
+    if (!u) return null;
+    if (u.role === 'artist' || u.assigned_artist) {
+      if (u.assigned_artist) return u.assigned_artist;
+      // Auto-fallback from username/full_name if role is artist
+      if (u.role === 'artist') {
+        const known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Edrian', 'Russel', 'Gilbert', 'Benjie'];
+        for (const k of known) {
+          if ((u.username && u.username.toLowerCase().includes(k.toLowerCase())) ||
+              (u.full_name && u.full_name.toLowerCase().includes(k.toLowerCase()))) {
+            return k;
+          }
+        }
+        if ((u.username && u.username.toLowerCase().includes('ed')) ||
+            (u.full_name && u.full_name.toLowerCase().includes('ed'))) {
+          return 'Edrian';
+        }
+      }
+    }
+    return null;
   }
 
   function escapeHTML(str) {
@@ -5663,9 +5829,11 @@
     'view-creatives-tracker': 'creatives-tracker.html',
     'view-artist-workload': 'artist-workload.html',
     'view-directives-details': 'directives-details.html',
-    'view-pending-artist': 'pending-artist.html',
-    'view-pending-sales': 'pending-sales.html',
+    'view-pending-sales': 'sales-requests.html',
     'view-monthly-output': 'monthly-output.html',
+    'view-reports': 'reports.html',
+    'view-access-control': 'access-control.html',
+    'view-audit-trail': 'audit-trail.html',
     'view-settings': 'settings.html'
   };
 
@@ -5694,7 +5862,7 @@
 
   function detectCurrentPage() {
     const bodyPage = document.body.getAttribute('data-page');
-    if (bodyPage && PAGE_MAP[bodyPage]) return bodyPage;
+    if (bodyPage && (PAGE_MAP[bodyPage] || document.getElementById(bodyPage))) return bodyPage;
 
     const path = window.location.pathname.toLowerCase().replace(/\\/g, '/');
     const rawFile = path.split('/').pop() || 'index.php';
@@ -5702,6 +5870,9 @@
     for (const [viewId, pageFile] of Object.entries(PAGE_MAP)) {
       const pageBase = pageFile.toLowerCase().replace(/\.(html|php)$/i, '');
       if (filename === pageBase) return viewId;
+    }
+    if (document.getElementById('view-' + filename)) {
+      return 'view-' + filename;
     }
     return 'view-dashboard';
   }
@@ -5714,8 +5885,12 @@
     if (!targetPanel) {
       const targetPage = PAGE_MAP[viewId];
       if (targetPage) {
-        window.location.href = getPageUrl(targetPage);
-        return;
+        const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.php').toLowerCase();
+        const destFile = (targetPage.replace(/\\/g, '/').split('/').pop() || '').toLowerCase().replace(/\.html$/i, isPhpEnv() ? '.php' : '.html');
+        if (currentFile !== destFile) {
+          window.location.href = getPageUrl(targetPage);
+          return;
+        }
       }
     }
 
@@ -5741,9 +5916,11 @@
       'view-creatives-tracker': { title: 'Creatives Tracker', badge: 'Production Queue' },
       'view-artist-workload': { title: 'Artist Workload', badge: 'Capacity & Assignments' },
       'view-directives-details': { title: 'Directives Details', badge: 'Printable Job Orders' },
-      'view-pending-artist': { title: 'Pending Projects — Artist', badge: 'Creative Queue' },
       'view-pending-sales': { title: 'Pending Projects — Sales', badge: 'Sales Actions' },
       'view-monthly-output': { title: 'Monthly Production Output', badge: 'Verified 2026 Metrics' },
+      'view-reports': { title: 'Reports & Analytics', badge: 'Performance Intelligence' },
+      'view-access-control': { title: 'Access Control & Users', badge: 'RBAC Administration' },
+      'view-audit-trail': { title: 'Audit Trail', badge: 'Security Logs' },
       'view-settings': { title: 'System Settings', badge: 'Configuration' }
     };
 
@@ -5776,22 +5953,25 @@
       case 'view-directives-details':
         renderDirectivePreview();
         break;
-      case 'view-pending-artist':
-        renderPendingArtistQueue();
-        break;
       case 'view-pending-sales':
         renderPendingSalesQueue();
         break;
       case 'view-monthly-output':
         renderMonthlyOutputReport();
         break;
+      case 'view-access-control':
+        if (typeof loadUsersList === 'function') {
+          loadUsersList();
+        }
+        break;
       case 'view-settings':
         renderSettings();
         break;
     }
 
-    // Ensure all filter selects in the active view are upgraded to custom themed buttons
+    // Ensure all filter and form selects in the active view are upgraded to custom themed buttons
     upgradeAllFilterSelects();
+    upgradeAllFormSelects();
   }
 
   // ==========================================================================
@@ -5835,6 +6015,16 @@
     const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
     const overdue = reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus)).length;
 
+    // Creatives Tracker KPI scoping for logged-in artist
+    const myArtist = getLoggedInArtist();
+    const trackerReqs = myArtist ? reqs.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : reqs;
+    const trkTotal = trackerReqs.length;
+    const trkPending = trackerReqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
+    const trkWorking = trackerReqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
+    const trkApproved = trackerReqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
+    const trkRevising = trackerReqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
+    const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus)).length;
+
     // Dashboard elements
     const elTot = document.getElementById('kpiTotalRequests'); if (elTot) elTot.textContent = totalRequests;
     const elPend = document.getElementById('kpiPendingApproval'); if (elPend) elPend.textContent = pendingApproval;
@@ -5845,12 +6035,12 @@
     const elOver = document.getElementById('kpiOverdue'); if (elOver) elOver.textContent = overdue;
 
     // Creatives Tracker KPI elements
-    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = totalRequests;
-    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = pendingApproval;
-    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = working;
-    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = approved;
-    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = revising;
-    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = overdue;
+    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = trkTotal;
+    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = trkPending;
+    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = trkWorking;
+    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = trkApproved;
+    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = trkRevising;
+    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = trkOverdue;
   }
 
   // Panze Left Column: Soft Pastel Tinted Task Cards
@@ -6212,8 +6402,37 @@
   function renderSalesRequests() {
     populateSalesFiltersDropdowns();
 
+    // Live Client Approval Status Tab Counts
+    const allCount = state.requests.length;
+    const pendingCount = state.requests.filter(r => r.clientApproval === 'Pending').length;
+    const revisionCount = state.requests.filter(r => r.clientApproval === 'Revision Requested').length;
+    const approvedCount = state.requests.filter(r => r.clientApproval === 'Approved').length;
+
+    const elAll = document.getElementById('badgeCountAll');
+    if (elAll) elAll.textContent = allCount;
+    const elPending = document.getElementById('badgeCountPending');
+    if (elPending) elPending.textContent = pendingCount;
+    const elRevision = document.getElementById('badgeCountRevision');
+    if (elRevision) elRevision.textContent = revisionCount;
+    const elApproved = document.getElementById('badgeCountApproved');
+    if (elApproved) elApproved.textContent = approvedCount;
+
+    // Sync active approval tab button
+    const activeApprovalTab = state.salesFilter.approvalTab || '';
+    document.querySelectorAll('.sales-approval-tab').forEach(tabBtn => {
+      const tabVal = tabBtn.getAttribute('data-tab-approval') || '';
+      const isAct = tabVal === activeApprovalTab;
+      tabBtn.classList.toggle('active', isAct);
+      tabBtn.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    });
+
     let list = [...state.requests];
     const { search, priority, approval, fileSent, salesRep, sortField, sortDir, page, perPage } = state.salesFilter;
+
+    // Filter by approval tab
+    if (activeApprovalTab) {
+      list = list.filter(r => r.clientApproval === activeApprovalTab);
+    }
 
     // Filters
     if (search) {
@@ -6301,9 +6520,10 @@
     const repSelect = document.getElementById('salesFilterSalesRep');
     if (repSelect && repSelect.children.length <= 1) {
       state.salesReps.forEach(rep => {
+        const titleRep = toTitleCase(rep);
         const opt = document.createElement('option');
-        opt.value = rep;
-        opt.textContent = rep;
+        opt.value = titleRep;
+        opt.textContent = titleRep;
         repSelect.appendChild(opt);
       });
     }
@@ -6311,9 +6531,10 @@
     const modalArtistSelect = document.getElementById('salesFormArtist');
     if (modalArtistSelect && modalArtistSelect.children.length === 0) {
       state.artists.forEach(a => {
+        const titleA = toTitleCase(a);
         const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = a;
+        opt.value = titleA;
+        opt.textContent = titleA;
         modalArtistSelect.appendChild(opt);
       });
     }
@@ -6321,12 +6542,15 @@
     const modalSalesSelect = document.getElementById('salesFormSalesRep');
     if (modalSalesSelect && modalSalesSelect.children.length === 0) {
       state.salesReps.forEach(s => {
+        const titleS = toTitleCase(s);
         const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
+        opt.value = titleS;
+        opt.textContent = titleS;
         modalSalesSelect.appendChild(opt);
       });
     }
+
+    upgradeAllFormSelects();
   }
 
   // ==========================================================================
@@ -6337,7 +6561,24 @@
     populateTrackerFiltersDropdowns();
     updateDashboardKPIs();
 
+    const myArtist = getLoggedInArtist();
     let list = [...state.requests];
+
+    // Artist-scoped filter: if logged in as an artist, show ONLY their assigned tasks!
+    if (myArtist) {
+      list = list.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase());
+
+      // Show artist banner on tracker header
+      const titleWrap = document.querySelector('#view-creatives-tracker .section-title-wrap');
+      if (titleWrap && !document.getElementById('artistScopedTrackerBanner')) {
+        const banner = document.createElement('div');
+        banner.id = 'artistScopedTrackerBanner';
+        banner.style.cssText = 'display:inline-flex; align-items:center; gap:6px; background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; margin-top:6px;';
+        banner.innerHTML = `<span>🎨 Filtered to Your Assigned Tasks: <strong>${escapeHTML(myArtist)}</strong></span>`;
+        titleWrap.appendChild(banner);
+      }
+    }
+
     const { search, projectStatus, designStatus, artist, overdue, sortField, sortDir, page, perPage } = state.trackerFilter;
 
     // Apply KPI filter if active on Creatives Tracker
@@ -6404,7 +6645,7 @@
     }
     if (projectStatus) list = list.filter(r => r.projectStatus === projectStatus);
     if (designStatus) list = list.filter(r => r.designStatus === designStatus);
-    if (artist) list = list.filter(r => r.artist === artist);
+    if (!myArtist && artist) list = list.filter(r => r.artist === artist);
     if (overdue) {
       list = list.filter(r => {
         const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
@@ -6484,25 +6725,45 @@
   }
 
   function populateTrackerFiltersDropdowns() {
+    const myArtist = getLoggedInArtist();
     const artistSelect = document.getElementById('trackerFilterArtist');
-    if (artistSelect && artistSelect.children.length <= 1) {
-      state.artists.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = a;
-        artistSelect.appendChild(opt);
-      });
+    if (artistSelect) {
+      if (myArtist) {
+        artistSelect.innerHTML = `<option value="${escapeHTML(myArtist)}" selected>🎨 ${escapeHTML(myArtist)} (You)</option>`;
+        artistSelect.disabled = true;
+        artistSelect.title = `Your account is linked to ${myArtist}. Only your assigned tasks are shown.`;
+        artistSelect.style.background = '#ECFDF5';
+        artistSelect.style.borderColor = '#10B981';
+        artistSelect.style.color = '#065F46';
+        artistSelect.style.fontWeight = '700';
+      } else if (artistSelect.children.length <= 1) {
+        state.artists.forEach(a => {
+          const titleA = toTitleCase(a);
+          const opt = document.createElement('option');
+          opt.value = titleA;
+          opt.textContent = titleA;
+          artistSelect.appendChild(opt);
+        });
+      }
     }
 
     const modalArtistSelect = document.getElementById('trackerFormArtist');
-    if (modalArtistSelect && modalArtistSelect.children.length === 0) {
-      state.artists.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = a;
-        modalArtistSelect.appendChild(opt);
-      });
+    if (modalArtistSelect) {
+      if (modalArtistSelect.children.length === 0) {
+        state.artists.forEach(a => {
+          const titleA = toTitleCase(a);
+          const opt = document.createElement('option');
+          opt.value = titleA;
+          opt.textContent = titleA;
+          modalArtistSelect.appendChild(opt);
+        });
+      }
+      if (myArtist) {
+        modalArtistSelect.value = toTitleCase(myArtist);
+      }
     }
+
+    upgradeAllFormSelects();
   }
 
   // ==========================================================================
@@ -6516,7 +6777,7 @@
     const reqs = state.requests;
     const filterAvail = state.workloadFilter.availability;
 
-    const artistData = state.artists.map(artist => {
+    const artistData = state.artists.filter(a => a !== 'Rodel' && a !== 'Benjie').map(artist => {
       const activeAssignments = reqs.filter(r => r.artist === artist && r.projectStatus !== 'Completed');
       let std = 0, prt = 0, spc = 0;
       activeAssignments.forEach(a => {
@@ -6595,7 +6856,7 @@
       titleEl.textContent = selectedArtist ? `Active Assignments for ${selectedArtist}` : 'All Active Artist Assignments';
     }
 
-    let list = state.requests.filter(r => r.projectStatus !== 'Completed');
+    let list = state.requests.filter(r => r.projectStatus !== 'Completed' && r.artist !== 'Rodel' && r.artist !== 'Benjie');
     if (selectedArtist) {
       list = list.filter(r => r.artist === selectedArtist);
     }
@@ -6629,23 +6890,41 @@
       if (pagedList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">No active tasks for selected artist.</td></tr>`;
       } else {
-        tbody.innerHTML = pagedList.map(r => `
-          <tr>
-            <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
-            <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
-            <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
-            <td>
-              ${r.countSpecial > 0 ? '<span class="badge badge-priority-high">Special</span>' : r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-not-started">Standard</span>'}
-            </td>
-            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
-            <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
-            <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus, DESIGN_STATUSES)}</td>
-            <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
-            <td>
-              <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
-            </td>
-          </tr>
-        `).join('');
+        tbody.innerHTML = pagedList.map(r => {
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          let deadlineBadge = '';
+          if (alertInfo.status === 'overdue') {
+            deadlineBadge = ` <span class="deadline-pill deadline-pill-overdue">${escapeHTML(alertInfo.diffText)}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlineBadge = ` <span class="deadline-pill deadline-pill-today">Due Today</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlineBadge = ` <span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText)}</span>`;
+          }
+
+          const categoryBadge = r.countSpecial > 0 
+            ? '<span class="badge badge-priority-high">Special</span>' 
+            : (r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-not-started">Standard</span>');
+
+          return `
+            <tr>
+              <td><strong style="color:var(--primary-green); font-family:var(--font-mono, monospace);">${escapeHTML(r.requestId)}</strong></td>
+              <td><span class="badge badge-artist" style="font-weight:700;">${escapeHTML(r.artist || '-')}</span></td>
+              <td><span style="font-weight:600; color:var(--text-main);">${escapeHTML(r.projectName || '-')}</span></td>
+              <td>${categoryBadge}</td>
+              <td style="white-space:nowrap;">
+                <span>${escapeHTML(r.designDeadline || '-')}</span>${deadlineBadge}
+              </td>
+              <td><span class="badge ${getStatusBadgeClass(r.projectStatus)}">${escapeHTML(r.projectStatus || 'Pending')}</span></td>
+              <td><span class="badge ${getStatusBadgeClass(r.designStatus)}">${escapeHTML(r.designStatus || 'Not Started')}</span></td>
+              <td style="text-align:center;"><span style="font-weight:700; color:var(--text-secondary);">${r.revisionCount || 0}</span></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="View Blueprint Directive">
+                  Directive
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
       }
     }
   }
@@ -7855,18 +8134,25 @@
   // ==========================================================================
 
   function renderPendingArtistQueue() {
+    const myArtist = getLoggedInArtist();
     const artistSelect = document.getElementById('pendingArtistSelect');
-    if (artistSelect && artistSelect.children.length === 0) {
-      state.artists.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = `Artist: ${a}`;
-        artistSelect.appendChild(opt);
-      });
-      artistSelect.value = state.pendingArtistSelected || state.artists[0];
+    if (artistSelect) {
+      if (myArtist) {
+        artistSelect.innerHTML = `<option value="${escapeHTML(myArtist)}" selected>🎨 Artist: ${escapeHTML(myArtist)} (You)</option>`;
+        artistSelect.disabled = true;
+        state.pendingArtistSelected = myArtist;
+      } else if (artistSelect.children.length === 0) {
+        state.artists.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a;
+          opt.textContent = `Artist: ${a}`;
+          artistSelect.appendChild(opt);
+        });
+        artistSelect.value = state.pendingArtistSelected || state.artists[0];
+      }
     }
 
-    const currentArtist = (artistSelect ? artistSelect.value : state.pendingArtistSelected) || state.artists[0];
+    const currentArtist = myArtist || (artistSelect ? artistSelect.value : state.pendingArtistSelected) || state.artists[0];
     state.pendingArtistSelected = currentArtist;
 
     const pendingList = state.requests.filter(r => r.artist === currentArtist && r.projectStatus !== 'Completed');
@@ -7923,13 +8209,21 @@
   // ==========================================================================
 
   function renderPendingSalesQueue() {
-    let list = state.requests.filter(r => r.projectStatus !== 'Completed');
+    // Strictly filter to all pending or newly encoded sales requests that are NOT yet approved
+    let list = state.requests.filter(r => {
+      const clientApp = (r.clientApproval || '').trim().toLowerCase();
+      const projStat = (r.projectStatus || '').trim().toLowerCase();
+      const isApproved = clientApp === 'approved' || projStat === 'approved';
+      const isCompleted = projStat === 'completed';
+      return !isApproved && !isCompleted;
+    });
+
     const qFilter = state.pendingSalesFilter;
     const search = state.pendingSalesSearch;
 
-    if (qFilter === 'approval') list = list.filter(r => r.clientApproval === 'Pending');
-    if (qFilter === 'files') list = list.filter(r => r.fileSent === 'Pending');
-    if (qFilter === 'release') list = list.filter(r => r.projectStatus === 'Approved' || r.designStatus === 'Completed');
+    if (qFilter === 'approval') list = list.filter(r => (r.clientApproval || 'Pending') === 'Pending');
+    if (qFilter === 'files') list = list.filter(r => r.fileSent === 'Pending' || r.fileSent === 'TO FOLLOW');
+    if (qFilter === 'release') list = list.filter(r => r.releasingDate || r.releasingMode);
     if (qFilter === 'rush') list = list.filter(r => r.priority === 'Rush');
 
     if (search) {
@@ -8347,16 +8641,7 @@
       };
     }
 
-    const collapseBtn = document.getElementById('sidebarCollapseBtn');
-    const sidebar = document.getElementById('appSidebar');
-    if (collapseBtn && sidebar) {
-      collapseBtn.onclick = () => sidebar.classList.toggle('collapsed');
-    }
-
-    const mobileBtn = document.getElementById('mobileMenuBtn');
-    if (mobileBtn && sidebar) {
-      mobileBtn.onclick = () => sidebar.classList.toggle('mobile-open');
-    }
+    // Sidebar toggle is handled cleanly via delegated events with debounce in window.toggleDesktopSidebar
 
     // Timeframe filters
     document.querySelectorAll('.timeframe-btn').forEach(btn => {
@@ -8386,6 +8671,24 @@
       modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.remove('show');
       });
+
+      // Automatically upgrade and sync all form selects whenever any modal becomes visible
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.attributeName === 'class' && modal.classList.contains('show')) {
+            upgradeAllFormSelects();
+            syncAllFormDropdowns();
+          }
+        });
+      });
+      observer.observe(modal, { attributes: true });
+    });
+
+    // Automatically sync dropdown button labels when forms are reset
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('reset', () => {
+        setTimeout(() => syncAllFormDropdowns(), 20);
+      });
     });
 
     const salesForm = document.getElementById('salesRequestForm');
@@ -8398,13 +8701,13 @@
         const project = document.getElementById('salesFormProject').value.trim();
         const client = document.getElementById('salesFormClient').value.trim();
         const artist = document.getElementById('salesFormArtist').value;
-        const salesRep = document.getElementById('salesFormSalesRep').value;
+        const salesRep = toTitleCase(document.getElementById('salesFormSalesRep').value);
         const deadline = document.getElementById('salesFormDeadline').value;
-        const releasingDate = document.getElementById('salesFormReleasingDate').value;
-        const fileSent = document.getElementById('salesFormFileSent').value;
-        const clientApproval = document.getElementById('salesFormClientApproval').value;
-        const priority = document.getElementById('salesFormPriority').value;
-        const mode = normalizeReleasingMode(document.getElementById('salesFormReleasingMode').value);
+        const releasingDate = (document.getElementById('salesFormReleasingDate') || document.getElementById('salesFormReleasing'))?.value || deadline;
+        const fileSent = document.getElementById('salesFormFileSent')?.value || 'Pending';
+        const clientApproval = document.getElementById('salesFormClientApproval')?.value || 'Pending';
+        const priority = document.getElementById('salesFormPriority')?.value || 'Normal';
+        const mode = normalizeReleasingMode((document.getElementById('salesFormRelMode') || document.getElementById('salesFormReleasingMode'))?.value);
         const contactPerson = document.getElementById('salesFormContactPerson').value.trim();
         const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
         const address = document.getElementById('salesFormAddress').value.trim();
@@ -8438,8 +8741,8 @@
             client: client,
             artist: artist,
             salesRep: salesRep,
-            inCharge: salesRep.toUpperCase(),
-            drawnBy: artist.toUpperCase(),
+            inCharge: toTitleCase(salesRep),
+            drawnBy: toTitleCase(artist),
             orderDate: '2026-10-23',
             designDeadline: deadline,
             releasingDate: releasingDate || deadline,
@@ -9025,6 +9328,8 @@
     updateDeadlineAlertCenter: () => updateDeadlineAlertCenter(),
     openCustomDropdown: (btn, ev) => openCustomDropdown(btn, ev),
     closeCustomDropdown: () => closeCustomDropdown(),
+    upgradeAllFormSelects: () => upgradeAllFormSelects(),
+    syncAllFormDropdowns: () => syncAllFormDropdowns(),
 
     // Direct Inline Editing Handlers
     handleInlineTextBlur: (el) => {
@@ -9066,7 +9371,7 @@
           showToast(`Task ${rec.requestId} marked in progress.`);
         } else {
           rec.projectStatus = 'Completed';
-          rec.designStatus = 'Completed';
+          rec.designStatus = 'Submitted';
           rec.completionDate = '2026-10-23';
           showToast(`Task ${rec.requestId} marked as Completed!`);
         }
@@ -9094,6 +9399,11 @@
 
     setSalesPage: (p) => {
       state.salesFilter.page = p;
+      renderSalesRequests();
+    },
+    setSalesApprovalTab: (tab) => {
+      state.salesFilter.approvalTab = tab || '';
+      state.salesFilter.page = 1;
       renderSalesRequests();
     },
     setSalesPerPage: (n) => {
@@ -9300,6 +9610,10 @@
     }
 
     function toggleMobileSidebar() {
+      if (typeof window.toggleMobileSidebar === 'function' && window.toggleMobileSidebar !== toggleMobileSidebar) {
+        window.toggleMobileSidebar();
+        return;
+      }
       const appSidebar = document.getElementById('appSidebar');
       if (appSidebar && appSidebar.classList.contains('mobile-open')) {
         closeMobileSidebar();
@@ -9309,12 +9623,16 @@
     }
 
     function toggleDesktopSidebar() {
+      if (typeof window.toggleDesktopSidebar === 'function' && window.toggleDesktopSidebar !== toggleDesktopSidebar) {
+        window.toggleDesktopSidebar();
+        return;
+      }
       const appSidebar = document.getElementById('appSidebar');
       if (!appSidebar) return;
-      appSidebar.classList.toggle('collapsed');
       const isCollapsed = appSidebar.classList.contains('collapsed');
+      appSidebar.classList.toggle('collapsed', !isCollapsed);
       try {
-        localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', isCollapsed ? '1' : '0');
+        localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', !isCollapsed ? '1' : '0');
       } catch (err) {}
     }
 
@@ -9473,10 +9791,20 @@
       }
     });
 
+    // Client Approval Status Tabs listener
+    document.querySelectorAll('.sales-approval-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabVal = btn.getAttribute('data-tab-approval') || '';
+        state.salesFilter.approvalTab = tabVal;
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    });
+
     const btnResetSales = document.getElementById('btnResetSalesFilters');
     if (btnResetSales) {
       btnResetSales.addEventListener('click', () => {
-        state.salesFilter = { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: 8 };
+        state.salesFilter = { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: getStoredRowsPerPage(), approvalTab: '' };
         if (salesSearch) salesSearch.value = '';
         ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep'].forEach(id => {
           const el = document.getElementById(id);
@@ -9502,10 +9830,17 @@
     const btnTrackerNew = document.getElementById('btnTrackerNewTask');
     if (btnTrackerNew) {
       btnTrackerNew.addEventListener('click', () => {
-        const first = state.requests[0];
+        const myArtist = getLoggedInArtist();
+        const candidateList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
+        const first = candidateList[0] || state.requests[0];
+        if (!first) return;
         document.getElementById('trackerFormId').value = first.id;
         document.getElementById('trackerFormReqId').value = first.requestId;
         document.getElementById('trackerFormProject').value = first.projectName;
+        if (myArtist) {
+          const mArtist = document.getElementById('trackerFormArtist');
+          if (mArtist) mArtist.value = myArtist;
+        }
         document.getElementById('trackerModalTitle').textContent = `Add Creative Task — ${first.requestId}`;
         document.getElementById('trackerModal').classList.add('show');
       });
@@ -9537,12 +9872,17 @@
     const btnResetTracker = document.getElementById('btnResetTrackerFilters');
     if (btnResetTracker) {
       btnResetTracker.addEventListener('click', () => {
-        state.trackerFilter = { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: 10 };
+        const myArtist = getLoggedInArtist();
+        state.trackerFilter = { search: '', projectStatus: '', designStatus: '', artist: myArtist || '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: 10 };
         if (trackerSearch) trackerSearch.value = '';
-        ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterArtist', 'trackerFilterOverdue'].forEach(id => {
+        ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterOverdue'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.value = '';
         });
+        const artEl = document.getElementById('trackerFilterArtist');
+        if (artEl) {
+          artEl.value = myArtist || '';
+        }
         renderCreativesTracker();
       });
     }
@@ -9710,8 +10050,10 @@
   }
 
   function exportTrackerCsv() {
+    const myArtist = getLoggedInArtist();
     const headers = ['Request ID', 'Artist', 'Project Name', 'Design Deadline', 'Head Approval', 'Standard', 'Printing', 'Special', 'Project Status', 'Design Status', 'Revisions', 'Remarks', 'Date', 'Sales', 'Month'];
-    const rows = state.requests.map(r => [
+    const reqList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
+    const rows = reqList.map(r => [
       r.requestId,
       r.artist,
       `"${(r.projectName || '').replace(/"/g, '""')}"`,
@@ -9730,7 +10072,7 @@
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    downloadCsv(csvContent, `Sign_Depot_Creatives_Tracker_${Date.now()}.csv`);
+    downloadCsv(csvContent, `Sign_Depot_Creatives_Tracker_${myArtist ? myArtist + '_' : ''}${Date.now()}.csv`);
   }
 
   function exportMonthlyReportCsv() {
@@ -9791,6 +10133,7 @@
 
     initCustomDropdownEngine();
     upgradeAllFilterSelects();
+    upgradeAllFormSelects();
     initCustomTooltipEngine();
 
     const urlParams = new URLSearchParams(window.location.search);

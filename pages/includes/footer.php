@@ -9,10 +9,11 @@ $base = function_exists('getBasePath') ? getBasePath() : '../';
 
   <?php require_once __DIR__ . '/modals.php'; ?>
 
-  <!-- Global Application API Endpoints Configuration -->
+  <!-- Global Application API Endpoints & Current User Configuration -->
   <script>
     window.PMS_API_URL = '<?= $base ?>api.php';
     window.PMS_BASE_URL = '<?= $base ?>';
+    window.PMS_CURRENT_USER = <?= json_encode(function_exists('getCurrentUser') ? getCurrentUser() : null) ?>;
   </script>
 
   <!-- Modular Component Loader & Core Application Scripts -->

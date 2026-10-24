@@ -3,7 +3,7 @@
  * Sign Depotâ„¢ Operations PMS â€” Directives Details
  */
 
-require_once __DIR__ . '/config.php';
+require_once dirname(__DIR__) . '/config.php';
 
 $pageTitle = 'Directives Details';
 $currentPage = 'directives-details';
@@ -50,13 +50,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               <button class="tab-btn" data-subtab="tab-template-editor" id="btnTabEditor">Template Editor</button>
               <button class="tab-btn" data-subtab="tab-attachments" id="btnTabAttachments">Attachments (<span id="attachmentsCountBadge">3</span>)</button>
             </div>
-            <div class="section-actions">
-              <button class="btn btn-secondary btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (4864 × 648 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator. (Hold Shift to download .png file)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                Copy Image 4K (Ctrl+V)
-              </button>
-              <button class="btn btn-secondary btn-sm" id="btnDirectiveReset">Reset</button>
-            </div>
           </div>
 
           <!-- SUBTAB 1: DIRECTIVE PREVIEW (Exact Sign Depot Document Layout) -->
@@ -77,11 +70,11 @@ require_once __DIR__ . '/includes/sidebar.php';
                       <button type="button" class="btn-font-scale" id="btnCellFontReset" title="Reset this cell to default font size">Reset</button>
                     </div>
 
-                    <span class="vector-status-indicator">• Vector Ready</span>
-                    <button class="btn btn-green btn-sm" id="btnQuickCopyVector" data-tooltip="Copy vector directly pasteable into Photoshop, Illustrator, CorelDRAW, or Affinity Designer">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                      Copy as Vector (SVG)
+                    <button class="btn btn-green btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (4864 × 648 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator. (Hold Shift to download .png file)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                      Copy Image 4K (Ctrl+V)
                     </button>
+                    <button class="btn btn-secondary btn-sm" id="btnDirectiveReset" title="Reset directive to default values">Reset</button>
                   </div>
                 </div>
 
@@ -152,14 +145,14 @@ require_once __DIR__ . '/includes/sidebar.php';
                               <td class="doc-label-cell doc-cell-center" id="docFieldDrawnByLabel" contenteditable="true" title="Click to edit Label" style="border-bottom: 1.5px solid #000000; height: 26px;">DRAWN BY:</td>
                             </tr>
                             <tr>
-                              <td class="doc-value-cell doc-cell-center doc-person-val" style="border-right: 1.5px solid #000000; height: 26px;" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge">DONA</td>
-                              <td class="doc-value-cell doc-cell-center doc-person-val" style="height: 26px;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By">GLEN</td>
+                              <td class="doc-value-cell doc-cell-center doc-person-val" style="border-right: 1.5px solid #000000; height: 26px;" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge">Dona</td>
+                              <td class="doc-value-cell doc-cell-center doc-person-val" style="height: 26px;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By">Glen</td>
                             </tr>
                           </tbody>
                         </table>
                       </td>
                       <td class="doc-label-cell" id="docFieldReleasingModeLabel" contenteditable="true" title="Click to edit Label">RELEASING MODE:</td>
-                      <td class="doc-value-cell" id="docFieldReleasingMode" contenteditable="true" title="Click to edit">PICKUP</td>
+                      <td class="doc-value-cell" id="docFieldReleasingMode" contenteditable="true" title="Click to edit">Pickup</td>
                       <td rowspan="2" class="doc-value-cell doc-cell-center doc-box-val" id="docFieldDuration" contenteditable="true" title="Click to edit Duration">1 Day (4 Hours)</td>
                     </tr>
 
@@ -188,9 +181,9 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <div class="form-group">
                   <label class="form-label">Releasing Mode</label>
                   <select class="form-control" id="ctrlReleasingMode">
-                    <option value="INSTALL">INSTALL</option>
-                    <option value="DELIVER">DELIVER</option>
-                    <option value="PICKUP">PICKUP</option>
+                    <option value="Install">Install</option>
+                    <option value="Deliver">Deliver</option>
+                    <option value="Pickup">Pickup</option>
                   </select>
                 </div>
                 <div class="form-group col-span-2">
@@ -199,9 +192,9 @@ require_once __DIR__ . '/includes/sidebar.php';
                 </div>
                 <div class="form-group">
                   <label class="form-label">Assigned In-Charge</label>
-                  <input type="text" class="form-control" id="ctrlInCharge" value="DONA">
+                  <input type="text" class="form-control" id="ctrlInCharge" value="Dona">
                   <label class="form-label" style="margin-top: 6px;">Drawn By (Artist)</label>
-                  <input type="text" class="form-control" id="ctrlDrawnBy" value="GLEN">
+                  <input type="text" class="form-control" id="ctrlDrawnBy" value="Glen">
                 </div>
               </div>
             </div>

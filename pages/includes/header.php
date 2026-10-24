@@ -3,9 +3,19 @@
  * Sign Depot Operations PMS — Shared Header
  * Location: pages/includes/header.php
  */
+require_once dirname(__DIR__, 2) . '/includes/auth.php';
+
+// Enforce authentication on all protected pages
+requireLogin();
+
 $base = function_exists('getBasePath') ? getBasePath() : '../';
 $pageTitle = $pageTitle ?? 'Operations PMS';
 $currentPage = $currentPage ?? 'dashboard';
+
+// Enforce module read permission
+if ($currentPage !== 'login') {
+    requirePermission($currentPage, 'r');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

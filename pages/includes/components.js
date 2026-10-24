@@ -14,11 +14,10 @@
   const rawFilename = (pathParts.pop() || 'index.php').toLowerCase().split('?')[0].split('#')[0];
   const isInsidePagesFolder = pathParts.some(p => p.toLowerCase() === 'pages') || currentPath.toLowerCase().includes('/pages/');
 
-  const rootPrefix = isInsidePagesFolder ? '../' : '';
-  const pagesPrefix = isInsidePagesFolder ? '' : 'pages/';
-
   const isPhp = rawFilename.endsWith('.php') || window.location.href.includes('.php') || typeof window.PMS_API_URL !== 'undefined';
   const ext = isPhp ? '.php' : '.html';
+  const rootPrefix = isInsidePagesFolder ? '../' : './';
+  const pagesPrefix = isInsidePagesFolder ? '' : 'pages/';
   const baseKey = rawFilename.replace(/\.(html|php)$/i, '');
   const currentFilename = baseKey + ext;
 
@@ -54,23 +53,29 @@
       badge: 'Official Job Order Blueprint',
       category: 'Sign Depot Technical Documentation'
     },
-    'pending-artist': {
-      view: 'view-pending-artist',
-      title: 'Pending — Artist',
-      badge: 'Drafting Queue',
-      category: 'Pending Creative Pipelines'
-    },
-    'pending-sales': {
-      view: 'view-pending-sales',
-      title: 'Pending — Sales',
-      badge: 'Awaiting Release',
-      category: 'Pending Sales Pipelines'
-    },
     'monthly-output': {
       view: 'view-monthly-output',
       title: 'Monthly Output',
       badge: 'Annual Production Matrix',
       category: 'Historical Production Records'
+    },
+    'reports': {
+      view: 'view-reports',
+      title: 'Reports',
+      badge: 'Operational Intelligence',
+      category: 'Analytics & Reports'
+    },
+    'access-control': {
+      view: 'view-access-control',
+      title: 'Access Control',
+      badge: 'RBAC & CRUD Permissions',
+      category: 'System Administration'
+    },
+    'audit-trail': {
+      view: 'view-audit-trail',
+      title: 'Audit Trail',
+      badge: 'Security Activity Log',
+      category: 'System Administration'
     },
     'settings': {
       view: 'view-settings',
@@ -111,9 +116,10 @@
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-section-label">Operations</div>
+    <!-- 1. HOME -->
+    <div class="nav-section-label">HOME</div>
     
-    <a class="nav-item${isAct('index')}" href="${rootPrefix}index${ext}" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
+    <a class="nav-item${isAct('index') || isAct('dashboard')}" href="${rootPrefix}index${ext}" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="9"></rect>
@@ -122,8 +128,11 @@
           <rect x="3" y="16" width="7" height="5"></rect>
         </svg>
       </span>
-      <span class="nav-label">Project Dashboard</span>
+      <span class="nav-label">Dashboard</span>
     </a>
+
+    <!-- 2. SALES -->
+    <div class="nav-section-label">SALES</div>
 
     <a class="nav-item${isAct('sales-requests')}" href="${pagesPrefix}sales-requests${ext}" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
       <span class="nav-icon">
@@ -137,6 +146,9 @@
       </span>
       <span class="nav-label">Sales Requests</span>
     </a>
+
+    <!-- 3. DESIGN -->
+    <div class="nav-section-label">DESIGN</div>
 
     <a class="nav-item${isAct('creatives-tracker')}" href="${pagesPrefix}creatives-tracker${ext}" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
       <span class="nav-icon">
@@ -160,9 +172,7 @@
       <span class="nav-label">Artist Workload</span>
     </a>
 
-    <div class="nav-section-label">Directives</div>
-
-    <a class="nav-item${isAct('directives-details')}" href="${pagesPrefix}directives-details${ext}" data-view="view-directives-details" data-page="view-directives-details" title="Directives Details">
+    <a class="nav-item${isAct('directives-details')}" href="${pagesPrefix}directives-details${ext}" data-view="view-directives-details" data-page="view-directives-details" title="Directive Details">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -170,32 +180,11 @@
           <rect x="6" y="14" width="12" height="8"></rect>
         </svg>
       </span>
-      <span class="nav-label">Directives Details</span>
+      <span class="nav-label">Directive Details</span>
     </a>
 
-    <div class="nav-section-label">Pending Queues</div>
-
-    <a class="nav-item${isAct('pending-artist')}" href="${pagesPrefix}pending-artist${ext}" data-view="view-pending-artist" data-page="view-pending-artist" title="Pending Artist">
-      <span class="nav-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-      </span>
-      <span class="nav-label">Pending — Artist</span>
-    </a>
-
-    <a class="nav-item${isAct('pending-sales')}" href="${pagesPrefix}pending-sales${ext}" data-view="view-pending-sales" data-page="view-pending-sales" title="Pending Sales">
-      <span class="nav-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-        </svg>
-      </span>
-      <span class="nav-label">Pending — Sales</span>
-    </a>
-
-    <div class="nav-section-label">Analytics & Config</div>
+    <!-- 4. ANALYTICS & REPORTS -->
+    <div class="nav-section-label">ANALYTICS & REPORTS</div>
 
     <a class="nav-item${isAct('monthly-output')}" href="${pagesPrefix}monthly-output${ext}" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
       <span class="nav-icon">
@@ -206,6 +195,37 @@
         </svg>
       </span>
       <span class="nav-label">Monthly Output</span>
+    </a>
+
+    <a class="nav-item${isAct('reports')}" href="${pagesPrefix}reports${ext}" data-view="view-reports" data-page="view-reports" title="Reports">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+          <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+        </svg>
+      </span>
+      <span class="nav-label">Reports</span>
+    </a>
+
+    <!-- 5. ADMINISTRATION -->
+    <div class="nav-section-label">ADMINISTRATION</div>
+
+    <a class="nav-item${isAct('access-control')}" href="${pagesPrefix}access-control${ext}" data-view="view-access-control" data-page="view-access-control" title="Access Control">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+      </span>
+      <span class="nav-label">Access Control</span>
+    </a>
+
+    <a class="nav-item${isAct('audit-trail')}" href="${pagesPrefix}audit-trail${ext}" data-view="view-audit-trail" data-page="view-audit-trail" title="Audit Trail">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      </span>
+      <span class="nav-label">Audit Trail</span>
     </a>
 
     <a class="nav-item${isAct('settings')}" href="${pagesPrefix}settings${ext}" data-view="view-settings" data-page="view-settings" title="Settings">
@@ -227,6 +247,8 @@
   </div>
 </aside>
 `;
+  }
+
   function buildNavbarHTML(containerEl) {
     const category = containerEl?.getAttribute('data-category') || currentPage.category;
     const title = containerEl?.getAttribute('data-title') || currentPage.title;
@@ -235,9 +257,6 @@
     return `
 <header class="topbar" id="appTopbar">
   <div class="topbar-left">
-    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation" title="Toggle Navigation Menu">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
     <div class="page-header-info">
       <span class="page-category-tag" id="pageCategoryTag">${category}</span>
       <h1 class="module-title" id="moduleTitle">
@@ -294,7 +313,7 @@
 
         <div class="deadline-alert-footer">
           <span class="deadline-alert-footer-note">Real-time status based on local time</span>
-          <a href="${pagesPrefix}creatives-tracker.html" class="deadline-alert-view-all">View Tracker &rarr;</a>
+          <a href="${pagesPrefix}creatives-tracker${ext}" class="deadline-alert-view-all">View Tracker &rarr;</a>
         </div>
       </div>
     </div>
@@ -326,7 +345,7 @@
           Reset Mock Data
         </div>
         <div class="dropdown-divider"></div>
-        <a href="${pagesPrefix}settings.html" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
+        <a href="${pagesPrefix}settings${ext}" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           System Settings
         </a>
@@ -342,21 +361,17 @@
     const sidebarContainer = document.getElementById('sidebarContainer');
     if (sidebarContainer) {
       sidebarContainer.innerHTML = buildSidebarHTML();
-    } else {
-      const existingSidebar = document.getElementById('appSidebar');
-      if (existingSidebar) {
-        existingSidebar.outerHTML = buildSidebarHTML();
-      }
+    } else if (!document.getElementById('appSidebar')) {
+      const appContainer = document.querySelector('.app-container') || document.body;
+      appContainer.insertAdjacentHTML('afterbegin', buildSidebarHTML());
     }
 
     const navbarContainer = document.getElementById('navbarContainer');
     if (navbarContainer) {
       navbarContainer.innerHTML = buildNavbarHTML(navbarContainer);
-    } else {
-      const existingTopbar = document.getElementById('appTopbar') || document.querySelector('.topbar');
-      if (existingTopbar) {
-        existingTopbar.outerHTML = buildNavbarHTML(null);
-      }
+    } else if (!document.getElementById('appTopbar') && !document.querySelector('.topbar')) {
+      const mainContent = document.querySelector('.main-content') || document.body;
+      mainContent.insertAdjacentHTML('afterbegin', buildNavbarHTML(null));
     }
 
     // Ensure Backdrop element exists
@@ -401,13 +416,19 @@
     }
   }
 
+  let isTogglingDesktop = false;
   function toggleDesktopSidebar() {
+    if (isTogglingDesktop) return;
+    isTogglingDesktop = true;
+    setTimeout(function () { isTogglingDesktop = false; }, 250);
+
     const sidebar = document.getElementById('appSidebar');
     if (!sidebar) return;
-    sidebar.classList.toggle('collapsed');
     const isCollapsed = sidebar.classList.contains('collapsed');
+    const newState = !isCollapsed;
+    sidebar.classList.toggle('collapsed', newState);
     try {
-      localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', isCollapsed ? '1' : '0');
+      localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', newState ? '1' : '0');
     } catch (e) {}
   }
 
@@ -422,15 +443,24 @@
     }
   }
 
+  window.toggleDesktopSidebar = toggleDesktopSidebar;
+  window.toggleMobileSidebar = toggleMobileSidebar;
+  window.closeMobileSidebar = closeMobileSidebar;
+  window.openMobileSidebar = openMobileSidebar;
+
   // Universal Document Event Delegation for 100% Reliable Interactions
   function bindGlobalEvents() {
     document.addEventListener('click', function (e) {
-      // 1. Mobile Menu Button
+      // 1. Mobile Menu Button (or Desktop Topbar Menu Toggle)
       const menuBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn');
       if (menuBtn) {
         e.preventDefault();
         e.stopPropagation();
-        toggleMobileSidebar();
+        if (window.innerWidth <= 992) {
+          toggleMobileSidebar();
+        } else {
+          toggleDesktopSidebar();
+        }
         return;
       }
 

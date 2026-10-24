@@ -60,17 +60,17 @@
           <div class="form-group">
             <label class="form-label">Releasing Mode</label>
             <select class="form-control" id="salesFormRelMode">
-              <option value="INSTALL">INSTALL</option>
-              <option value="DELIVER">DELIVER</option>
-              <option value="PICKUP">PICKUP</option>
+              <option value="Install">Install</option>
+              <option value="Deliver">Deliver</option>
+              <option value="Pickup">Pickup</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">File Sent Status</label>
             <select class="form-control" id="salesFormFileSent">
-              <option value="FILE SENT">FILE SENT</option>
+              <option value="File Sent">File Sent</option>
               <option value="Pending">Pending</option>
-              <option value="TO FOLLOW">TO FOLLOW</option>
+              <option value="To Follow">To Follow</option>
             </select>
           </div>
           <div class="form-group">
@@ -151,7 +151,7 @@
               <option value="In Progress">In Progress</option>
               <option value="For Review">For Review</option>
               <option value="Revising">Revising</option>
-              <option value="Completed">Completed</option>
+              <option value="Submitted">Submitted</option>
             </select>
           </div>
           <div class="form-group">
