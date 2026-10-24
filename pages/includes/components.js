@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Sign Depot Creative Operations — Modular Component Loader (Sidebar & Navbar)
  * File: pages/includes/components.js
  * Automatically renders, binds, and manages responsive navigation for all pages
@@ -11,63 +11,68 @@
   // Determine current page and folder depth
   const currentPath = window.location.pathname.replace(/\\/g, '/');
   const pathParts = currentPath.split('/');
-  const currentFilename = (pathParts.pop() || 'index.html').toLowerCase().split('?')[0].split('#')[0];
+  const rawFilename = (pathParts.pop() || 'index.php').toLowerCase().split('?')[0].split('#')[0];
   const isInsidePagesFolder = pathParts.some(p => p.toLowerCase() === 'pages') || currentPath.toLowerCase().includes('/pages/');
 
   const rootPrefix = isInsidePagesFolder ? '../' : '';
   const pagesPrefix = isInsidePagesFolder ? '' : 'pages/';
 
+  const isPhp = rawFilename.endsWith('.php') || window.location.href.includes('.php') || typeof window.PMS_API_URL !== 'undefined';
+  const ext = isPhp ? '.php' : '.html';
+  const baseKey = rawFilename.replace(/\.(html|php)$/i, '');
+  const currentFilename = baseKey + ext;
+
   // Configuration map for every page in the suite
-  const PAGE_CONFIG = {
-    'index.html': {
+  const BASE_PAGE_CONFIG = {
+    'index': {
       view: 'view-dashboard',
       title: 'Project Dashboard',
       badge: 'Live Status',
       category: 'Operations Overview'
     },
-    'sales-requests.html': {
+    'sales-requests': {
       view: 'view-sales-requests',
       title: 'Sales Requests',
       badge: 'Direct Inline Editable',
       category: 'Manage and track your operations'
     },
-    'creatives-tracker.html': {
+    'creatives-tracker': {
       view: 'view-creatives-tracker',
       title: 'Creatives Tracker',
       badge: 'Live Production Queue',
       category: 'Manage and track your operations'
     },
-    'artist-workload.html': {
+    'artist-workload': {
       view: 'view-artist-workload',
       title: 'Artist Workload',
       badge: 'Capacity & Assignments',
       category: 'Manage and track your operations'
     },
-    'directives-details.html': {
+    'directives-details': {
       view: 'view-directives-details',
       title: 'Directives Details',
       badge: 'Official Job Order Blueprint',
       category: 'Sign Depot Technical Documentation'
     },
-    'pending-artist.html': {
+    'pending-artist': {
       view: 'view-pending-artist',
       title: 'Pending — Artist',
       badge: 'Drafting Queue',
       category: 'Pending Creative Pipelines'
     },
-    'pending-sales.html': {
+    'pending-sales': {
       view: 'view-pending-sales',
       title: 'Pending — Sales',
       badge: 'Awaiting Release',
       category: 'Pending Sales Pipelines'
     },
-    'monthly-output.html': {
+    'monthly-output': {
       view: 'view-monthly-output',
       title: 'Monthly Output',
       badge: 'Annual Production Matrix',
       category: 'Historical Production Records'
     },
-    'settings.html': {
+    'settings': {
       view: 'view-settings',
       title: 'Settings',
       badge: 'Configuration',
@@ -75,15 +80,15 @@
     }
   };
 
-  const currentPage = PAGE_CONFIG[currentFilename] || PAGE_CONFIG['index.html'];
+  const currentPage = BASE_PAGE_CONFIG[baseKey] || BASE_PAGE_CONFIG['index'];
 
   function buildSidebarHTML() {
-    const isAct = (file) => currentFilename === file ? ' active' : '';
+    const isAct = (key) => baseKey === key ? ' active' : '';
 
     return `
 <aside class="sidebar" id="appSidebar">
   <div class="sidebar-brand">
-    <a href="${rootPrefix}index.html" class="brand-link" id="brandHomeLink" title="Sign Depot">
+    <a href="${rootPrefix}index${ext}" class="brand-link" id="brandHomeLink" title="Sign Depot">
       <img src="${rootPrefix}assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
     </a>
     <div class="sidebar-header-actions">
@@ -108,7 +113,7 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">Operations</div>
     
-    <a class="nav-item${isAct('index.html')}" href="${rootPrefix}index.html" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
+    <a class="nav-item${isAct('index')}" href="${rootPrefix}index${ext}" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="9"></rect>
@@ -120,7 +125,7 @@
       <span class="nav-label">Project Dashboard</span>
     </a>
 
-    <a class="nav-item${isAct('sales-requests.html')}" href="${pagesPrefix}sales-requests.html" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
+    <a class="nav-item${isAct('sales-requests')}" href="${pagesPrefix}sales-requests${ext}" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -133,7 +138,7 @@
       <span class="nav-label">Sales Requests</span>
     </a>
 
-    <a class="nav-item${isAct('creatives-tracker.html')}" href="${pagesPrefix}creatives-tracker.html" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
+    <a class="nav-item${isAct('creatives-tracker')}" href="${pagesPrefix}creatives-tracker${ext}" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"></path>
@@ -143,7 +148,7 @@
       <span class="nav-label">Creatives Tracker</span>
     </a>
 
-    <a class="nav-item${isAct('artist-workload.html')}" href="${pagesPrefix}artist-workload.html" data-view="view-artist-workload" data-page="view-artist-workload" title="Artist Workload">
+    <a class="nav-item${isAct('artist-workload')}" href="${pagesPrefix}artist-workload${ext}" data-view="view-artist-workload" data-page="view-artist-workload" title="Artist Workload">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -157,7 +162,7 @@
 
     <div class="nav-section-label">Directives</div>
 
-    <a class="nav-item${isAct('directives-details.html')}" href="${pagesPrefix}directives-details.html" data-view="view-directives-details" data-page="view-directives-details" title="Directives Details">
+    <a class="nav-item${isAct('directives-details')}" href="${pagesPrefix}directives-details${ext}" data-view="view-directives-details" data-page="view-directives-details" title="Directives Details">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -170,7 +175,7 @@
 
     <div class="nav-section-label">Pending Queues</div>
 
-    <a class="nav-item${isAct('pending-artist.html')}" href="${pagesPrefix}pending-artist.html" data-view="view-pending-artist" data-page="view-pending-artist" title="Pending Artist">
+    <a class="nav-item${isAct('pending-artist')}" href="${pagesPrefix}pending-artist${ext}" data-view="view-pending-artist" data-page="view-pending-artist" title="Pending Artist">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -180,7 +185,7 @@
       <span class="nav-label">Pending — Artist</span>
     </a>
 
-    <a class="nav-item${isAct('pending-sales.html')}" href="${pagesPrefix}pending-sales.html" data-view="view-pending-sales" data-page="view-pending-sales" title="Pending Sales">
+    <a class="nav-item${isAct('pending-sales')}" href="${pagesPrefix}pending-sales${ext}" data-view="view-pending-sales" data-page="view-pending-sales" title="Pending Sales">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
@@ -192,7 +197,7 @@
 
     <div class="nav-section-label">Analytics & Config</div>
 
-    <a class="nav-item${isAct('monthly-output.html')}" href="${pagesPrefix}monthly-output.html" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
+    <a class="nav-item${isAct('monthly-output')}" href="${pagesPrefix}monthly-output${ext}" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -203,7 +208,7 @@
       <span class="nav-label">Monthly Output</span>
     </a>
 
-    <a class="nav-item${isAct('settings.html')}" href="${pagesPrefix}settings.html" data-view="view-settings" data-page="view-settings" title="Settings">
+    <a class="nav-item${isAct('settings')}" href="${pagesPrefix}settings${ext}" data-view="view-settings" data-page="view-settings" title="Settings">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -215,15 +220,13 @@
   </nav>
 
   <div class="sidebar-footer">
-    <span class="badge-prototype">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-      Live Inline Editable
-    </span>
+    <div class="system-status-pill">
+      <span class="status-indicator-dot online"></span>
+      <span class="status-text">${isPhp ? 'MySQL Live' : 'Live Inline'}</span>
+    </div>
   </div>
 </aside>
 `;
-  }
-
   function buildNavbarHTML(containerEl) {
     const category = containerEl?.getAttribute('data-category') || currentPage.category;
     const title = containerEl?.getAttribute('data-title') || currentPage.title;

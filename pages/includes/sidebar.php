@@ -1,11 +1,15 @@
-﻿<!-- ==========================================================================
-     Sign Depot Creative Operations — Modular Sidebar Component
-     Include: pages/includes/sidebar.html
-     ========================================================================== -->
+<?php
+/**
+ * Sign Depot Creative Operations — Modular Sidebar Component
+ * File: pages/includes/sidebar.php
+ */
+$base = function_exists('getBasePath') ? getBasePath() : '../';
+$cur = $currentPage ?? 'dashboard';
+?>
 <aside class="sidebar" id="appSidebar">
   <div class="sidebar-brand">
-    <a href="index.html" class="brand-link" id="brandHomeLink" title="Sign Depot">
-      <img src="assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
+    <a href="<?= $base ?>index.php" class="brand-link" id="brandHomeLink" title="Sign Depot">
+      <img src="<?= $base ?>assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
     </a>
     <div class="sidebar-header-actions">
       <!-- Desktop Collapse Button -->
@@ -29,7 +33,7 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">Operations</div>
     
-    <a class="nav-item" href="index.html" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
+    <a class="nav-item <?= ($cur === 'dashboard') ? 'active' : '' ?>" href="<?= $base ?>index.php" data-view="view-dashboard" data-page="view-dashboard" title="Dashboard">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="9"></rect>
@@ -41,7 +45,7 @@
       <span class="nav-label">Project Dashboard</span>
     </a>
 
-    <a class="nav-item" href="pages/sales-requests.html" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
+    <a class="nav-item <?= ($cur === 'sales-requests') ? 'active' : '' ?>" href="<?= $base ?>sales-requests.php" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -54,7 +58,7 @@
       <span class="nav-label">Sales Requests</span>
     </a>
 
-    <a class="nav-item" href="pages/creatives-tracker.html" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
+    <a class="nav-item <?= ($cur === 'creatives-tracker') ? 'active' : '' ?>" href="<?= $base ?>creatives-tracker.php" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"></path>
@@ -64,7 +68,7 @@
       <span class="nav-label">Creatives Tracker</span>
     </a>
 
-    <a class="nav-item" href="pages/artist-workload.html" data-view="view-artist-workload" data-page="view-artist-workload" title="Artist Workload">
+    <a class="nav-item <?= ($cur === 'artist-workload') ? 'active' : '' ?>" href="<?= $base ?>artist-workload.php" data-view="view-artist-workload" data-page="view-artist-workload" title="Artist Workload">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -78,7 +82,7 @@
 
     <div class="nav-section-label">Directives</div>
 
-    <a class="nav-item" href="pages/directives-details.html" data-view="view-directives-details" data-page="view-directives-details" title="Directives Details">
+    <a class="nav-item <?= ($cur === 'directives-details') ? 'active' : '' ?>" href="<?= $base ?>directives-details.php" data-view="view-directives-details" data-page="view-directives-details" title="Directives Details">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -91,7 +95,7 @@
 
     <div class="nav-section-label">Pending Queues</div>
 
-    <a class="nav-item" href="pages/pending-artist.html" data-view="view-pending-artist" data-page="view-pending-artist" title="Pending Artist">
+    <a class="nav-item <?= ($cur === 'pending-artist') ? 'active' : '' ?>" href="<?= $base ?>pending-artist.php" data-view="view-pending-artist" data-page="view-pending-artist" title="Pending Artist">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -101,11 +105,13 @@
       <span class="nav-label">Pending — Artist</span>
     </a>
 
-    <a class="nav-item" href="pages/pending-sales.html" data-view="view-pending-sales" data-page="view-pending-sales" title="Pending Sales">
+    <a class="nav-item <?= ($cur === 'pending-sales') ? 'active' : '' ?>" href="<?= $base ?>pending-sales.php" data-view="view-pending-sales" data-page="view-pending-sales" title="Pending Sales">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <line x1="19" y1="8" x2="19" y2="14"></line>
+          <line x1="22" y1="11" x2="16" y2="11"></line>
         </svg>
       </span>
       <span class="nav-label">Pending — Sales</span>
@@ -113,7 +119,7 @@
 
     <div class="nav-section-label">Analytics & Config</div>
 
-    <a class="nav-item" href="pages/monthly-output.html" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
+    <a class="nav-item <?= ($cur === 'monthly-output') ? 'active' : '' ?>" href="<?= $base ?>monthly-output.php" data-view="view-monthly-output" data-page="view-monthly-output" title="Monthly Output">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -124,7 +130,7 @@
       <span class="nav-label">Monthly Output</span>
     </a>
 
-    <a class="nav-item" href="pages/settings.html" data-view="view-settings" data-page="view-settings" title="Settings">
+    <a class="nav-item <?= ($cur === 'settings') ? 'active' : '' ?>" href="<?= $base ?>settings.php" data-view="view-settings" data-page="view-settings" title="Settings">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -136,9 +142,9 @@
   </nav>
 
   <div class="sidebar-footer">
-    <span class="badge-prototype">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-      Live Inline Editable
-    </span>
+    <div class="system-status-pill">
+      <span class="status-indicator-dot online"></span>
+      <span class="status-text">MySQL Live</span>
+    </div>
   </div>
 </aside>

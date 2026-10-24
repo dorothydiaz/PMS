@@ -1,17 +1,23 @@
-﻿<!-- ==========================================================================
-     Sign Depot Creative Operations — Modular Universal Topbar / Navbar Component
-     Include: pages/includes/navbar.html
-     ========================================================================== -->
+<?php
+/**
+ * Sign Depot Creative Operations — Modular Universal Topbar / Navbar Component
+ * File: pages/includes/navbar.php
+ */
+$base = function_exists('getBasePath') ? getBasePath() : '../';
+$pageTitle = $pageTitle ?? 'Project Dashboard';
+$pageCategory = $pageCategory ?? 'Operations Overview';
+$pageBadge = $pageBadge ?? 'MySQL Live';
+?>
 <header class="topbar" id="appTopbar">
   <div class="topbar-left">
     <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation" title="Toggle Navigation Menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
     <div class="page-header-info">
-      <span class="page-category-tag" id="pageCategoryTag">Operations Overview</span>
+      <span class="page-category-tag" id="pageCategoryTag"><?= htmlspecialchars($pageCategory) ?></span>
       <h1 class="module-title" id="moduleTitle">
-        <span class="module-title-text" id="moduleTitleText">Project Dashboard</span>
-        <span class="module-badge" id="moduleCategoryBadge">Live Status</span>
+        <span class="module-title-text" id="moduleTitleText"><?= htmlspecialchars($pageTitle) ?></span>
+        <span class="module-badge" id="moduleCategoryBadge"><?= htmlspecialchars($pageBadge) ?></span>
       </h1>
     </div>
   </div>
@@ -26,7 +32,7 @@
     </div>
 
     <!-- Live Auto-Save Indicator -->
-    <div class="auto-save-pill" >
+    <div class="auto-save-pill">
       <span class="auto-save-dot"></span>
       <span>Auto-Saved</span>
     </div>
@@ -63,7 +69,7 @@
 
         <div class="deadline-alert-footer">
           <span class="deadline-alert-footer-note">Real-time status based on local time</span>
-          <a href="pages/creatives-tracker.html" class="deadline-alert-view-all">View Tracker &rarr;</a>
+          <a href="<?= $base ?>creatives-tracker.php" class="deadline-alert-view-all">View Tracker &rarr;</a>
         </div>
       </div>
     </div>
@@ -86,16 +92,16 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
       <div class="dropdown-popover" id="userProfileDropdown">
-        <div class="dropdown-item" id="btnQuickDirectiveSample">
+        <a href="<?= $base ?>directives-details.php" class="dropdown-item" id="btnQuickDirectiveSample" style="text-decoration:none; color:inherit;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
-          Load Sample Directive (URAL)
-        </div>
-        <div class="dropdown-item" id="btnResetLocalStorage">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-          Reset Mock Data
-        </div>
+          Directives Blueprint Sheet
+        </a>
+        <a href="<?= $base ?>database/import.php" class="dropdown-item" style="text-decoration:none; color:inherit;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          MySQL Database Status
+        </a>
         <div class="dropdown-divider"></div>
-        <a href="pages/settings.html" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
+        <a href="<?= $base ?>settings.php" class="dropdown-item" id="btnGotoSettings" style="text-decoration: none; color: inherit;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           System Settings
         </a>
