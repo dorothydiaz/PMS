@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Monthly Production Output</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_nav2">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_rows1">
   <link rel="icon" type="image/png" href="../assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-monthly-output">
@@ -254,9 +254,21 @@
           </div>
 
           <div class="studio-card">
-            <div class="section-header-row" style="margin-bottom: 12px;">
-              <h3 style="font-size: 16px; font-weight: 800;">Artist Production Output Matrix (Jan — Dec 2026)</h3>
-              <span class="badge badge-completed">Verified Assignment Count</span>
+            <div class="section-header-row" style="margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
+              <div>
+                <h3 style="font-size: 16px; font-weight: 800;">Artist Production Output Matrix (Jan — Dec 2026)</h3>
+                <span class="badge badge-completed">Verified Assignment Count</span>
+              </div>
+              <div class="filter-rows-wrap">
+                <label for="monthlyOutputFilterPerPage">Show:</label>
+                <select class="filter-input rows-filter-select" id="monthlyOutputFilterPerPage" title="Rows to display">
+                  <option value="10" selected>10 rows</option>
+                  <option value="15">15 rows</option>
+                  <option value="20">20 rows</option>
+                  <option value="25">25 rows</option>
+                  <option value="30">30 rows</option>
+                </select>
+              </div>
             </div>
             <div class="table-studio-wrap" style="margin-bottom: 0;">
               <table class="data-table" id="monthlyOutputMatrixTable">
@@ -282,6 +294,24 @@
                 <tbody id="monthlyOutputTableBody"></tbody>
               </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" id="monthlyOutputPagination" style="margin-top: 14px;">
+              <div class="pagination-info-group">
+                <div class="pagination-info" id="monthlyOutputPaginationInfo">Showing 1-9 of 9 artists</div>
+                <div class="pagination-rows-select-wrap">
+                  <label for="monthlyOutputPaginationPerPage">Show:</label>
+                  <select class="filter-input-sm" id="monthlyOutputPaginationPerPage" title="Rows to display">
+                    <option value="10" selected>10 rows</option>
+                    <option value="15">15 rows</option>
+                    <option value="20">20 rows</option>
+                    <option value="25">25 rows</option>
+                    <option value="30">30 rows</option>
+                  </select>
+                </div>
+              </div>
+              <div class="pagination-controls" id="monthlyOutputPaginationControls"></div>
+            </div>
           </div>
         </section>
       </main>
@@ -292,7 +322,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="includes/components.js?v=20261024_nav1"></script>
-  <script src="../assets/js/script.js?v=20261024_nav1"></script>
+  <script src="includes/components.js?v=20261024_rows1"></script>
+  <script src="../assets/js/script.js?v=20261024_rows1"></script>
 </body>
 </html>

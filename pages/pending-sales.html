@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Pending Projects (Sales)</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_nav2">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_rows1">
   <link rel="icon" type="image/png" href="../assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-pending-sales">
@@ -226,6 +226,16 @@
             </div>
             <div class="filter-group">
               <input type="text" class="filter-input" id="pendingSalesSearchInput" placeholder="Search queue..." style="width: 200px;">
+              <div class="filter-rows-wrap">
+                <label for="pendingSalesFilterPerPage">Show:</label>
+                <select class="filter-input rows-filter-select" id="pendingSalesFilterPerPage" title="Rows to display">
+                  <option value="10" selected>10 rows</option>
+                  <option value="15">15 rows</option>
+                  <option value="20">20 rows</option>
+                  <option value="25">25 rows</option>
+                  <option value="30">30 rows</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -250,6 +260,24 @@
               <tbody id="pendingSalesTableBody"></tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container" id="pendingSalesPagination" style="margin-top: 14px;">
+            <div class="pagination-info-group">
+              <div class="pagination-info" id="pendingSalesPaginationInfo">Showing 0-0 of 0</div>
+              <div class="pagination-rows-select-wrap">
+                <label for="pendingSalesPaginationPerPage">Show:</label>
+                <select class="filter-input-sm" id="pendingSalesPaginationPerPage" title="Rows to display">
+                  <option value="10" selected>10 rows</option>
+                  <option value="15">15 rows</option>
+                  <option value="20">20 rows</option>
+                  <option value="25">25 rows</option>
+                  <option value="30">30 rows</option>
+                </select>
+              </div>
+            </div>
+            <div class="pagination-controls" id="pendingSalesPaginationControls"></div>
+          </div>
         </section>
       </main>
     </div>
@@ -259,7 +287,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="includes/components.js?v=20261024_nav1"></script>
-  <script src="../assets/js/script.js?v=20261024_nav1"></script>
+  <script src="includes/components.js?v=20261024_rows1"></script>
+  <script src="../assets/js/script.js?v=20261024_rows1"></script>
 </body>
 </html>

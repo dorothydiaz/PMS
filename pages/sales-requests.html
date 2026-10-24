@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Depot — Sales Requests</title>
   <meta name="description" content="Sign Depot modern enterprise frontend with live editable tables, production dashboard, artist workload, and printable job directives.">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_nav2">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261024_rows1">
   <link rel="icon" type="image/png" href="../assets/img/sign-depot-logo.png">
 </head>
 <body data-page="view-sales-requests">
@@ -249,6 +249,16 @@
               </select>
             </div>
             <div class="filter-group">
+              <div class="filter-rows-wrap">
+                <label for="salesFilterPerPage">Show:</label>
+                <select class="filter-input rows-filter-select" id="salesFilterPerPage" title="Rows to display">
+                  <option value="10" selected>10 rows</option>
+                  <option value="15">15 rows</option>
+                  <option value="20">20 rows</option>
+                  <option value="25">25 rows</option>
+                  <option value="30">30 rows</option>
+                </select>
+              </div>
               <button class="btn btn-secondary btn-sm" id="btnResetSalesFilters">Reset Filters</button>
             </div>
           </div>
@@ -280,7 +290,19 @@
 
           <!-- Pagination -->
           <div class="pagination-container" id="salesPagination">
-            <div class="pagination-info" id="salesPaginationInfo">Showing 0-0 of 0</div>
+            <div class="pagination-info-group">
+              <div class="pagination-info" id="salesPaginationInfo">Showing 0-0 of 0</div>
+              <div class="pagination-rows-select-wrap">
+                <label for="salesPaginationPerPage">Show:</label>
+                <select class="filter-input-sm" id="salesPaginationPerPage" title="Rows to display">
+                  <option value="10" selected>10 rows</option>
+                  <option value="15">15 rows</option>
+                  <option value="20">20 rows</option>
+                  <option value="25">25 rows</option>
+                  <option value="30">30 rows</option>
+                </select>
+              </div>
+            </div>
             <div class="pagination-controls" id="salesPaginationControls"></div>
           </div>
         </section>
@@ -391,7 +413,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="includes/components.js?v=20261024_nav1"></script>
-  <script src="../assets/js/script.js?v=20261024_nav1"></script>
+  <script src="includes/components.js?v=20261024_rows1"></script>
+  <script src="../assets/js/script.js?v=20261024_rows1"></script>
 </body>
 </html>

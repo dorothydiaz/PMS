@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sign Depot — Sales & Creative Production Tracker
  * Frontend Application Engine (Vanilla JS, Local Persistence)
  * With Panze Studio Aesthetic & Direct Inline Editable Tables
@@ -836,6 +836,30 @@
   // STATE STORE (Unified Central State with LocalStorage Sync)
   // ==========================================================================
 
+  const ROWS_PER_PAGE_KEY = 'SIGN_DEPOT_DEFAULT_PER_PAGE';
+
+  function getStoredRowsPerPage() {
+    try {
+      const saved = localStorage.getItem(ROWS_PER_PAGE_KEY);
+      if (saved) {
+        const n = parseInt(saved, 10);
+        if ([10, 15, 20, 25, 30].includes(n)) return n;
+      }
+    } catch (e) {}
+    return 10;
+  }
+
+  function setStoredRowsPerPage(n) {
+    try {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        localStorage.setItem(ROWS_PER_PAGE_KEY, String(val));
+      }
+    } catch (e) {}
+  }
+
+  const initialRowsPerPage = getStoredRowsPerPage();
+
   let state = {
     artists: [...DEFAULT_ARTISTS],
     salesReps: [...DEFAULT_SALES_REPS],
@@ -845,12 +869,24 @@
     activeView: 'view-dashboard',
     currentDirectiveJo: 'P260701373',
     timeframe: 'month',
-    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: 8 },
-    trackerFilter: { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: 10 },
-    workloadFilter: { availability: '', search: '', selectedArtist: '' },
-    pendingArtistSelected: 'Glen',
+    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage },
+    trackerFilter: { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: initialRowsPerPage },
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
+    pendingSalesPage: 1,
+    pendingSalesPerPage: initialRowsPerPage,
+    pendingArtistSelected: 'Glen',
+    pendingArtistPage: 1,
+    pendingArtistPerPage: initialRowsPerPage,
+    workloadFilter: { availability: '', search: '', selectedArtist: '' },
+    workloadPage: 1,
+    workloadPerPage: initialRowsPerPage,
+    dashboardSearch: '',
+    dashboardStatus: '',
+    dashboardPage: 1,
+    dashboardPerPage: initialRowsPerPage,
+    monthlyOutputPage: 1,
+    monthlyOutputPerPage: initialRowsPerPage,
     selectedTemplateElemId: null,
     customCellFonts: {}
   };
@@ -864,12 +900,32 @@
           state.artists = parsed.artists || DEFAULT_ARTISTS;
           state.salesReps = parsed.salesReps || DEFAULT_SALES_REPS;
           state.requests = parsed.requests;
+
+          // Merge any newly added default mock requests (e.g. req-022 to req-032)
+          if (state.requests.length < DEFAULT_REQUESTS.length) {
+            const existingIds = new Set(state.requests.map(r => r.id));
+            DEFAULT_REQUESTS.forEach(defReq => {
+              if (!existingIds.has(defReq.id)) {
+                state.requests.push(JSON.parse(JSON.stringify(defReq)));
+              }
+            });
+          }
+
           state.requests.forEach(r => {
             r.releasingMode = normalizeReleasingMode(r.releasingMode);
           });
           state.templateElements = parsed.templateElements || DEFAULT_TEMPLATE_ELEMENTS;
           state.attachments = parsed.attachments || DEFAULT_ATTACHMENTS;
           state.customCellFonts = parsed.customCellFonts || {};
+
+          const storedRows = getStoredRowsPerPage();
+          if (state.salesFilter) state.salesFilter.perPage = storedRows;
+          if (state.trackerFilter) state.trackerFilter.perPage = storedRows;
+          state.pendingSalesPerPage = storedRows;
+          state.pendingArtistPerPage = storedRows;
+          state.workloadPerPage = storedRows;
+          state.dashboardPerPage = storedRows;
+          state.monthlyOutputPerPage = storedRows;
           return;
         }
       }
@@ -1732,13 +1788,134 @@
     `).join('');
   }
 
+  // ==========================================================================
+  // UNIFIED PAGINATION & ROWS-PER-PAGE RENDERER
+  // ==========================================================================
+
+  function renderPagination(opts) {
+    const {
+      infoId,
+      controlsId,
+      selectIds = [],
+      currentPage = 1,
+      perPage = 10,
+      totalItems = 0,
+      onPageChange = '',
+      itemLabel = 'items'
+    } = opts;
+
+    const totalPages = Math.max(Math.ceil(totalItems / perPage), 1);
+    const validPage = Math.min(Math.max(currentPage, 1), totalPages);
+    const startIndex = (validPage - 1) * perPage;
+    const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
+    const endDisplay = Math.min(startIndex + perPage, totalItems);
+
+    // Sync Info label
+    const infoEl = document.getElementById(infoId);
+    if (infoEl) {
+      infoEl.textContent = `Showing ${startDisplay}-${endDisplay} of ${totalItems} ${itemLabel}`;
+    }
+
+    // Sync all rows-per-page select dropdowns
+    selectIds.forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel && sel.value !== String(perPage)) {
+        sel.value = String(perPage);
+        const customBtn = sel.nextElementSibling;
+        if (customBtn && customBtn.classList.contains('custom-filter-dropdown-btn')) {
+          const lbl = customBtn.querySelector('.custom-select-label');
+          if (lbl) lbl.textContent = sel.options[sel.selectedIndex]?.text || `${perPage} rows`;
+        }
+      }
+    });
+
+    // Render Controls
+    const controlsEl = document.getElementById(controlsId);
+    if (controlsEl) {
+      if (totalPages <= 1) {
+        controlsEl.innerHTML = '';
+        return { validPage, startIndex, totalPages };
+      }
+
+      let btnsHTML = `
+        <button class="page-btn" ${validPage === 1 ? 'disabled' : ''} onclick="${onPageChange}(${validPage - 1})" aria-label="Previous Page" title="Previous Page">&laquo;</button>
+      `;
+
+      if (totalPages <= 7) {
+        for (let p = 1; p <= totalPages; p++) {
+          btnsHTML += `<button class="page-btn ${p === validPage ? 'active' : ''}" onclick="${onPageChange}(${p})">${p}</button>`;
+        }
+      } else {
+        btnsHTML += `<button class="page-btn ${validPage === 1 ? 'active' : ''}" onclick="${onPageChange}(1)">1</button>`;
+        const startP = Math.max(2, validPage - 1);
+        const endP = Math.min(totalPages - 1, validPage + 1);
+
+        if (startP > 2) {
+          btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+        }
+        for (let p = startP; p <= endP; p++) {
+          btnsHTML += `<button class="page-btn ${p === validPage ? 'active' : ''}" onclick="${onPageChange}(${p})">${p}</button>`;
+        }
+        if (endP < totalPages - 1) {
+          btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+        }
+        btnsHTML += `<button class="page-btn ${validPage === totalPages ? 'active' : ''}" onclick="${onPageChange}(${totalPages})">${totalPages}</button>`;
+      }
+
+      btnsHTML += `
+        <button class="page-btn ${validPage === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${validPage + 1})" aria-label="Next Page" title="Next Page">&raquo;</button>
+      `;
+
+      controlsEl.innerHTML = btnsHTML;
+    }
+
+    return { validPage, startIndex, totalPages };
+  }
+
   // Bottom Recent Projects: DIRECT INLINE EDITABLE TABLE
   function renderDashboardRecentProjectsTable() {
     const tbody = document.getElementById('dashboardRecentProjectsBody');
     if (!tbody) return;
 
-    const recentList = [...state.requests].slice(0, 6);
-    tbody.innerHTML = recentList.map(r => `
+    let list = [...state.requests];
+    const search = (state.dashboardSearch || '').toLowerCase();
+    const status = state.dashboardStatus || '';
+
+    if (search) {
+      list = list.filter(r =>
+        r.requestId.toLowerCase().includes(search) ||
+        r.joNumber.toLowerCase().includes(search) ||
+        r.projectName.toLowerCase().includes(search) ||
+        r.client.toLowerCase().includes(search)
+      );
+    }
+    if (status) {
+      list = list.filter(r => r.projectStatus === status);
+    }
+
+    const page = state.dashboardPage || 1;
+    const perPage = state.dashboardPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'dashboardPaginationInfo',
+      controlsId: 'dashboardPaginationControls',
+      selectIds: ['dashboardFilterPerPage', 'dashboardPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems: list.length,
+      onPageChange: 'window.SignDepotApp.setDashboardPage',
+      itemLabel: 'projects'
+    });
+
+    state.dashboardPage = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
+    if (pagedList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">No projects match current filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = pagedList.map(r => `
       <tr>
         <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
         <td><strong style="color:var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
@@ -1792,9 +1969,18 @@
     });
 
     const totalItems = list.length;
-    const totalPages = Math.max(Math.ceil(totalItems / perPage), 1);
-    const currentPage = Math.min(Math.max(page, 1), totalPages);
-    const startIndex = (currentPage - 1) * perPage;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'salesPaginationInfo',
+      controlsId: 'salesPaginationControls',
+      selectIds: ['salesFilterPerPage', 'salesPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setSalesPage',
+      itemLabel: 'requests'
+    });
+
+    state.salesFilter.page = validPage;
     const pagedList = list.slice(startIndex, startIndex + perPage);
 
     const tbody = document.getElementById('salesRequestsTableBody');
@@ -1828,30 +2014,6 @@
           </tr>
         `).join('');
       }
-    }
-
-    // Pagination
-    const infoEl = document.getElementById('salesPaginationInfo');
-    if (infoEl) {
-      const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
-      const endDisplay = Math.min(startIndex + perPage, totalItems);
-      infoEl.textContent = `Showing ${startDisplay}-${endDisplay} of ${totalItems} requests`;
-    }
-
-    const controlsEl = document.getElementById('salesPaginationControls');
-    if (controlsEl) {
-      let btnsHTML = `
-        <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.SignDepotApp.setSalesPage(${currentPage - 1})">&laquo;</button>
-      `;
-      for (let p = 1; p <= totalPages; p++) {
-        btnsHTML += `
-          <button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="window.SignDepotApp.setSalesPage(${p})">${p}</button>
-        `;
-      }
-      btnsHTML += `
-        <button class="page-btn ${currentPage === totalPages ? 'disabled' : ''} onclick="window.SignDepotApp.setSalesPage(${currentPage + 1})">&raquo;</button>
-      `;
-      controlsEl.innerHTML = btnsHTML;
     }
   }
 
@@ -1921,9 +2083,18 @@
     });
 
     const totalItems = list.length;
-    const totalPages = Math.max(Math.ceil(totalItems / perPage), 1);
-    const currentPage = Math.min(Math.max(page, 1), totalPages);
-    const startIndex = (currentPage - 1) * perPage;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'trackerPaginationInfo',
+      controlsId: 'trackerPaginationControls',
+      selectIds: ['trackerFilterPerPage', 'trackerPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setTrackerPage',
+      itemLabel: 'tasks'
+    });
+
+    state.trackerFilter.page = validPage;
     const pagedList = list.slice(startIndex, startIndex + perPage);
 
     const tbody = document.getElementById('creativesTrackerTableBody');
@@ -1958,29 +2129,6 @@
           `;
         }).join('');
       }
-    }
-
-    const infoEl = document.getElementById('trackerPaginationInfo');
-    if (infoEl) {
-      const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
-      const endDisplay = Math.min(startIndex + perPage, totalItems);
-      infoEl.textContent = `Showing ${startDisplay}-${endDisplay} of ${totalItems} tasks`;
-    }
-
-    const controlsEl = document.getElementById('trackerPaginationControls');
-    if (controlsEl) {
-      let btnsHTML = `
-        <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.SignDepotApp.setTrackerPage(${currentPage - 1})">&laquo;</button>
-      `;
-      for (let p = 1; p <= totalPages; p++) {
-        btnsHTML += `
-          <button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="window.SignDepotApp.setTrackerPage(${p})">${p}</button>
-        `;
-      }
-      btnsHTML += `
-        <button class="page-btn ${currentPage === totalPages ? 'disabled' : ''} onclick="window.SignDepotApp.setTrackerPage(${currentPage + 1})">&raquo;</button>
-      `;
-      controlsEl.innerHTML = btnsHTML;
     }
   }
 
@@ -2107,12 +2255,30 @@
       list = list.filter(r => r.projectName.toLowerCase().includes(q) || r.requestId.toLowerCase().includes(q));
     }
 
+    const totalItems = list.length;
+    const page = state.workloadPage || 1;
+    const perPage = state.workloadPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'workloadPaginationInfo',
+      controlsId: 'workloadPaginationControls',
+      selectIds: ['workloadFilterPerPage', 'workloadPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setWorkloadPage',
+      itemLabel: 'assignments'
+    });
+
+    state.workloadPage = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
     const tbody = document.getElementById('artistWorkloadDetailsTableBody');
     if (tbody) {
-      if (list.length === 0) {
+      if (pagedList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">No active tasks for selected artist.</td></tr>`;
       } else {
-        tbody.innerHTML = list.map(r => `
+        tbody.innerHTML = pagedList.map(r => `
           <tr>
             <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
             <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
@@ -3360,12 +3526,30 @@
     document.getElementById('artistStatActive').textContent = activeList.length;
     document.getElementById('artistStatOverdue').textContent = overdueList.length;
 
+    const totalItems = pendingList.length;
+    const page = state.pendingArtistPage || 1;
+    const perPage = state.pendingArtistPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'pendingArtistPaginationInfo',
+      controlsId: 'pendingArtistPaginationControls',
+      selectIds: ['pendingArtistFilterPerPage', 'pendingArtistPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setPendingArtistPage',
+      itemLabel: 'tasks'
+    });
+
+    state.pendingArtistPage = validPage;
+    const pagedList = pendingList.slice(startIndex, startIndex + perPage);
+
     const tbody = document.getElementById('pendingArtistTableBody');
     if (tbody) {
-      if (pendingList.length === 0) {
+      if (pagedList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">${currentArtist} currently has no pending projects.</td></tr>`;
       } else {
-        tbody.innerHTML = pendingList.map(r => `
+        tbody.innerHTML = pagedList.map(r => `
           <tr>
             <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
             <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
@@ -3406,12 +3590,30 @@
       );
     }
 
+    const totalItems = list.length;
+    const page = state.pendingSalesPage || 1;
+    const perPage = state.pendingSalesPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'pendingSalesPaginationInfo',
+      controlsId: 'pendingSalesPaginationControls',
+      selectIds: ['pendingSalesFilterPerPage', 'pendingSalesPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setPendingSalesPage',
+      itemLabel: 'orders'
+    });
+
+    state.pendingSalesPage = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
     const tbody = document.getElementById('pendingSalesTableBody');
     if (tbody) {
-      if (list.length === 0) {
+      if (pagedList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:var(--text-muted);">No sales queue tasks for the selected filter.</td></tr>`;
       } else {
-        tbody.innerHTML = list.map(r => `
+        tbody.innerHTML = pagedList.map(r => `
           <tr>
             <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
             <td><strong style="color:var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
@@ -3502,7 +3704,25 @@
 
       rows.sort((a, b) => b.annualSum - a.annualSum);
 
-      tbody.innerHTML = rows.map((r, idx) => `
+      const totalItems = rows.length;
+      const page = state.monthlyOutputPage || 1;
+      const perPage = state.monthlyOutputPerPage || 10;
+
+      const { validPage, startIndex } = renderPagination({
+        infoId: 'monthlyOutputPaginationInfo',
+        controlsId: 'monthlyOutputPaginationControls',
+        selectIds: ['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'],
+        currentPage: page,
+        perPage,
+        totalItems,
+        onPageChange: 'window.SignDepotApp.setMonthlyOutputPage',
+        itemLabel: 'artists'
+      });
+
+      state.monthlyOutputPage = validPage;
+      const pagedRows = rows.slice(startIndex, startIndex + perPage);
+
+      tbody.innerHTML = pagedRows.map((r, idx) => `
         <tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
@@ -3514,7 +3734,7 @@
           <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">
             ${r.annualSum}
           </td>
-          <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+          <td style="text-align:center; font-weight:800;">#${startIndex + idx + 1}</td>
         </tr>
       `).join('');
     }
@@ -4015,6 +4235,99 @@
       state.salesFilter.page = p;
       renderSalesRequests();
     },
+    setSalesPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.salesFilter.perPage = val;
+        state.salesFilter.page = 1;
+        setStoredRowsPerPage(val);
+        renderSalesRequests();
+      }
+    },
+
+    setTrackerPage: (p) => {
+      state.trackerFilter.page = p;
+      renderCreativesTracker();
+    },
+    setTrackerPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.trackerFilter.perPage = val;
+        state.trackerFilter.page = 1;
+        setStoredRowsPerPage(val);
+        renderCreativesTracker();
+      }
+    },
+
+    setPendingSalesPage: (p) => {
+      state.pendingSalesPage = p;
+      renderPendingSalesQueue();
+    },
+    setPendingSalesPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.pendingSalesPerPage = val;
+        state.pendingSalesPage = 1;
+        setStoredRowsPerPage(val);
+        renderPendingSalesQueue();
+      }
+    },
+
+    setPendingArtistPage: (p) => {
+      state.pendingArtistPage = p;
+      renderPendingArtistQueue();
+    },
+    setPendingArtistPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.pendingArtistPerPage = val;
+        state.pendingArtistPage = 1;
+        setStoredRowsPerPage(val);
+        renderPendingArtistQueue();
+      }
+    },
+
+    setWorkloadPage: (p) => {
+      state.workloadPage = p;
+      renderWorkloadDetailsTable();
+    },
+    setWorkloadPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.workloadPerPage = val;
+        state.workloadPage = 1;
+        setStoredRowsPerPage(val);
+        renderWorkloadDetailsTable();
+      }
+    },
+
+    setDashboardPage: (p) => {
+      state.dashboardPage = p;
+      renderDashboardRecentProjectsTable();
+    },
+    setDashboardPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.dashboardPerPage = val;
+        state.dashboardPage = 1;
+        setStoredRowsPerPage(val);
+        renderDashboardRecentProjectsTable();
+      }
+    },
+
+    setMonthlyOutputPage: (p) => {
+      state.monthlyOutputPage = p;
+      renderMonthlyOutputReport();
+    },
+    setMonthlyOutputPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.monthlyOutputPerPage = val;
+        state.monthlyOutputPage = 1;
+        setStoredRowsPerPage(val);
+        renderMonthlyOutputReport();
+      }
+    },
     duplicateSalesRequest: (id) => {
       const rec = state.requests.find(r => r.id === id);
       if (!rec) return;
@@ -4428,7 +4741,45 @@
     if (pendingSalesSearch) {
       pendingSalesSearch.addEventListener('input', () => {
         state.pendingSalesSearch = pendingSalesSearch.value.trim();
+        state.pendingSalesPage = 1;
         renderPendingSalesQueue();
+      });
+    }
+
+    // Rows Per Page event listeners for all tables
+    const bindRowsSelects = (ids, setter) => {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', () => setter(el.value));
+        }
+      });
+    };
+
+    bindRowsSelects(['salesFilterPerPage', 'salesPaginationPerPage'], window.SignDepotApp.setSalesPerPage);
+    bindRowsSelects(['trackerFilterPerPage', 'trackerPaginationPerPage'], window.SignDepotApp.setTrackerPerPage);
+    bindRowsSelects(['pendingSalesFilterPerPage', 'pendingSalesPaginationPerPage'], window.SignDepotApp.setPendingSalesPerPage);
+    bindRowsSelects(['pendingArtistFilterPerPage', 'pendingArtistPaginationPerPage'], window.SignDepotApp.setPendingArtistPerPage);
+    bindRowsSelects(['workloadFilterPerPage', 'workloadPaginationPerPage'], window.SignDepotApp.setWorkloadPerPage);
+    bindRowsSelects(['dashboardFilterPerPage', 'dashboardPaginationPerPage'], window.SignDepotApp.setDashboardPerPage);
+    bindRowsSelects(['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'], window.SignDepotApp.setMonthlyOutputPerPage);
+
+    // Dashboard Search & Status Filter listeners
+    const dashSearch = document.getElementById('dashboardSearchInput');
+    if (dashSearch) {
+      dashSearch.addEventListener('input', () => {
+        state.dashboardSearch = dashSearch.value.trim();
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    const dashStatus = document.getElementById('dashboardFilterStatus');
+    if (dashStatus) {
+      dashStatus.addEventListener('change', () => {
+        state.dashboardStatus = dashStatus.value;
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
       });
     }
   }
