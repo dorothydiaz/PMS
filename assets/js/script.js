@@ -8561,109 +8561,519 @@
   // MODULE 8A: MONTHLY OUTPUT REPORT ENGINE (DATABASE DRIVEN)
   // ==========================================================================
 
-  function renderMonthlyOutputReport(timeframe) {
-    const tf = timeframe || state.timeframe || 'all';
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const matrix = {};
+  // ==========================================================================
+  // MODULE 8A: PRODUCTION OUTPUT REPORT ENGINE (DAILY, WEEKLY, MONTHLY, ALL-TIME)
+  // ==========================================================================
 
-    state.artists.forEach(artist => {
-      matrix[artist] = new Array(12).fill(0);
+  function renderMonthlyOutputReport(timeframe) {
+    const rawTf = timeframe || state.timeframe || 'month';
+    // Normalize: 'daily'/'today', 'weekly'/'week', 'monthly'/'month', 'all'/'all_time'
+    let tf = 'month';
+    const lowTf = String(rawTf).toLowerCase().trim();
+    if (lowTf === 'today' || lowTf === 'daily' || lowTf === 'day') tf = 'today';
+    else if (lowTf === 'week' || lowTf === 'weekly') tf = 'week';
+    else if (lowTf === 'month' || lowTf === 'monthly') tf = 'month';
+    else if (lowTf === 'all' || lowTf === 'all_time' || lowTf === 'alltime') tf = 'all';
+
+    state.timeframe = tf;
+
+    // Sync all timeframe buttons on page and topbar
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+      const bTf = (btn.getAttribute('data-timeframe') || '').toLowerCase();
+      const isAct = (bTf === tf) || 
+                    (tf === 'today' && (bTf === 'daily' || bTf === 'today' || bTf === 'day')) ||
+                    (tf === 'week' && (bTf === 'weekly' || bTf === 'week')) ||
+                    (tf === 'month' && (bTf === 'monthly' || bTf === 'month')) ||
+                    (tf === 'all' && (bTf === 'all' || bTf === 'all_time' || bTf === 'alltime'));
+      btn.classList.toggle('active', isAct);
+    });
+
+    const ref = getReferenceToday(); // new Date(2026, 9, 26)
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMIdx = ref.getMonth();
+
+    // 1. Filter completed requests
+    const allCompleted = (state.requests || []).filter(r => 
+      r.projectStatus === 'Completed' || r.designStatus === 'Submitted'
+    );
+
+    // Dynamic Elements References
+    const reportTitle = document.getElementById('outputReportTitle');
+    const reportSubtitle = document.getElementById('outputReportSubtitle');
+    const chartTitle = document.getElementById('outputChartTitle');
+    const chartSubtitle = document.getElementById('outputChartSubtitle');
+    const chartBadge = document.getElementById('outputChartIntervalBadge');
+    const matrixTitle = document.getElementById('outputMatrixTitle');
+    const matrixBadge = document.getElementById('outputMatrixBadge');
+    const thead = document.getElementById('monthlyOutputTableHead');
+    const tbody = document.getElementById('monthlyOutputTableBody');
+    const tfoot = document.getElementById('monthlyOutputTableFoot');
+    const dailyCard = document.getElementById('dailyCompletedTasksCard');
+
+    // KPI Elements
+    const kpi1Title = document.getElementById('outputKpi1Title');
+    const kpi1Val = document.getElementById('outputYtdTotal');
+    const kpi1Desc = document.getElementById('outputKpi1Desc');
+
+    const kpi2Title = document.getElementById('outputKpi2Title');
+    const kpi2Val = document.getElementById('outputCurrentMonthTotal');
+    const kpi2Desc = document.getElementById('outputKpi2Desc');
+
+    const kpi3Title = document.getElementById('outputKpi3Title');
+    const kpi3Val = document.getElementById('outputTopArtistName');
+    const kpi3Desc = document.getElementById('outputTopArtistCount');
+
+    const kpi4Title = document.getElementById('outputKpi4Title');
+    const kpi4Val = document.getElementById('outputMonthlyAvg');
+    const kpi4Desc = document.getElementById('outputKpi4Desc');
+
+    // =========================================================================
+    // CASE 1: DAILY / TODAY VIEW
+    // =========================================================================
+    if (tf === 'today') {
+      const todayFormatted = ref.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+      if (reportTitle) reportTitle.textContent = 'Daily Production Output Report';
+      if (reportSubtitle) reportSubtitle.textContent = `Verified output and completed artist assignments for Today (${todayFormatted})`;
+      if (chartTitle) chartTitle.textContent = `Daily Completed Output per Artist (${ref.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Total verified assignments finished today across all active artists';
+      if (chartBadge) { chartBadge.textContent = 'Daily Interval'; chartBadge.className = 'badge badge-completed'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Daily Production Matrix (${ref.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})`;
+      if (matrixBadge) { matrixBadge.textContent = "Today's Verified Output"; matrixBadge.className = 'badge badge-completed'; }
+
+      // Filter requests completed today (or fallback to recent work dates if demo day has no jobs)
+      let todayReqs = allCompleted.filter(r => matchesTimeframe(r, 'today'));
+      if (todayReqs.length === 0) {
+        todayReqs = allCompleted.filter(r => {
+          const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+          const d = parseRequestDate(dStr);
+          return d && d.getFullYear() === 2026 && d.getMonth() === 9 && (d.getDate() === 23 || d.getDate() === 26);
+        });
+      }
+
+      // Group by artist
+      const artistData = {};
+      state.artists.forEach(a => {
+        artistData[a] = { artist: a, std: 0, prt: 0, spc: 0, total: 0, revisions: 0 };
+      });
+
+      let totalDayOutput = 0;
+      let totalStd = 0, totalPrt = 0, totalSpc = 0, totalRev = 0;
+
+      todayReqs.forEach(r => {
+        let art = toTitleCase(r.artist);
+        if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+        if (art === 'Gle') art = 'Glen';
+
+        if (!artistData[art]) {
+          artistData[art] = { artist: art, std: 0, prt: 0, spc: 0, total: 0, revisions: 0 };
+        }
+        const std = parseInt(r.countStandard, 10) || 0;
+        const prt = parseInt(r.countPrinting, 10) || 0;
+        const spc = parseInt(r.countSpecial, 10) || 0;
+        const cnt = Math.max(std + prt + spc, 1);
+        const rev = parseInt(r.revisionCount, 10) || 0;
+
+        artistData[art].std += std;
+        artistData[art].prt += prt;
+        artistData[art].spc += spc;
+        artistData[art].total += cnt;
+        artistData[art].revisions += rev;
+
+        totalDayOutput += cnt;
+        totalStd += std;
+        totalPrt += prt;
+        totalSpc += spc;
+        totalRev += rev;
+      });
+
+      // Top artist today
+      const sortedArtists = Object.values(artistData).sort((a, b) => b.total - a.total);
+      const topArt = sortedArtists[0] && sortedArtists[0].total > 0 ? sortedArtists[0].artist : (state.artists[0] || 'Glen');
+      const topCount = sortedArtists[0] ? sortedArtists[0].total : 0;
+      const activeArtistsCount = sortedArtists.filter(a => a.total > 0).length;
+
+      // Update KPIs
+      if (kpi1Title) kpi1Title.textContent = "Today's Total Output";
+      if (kpi1Val) kpi1Val.textContent = Number(totalDayOutput).toLocaleString();
+      if (kpi1Desc) kpi1Desc.textContent = `${todayReqs.length} finished job order${todayReqs.length === 1 ? '' : 's'}`;
+
+      if (kpi2Title) kpi2Title.textContent = "Today's Category Mix";
+      if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${totalStd} | Prt: ${totalPrt} | Spc: ${totalSpc}</span>`;
+      if (kpi2Desc) kpi2Desc.textContent = "Fabrication breakdown today";
+
+      if (kpi3Title) kpi3Title.textContent = "Top Producer Today";
+      if (kpi3Val) kpi3Val.textContent = topArt;
+      if (kpi3Desc) kpi3Desc.textContent = `${topCount} completed assignment${topCount === 1 ? '' : 's'}`;
+
+      if (kpi4Title) kpi4Title.textContent = "Contributing Artists";
+      if (kpi4Val) kpi4Val.textContent = `${activeArtistsCount} / ${state.artists.length}`;
+      if (kpi4Desc) kpi4Desc.textContent = "Designers with output today";
+
+      // Render Table Header
+      if (thead) {
+        thead.innerHTML = `
+          <tr>
+            <th>Artist</th>
+            <th style="text-align:center;">Standard Signage</th>
+            <th style="text-align:center;">Large Format Print</th>
+            <th style="text-align:center;">Special Fabrication</th>
+            <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">Today's Completed</th>
+            <th style="text-align:center;">Revisions</th>
+            <th style="text-align:center;">Daily Share</th>
+            <th style="text-align:center;">Rank</th>
+          </tr>
+        `;
+      }
+
+      // Render Table Body
+      if (tbody) {
+        tbody.innerHTML = sortedArtists.map((a, idx) => {
+          const share = totalDayOutput > 0 ? ((a.total / totalDayOutput) * 100).toFixed(1) : '0.0';
+          const isTop = idx === 0 && a.total > 0;
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:26px; height:26px; font-size:10px; background:${isTop ? 'var(--primary-green)' : '#0F172A'};">${escapeHTML(a.artist.substring(0, 2).toUpperCase())}</div>
+                  <strong>${escapeHTML(a.artist)}</strong>
+                  ${isTop ? '<span class="badge badge-priority-rush" style="font-size:9px; padding:1px 5px;">★ Top</span>' : ''}
+                </div>
+              </td>
+              <td style="text-align:center; font-weight:${a.std > 0 ? '700' : '400'}; color:${a.std > 0 ? '#0F172A' : '#94A3B8'};">${a.std}</td>
+              <td style="text-align:center; font-weight:${a.prt > 0 ? '700' : '400'}; color:${a.prt > 0 ? '#0F172A' : '#94A3B8'};">${a.prt}</td>
+              <td style="text-align:center; font-weight:${a.spc > 0 ? '700' : '400'}; color:${a.spc > 0 ? '#0F172A' : '#94A3B8'};">${a.spc}</td>
+              <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">${a.total}</td>
+              <td style="text-align:center; color:${a.revisions > 0 ? 'var(--accent-red)' : '#94A3B8'}; font-weight:700;">${a.revisions}</td>
+              <td style="text-align:center; font-weight:700; color:var(--text-secondary);">${share}%</td>
+              <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Table Foot
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+            <td><strong>TOTAL TODAY</strong></td>
+            <td style="text-align:center;">${totalStd}</td>
+            <td style="text-align:center;">${totalPrt}</td>
+            <td style="text-align:center;">${totalSpc}</td>
+            <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${totalDayOutput}</td>
+            <td style="text-align:center;">${totalRev}</td>
+            <td style="text-align:center;">100.0%</td>
+            <td style="text-align:center;">—</td>
+          </tr>
+        `;
+      }
+
+      // Render Daily Chart (Artist comparison bars)
+      renderDailyArtistSvgChart(sortedArtists, totalDayOutput);
+
+      // Render Today's Completed Tasks Log
+      if (dailyCard) {
+        dailyCard.style.display = 'block';
+        const countBadge = document.getElementById('dailyTasksCountBadge');
+        if (countBadge) countBadge.textContent = `${todayReqs.length} Completed Today`;
+
+        const logTbody = document.getElementById('dailyCompletedTasksTableBody');
+        if (logTbody) {
+          if (todayReqs.length === 0) {
+            logTbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No completed tasks logged for today yet.</td></tr>';
+          } else {
+            logTbody.innerHTML = todayReqs.map(r => {
+              const catBadge = r.countSpecial > 0 ? '<span class="badge badge-priority-rush">Special</span>' :
+                               (r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-completed">Standard</span>');
+              return `
+                <tr>
+                  <td><strong style="color:var(--primary-green); font-family:monospace;">${escapeHTML(r.requestId)}</strong></td>
+                  <td><strong style="color:var(--accent-red); font-family:monospace;">${escapeHTML(r.joNumber)}</strong></td>
+                  <td><strong>${escapeHTML(r.projectName)}</strong></td>
+                  <td>${escapeHTML(r.client)}</td>
+                  <td><span class="badge badge-artist">${escapeHTML(r.artist)}</span></td>
+                  <td>${catBadge}</td>
+                  <td><span style="font-size:12px; color:var(--text-secondary);">${formatReadableDate(r.releasingDate || r.designDeadline || r.orderDate)}</span></td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                  </td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+      }
+
+      setupCsvExportButton('daily', sortedArtists);
+      return;
+    }
+
+    // Hide daily log on non-daily modes
+    if (dailyCard) dailyCard.style.display = 'none';
+
+    // =========================================================================
+    // CASE 2: WEEKLY VIEW (Monday — Sunday)
+    // =========================================================================
+    if (tf === 'week') {
+      if (reportTitle) reportTitle.textContent = 'Weekly Production Output Report';
+      if (reportSubtitle) reportSubtitle.textContent = 'Verified output breakdown by day for the active week (Monday — Sunday)';
+      if (chartTitle) chartTitle.textContent = 'Weekly Production Trend by Day (Mon — Sun)';
+      if (chartSubtitle) chartSubtitle.textContent = 'Daily completed assignment counts across the 7 days of the work week';
+      if (chartBadge) { chartBadge.textContent = 'Weekly Interval'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = 'Artist Weekly Output Matrix (Monday — Sunday)';
+      if (matrixBadge) { matrixBadge.textContent = 'Weekly Verified Output'; matrixBadge.className = 'badge badge-completed'; }
+
+      // 7 days of the active week: Oct 19 (Mon) to Oct 25 (Sun)
+      const weekDays = [
+        { day: 'Mon', dateStr: '2026-10-19', label: 'Mon (Oct 19)' },
+        { day: 'Tue', dateStr: '2026-10-20', label: 'Tue (Oct 20)' },
+        { day: 'Wed', dateStr: '2026-10-21', label: 'Wed (Oct 21)' },
+        { day: 'Thu', dateStr: '2026-10-22', label: 'Thu (Oct 22)' },
+        { day: 'Fri', dateStr: '2026-10-23', label: 'Fri (Oct 23)' },
+        { day: 'Sat', dateStr: '2026-10-24', label: 'Sat (Oct 24)' },
+        { day: 'Sun', dateStr: '2026-10-25', label: 'Sun (Oct 25)' }
+      ];
+
+      const weekMatrix = {};
+      state.artists.forEach(a => {
+        weekMatrix[a] = [0, 0, 0, 0, 0, 0, 0];
+      });
+
+      let weekTotal = 0;
+      let weekStd = 0, weekPrt = 0, weekSpc = 0;
+      const dailyTotals = [0, 0, 0, 0, 0, 0, 0];
+
+      allCompleted.forEach(r => {
+        const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+        const d = parseRequestDate(dStr);
+        if (!d) return;
+        const isoDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+        const dayIdx = weekDays.findIndex(w => w.dateStr === isoDate);
+        if (dayIdx >= 0) {
+          let art = toTitleCase(r.artist);
+          if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+          if (art === 'Gle') art = 'Glen';
+
+          if (!weekMatrix[art]) weekMatrix[art] = [0, 0, 0, 0, 0, 0, 0];
+
+          const std = parseInt(r.countStandard, 10) || 0;
+          const prt = parseInt(r.countPrinting, 10) || 0;
+          const spc = parseInt(r.countSpecial, 10) || 0;
+          const cnt = Math.max(std + prt + spc, 1);
+
+          weekMatrix[art][dayIdx] += cnt;
+          dailyTotals[dayIdx] += cnt;
+          weekTotal += cnt;
+          weekStd += std;
+          weekPrt += prt;
+          weekSpc += spc;
+        }
+      });
+
+      // Rows per artist
+      const weekRows = state.artists.map(art => {
+        const counts = weekMatrix[art] || [0, 0, 0, 0, 0, 0, 0];
+        const sum = counts.reduce((a, b) => a + b, 0);
+        return { artist: art, counts, sum };
+      });
+      weekRows.sort((a, b) => b.sum - a.sum);
+
+      const topWeekArt = weekRows[0] && weekRows[0].sum > 0 ? weekRows[0].artist : (state.artists[0] || 'Glen');
+      const topWeekCount = weekRows[0] ? weekRows[0].sum : 0;
+
+      // Update KPIs
+      if (kpi1Title) kpi1Title.textContent = "Weekly Output";
+      if (kpi1Val) kpi1Val.textContent = Number(weekTotal).toLocaleString();
+      if (kpi1Desc) kpi1Desc.textContent = "Completed Mon — Sun";
+
+      if (kpi2Title) kpi2Title.textContent = "Weekly Category Mix";
+      if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${weekStd} | Prt: ${weekPrt} | Spc: ${weekSpc}</span>`;
+      if (kpi2Desc) kpi2Desc.textContent = "Weekly fabrication types";
+
+      if (kpi3Title) kpi3Title.textContent = "Top Producer This Week";
+      if (kpi3Val) kpi3Val.textContent = topWeekArt;
+      if (kpi3Desc) kpi3Desc.textContent = `${topWeekCount} completed jobs this week`;
+
+      if (kpi4Title) kpi4Title.textContent = "Daily Run Rate";
+      if (kpi4Val) kpi4Val.textContent = `${(weekTotal / 7).toFixed(1)} / day`;
+      if (kpi4Desc) kpi4Desc.textContent = "Average completed per day";
+
+      // Render Table Header
+      if (thead) {
+        thead.innerHTML = `
+          <tr>
+            <th>Artist</th>
+            ${weekDays.map(w => `<th style="text-align:center;">${w.label}</th>`).join('')}
+            <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">Week Total</th>
+            <th style="text-align:center;">Team Share</th>
+            <th style="text-align:center;">Rank</th>
+          </tr>
+        `;
+      }
+
+      // Render Table Body
+      if (tbody) {
+        tbody.innerHTML = weekRows.map((r, idx) => {
+          const share = weekTotal > 0 ? ((r.sum / weekTotal) * 100).toFixed(1) : '0.0';
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.artist.substring(0, 2).toUpperCase())}</div>
+                  <strong>${escapeHTML(r.artist)}</strong>
+                </div>
+              </td>
+              ${r.counts.map(c => `<td style="text-align:center; font-weight:${c > 0 ? '700' : '400'}; color:${c > 0 ? '#0F172A' : '#94A3B8'};">${c}</td>`).join('')}
+              <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">${r.sum}</td>
+              <td style="text-align:center; font-weight:700; color:var(--text-secondary);">${share}%</td>
+              <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Table Foot
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+            <td><strong>WEEKLY TOTAL</strong></td>
+            ${dailyTotals.map(dt => `<td style="text-align:center; font-weight:800;">${dt}</td>`).join('')}
+            <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${weekTotal}</td>
+            <td style="text-align:center;">100.0%</td>
+            <td style="text-align:center;">—</td>
+          </tr>
+        `;
+      }
+
+      // Render Weekly SVG Chart
+      renderWeeklySvgChart(weekDays, dailyTotals);
+
+      // Export handler for Weekly
+      setupCsvExportButton('weekly', weekRows, weekDays);
+      return;
+    }
+
+    // =========================================================================
+    // CASE 3 & 4: MONTHLY & ALL-TIME VIEW (Jan — Dec 2026 Matrix)
+    // =========================================================================
+    const isMonthOnly = (tf === 'month');
+
+    if (reportTitle) reportTitle.textContent = isMonthOnly ? 'Monthly Production Output Report' : 'Production Output Analytics & History';
+    if (reportSubtitle) reportSubtitle.textContent = isMonthOnly 
+      ? 'Verified output breakdown by month across all active artists (Jan — Dec 2026)' 
+      : 'Comprehensive production history and cumulative performance rankings across all records';
+    if (chartTitle) chartTitle.textContent = isMonthOnly ? '2026 Completed Output per Month' : 'All-Time Completed Assignments by Month';
+    if (chartSubtitle) chartSubtitle.textContent = 'Hover over bars for exact monthly count and verified volume';
+    if (chartBadge) { chartBadge.textContent = isMonthOnly ? 'Monthly Interval' : 'All-Time Output'; chartBadge.className = 'badge badge-ongoing'; }
+    if (matrixTitle) matrixTitle.textContent = isMonthOnly ? 'Artist Monthly Output Matrix (Jan — Dec 2026)' : 'Artist All-Time Production Matrix';
+    if (matrixBadge) { matrixBadge.textContent = isMonthOnly ? 'Monthly Verified Count' : 'All-Time Grand Total'; matrixBadge.className = 'badge badge-completed'; }
+
+    const matrix = {};
+    state.artists.forEach(a => {
+      matrix[a] = new Array(12).fill(0);
     });
 
     let ytdTotal = 0;
     let currentMonthTotal = 0;
-    const ref = getReferenceToday();
-    const currentMIdx = ref.getMonth(); // 9 for Oct
+    let totalStd = 0, totalPrt = 0, totalSpc = 0;
 
-    state.requests.forEach(r => {
-      const isCompleted = (r.projectStatus === 'Completed' || r.designStatus === 'Submitted');
-      if (!isCompleted) return;
-
-      if (!matchesTimeframe(r, tf)) return;
-
+    allCompleted.forEach(r => {
       const dateStr = r.releasingDate || r.designDeadline || r.orderDate;
-      if (!dateStr) return;
-      const parsedDate = parseRequestDate(dateStr);
-      if (!parsedDate) return;
+      const d = parseRequestDate(dateStr);
+      if (!d) return;
 
-      const mIdx = parsedDate.getMonth();
+      const mIdx = d.getMonth();
       if (mIdx < 0 || mIdx > 11) return;
 
-      let artist = toTitleCase(r.artist);
-      if (artist === 'Juls' || artist === 'Ju' || artist === 'J') artist = 'Jules';
-      if (artist === 'Gle') artist = 'Glen';
+      let art = toTitleCase(r.artist);
+      if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+      if (art === 'Gle') art = 'Glen';
 
-      if (matrix[artist]) {
-        const assignmentsCount = Math.max((r.countStandard || 0) + (r.countPrinting || 0) + (r.countSpecial || 0), 1);
-        matrix[artist][mIdx] += assignmentsCount;
-        ytdTotal += assignmentsCount;
+      if (!matrix[art]) matrix[art] = new Array(12).fill(0);
 
-        if (mIdx === currentMIdx) {
-          currentMonthTotal += assignmentsCount;
-        }
+      const std = parseInt(r.countStandard, 10) || 0;
+      const prt = parseInt(r.countPrinting, 10) || 0;
+      const spc = parseInt(r.countSpecial, 10) || 0;
+      const cnt = Math.max(std + prt + spc, 1);
+
+      matrix[art][mIdx] += cnt;
+      ytdTotal += cnt;
+      totalStd += std;
+      totalPrt += prt;
+      totalSpc += spc;
+
+      if (mIdx === currentMIdx) {
+        currentMonthTotal += cnt;
       }
     });
 
-    let topArtist = '-';
-    let topArtistCount = 0;
-    state.artists.forEach(artist => {
-      const annualSum = matrix[artist].reduce((a, b) => a + b, 0);
-      if (annualSum > topArtistCount) {
-        topArtistCount = annualSum;
-        topArtist = artist;
-      }
-    });
-
+    // Monthly totals per month column
     const monthlyTotals = new Array(12).fill(0);
     Object.values(matrix).forEach(counts => {
       counts.forEach((c, idx) => { monthlyTotals[idx] += c; });
     });
+
+    // Rows per artist
+    const rows = state.artists.map(art => {
+      const counts = matrix[art] || new Array(12).fill(0);
+      const annualSum = counts.reduce((a, b) => a + b, 0);
+      return { artist: art, counts, annualSum };
+    });
+    rows.sort((a, b) => b.annualSum - a.annualSum);
+
+    const topArtAll = rows[0] && rows[0].annualSum > 0 ? rows[0].artist : (state.artists[0] || 'Glen');
+    const topCountAll = rows[0] ? rows[0].annualSum : 0;
     const activeMonths = monthlyTotals.filter(c => c > 0).length || 1;
     const monthlyAvg = (ytdTotal / activeMonths).toFixed(1);
 
-    const elYtd = document.getElementById('outputYtdTotal');
-    if (elYtd) elYtd.textContent = Number(ytdTotal).toLocaleString();
+    // Update KPIs for Monthly or All-Time
+    if (kpi1Title) kpi1Title.textContent = isMonthOnly ? "Current Month Output" : "All-Time Output";
+    if (kpi1Val) kpi1Val.textContent = Number(isMonthOnly ? currentMonthTotal : ytdTotal).toLocaleString();
+    if (kpi1Desc) kpi1Desc.textContent = isMonthOnly ? "October 2026 completed jobs" : "Total verified assignments";
 
-    const elCur = document.getElementById('outputCurrentMonthTotal');
-    if (elCur) elCur.textContent = Number(currentMonthTotal).toLocaleString();
+    if (kpi2Title) kpi2Title.textContent = isMonthOnly ? "October Category Mix" : "Category Breakdown";
+    if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${totalStd} | Prt: ${totalPrt} | Spc: ${totalSpc}</span>`;
+    if (kpi2Desc) kpi2Desc.textContent = "Fabrication distribution";
 
-    const elTopName = document.getElementById('outputTopArtistName');
-    if (elTopName) elTopName.textContent = topArtist;
+    if (kpi3Title) kpi3Title.textContent = isMonthOnly ? "Top Artist (October)" : "All-Time Top Producer";
+    if (kpi3Val) kpi3Val.textContent = topArtAll;
+    if (kpi3Desc) kpi3Desc.textContent = `${topCountAll} completed assignments`;
 
-    const elTopCnt = document.getElementById('outputTopArtistCount');
-    if (elTopCnt) elTopCnt.textContent = `${Number(topArtistCount).toLocaleString()} completed assignments`;
+    if (kpi4Title) kpi4Title.textContent = isMonthOnly ? "Daily Run Rate (October)" : "Monthly Average Output";
+    if (kpi4Val) kpi4Val.textContent = isMonthOnly ? `${(currentMonthTotal / 26).toFixed(1)} / day` : `${monthlyAvg} / mo`;
+    if (kpi4Desc) kpi4Desc.textContent = isMonthOnly ? "Average completed per day" : "Average jobs per active month";
 
-    const elAvg = document.getElementById('outputMonthlyAvg');
-    if (elAvg) elAvg.textContent = monthlyAvg;
+    // Table Header
+    if (thead) {
+      thead.innerHTML = `
+        <tr>
+          <th>Artist</th>
+          ${months.map((m, mIdx) => `<th style="text-align:center; ${mIdx === currentMIdx ? 'background:#E2E8F0; color:#0F172A; font-weight:800;' : ''}">${m}</th>`).join('')}
+          <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">${isMonthOnly ? 'YTD Total' : 'Grand Total'}</th>
+          <th style="text-align:center;">Rank</th>
+        </tr>
+      `;
+    }
 
-    const tbody = document.getElementById('monthlyOutputTableBody');
+    // Pagination
+    const totalItems = rows.length;
+    const page = state.monthlyOutputPage || 1;
+    const perPage = state.monthlyOutputPerPage || 10;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'monthlyOutputPaginationInfo',
+      controlsId: 'monthlyOutputPaginationControls',
+      selectIds: ['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setMonthlyOutputPage',
+      itemLabel: 'artists'
+    });
+    state.monthlyOutputPage = validPage;
+    const pagedRows = rows.slice(startIndex, startIndex + perPage);
+
+    // Table Body
     if (tbody) {
-      const rows = state.artists.map(artist => {
-        const counts = matrix[artist];
-        const annualSum = counts.reduce((a, b) => a + b, 0);
-        return { artist, counts, annualSum };
-      });
-
-      rows.sort((a, b) => b.annualSum - a.annualSum);
-
-      const totalItems = rows.length;
-      const page = state.monthlyOutputPage || 1;
-      const perPage = state.monthlyOutputPerPage || 10;
-
-      const { validPage, startIndex } = renderPagination({
-        infoId: 'monthlyOutputPaginationInfo',
-        controlsId: 'monthlyOutputPaginationControls',
-        selectIds: ['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'],
-        currentPage: page,
-        perPage,
-        totalItems,
-        onPageChange: 'window.SignDepotApp.setMonthlyOutputPage',
-        itemLabel: 'artists'
-      });
-
-      state.monthlyOutputPage = validPage;
-      const pagedRows = rows.slice(startIndex, startIndex + perPage);
-
       tbody.innerHTML = pagedRows.map((r, idx) => `
         <tr>
           <td>
@@ -8672,7 +9082,11 @@
               <strong>${escapeHTML(r.artist)}</strong>
             </div>
           </td>
-          ${r.counts.map((c, mIdx) => `<td style="text-align:center; font-weight:${c > 0 ? '800' : '400'}; color:${mIdx === currentMIdx && c > 0 ? '#176B55' : c > 0 ? '#0F172A' : '#94A3B8'};">${c}</td>`).join('')}
+          ${r.counts.map((c, mIdx) => `
+            <td style="text-align:center; font-weight:${c > 0 ? '700' : '400'}; color:${mIdx === currentMIdx && c > 0 ? '#176B55' : c > 0 ? '#0F172A' : '#94A3B8'}; ${mIdx === currentMIdx ? 'background:#F1F5F9;' : ''}">
+              ${c}
+            </td>
+          `).join('')}
           <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">
             ${r.annualSum}
           </td>
@@ -8681,31 +9095,148 @@
       `).join('');
     }
 
+    // Table Foot
+    if (tfoot) {
+      tfoot.innerHTML = `
+        <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+          <td><strong>TOTAL OUTPUT</strong></td>
+          ${monthlyTotals.map((mt, mIdx) => `<td style="text-align:center; font-weight:800; ${mIdx === currentMIdx ? 'background:#E2E8F0;' : ''}">${mt}</td>`).join('')}
+          <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${ytdTotal}</td>
+          <td style="text-align:center;">—</td>
+        </tr>
+      `;
+    }
+
+    // Render 12-Month SVG Chart
     renderMonthlyOutputSvgChart(months, matrix);
 
-    window.currentMonthlyMatrix = {
-      months,
-      matrix,
-      timeframe: tf
-    };
+    // Export CSV
+    setupCsvExportButton(isMonthOnly ? 'monthly' : 'all_time', rows, months);
+  }
 
-    const btnExportMonthly = document.getElementById('btnExportMonthlyReportCSV');
-    if (btnExportMonthly) {
-      btnExportMonthly.onclick = () => {
-        const headers = ['Artist', ...months, 'Total Output'];
-        const csvLines = [headers.join(',')];
-        Object.entries(matrix).forEach(([art, cnts]) => {
-          csvLines.push([`"${art}"`, ...cnts, cnts.reduce((a, b) => a + b, 0)].join(','));
+  function setupCsvExportButton(mode, rows, headerCols) {
+    const btn = document.getElementById('btnExportMonthlyReportCSV');
+    if (!btn) return;
+    btn.onclick = () => {
+      let csvContent = '';
+      if (mode === 'daily') {
+        const headers = ['Artist', 'Standard Signage', 'Large Format Printing', 'Special Fabrication', "Today's Total", 'Revisions', 'Daily Share %'];
+        const lines = [headers.join(',')];
+        const dayTot = rows.reduce((acc, r) => acc + (r.total || 0), 0);
+        rows.forEach(r => {
+          const share = dayTot > 0 ? ((r.total / dayTot) * 100).toFixed(1) : '0.0';
+          lines.push([`"${r.artist}"`, r.std, r.prt, r.spc, r.total, r.revisions, `"${share}%"`].join(','));
         });
-        const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Sign_Depot_Monthly_Output_${tf}_${Date.now()}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-      };
-    }
+        csvContent = lines.join('\n');
+      } else if (mode === 'weekly') {
+        const headers = ['Artist', ...headerCols.map(h => `"${h.label}"`), 'Week Total', 'Team Share %'];
+        const lines = [headers.join(',')];
+        const wTot = rows.reduce((acc, r) => acc + r.sum, 0);
+        rows.forEach(r => {
+          const share = wTot > 0 ? ((r.sum / wTot) * 100).toFixed(1) : '0.0';
+          lines.push([`"${r.artist}"`, ...r.counts, r.sum, `"${share}%"`].join(','));
+        });
+        csvContent = lines.join('\n');
+      } else {
+        const headers = ['Artist', ...headerCols, 'Total Output'];
+        const lines = [headers.join(',')];
+        rows.forEach(r => {
+          lines.push([`"${r.artist}"`, ...r.counts, r.annualSum].join(','));
+        });
+        csvContent = lines.join('\n');
+      }
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sign_Depot_Production_Output_${mode}_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${mode.toUpperCase()} output report to CSV.`);
+    };
+  }
+
+  function renderDailyArtistSvgChart(sortedArtists, totalDayOutput) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const topArtists = sortedArtists.slice(0, 9);
+    const maxVal = Math.max(...topArtists.map(a => a.total), 4);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 54;
+    const padding = 36;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * topArtists.length) / Math.max(topArtists.length - 1, 1);
+
+    let bars = '';
+    topArtists.forEach((a, idx) => {
+      const total = a.total;
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isTop = idx === 0 && total > 0;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isTop ? 'var(--primary-green)' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${a.artist}: ${total} completed assignments today</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="12" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">${a.artist}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderWeeklySvgChart(weekDays, dailyTotals) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const maxVal = Math.max(...dailyTotals, 8);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 64;
+    const padding = 40;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * 7) / 6;
+
+    let bars = '';
+    weekDays.forEach((w, idx) => {
+      const total = dailyTotals[idx];
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isPeak = total === Math.max(...dailyTotals) && total > 0;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isPeak ? '#176B55' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${w.label}: ${total} completed assignments</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="12" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">${w.label}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
   }
 
   function renderMonthlyOutputSvgChart(months, matrix) {
@@ -9999,6 +10530,12 @@
       }
     },
 
+    setMonthlyOutputTimeframe: (tf) => {
+      renderMonthlyOutputReport(tf);
+    },
+    renderMonthlyOutputReport: (tf) => {
+      renderMonthlyOutputReport(tf);
+    },
     setMonthlyOutputPage: (p) => {
       state.monthlyOutputPage = p;
       renderMonthlyOutputReport();
