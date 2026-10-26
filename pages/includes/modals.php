@@ -12,8 +12,8 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
-    <form id="salesRequestForm">
-      <div class="modal-body">
+    <form id="salesRequestForm" style="display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; margin: 0;">
+      <div class="modal-body" style="overflow-y: auto; flex: 1; min-height: 0; padding: 22px 26px;">
         <input type="hidden" id="salesFormId">
         <div class="form-grid-2">
           <div class="form-group">
@@ -98,7 +98,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="flex-shrink: 0; z-index: 2; position: relative;">
         <button type="button" class="btn btn-secondary" data-close-modal="salesModal">Cancel</button>
         <button type="submit" class="btn btn-primary" id="btnSaveSalesRequest">Save Request</button>
       </div>
@@ -115,8 +115,8 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
-    <form id="trackerTaskForm">
-      <div class="modal-body">
+    <form id="trackerTaskForm" style="display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; margin: 0;">
+      <div class="modal-body" style="overflow-y: auto; flex: 1; min-height: 0; padding: 22px 26px;">
         <input type="hidden" id="trackerFormId">
         <div class="form-grid-2">
           <div class="form-group">
@@ -187,7 +187,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="flex-shrink: 0;">
         <button type="button" class="btn btn-secondary" data-close-modal="trackerModal">Cancel</button>
         <button type="submit" class="btn btn-primary" id="btnSaveTrackerTask">Save Changes</button>
       </div>
