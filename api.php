@@ -22,6 +22,17 @@ if (!$pdo) {
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+function normalizeDesignStatus($designStatus, $projectStatus = '') {
+    $ds = trim((string)$designStatus);
+    if ($ds === '' || $ds === '[object Object]' || $ds === '{}') {
+        if ($projectStatus === 'Completed') return 'Submitted';
+        if ($projectStatus === 'On-going') return 'In Progress';
+        return 'Not Started';
+    }
+    if ($ds === 'Completed') return 'Submitted';
+    return $ds;
+}
+
 // If raw JSON body was sent
 $inputJson = file_get_contents('php://input');
 $bodyData = [];
@@ -205,7 +216,7 @@ switch ($action) {
                     'countStandard' => (int)$r['count_standard'],
                     'countSpecial' => (int)$r['count_special'],
                     'countPrinting' => (int)$r['count_printing'],
-                    'designStatus' => $r['design_status'],
+                    'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
                     'remarks' => $r['remarks']
                 ];
@@ -260,7 +271,7 @@ switch ($action) {
                     'countStandard' => (int)$r['count_standard'],
                     'countSpecial' => (int)$r['count_special'],
                     'countPrinting' => (int)$r['count_printing'],
-                    'designStatus' => $r['design_status'],
+                    'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
                     'remarks' => $r['remarks']
                 ];
@@ -328,6 +339,11 @@ switch ($action) {
             // Security check on column names
             if (!in_array($col, array_values($fieldMap))) {
                 sendJsonResponse(['success' => false, 'error' => 'Invalid column name: ' . $col], 400);
+            }
+
+            if ($col === 'design_status') {
+                if ($value === 'Completed') $value = 'Submitted';
+                if ($value === '' || $value === '[object Object]' || $value === '{}') $value = 'Not Started';
             }
 
             $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
@@ -418,7 +434,7 @@ switch ($action) {
                 ':std' => (int)($data['countStandard'] ?? $data['count_standard'] ?? 0),
                 ':spc' => (int)($data['countSpecial'] ?? $data['count_special'] ?? 0),
                 ':prt' => (int)($data['countPrinting'] ?? $data['count_printing'] ?? 0),
-                ':dstat' => trim($data['designStatus'] ?? $data['design_status'] ?? 'Not Started'),
+                ':dstat' => normalizeDesignStatus($data['designStatus'] ?? $data['design_status'] ?? '', $data['projectStatus'] ?? $data['project_status'] ?? ''),
                 ':rev' => (int)($data['revisionCount'] ?? $data['revision_count'] ?? 0),
                 ':remarks' => trim($data['remarks'] ?? '')
             ]);

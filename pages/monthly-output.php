@@ -115,14 +115,85 @@ $monthlyAvg = $activeMonths > 0 ? number_format($ytdTotal / $activeMonths, 1) : 
                 </button>
               </div>
 
-              <select class="filter-input" id="monthlyOutputYearSelect" style="width: 140px;">
-                <option value="2026" selected>Year 2026</option>
-              </select>
-
               <button class="btn btn-secondary btn-sm" id="btnExportMonthlyReportCSV" style="display: inline-flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Export Output CSV
               </button>
+            </div>
+          </div>
+
+          <!-- Interactive Timeframe Filter Bar (Filter by Day, Week, Month, or Year) -->
+          <div class="studio-card" id="outputFilterCard" style="padding: 12px 18px; margin-bottom: 20px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary-green);"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                  <span style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #0F172A;">Filter Period:</span>
+                </div>
+
+                <!-- 1. Year Filter -->
+                <div class="filter-field-inline" style="display: flex; align-items: center; gap: 6px;">
+                  <label for="outputFilterYear" style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Year:</label>
+                  <select class="filter-input" id="outputFilterYear" style="min-width: 105px; padding: 5px 8px; font-weight: 700;">
+                    <option value="2026" selected>2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="all">All Years</option>
+                  </select>
+                </div>
+
+                <!-- 2. Month Filter -->
+                <div class="filter-field-inline" id="filterFieldMonth" style="display: flex; align-items: center; gap: 6px;">
+                  <label for="outputFilterMonth" style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Month:</label>
+                  <select class="filter-input" id="outputFilterMonth" style="min-width: 145px; padding: 5px 8px; font-weight: 700;">
+                    <option value="all">All Months</option>
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9" selected>October (Current)</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                  </select>
+                </div>
+
+                <!-- 3. Week Filter (Dynamic weeks with Prev/Next buttons) -->
+                <div class="filter-field-inline" id="filterFieldWeek" style="display: none; align-items: center; gap: 6px;">
+                  <label for="outputFilterWeek" style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Week:</label>
+                  <div style="display: inline-flex; align-items: center; gap: 3px;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnPrevWeek" title="Previous Week" style="padding: 4px 9px; font-weight: 800;">‹</button>
+                    <select class="filter-input" id="outputFilterWeek" style="min-width: 235px; padding: 5px 8px; font-weight: 700;">
+                      <!-- Populated dynamically in script.js -->
+                    </select>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnNextWeek" title="Next Week" style="padding: 4px 9px; font-weight: 800;">›</button>
+                  </div>
+                </div>
+
+                <!-- 4. Day Filter (Interactive Date picker with Prev/Next/Today buttons) -->
+                <div class="filter-field-inline" id="filterFieldDay" style="display: none; align-items: center; gap: 6px;">
+                  <label for="outputFilterDate" style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Day:</label>
+                  <div style="display: inline-flex; align-items: center; gap: 3px;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnPrevDay" title="Previous Day" style="padding: 4px 9px; font-weight: 800;">‹</button>
+                    <input type="date" class="filter-input" id="outputFilterDate" value="2026-10-26" style="width: 140px; padding: 5px 8px; font-weight: 700;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnNextDay" title="Next Day" style="padding: 4px 9px; font-weight: 800;">›</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnFilterToday" style="padding: 4px 10px; font-size: 11px; font-weight: 800; background: #0F172A; color: #FFF;">Today</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick summary badge & reset button -->
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge badge-ongoing" id="outputFilterStatusBadge" style="font-size: 11px; padding: 5px 12px; font-weight: 700;">Active Filter: October 2026</span>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnResetOutputFilter" style="font-size: 11px; padding: 5px 10px; display: inline-flex; align-items: center; gap: 4px;" title="Reset filters to current defaults">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                  Reset
+                </button>
+              </div>
             </div>
           </div>
 

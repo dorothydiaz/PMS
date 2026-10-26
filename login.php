@@ -18,7 +18,7 @@ $msg = $_GET['msg'] ?? '';
 $redirect = $_GET['redirect'] ?? 'index.php';
 
 // Handle Credentials Submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $usernameOrEmail = cleanInput($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     
@@ -383,12 +383,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </span>
             <span class="quick-cred-meta">superadmin / Full CRUD</span>
           </div>
-          <div class="quick-cred-chip" onclick="fillCreds('artist_ed', 'Password123!')">
+          <div class="quick-cred-chip" onclick="fillCreds('artist_dorothy', 'sample123')">
             <span class="quick-cred-role">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
               Artist Account
             </span>
-            <span class="quick-cred-meta">artist_ed / Limited Modules</span>
+            <span class="quick-cred-meta">artist_dorothy / Limited Modules</span>
           </div>
           <div class="quick-cred-chip" onclick="fillCreds('sales_dona', 'Password123!')">
             <span class="quick-cred-role">

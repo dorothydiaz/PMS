@@ -21,16 +21,6 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
   </div>
 
   <div class="topbar-right">
-    <?php if (in_array($currentPage ?? '', ['monthly-output', 'reports'])): ?>
-    <!-- Timeframe Pills (Today | This Week | This Month | All Time) like Panze -->
-    <div class="timeframe-pill-group" id="navbarTimeframePillGroup">
-      <button class="timeframe-btn" data-timeframe="today">Today</button>
-      <button class="timeframe-btn" data-timeframe="week">This Week</button>
-      <button class="timeframe-btn" data-timeframe="month">This Month</button>
-      <button class="timeframe-btn active" data-timeframe="all">All Time</button>
-    </div>
-    <?php endif; ?>
-
     <!-- Live Auto-Save Indicator -->
     <div class="auto-save-pill">
       <span class="auto-save-dot"></span>
