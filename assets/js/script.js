@@ -4712,7 +4712,7 @@
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.requests) && parsed.requests.length > 0) {
           // Check if this is old dummy mock data or a partial cached slice (< 2100 records)
-          const isStaleMockData = (parsed.requests.length < 2100) || parsed.requests.some(r => r.id === 'req-001' || r.projectName === 'URAL' || r.requestId === 'LR-26-1230');
+          const isStaleMockData = (parsed.requests.length < 2100) || parsed.requests.some(r => r.id === 'req-001' || r.id === 'mock-001');
           if (isStaleMockData) {
             console.log('Purging stale/partial (' + parsed.requests.length + ' rows) cache from localStorage, loading live full dataset...');
             localStorage.removeItem(STORAGE_KEY);
@@ -5007,13 +5007,14 @@
   }
 
   // Generates directly editable text cell HTML (or locked read-only span)
-  function renderEditableCell(reqId, fieldName, currentValue) {
+  function renderEditableCell(reqId, fieldName, currentValue, extraClass = '', extraStyle = '') {
     const canEdit = canUserEditField(null, fieldName);
+    const styleAttr = extraStyle ? ` style="${extraStyle}"` : '';
     if (!canEdit) {
-      return `<span class="read-only-cell" data-req-id="${reqId}" data-field="${fieldName}" title="Editing locked: Read-only for your role">${escapeHTML(currentValue || '—')}</span>`;
+      return `<span class="read-only-cell ${extraClass}" data-req-id="${reqId}" data-field="${fieldName}" title="Editing locked: Read-only for your role"${styleAttr}>${escapeHTML(currentValue || '—')}</span>`;
     }
 
-    return `<span class="editable-cell" contenteditable="true" 
+    return `<span class="editable-cell ${extraClass}" contenteditable="true"${styleAttr} 
       data-req-id="${reqId}" data-field="${fieldName}"
       onblur="window.SignDepotApp.handleInlineTextBlur(this)" 
       onkeydown="window.SignDepotApp.handleInlineTextKey(event, this)">${escapeHTML(currentValue || '')}</span>`;
@@ -6313,10 +6314,11 @@
       return;
     }
 
+    const isSuper = isCurrentUserSuperAdmin();
     tbody.innerHTML = pagedList.map(r => `
       <tr data-req-id="${r.id}">
-        <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
-        <td><strong style="color:var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
+        <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700;')}</td>
+        <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700;')}</td>
         <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
         <td>${renderEditableCell(r.id, 'client', r.client)}</td>
         <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
@@ -6324,9 +6326,16 @@
         <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
         <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">
-            Directive
-          </button>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">
+              Directive
+            </button>
+            ${isSuper ? `
+              <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Project (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            ` : ''}
+          </div>
         </td>
       </tr>
     `).join('');
@@ -6433,10 +6442,11 @@
       if (pagedList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:var(--text-muted);">No sales requests match the current filters.</td></tr>`;
       } else {
+        const isSuper = isCurrentUserSuperAdmin();
         tbody.innerHTML = pagedList.map(r => `
           <tr data-req-id="${r.id}">
-            <td><strong style="color: var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
-            <td><strong style="color: var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
+            <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color: var(--primary-green); font-weight: 700;')}</td>
+            <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color: var(--accent-red); font-weight: 700;')}</td>
             <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
             <td>${renderEditableCell(r.id, 'client', r.client)}</td>
             <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
@@ -6447,13 +6457,21 @@
             <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
             <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
             <td>
-              <div style="display:flex; gap:4px;">
+              <div style="display:flex; gap:4px; align-items:center;">
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Directive">
                   Directive
                 </button>
-                <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.duplicateSalesRequest('${r.id}')" title="Duplicate">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.editSalesRequest('${r.id}')" title="Edit Full Details">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
+                <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.duplicateSalesRequest('${r.id}')" title="Duplicate">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+                ${isSuper ? `
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Request (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
               </div>
             </td>
           </tr>
@@ -6651,9 +6669,10 @@
             deadlineStatusBadge = `<span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText)}</span>`;
           }
 
+          const isSuper = isCurrentUserSuperAdmin();
           return `
             <tr data-req-id="${r.id}">
-              <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
+              <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700;')}</td>
               <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
               <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
               <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
@@ -6670,7 +6689,14 @@
               <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
               <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
               <td>
-                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                <div style="display:flex; gap:4px; align-items:center;">
+                  <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                  ${isSuper ? `
+                    <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  ` : ''}
+                </div>
               </td>
             </tr>
           `;
@@ -8156,7 +8182,14 @@
             <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
             <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
             <td>
-              <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+              <div style="display:flex; gap:4px; align-items:center;">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                ${isCurrentUserSuperAdmin() ? `
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
+              </div>
             </td>
           </tr>
         `).join('');
@@ -8232,9 +8265,14 @@
             <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
             <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
             <td>
-              <div style="display:flex; gap:4px;">
+              <div style="display:flex; gap:4px; align-items:center;">
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.quickSalesApprove('${r.id}')">Approve</button>
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                ${isCurrentUserSuperAdmin() ? `
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Order (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
               </div>
             </td>
           </tr>
@@ -10178,43 +10216,6 @@
   }
 
   // ==========================================================================
-  // MODALS
-  // ==========================================================================
-
-  function setupModals() {
-    document.querySelectorAll('[data-close-modal]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const modalId = btn.getAttribute('data-close-modal');
-        const modal = document.getElementById(modalId);
-        if (modal) modal.classList.remove('show');
-      });
-    });
-
-    document.querySelectorAll('.modal-backdrop').forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('show');
-      });
-
-      // Automatically upgrade and sync all form selects whenever any modal becomes visible
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((m) => {
-          if (m.attributeName === 'class' && modal.classList.contains('show')) {
-            upgradeAllFormSelects();
-            syncAllFormDropdowns();
-          }
-        });
-      });
-      observer.observe(modal, { attributes: true });
-    });
-
-    // Automatically sync dropdown button labels when forms are reset
-    document.querySelectorAll('form').forEach(form => {
-      form.addEventListener('reset', () => {
-        setTimeout(() => syncAllFormDropdowns(), 20);
-      });
-    });
-
-  // ==========================================================================
   // REQUEST ID AUTO-GENERATION & SEPARATOR DASH FORMATTING ENGINE
   // ==========================================================================
 
@@ -10307,10 +10308,9 @@
         .catch(() => {});
     }
 
-    // Auto-generate next JO Number
-    const nextJo = getNextJoNumber();
+    // No default JO number on the add request form
     const joInput = document.getElementById('salesFormJo');
-    if (joInput) joInput.value = nextJo;
+    if (joInput) joInput.value = '';
 
     // Default design deadline (+3 days from today)
     const deadlineInput = document.getElementById('salesFormDeadline');
@@ -10325,9 +10325,133 @@
   }
   window.openNewSalesRequestModal = openNewSalesRequestModal;
 
-  const salesForm = document.getElementById('salesRequestForm');
-  if (salesForm) {
-    salesForm.addEventListener('submit', (e) => {
+  function editSalesRequest(id) {
+    const rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) return;
+
+    const form = document.getElementById('salesRequestForm');
+    if (form) form.reset();
+
+    const setVal = (elemId, val) => {
+      const el = document.getElementById(elemId);
+      if (el) el.value = (val !== undefined && val !== null) ? val : '';
+    };
+
+    setVal('salesFormId', rec.id || '');
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = `Edit Sales Request — ${rec.requestId}`;
+
+    setVal('salesFormReqId', rec.requestId);
+    setVal('salesFormJo', rec.joNumber);
+    setVal('salesFormProject', rec.projectName);
+    setVal('salesFormClient', rec.client);
+    setVal('salesFormArtist', rec.artist);
+    setVal('salesFormSalesRep', rec.salesRep);
+    setVal('salesFormDeadline', rec.designDeadline);
+    setVal('salesFormReleasing', rec.releasingDate || rec.designDeadline);
+    setVal('salesFormPriority', rec.priority || 'Normal');
+    setVal('salesFormRelMode', rec.releasingMode || 'Pickup');
+    setVal('salesFormFileSent', rec.fileSent || 'Pending');
+    setVal('salesFormContactPerson', rec.contactPerson || '');
+    setVal('salesFormContactNumber', rec.contactNumber || '');
+    setVal('salesFormAddress', rec.completeAddress || '');
+
+    populateSalesFiltersDropdowns();
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) modal.classList.add('show');
+  }
+  window.editSalesRequest = editSalesRequest;
+
+  function deleteSalesRequest(id) {
+    if (!isCurrentUserSuperAdmin()) {
+      showToast('Permission Denied: Only Super Admin can delete records.', 'error');
+      return;
+    }
+
+    const rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) return;
+
+    const reqLabel = rec.requestId || id;
+    if (!confirm(`Are you sure you want to permanently delete ${reqLabel}? This action cannot be undone.`)) {
+      return;
+    }
+
+    // Remove from local state
+    state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+
+    saveStateToStorage();
+    renderCurrentView(state.activeView);
+    updateDashboardKPIs();
+    updateDeadlineAlertCenter();
+
+    // Sync deletion to live MySQL database
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=delete_request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: rec.id || id, requestId: rec.requestId })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && res.success) {
+          showToast(`Request ${reqLabel} deleted successfully.`);
+        } else {
+          showToast(res.error || 'Server error deleting request.', 'error');
+        }
+      })
+      .catch(err => {
+        console.warn('MySQL delete error:', err);
+        showToast(`Deleted ${reqLabel} locally.`, 'info');
+      });
+    } else {
+      showToast(`Request ${reqLabel} deleted successfully.`);
+    }
+  }
+  window.deleteSalesRequest = deleteSalesRequest;
+
+  // ==========================================================================
+  // MODALS
+  // ==========================================================================
+
+  function setupModals() {
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modalId = btn.getAttribute('data-close-modal');
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.remove('show');
+      });
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('show');
+      });
+
+      // Automatically upgrade and sync all form selects whenever any modal becomes visible
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.attributeName === 'class' && modal.classList.contains('show')) {
+            upgradeAllFormSelects();
+            syncAllFormDropdowns();
+          }
+        });
+      });
+      observer.observe(modal, { attributes: true });
+    });
+
+    // Automatically sync dropdown button labels when forms are reset
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('reset', () => {
+        setTimeout(() => syncAllFormDropdowns(), 20);
+      });
+    });
+
+    const salesForm = document.getElementById('salesRequestForm');
+    if (salesForm) {
+      salesForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const id = document.getElementById('salesFormId').value;
       const rawReqId = document.getElementById('salesFormReqId').value.trim();
@@ -10366,6 +10490,13 @@
             rec.contactNumber = contactNumber;
             rec.completeAddress = address;
             showToast(`Sales request ${reqId} updated.`);
+            if (window.PMS_API_URL) {
+              fetch(window.PMS_API_URL + '?action=update_request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rec)
+              }).catch(err => console.warn('MySQL update sync:', err));
+            }
           }
         } else {
           const newRec = {
@@ -10617,10 +10748,15 @@
 
   window.SignDepotApp = {
     switchView: switchView,
+    renderSalesRequests: renderSalesRequests,
+    renderCreativesTracker: renderCreativesTracker,
+    renderDashboardRecentProjectsTable: renderDashboardRecentProjectsTable,
     canUserEditField: canUserEditField,
     canUserAccessTab: canUserAccessTab,
     getCurrentUserPermissions: getCurrentUserPermissions,
     openNewSalesRequestModal: openNewSalesRequestModal,
+    editSalesRequest: editSalesRequest,
+    deleteSalesRequest: deleteSalesRequest,
     formatRequestIdInput: formatRequestIdInput,
     getNextRequestId: getNextRequestId,
 

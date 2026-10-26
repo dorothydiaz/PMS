@@ -455,13 +455,97 @@ switch ($action) {
 
     case 'delete_request':
         try {
-            $id = trim($_POST['id'] ?? $bodyData['id'] ?? '');
+            $currUser = getCurrentUser();
+            if (!isSuperAdmin() && (!$currUser || $currUser['role'] !== 'super_admin')) {
+                sendJsonResponse(['success' => false, 'error' => 'Permission denied: Only Super Admin can delete records.'], 403);
+            }
+            $id = trim($_POST['id'] ?? $bodyData['id'] ?? $_POST['requestId'] ?? $bodyData['requestId'] ?? '');
             if (empty($id)) {
                 sendJsonResponse(['success' => false, 'error' => 'Missing ID'], 400);
             }
             $stmt = $pdo->prepare("DELETE FROM sales_requests WHERE id = :id1 OR request_id = :id2");
             $stmt->execute([':id1' => $id, ':id2' => $id]);
-            sendJsonResponse(['success' => true, 'message' => 'Request deleted']);
+
+            // Record to audit_logs
+            try {
+                $userStr = $currUser['username'] ?? 'superadmin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $auditStmt = $pdo->prepare("INSERT INTO audit_logs (`user`, `role`, `action`, `module`, `description`, `ip_address`, `status`) VALUES (?, 'Super Admin', 'DELETE', 'Sales Requests', ?, ?, 'Success')");
+                $auditStmt->execute([$userStr, "Deleted sales request {$id}", $ip]);
+            } catch (Exception $ae) {}
+
+            sendJsonResponse(['success' => true, 'message' => "Request {$id} deleted successfully."]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'update_request':
+        try {
+            $currUser = getCurrentUser();
+            if (!$currUser && !isSuperAdmin()) {
+                sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+            }
+            $data = !empty($bodyData) ? $bodyData : $_POST;
+            $id = trim($data['id'] ?? '');
+            $reqId = trim($data['requestId'] ?? $data['request_id'] ?? '');
+            if (empty($id) && empty($reqId)) {
+                sendJsonResponse(['success' => false, 'error' => 'Missing ID or Request ID'], 400);
+            }
+
+            // Permissions: super admin bypasses, otherwise needs update perm
+            if (!isSuperAdmin() && !hasPermission('sales-requests', 'u')) {
+                sendJsonResponse(['success' => false, 'error' => 'Permission denied: Cannot edit sales requests.'], 403);
+            }
+
+            $sql = "UPDATE sales_requests SET
+                request_id = :req_id,
+                jo_number = :jo,
+                project_name = :proj,
+                client = :client,
+                artist = :artist,
+                sales_rep = :sales_rep,
+                design_deadline = :deadline,
+                releasing_date = :releasing,
+                file_sent = :file_sent,
+                client_approval = :appr,
+                priority = :priority,
+                releasing_mode = :rel_mode,
+                contact_person = :contact_p,
+                contact_number = :contact_n,
+                complete_address = :addr
+            WHERE id = :id1 OR request_id = :id2";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':req_id' => $reqId,
+                ':jo' => trim($data['joNumber'] ?? $data['jo_number'] ?? ''),
+                ':proj' => trim($data['projectName'] ?? $data['project_name'] ?? ''),
+                ':client' => trim($data['client'] ?? ''),
+                ':artist' => trim($data['artist'] ?? 'Unassigned'),
+                ':sales_rep' => trim($data['salesRep'] ?? $data['sales_rep'] ?? ''),
+                ':deadline' => trim($data['designDeadline'] ?? $data['design_deadline'] ?? ''),
+                ':releasing' => trim($data['releasingDate'] ?? $data['releasing_date'] ?? ''),
+                ':file_sent' => trim($data['fileSent'] ?? $data['file_sent'] ?? 'Pending'),
+                ':appr' => trim($data['clientApproval'] ?? $data['client_approval'] ?? 'Pending'),
+                ':priority' => trim($data['priority'] ?? 'Normal'),
+                ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? 'INSTALL'),
+                ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? ''),
+                ':contact_n' => trim($data['contactNumber'] ?? $data['contact_number'] ?? ''),
+                ':addr' => trim($data['completeAddress'] ?? $data['complete_address'] ?? ''),
+                ':id1' => $id,
+                ':id2' => !empty($reqId) ? $reqId : $id
+            ]);
+
+            // Audit trail
+            try {
+                $userStr = $currUser['username'] ?? 'superadmin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $auditStmt = $pdo->prepare("INSERT INTO audit_logs (`user`, `role`, `action`, `module`, `description`, `ip_address`, `status`) VALUES (?, 'Super Admin', 'UPDATE', 'Sales Requests', ?, ?, 'Success')");
+                $auditStmt->execute([$userStr, "Updated sales request {$reqId}", $ip]);
+            } catch (Exception $ae) {}
+
+            sendJsonResponse(['success' => true, 'message' => "Request {$reqId} updated successfully."]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
