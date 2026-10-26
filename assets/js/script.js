@@ -15,7 +15,12 @@
 
   const DEFAULT_ARTISTS = ['Bob', 'Dorothy', 'Glen', 'Goodrich', 'Jules', 'Raven', 'Rodel', 'Tim'];
 
-  const DEFAULT_SALES_REPS = ['Dona', 'Jen', 'Janet', 'Flora', 'Joyce', 'Mariel', 'Mae', 'Jay', 'Kim', 'Shella', 'Sheena', 'Sol'];
+  const DEFAULT_SALES_REPS = [
+    'Aj', 'Alvic', 'Anna', 'Dave', 'Dona', 'Ed', 'Flora', 'Jade', 'Janet',
+    'Jasmin', 'Jastine', 'Jay', 'Jen', 'Joana', 'Joie', 'Joyce', 'Kate',
+    'Kim', 'Levi', 'Mae', 'Mariel', 'Mike', 'Pia', 'Seven', 'Sheena',
+    'Shela', 'Shella', 'Sol', 'Tim'
+  ];
 
   const PROJECT_STATUSES = [
     'Pending', 'On-going', 'Approved', 'For Review', 'Revising', 'Completed', 'On Hold'
@@ -4726,7 +4731,16 @@
             } else {
               state.artists = [...DEFAULT_ARTISTS];
             }
-            if (parsed.salesReps) state.salesReps = parsed.salesReps.map(toTitleCase);
+            if (parsed.salesReps) {
+              const loadedReps = parsed.salesReps.map(toTitleCase);
+              state.salesReps = Array.from(new Set([...DEFAULT_SALES_REPS, ...loadedReps])).sort();
+            } else {
+              state.salesReps = [...DEFAULT_SALES_REPS];
+            }
+            if (!state.salesReps.includes('Jastine')) {
+              state.salesReps.push('Jastine');
+              state.salesReps.sort();
+            }
             if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
             
             const storedRows = getStoredRowsPerPage();
@@ -4772,6 +4786,18 @@
           }
         })
         .catch(e => console.warn('MySQL live artists fetch:', e));
+
+      fetch(window.PMS_API_URL + '?action=get_sales_reps')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const reps = res.data.map(toTitleCase);
+            state.salesReps = Array.from(new Set([...state.salesReps, ...reps])).sort();
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('MySQL live sales reps fetch:', e));
 
       fetch(window.PMS_API_URL + '?action=get_all_requests')
         .then(res => res.json())
@@ -5853,19 +5879,12 @@
         break;
     }
 
-    // Toggle Timeframe Pills visibility (only for monthly-output and reports)
-    const tfGroup = document.getElementById('navbarTimeframePillGroup') || document.querySelector('.timeframe-pill-group');
-    if (tfGroup) {
-      if (viewId === 'view-monthly-output' || viewId === 'view-reports') {
-        tfGroup.style.display = 'inline-flex';
-        const curTf = state.timeframe || 'all';
-        tfGroup.querySelectorAll('.timeframe-btn').forEach(b => {
-          b.classList.toggle('active', b.getAttribute('data-timeframe') === curTf);
-        });
-      } else {
-        tfGroup.style.display = 'none';
-      }
-    }
+    // Sync in-page Timeframe Pills if on monthly-output or reports
+    const curTf = state.timeframe || 'month';
+    document.querySelectorAll('#outputTimeframeTabs .timeframe-btn, #reportTimeframeTabs .timeframe-btn').forEach(b => {
+      const bTf = b.getAttribute('data-timeframe');
+      b.classList.toggle('active', bTf === curTf);
+    });
 
     // Ensure all filter and form selects in the active view are upgraded to custom themed buttons
     upgradeAllFilterSelects();
@@ -6187,6 +6206,7 @@
 
     return { validPage, startIndex, totalPages };
   }
+  window.renderPagination = renderPagination;
 
   // Bottom Recent Projects: DIRECT INLINE EDITABLE TABLE
   function renderDashboardRecentProjectsTable() {
@@ -6444,7 +6464,9 @@
 
   function populateSalesFiltersDropdowns() {
     const repSelect = document.getElementById('salesFilterSalesRep');
-    if (repSelect && repSelect.children.length <= 1) {
+    if (repSelect) {
+      const curVal = repSelect.value;
+      repSelect.innerHTML = '<option value="">All Sales Reps</option>';
       state.salesReps.forEach(rep => {
         const titleRep = toTitleCase(rep);
         const opt = document.createElement('option');
@@ -6452,10 +6474,13 @@
         opt.textContent = titleRep;
         repSelect.appendChild(opt);
       });
+      if (curVal) repSelect.value = curVal;
     }
 
     const modalArtistSelect = document.getElementById('salesFormArtist');
-    if (modalArtistSelect && modalArtistSelect.children.length === 0) {
+    if (modalArtistSelect) {
+      const curArtist = modalArtistSelect.value;
+      modalArtistSelect.innerHTML = '<option value="">Select Artist...</option>';
       state.artists.forEach(a => {
         const titleA = toTitleCase(a);
         const opt = document.createElement('option');
@@ -6463,10 +6488,13 @@
         opt.textContent = titleA;
         modalArtistSelect.appendChild(opt);
       });
+      if (curArtist) modalArtistSelect.value = curArtist;
     }
 
     const modalSalesSelect = document.getElementById('salesFormSalesRep');
-    if (modalSalesSelect && modalSalesSelect.children.length === 0) {
+    if (modalSalesSelect) {
+      const curRep = modalSalesSelect.value;
+      modalSalesSelect.innerHTML = '<option value="">Select Sales Rep...</option>';
       state.salesReps.forEach(s => {
         const titleS = toTitleCase(s);
         const opt = document.createElement('option');
@@ -6474,6 +6502,7 @@
         opt.textContent = titleS;
         modalSalesSelect.appendChild(opt);
       });
+      if (curRep) modalSalesSelect.value = curRep;
     }
 
     upgradeAllFormSelects();
@@ -9382,9 +9411,379 @@
   // MODULE 8B: COMPREHENSIVE REPORTS & ANALYTICS ENGINE (DATABASE DRIVEN)
   // ==========================================================================
 
+  function initReportFilterState() {
+    if (!state.reportFilter) {
+      state.reportFilter = {
+        timeframe: state.timeframe || 'month',
+        year: '2026',
+        month: '9', // 0-indexed: 9 = October
+        weekStartDate: '2026-10-19', // Monday of peak active week
+        dayDate: '2026-10-26', // Today
+        department: 'all'
+      };
+    }
+  }
+
+  function populateReportWeekOptions() {
+    const weekSelect = document.getElementById('reportFilterWeek');
+    if (!weekSelect) return;
+
+    initReportFilterState();
+    const selYear = state.reportFilter.year === 'all' ? 2026 : parseInt(state.reportFilter.year, 10);
+    const selMonth = state.reportFilter.month === 'all' ? null : parseInt(state.reportFilter.month, 10);
+
+    const options = [];
+    const startYear = new Date(selYear, 0, 1);
+    const firstMon = getMondayOfWeek(startYear);
+    const endYear = new Date(selYear, 11, 31);
+
+    let curMon = new Date(firstMon);
+    let weekIndex = 1;
+
+    while (curMon <= endYear || curMon.getFullYear() === selYear) {
+      const sun = new Date(curMon);
+      sun.setDate(sun.getDate() + 6);
+
+      let include = true;
+      if (selMonth !== null) {
+        include = (curMon.getMonth() === selMonth || sun.getMonth() === selMonth);
+      }
+
+      if (include && (curMon.getFullYear() === selYear || sun.getFullYear() === selYear)) {
+        const iso = formatIsoDate(curMon);
+        const m1 = curMon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const m2 = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isPeak = (iso === '2026-10-19');
+        options.push(`<option value="${iso}">${isPeak ? '★ ' : ''}Week ${weekIndex} (${m1} — ${m2})</option>`);
+      }
+
+      curMon.setDate(curMon.getDate() + 7);
+      weekIndex++;
+      if (curMon.getFullYear() > selYear + 1) break;
+    }
+
+    weekSelect.innerHTML = options.join('');
+
+    const exists = Array.from(weekSelect.options).some(o => o.value === state.reportFilter.weekStartDate);
+    if (exists) {
+      weekSelect.value = state.reportFilter.weekStartDate;
+    } else if (weekSelect.options.length > 0) {
+      const peakOpt = Array.from(weekSelect.options).find(o => o.value === '2026-10-19');
+      if (peakOpt) {
+        weekSelect.value = '2026-10-19';
+        state.reportFilter.weekStartDate = '2026-10-19';
+      } else {
+        weekSelect.value = weekSelect.options[0].value;
+        state.reportFilter.weekStartDate = weekSelect.options[0].value;
+      }
+    }
+  }
+
+  function syncReportFilterControlsUI(tf) {
+    initReportFilterState();
+    state.reportFilter.timeframe = tf;
+
+    const yearSelect = document.getElementById('reportFilterYear');
+    const monthSelect = document.getElementById('reportFilterMonth');
+    const fieldWeek = document.getElementById('reportFilterFieldWeek');
+    const fieldDay = document.getElementById('reportFilterFieldDay');
+    const fieldMonth = document.getElementById('reportFilterFieldMonth');
+    const dateInput = document.getElementById('reportFilterDate');
+    const deptSelect = document.getElementById('reportDepartment');
+    const statusBadge = document.getElementById('reportFilterStatusBadge');
+
+    if (yearSelect) yearSelect.value = state.reportFilter.year || '2026';
+    if (monthSelect) monthSelect.value = state.reportFilter.month !== undefined ? state.reportFilter.month : '9';
+    if (dateInput) dateInput.value = state.reportFilter.dayDate || '2026-10-26';
+    if (deptSelect) deptSelect.value = state.reportFilter.department || 'all';
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.reportFilter.year === 'all' ? 'All Years' : state.reportFilter.year;
+
+    if (tf === 'today') {
+      if (fieldDay) fieldDay.style.display = 'flex';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      const parts = (state.reportFilter.dayDate || '2026-10-26').split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (statusBadge) {
+        statusBadge.textContent = `Daily: ${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-completed';
+      }
+    } else if (tf === 'week') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'flex';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      populateReportWeekOptions();
+      const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+      const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      if (statusBadge) {
+        statusBadge.textContent = `Weekly: ${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else if (tf === 'month') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      if (statusBadge) {
+        const mIdx = parseInt(state.reportFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.reportFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthNames[mIdx];
+        statusBadge.textContent = `Monthly: ${mLabel} ${curYear}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'none';
+      if (statusBadge) {
+        statusBadge.textContent = `All-Time History (${curYear})`;
+        statusBadge.className = 'badge badge-priority-rush';
+      }
+    }
+  }
+
+  function setupReportFilterToolbarEvents() {
+    const yearSelect = document.getElementById('reportFilterYear');
+    const monthSelect = document.getElementById('reportFilterMonth');
+    const weekSelect = document.getElementById('reportFilterWeek');
+    const dateInput = document.getElementById('reportFilterDate');
+    const deptSelect = document.getElementById('reportDepartment');
+    const btnPrevWeek = document.getElementById('btnReportPrevWeek');
+    const btnNextWeek = document.getElementById('btnReportNextWeek');
+    const btnPrevDay = document.getElementById('btnReportPrevDay');
+    const btnNextDay = document.getElementById('btnReportNextDay');
+    const btnFilterToday = document.getElementById('btnReportFilterToday');
+    const btnReset = document.getElementById('btnResetReportFilter');
+
+    initReportFilterState();
+
+    if (yearSelect && !yearSelect._bound) {
+      yearSelect._bound = true;
+      yearSelect.addEventListener('change', () => {
+        state.reportFilter.year = yearSelect.value;
+        if (state.reportFilter.timeframe === 'today') {
+          const parts = state.reportFilter.dayDate.split('-');
+          state.reportFilter.dayDate = `${yearSelect.value === 'all' ? '2026' : yearSelect.value}-${parts[1]}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        } else if (state.reportFilter.timeframe === 'week') {
+          populateReportWeekOptions();
+        }
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (monthSelect && !monthSelect._bound) {
+      monthSelect._bound = true;
+      monthSelect.addEventListener('change', () => {
+        state.reportFilter.month = monthSelect.value;
+        if (state.reportFilter.timeframe === 'today') {
+          const parts = state.reportFilter.dayDate.split('-');
+          const mNum = monthSelect.value === 'all' ? '10' : String(parseInt(monthSelect.value, 10) + 1).padStart(2, '0');
+          state.reportFilter.dayDate = `${parts[0]}-${mNum}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        } else if (state.reportFilter.timeframe === 'week') {
+          populateReportWeekOptions();
+        }
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (weekSelect && !weekSelect._bound) {
+      weekSelect._bound = true;
+      weekSelect.addEventListener('change', () => {
+        state.reportFilter.weekStartDate = weekSelect.value;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnPrevWeek && !btnPrevWeek._bound) {
+      btnPrevWeek._bound = true;
+      btnPrevWeek.addEventListener('click', () => {
+        if (weekSelect && weekSelect.selectedIndex > 0) {
+          weekSelect.selectedIndex--;
+          state.reportFilter.weekStartDate = weekSelect.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (btnNextWeek && !btnNextWeek._bound) {
+      btnNextWeek._bound = true;
+      btnNextWeek.addEventListener('click', () => {
+        if (weekSelect && weekSelect.selectedIndex < weekSelect.options.length - 1) {
+          weekSelect.selectedIndex++;
+          state.reportFilter.weekStartDate = weekSelect.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (dateInput && !dateInput._bound) {
+      dateInput._bound = true;
+      dateInput.addEventListener('change', () => {
+        if (dateInput.value) {
+          state.reportFilter.dayDate = dateInput.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (btnPrevDay && !btnPrevDay._bound) {
+      btnPrevDay._bound = true;
+      btnPrevDay.addEventListener('click', () => {
+        const cur = new Date(state.reportFilter.dayDate || '2026-10-26');
+        cur.setDate(cur.getDate() - 1);
+        state.reportFilter.dayDate = formatIsoDate(cur);
+        if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnNextDay && !btnNextDay._bound) {
+      btnNextDay._bound = true;
+      btnNextDay.addEventListener('click', () => {
+        const cur = new Date(state.reportFilter.dayDate || '2026-10-26');
+        cur.setDate(cur.getDate() + 1);
+        state.reportFilter.dayDate = formatIsoDate(cur);
+        if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnFilterToday && !btnFilterToday._bound) {
+      btnFilterToday._bound = true;
+      btnFilterToday.addEventListener('click', () => {
+        state.reportFilter.dayDate = '2026-10-26';
+        if (dateInput) dateInput.value = '2026-10-26';
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (deptSelect && !deptSelect._bound) {
+      deptSelect._bound = true;
+      deptSelect.addEventListener('change', () => {
+        state.reportFilter.department = deptSelect.value;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnReset && !btnReset._bound) {
+      btnReset._bound = true;
+      btnReset.addEventListener('click', () => {
+        state.reportFilter = {
+          timeframe: 'month',
+          year: '2026',
+          month: '9',
+          weekStartDate: '2026-10-19',
+          dayDate: '2026-10-26',
+          department: 'all'
+        };
+        renderReports('month');
+      });
+    }
+  }
+
   function renderReports(timeframe) {
-    const tf = timeframe || state.timeframe || 'all';
-    const reqs = (state.requests || []).filter(r => matchesTimeframe(r, tf));
+    initReportFilterState();
+    setupReportFilterToolbarEvents();
+
+    const rawTf = timeframe || state.reportFilter.timeframe || state.timeframe || 'month';
+    let tf = 'month';
+    const lowTf = String(rawTf).toLowerCase().trim();
+    if (lowTf === 'today' || lowTf === 'daily' || lowTf === 'day') tf = 'today';
+    else if (lowTf === 'week' || lowTf === 'weekly') tf = 'week';
+    else if (lowTf === 'month' || lowTf === 'monthly') tf = 'month';
+    else if (lowTf === 'all' || lowTf === 'all_time' || lowTf === 'alltime') tf = 'all';
+
+    state.timeframe = tf;
+    state.reportFilter.timeframe = tf;
+
+    // Sync timeframe buttons in #reportTimeframeTabs
+    document.querySelectorAll('#reportTimeframeTabs .timeframe-btn').forEach(btn => {
+      const bTf = (btn.getAttribute('data-timeframe') || '').toLowerCase();
+      const isAct = (bTf === tf) || 
+                    (tf === 'today' && (bTf === 'daily' || bTf === 'today' || bTf === 'day')) ||
+                    (tf === 'week' && (bTf === 'weekly' || bTf === 'week')) ||
+                    (tf === 'month' && (bTf === 'monthly' || bTf === 'month')) ||
+                    (tf === 'all' && (bTf === 'all' || bTf === 'all_time' || bTf === 'alltime'));
+      btn.classList.toggle('active', isAct);
+    });
+
+    syncReportFilterControlsUI(tf);
+
+    const monthFullNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.reportFilter.year === 'all' ? 'All Years' : state.reportFilter.year;
+
+    // Filter requests according to state.reportFilter
+    const reqs = (state.requests || []).filter(r => {
+      // Department filter
+      if (state.reportFilter.department && state.reportFilter.department !== 'all') {
+        if (state.reportFilter.department === 'creative' && (!r.artist || r.artist === 'Unassigned')) return false;
+        if (state.reportFilter.department === 'sales' && !r.salesRep) return false;
+        if (state.reportFilter.department === 'production' && ((parseInt(r.countStandard, 10) || 0) + (parseInt(r.countPrinting, 10) || 0) + (parseInt(r.countSpecial, 10) || 0) <= 0)) return false;
+      }
+
+      const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+      if (!dStr) return tf === 'all';
+      const d = parseRequestDate(dStr);
+      if (!d) return tf === 'all';
+
+      if (tf === 'today') {
+        const targetIso = state.reportFilter.dayDate || '2026-10-26';
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return iso === targetIso;
+      }
+
+      if (tf === 'week') {
+        const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0);
+        const sun = new Date(parts[0], parts[1] - 1, parts[2] + 6, 23, 59, 59);
+        return d >= mon && d <= sun;
+      }
+
+      if (tf === 'month') {
+        const yMatch = (state.reportFilter.year === 'all') || (d.getFullYear() === parseInt(state.reportFilter.year, 10));
+        if (!yMatch) return false;
+        if (state.reportFilter.month === 'all') return true;
+        return d.getMonth() === parseInt(state.reportFilter.month, 10);
+      }
+
+      // All Time
+      if (state.reportFilter.year && state.reportFilter.year !== 'all') {
+        return d.getFullYear() === parseInt(state.reportFilter.year, 10);
+      }
+      return true;
+    });
+
+    // Update section titles and subtitles dynamically
+    const headerTitle = document.getElementById('reportHeaderTitle');
+    const headerSubtitle = document.getElementById('reportHeaderSubtitle');
+    if (headerTitle && headerSubtitle) {
+      if (tf === 'today') {
+        const parts = (state.reportFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+        headerTitle.textContent = `Daily Production Reports & Analytics — ${dayStr}`;
+        headerSubtitle.textContent = `Verified operational metrics and production performance for ${dayStr}`;
+      } else if (tf === 'week') {
+        const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+        const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+        const monStr = mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const sunStr = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        headerTitle.textContent = `Weekly Production Reports & Analytics (${monStr} — ${sunStr})`;
+        headerSubtitle.textContent = `Verified operational metrics and performance breakdown across Week (${monStr} — ${sunStr})`;
+      } else if (tf === 'month') {
+        const mIdx = parseInt(state.reportFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.reportFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthFullNames[mIdx];
+        headerTitle.textContent = `Monthly Production Reports & Analytics — ${mLabel} ${curYear}`;
+        headerSubtitle.textContent = `Operational performance, artist turnaround, and output breakdown for ${mLabel} ${curYear}`;
+      } else {
+        headerTitle.textContent = `All-Time Production Reports & Analytics (${curYear})`;
+        headerSubtitle.textContent = `Comprehensive historical operational performance across all logged production orders (${curYear})`;
+      }
+    }
 
     const totalOrders = reqs.length;
     let completedOrders = 0;
@@ -9474,23 +9873,35 @@
 
     const tbody = document.getElementById('reportsArtistTableBody');
     if (tbody) {
-      tbody.innerHTML = artistRows.map(r => `
-        <tr>
-          <td>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.name.substring(0, 2).toUpperCase())}</div>
-              <strong>${escapeHTML(r.name)}</strong>
-            </div>
-          </td>
-          <td><strong>${Number(r.assigned).toLocaleString()}</strong></td>
-          <td><span class="badge" style="background:#F0FDF4; color:#166534; font-weight:700;">${Number(r.completed).toLocaleString()}</span></td>
-          <td><span style="color:#64748B; font-weight:600;">${Number(r.inProgress).toLocaleString()}</span></td>
-          <td>${Number(r.standard).toLocaleString()}</td>
-          <td>${Number(r.printing).toLocaleString()}</td>
-          <td>${Number(r.special).toLocaleString()}</td>
-          <td><span style="font-weight:700; color:${parseFloat(r.efficiency) >= 90 ? '#166534' : '#D97706'};">${r.efficiency}</span></td>
-        </tr>
-      `).join('');
+      if (artistRows.length === 0 || totalOrders === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--text-secondary);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 6px; opacity: 0.6;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div style="font-weight: 700; font-size: 14px;">No production orders found for this filter interval</div>
+              <div style="font-size: 12px; margin-top: 4px;">Try selecting another Day, Week, Month, or Department.</div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = artistRows.map(r => `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.name.substring(0, 2).toUpperCase())}</div>
+                <strong>${escapeHTML(r.name)}</strong>
+              </div>
+            </td>
+            <td><strong>${Number(r.assigned).toLocaleString()}</strong></td>
+            <td><span class="badge" style="background:#F0FDF4; color:#166534; font-weight:700;">${Number(r.completed).toLocaleString()}</span></td>
+            <td><span style="color:#64748B; font-weight:600;">${Number(r.inProgress).toLocaleString()}</span></td>
+            <td>${Number(r.standard).toLocaleString()}</td>
+            <td>${Number(r.printing).toLocaleString()}</td>
+            <td>${Number(r.special).toLocaleString()}</td>
+            <td><span style="font-weight:700; color:${parseFloat(r.efficiency) >= 90 ? '#166534' : '#D97706'};">${r.efficiency}</span></td>
+          </tr>
+        `).join('');
+      }
     }
 
     window.currentReportData = {
@@ -9500,30 +9911,6 @@
       avgTurnaround,
       revisionRatio,
       artistRows
-    };
-
-    window.exportReportsCSV = function() {
-      const headers = ['Artist Name', 'Assigned Jobs', 'Completed', 'In Progress', 'Standard Signages', 'Large Format Print', 'Special Fabrication', 'Efficiency Rating'];
-      const csvLines = [headers.join(',')];
-      artistRows.forEach(r => {
-        csvLines.push([
-          `"${r.name}"`,
-          r.assigned,
-          r.completed,
-          r.inProgress,
-          r.standard,
-          r.printing,
-          r.special,
-          `"${r.efficiency}"`
-        ].join(','));
-      });
-      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Sign_Depot_Production_Report_${tf}_${Date.now()}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
     };
   }
 
@@ -9787,6 +10174,7 @@
     }
 
     setupOutputFilterToolbarEvents();
+    setupReportFilterToolbarEvents();
   }
 
   // ==========================================================================
@@ -9826,12 +10214,124 @@
       });
     });
 
-    const salesForm = document.getElementById('salesRequestForm');
-    if (salesForm) {
-      salesForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = document.getElementById('salesFormId').value;
-        const reqId = document.getElementById('salesFormReqId').value.trim();
+  // ==========================================================================
+  // REQUEST ID AUTO-GENERATION & SEPARATOR DASH FORMATTING ENGINE
+  // ==========================================================================
+
+  function getNextRequestId() {
+    let maxSeq = 2103;
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    (state.requests || []).forEach(r => {
+      if (!r.requestId) return;
+      const match = String(r.requestId).match(/(?:LR-?\d{2}-?)?(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxSeq) {
+          maxSeq = num;
+        }
+      }
+    });
+    const nextSeq = maxSeq + 1;
+    return `LR-${curYear}-${nextSeq}`;
+  }
+
+  function getNextJoNumber() {
+    let maxJo = 1001357;
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    (state.requests || []).forEach(r => {
+      if (!r.joNumber) return;
+      const match = String(r.joNumber).match(/P\d{2}(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxJo) {
+          maxJo = num;
+        }
+      }
+    });
+    return `P${curYear}${maxJo + 1}`;
+  }
+
+  function formatRequestIdInput(val) {
+    if (!val) return '';
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    let str = String(val).trim().toUpperCase();
+
+    // Pure digits: "2104" or "2105" -> "LR-26-2104"
+    if (/^\d{4,5}$/.test(str)) {
+      return `LR-${curYear}-${str}`;
+    }
+    // "26-2104" or "262104" -> "LR-26-2104"
+    if (/^\d{2}-?\d{4,5}$/.test(str)) {
+      const clean = str.replace(/-/g, '');
+      return `LR-${clean.slice(0, 2)}-${clean.slice(2)}`;
+    }
+    // "LR2104" -> "LR-26-2104"
+    if (/^LR\d{4,5}$/.test(str)) {
+      return `LR-${curYear}-${str.slice(2)}`;
+    }
+    // "LR262104" -> "LR-26-2104"
+    if (/^LR\d{6,7}$/.test(str)) {
+      return `LR-${str.slice(2, 4)}-${str.slice(4)}`;
+    }
+    // "LR-262104" -> "LR-26-2104"
+    if (/^LR-\d{6,7}$/.test(str)) {
+      return `LR-${str.slice(3, 5)}-${str.slice(5)}`;
+    }
+    // Progressive typing formatting
+    if (str === 'LR') return 'LR-';
+    if (/^LR-\d{2}$/.test(str)) return `${str}-`;
+
+    return str;
+  }
+
+  function openNewSalesRequestModal() {
+    const form = document.getElementById('salesRequestForm');
+    if (form) form.reset();
+    document.getElementById('salesFormId').value = '';
+    document.getElementById('salesModalTitle').textContent = 'New Sales Request';
+
+    // Auto-generate sequential Request ID with separator dash (e.g. LR-26-2104 / LR-26-2105)
+    const nextId = getNextRequestId();
+    const reqInput = document.getElementById('salesFormReqId');
+    if (reqInput) reqInput.value = nextId;
+
+    // Fetch live backend for latest ID if available to ensure perfect multi-client sync
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_next_request_id')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.nextRequestId && reqInput && (!reqInput.value || reqInput.value === nextId)) {
+            reqInput.value = res.nextRequestId;
+          }
+        })
+        .catch(() => {});
+    }
+
+    // Auto-generate next JO Number
+    const nextJo = getNextJoNumber();
+    const joInput = document.getElementById('salesFormJo');
+    if (joInput) joInput.value = nextJo;
+
+    // Default design deadline (+3 days from today)
+    const deadlineInput = document.getElementById('salesFormDeadline');
+    if (deadlineInput && !deadlineInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 3);
+      deadlineInput.value = d.toISOString().split('T')[0];
+    }
+
+    populateSalesFiltersDropdowns();
+    document.getElementById('salesModal').classList.add('show');
+  }
+  window.openNewSalesRequestModal = openNewSalesRequestModal;
+
+  const salesForm = document.getElementById('salesRequestForm');
+  if (salesForm) {
+    salesForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('salesFormId').value;
+      const rawReqId = document.getElementById('salesFormReqId').value.trim();
+      const reqId = formatRequestIdInput(rawReqId) || getNextRequestId();
         const jo = document.getElementById('salesFormJo').value.trim();
         const project = document.getElementById('salesFormProject').value.trim();
         const client = document.getElementById('salesFormClient').value.trim();
@@ -10120,6 +10620,9 @@
     canUserEditField: canUserEditField,
     canUserAccessTab: canUserAccessTab,
     getCurrentUserPermissions: getCurrentUserPermissions,
+    openNewSalesRequestModal: openNewSalesRequestModal,
+    formatRequestIdInput: formatRequestIdInput,
+    getNextRequestId: getNextRequestId,
 
     // KPI Cards Clickable & Viewable Public API (SPA + Multi-Page Aware)
     navigateToPageTable: (type) => {
@@ -10891,31 +11394,36 @@
 
     const btnNewReqDash = document.getElementById('btnDashboardNewRequest');
     if (btnNewReqDash) {
-      btnNewReqDash.addEventListener('click', () => {
-        document.getElementById('salesFormId').value = '';
-        document.getElementById('salesRequestForm').reset();
-        document.getElementById('salesModalTitle').textContent = 'New Sales Request';
-        document.getElementById('salesModal').classList.add('show');
-      });
+      btnNewReqDash.addEventListener('click', openNewSalesRequestModal);
     }
 
     const btnPanzeAdd = document.getElementById('btnPanzeAddTask');
     if (btnPanzeAdd) {
-      btnPanzeAdd.addEventListener('click', () => {
-        document.getElementById('salesFormId').value = '';
-        document.getElementById('salesRequestForm').reset();
-        document.getElementById('salesModalTitle').textContent = 'New Task Order';
-        document.getElementById('salesModal').classList.add('show');
-      });
+      btnPanzeAdd.addEventListener('click', openNewSalesRequestModal);
     }
 
     const btnSalesNewReq = document.getElementById('btnSalesNewRequest');
     if (btnSalesNewReq) {
-      btnSalesNewReq.addEventListener('click', () => {
-        document.getElementById('salesFormId').value = '';
-        document.getElementById('salesRequestForm').reset();
-        document.getElementById('salesModalTitle').textContent = 'New Sales Request';
-        document.getElementById('salesModal').classList.add('show');
+      btnSalesNewReq.addEventListener('click', openNewSalesRequestModal);
+    }
+
+    // Automatic separator dash formatting on Request ID input
+    const reqIdInput = document.getElementById('salesFormReqId');
+    if (reqIdInput) {
+      reqIdInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        const formatted = formatRequestIdInput(raw);
+        if (formatted && formatted !== raw) {
+          const oldLen = raw.length;
+          e.target.value = formatted;
+          if (formatted.length > oldLen) {
+            e.target.setSelectionRange(formatted.length, formatted.length);
+          }
+        }
+      });
+      reqIdInput.addEventListener('blur', (e) => {
+        const formatted = formatRequestIdInput(e.target.value);
+        if (formatted) e.target.value = formatted;
       });
     }
 

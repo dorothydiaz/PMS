@@ -8,7 +8,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     exit;
 }
 
@@ -381,10 +381,18 @@ switch ($action) {
 
             $reqId = trim($data['requestId'] ?? $data['request_id'] ?? '');
             if (empty($reqId)) {
-                // Auto generate
-                $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests");
-                $count = (int)$stmt->fetchColumn() + 1;
-                $reqId = 'LR-26-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+                // Auto generate sequential ID with separator dash
+                $stmt = $pdo->query("SELECT request_id FROM sales_requests WHERE request_id LIKE 'LR-%'");
+                $maxSeq = 2103;
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    if (preg_match('/(\d+)$/', $row['request_id'], $m)) {
+                        $n = (int)$m[1];
+                        if ($n > $maxSeq) $maxSeq = $n;
+                    }
+                }
+                $nextSeq = $maxSeq + 1;
+                $currYear = date('y');
+                $reqId = "LR-{$currYear}-{$nextSeq}";
             }
             $id = strtolower(str_replace(' ', '-', $reqId));
 
@@ -487,9 +495,40 @@ switch ($action) {
 
     case 'get_sales_reps':
         try {
-            $stmt = $pdo->query("SELECT name FROM sales_reps ORDER BY name ASC");
-            $reps = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $stmt = $pdo->query("
+                SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != ''
+                UNION
+                SELECT full_name AS name FROM users WHERE role = 'sales' AND full_name IS NOT NULL AND TRIM(full_name) != ''
+                UNION
+                SELECT DISTINCT sales_rep AS name FROM sales_requests WHERE sales_rep IS NOT NULL AND TRIM(sales_rep) != ''
+                ORDER BY name ASC
+            ");
+            $reps = array_values(array_unique(array_filter(array_map('trim', $stmt->fetchAll(PDO::FETCH_COLUMN)))));
+            sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
             sendJsonResponse(['success' => true, 'data' => $reps]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'get_next_request_id':
+        try {
+            $stmt = $pdo->query("SELECT request_id FROM sales_requests WHERE request_id LIKE 'LR-%'");
+            $maxSeq = 2103;
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                if (preg_match('/(\d+)$/', $row['request_id'], $m)) {
+                    $n = (int)$m[1];
+                    if ($n > $maxSeq) $maxSeq = $n;
+                }
+            }
+            $nextSeq = $maxSeq + 1;
+            $currYear = date('y');
+            $nextId = "LR-{$currYear}-{$nextSeq}";
+            sendJsonResponse([
+                'success' => true,
+                'nextRequestId' => $nextId,
+                'nextNumber' => $nextSeq
+            ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
@@ -508,21 +547,52 @@ switch ($action) {
     case 'get_reports':
         try {
             $timeframe = trim($_GET['timeframe'] ?? 'all');
+            $yearParam = trim($_GET['year'] ?? '');
+            $monthParam = trim($_GET['month'] ?? '');
+            $dateParam = trim($_GET['date'] ?? '');
+            $weekStartParam = trim($_GET['week_start'] ?? '');
+            $deptParam = trim($_GET['department'] ?? 'all');
+
             $where = [];
             $params = [];
 
-            $today = date('Y-m-d');
-            $dayOfWeek = (int)date('N'); // 1 (Mon) - 7 (Sun)
-            $weekStart = date('Y-m-d', strtotime('-' . ($dayOfWeek - 1) . ' days'));
-            $weekEnd = date('Y-m-d', strtotime('+' . (7 - $dayOfWeek) . ' days'));
-            $month = date('Y-m');
+            // Department filter
+            if ($deptParam === 'creative') {
+                $where[] = "(artist IS NOT NULL AND TRIM(artist) != '' AND artist != 'Unassigned')";
+            } elseif ($deptParam === 'sales') {
+                $where[] = "(sales_rep IS NOT NULL AND TRIM(sales_rep) != '')";
+            } elseif ($deptParam === 'production') {
+                $where[] = "(count_standard > 0 OR count_special > 0 OR count_printing > 0)";
+            }
 
-            if ($timeframe === 'today') {
+            $today = (!empty($dateParam) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)) ? $dateParam : date('Y-m-d');
+            
+            if (!empty($weekStartParam) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $weekStartParam)) {
+                $weekStart = $weekStartParam;
+                $weekEnd = date('Y-m-d', strtotime($weekStartParam . ' +6 days'));
+            } else {
+                $dayOfWeek = (int)date('N'); // 1 (Mon) - 7 (Sun)
+                $weekStart = date('Y-m-d', strtotime('-' . ($dayOfWeek - 1) . ' days'));
+                $weekEnd = date('Y-m-d', strtotime('+' . (7 - $dayOfWeek) . ' days'));
+            }
+
+            if (!empty($yearParam) && $yearParam !== 'all') {
+                if ($monthParam !== '' && $monthParam !== 'all') {
+                    $mNum = str_pad((int)$monthParam + 1, 2, '0', STR_PAD_LEFT);
+                    $month = "$yearParam-$mNum";
+                } else {
+                    $month = "$yearParam-";
+                }
+            } else {
+                $month = date('Y-m');
+            }
+
+            if ($timeframe === 'today' || $timeframe === 'daily') {
                 $where[] = "(order_date = :t1 OR releasing_date = :t2 OR design_deadline = :t3)";
                 $params[':t1'] = $today;
                 $params[':t2'] = $today;
                 $params[':t3'] = $today;
-            } elseif ($timeframe === 'week') {
+            } elseif ($timeframe === 'week' || $timeframe === 'weekly') {
                 $where[] = "((order_date BETWEEN :ws1 AND :we1) OR (releasing_date BETWEEN :ws2 AND :we2) OR (design_deadline BETWEEN :ws3 AND :we3))";
                 $params[':ws1'] = $weekStart;
                 $params[':we1'] = $weekEnd;
@@ -530,11 +600,23 @@ switch ($action) {
                 $params[':we2'] = $weekEnd;
                 $params[':ws3'] = $weekStart;
                 $params[':we3'] = $weekEnd;
-            } elseif ($timeframe === 'month') {
-                $where[] = "(order_date LIKE :m1 OR releasing_date LIKE :m2 OR design_deadline LIKE :m3)";
-                $params[':m1'] = "$month%";
-                $params[':m2'] = "$month%";
-                $params[':m3'] = "$month%";
+            } elseif ($timeframe === 'month' || $timeframe === 'monthly') {
+                if ($monthParam === 'all' && !empty($yearParam) && $yearParam !== 'all') {
+                    $where[] = "(order_date LIKE :m1 OR releasing_date LIKE :m2 OR design_deadline LIKE :m3)";
+                    $params[':m1'] = "$yearParam-%";
+                    $params[':m2'] = "$yearParam-%";
+                    $params[':m3'] = "$yearParam-%";
+                } else {
+                    $where[] = "(order_date LIKE :m1 OR releasing_date LIKE :m2 OR design_deadline LIKE :m3)";
+                    $params[':m1'] = "$month%";
+                    $params[':m2'] = "$month%";
+                    $params[':m3'] = "$month%";
+                }
+            } elseif (($timeframe === 'all' || $timeframe === 'all_time') && !empty($yearParam) && $yearParam !== 'all') {
+                $where[] = "(order_date LIKE :y1 OR releasing_date LIKE :y2 OR design_deadline LIKE :y3)";
+                $params[':y1'] = "$yearParam-%";
+                $params[':y2'] = "$yearParam-%";
+                $params[':y3'] = "$yearParam-%";
             }
 
             $whereSql = !empty($where) ? "WHERE " . implode(' AND ', $where) : "";

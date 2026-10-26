@@ -59,6 +59,19 @@ require_once __DIR__ . '/includes/sidebar.php';
           </div>
         </div>
 
+        <!-- Filter bar -->
+        <div class="filter-bar" style="margin-bottom: 20px;">
+          <div class="filter-group" style="flex-wrap: wrap; gap: 10px;">
+            <input type="text" class="filter-input" id="usersSearchInput" placeholder="Search user, name, email, role..." style="width: 260px;" oninput="filterUsers(this.value)">
+            <select class="filter-input" id="usersRoleFilter" onchange="filterUserRole(this.value)">
+              <option value="">All Roles</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="artist">Artist</option>
+              <option value="sales">Sales</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Users Roster Table -->
         <div class="table-studio-wrap">
           <table class="data-table" id="usersTable">
@@ -79,6 +92,24 @@ require_once __DIR__ . '/includes/sidebar.php';
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" id="usersPagination" style="margin-top: 14px;">
+          <div class="pagination-info-group">
+            <div class="pagination-info" id="usersPaginationInfo">Showing 0-0 of 0 users</div>
+            <div class="pagination-rows-select-wrap">
+              <label for="usersPaginationPerPage">Show:</label>
+              <select class="filter-input-sm" id="usersPaginationPerPage" title="Rows to display">
+                <option value="10" selected>10 rows</option>
+                <option value="15">15 rows</option>
+                <option value="20">20 rows</option>
+                <option value="25">25 rows</option>
+                <option value="30">30 rows</option>
+              </select>
+            </div>
+          </div>
+          <div class="pagination-controls" id="usersPaginationControls"></div>
         </div>
       </section>
     </div>
@@ -324,6 +355,27 @@ require_once __DIR__ . '/includes/sidebar.php';
 <script>
   let cachedUsers = [];
   let currentTargetUser = null;
+  let usersCurrentPage = 1;
+  let usersPerPage = 10;
+  let usersSearchQuery = '';
+  let usersRoleFilterVal = '';
+
+  function filterUsers(q) {
+    usersSearchQuery = q || '';
+    usersCurrentPage = 1;
+    renderUsersTable();
+  }
+
+  function filterUserRole(r) {
+    usersRoleFilterVal = r || '';
+    usersCurrentPage = 1;
+    renderUsersTable();
+  }
+
+  function changeUsersPage(p) {
+    usersCurrentPage = p;
+    renderUsersTable();
+  }
 
   async function loadUsersList() {
     try {
@@ -344,75 +396,135 @@ require_once __DIR__ . '/includes/sidebar.php';
   function renderUsersTable() {
     const tbody = document.getElementById('usersTableBody');
     const badgeEl = document.getElementById('activeUsersCountBadge');
+    const infoEl = document.getElementById('usersPaginationInfo');
+    const controlsEl = document.getElementById('usersPaginationControls');
+    if (!tbody) return;
+
     if (badgeEl) badgeEl.textContent = `${cachedUsers.length} Registered Users`;
 
-    if (!cachedUsers.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">No users found.</td></tr>';
-      return;
+    const q = usersSearchQuery.toLowerCase().trim();
+    const filtered = cachedUsers.filter(u => {
+      if (usersRoleFilterVal && u.role !== usersRoleFilterVal) return false;
+      if (!q) return true;
+      const searchable = `${u.full_name || ''} ${u.username || ''} ${u.email || ''} ${u.role || ''} ${u.assigned_artist || ''}`.toLowerCase();
+      return searchable.includes(q);
+    });
+
+    const totalItems = filtered.length;
+    const totalPages = Math.max(Math.ceil(totalItems / usersPerPage), 1);
+    if (usersCurrentPage > totalPages) usersCurrentPage = totalPages;
+    if (usersCurrentPage < 1) usersCurrentPage = 1;
+
+    const startIndex = (usersCurrentPage - 1) * usersPerPage;
+    const pagedUsers = filtered.slice(startIndex, startIndex + usersPerPage);
+
+    if (!pagedUsers.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748B;">No user accounts found matching the filters.</td></tr>';
+    } else {
+      tbody.innerHTML = pagedUsers.map(u => {
+        const isSuper = u.role === 'super_admin';
+        const roleBadge = isSuper ? 'badge-priority-rush' : (u.role === 'artist' ? 'badge-artist' : (u.role === 'sales' ? 'badge-sales' : 'badge-ongoing'));
+        const statusBadge = u.status === 'active' ? 'badge-completed' : 'badge-not-started';
+        const avatarText = u.full_name ? u.full_name.split(' ').map(n=>n[0]).join('').slice(0, 2).toUpperCase() : 'U';
+
+        // Summary of readable modules
+        let permsSummary = '';
+        if (isSuper) {
+          permsSummary = '<span style="color: #176B55; font-weight: 700;">★ Full Master CRUD (All 10 Modules)</span>';
+        } else {
+          const perms = u.permissions || {};
+          const readableMods = Object.keys(perms).filter(k => perms[k] && perms[k].r);
+          permsSummary = `<span style="font-weight: 600; color: #475569;">${readableMods.length} of 10 Modules</span> <span style="color: #94A3B8; font-size: 11px;">(${readableMods.slice(0, 3).join(', ')}${readableMods.length > 3 ? '...' : ''})</span>`;
+        }
+
+        let roleLabel = escapeHtml(u.role.replace('_', ' ').toUpperCase());
+        if (u.role === 'artist') {
+          roleLabel = u.assigned_artist ? `ARTIST (${escapeHtml(u.assigned_artist)})` : 'ARTIST';
+        }
+
+        return `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: #0F172A; color: #FFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+                  ${avatarText}
+                </div>
+                <div>
+                  <div style="font-weight: 700; color: #0F172A;">${escapeHtml(u.full_name)}</div>
+                  <div style="font-size: 11px; color: #64748B;">@${escapeHtml(u.username)}</div>
+                </div>
+              </div>
+            </td>
+            <td>${escapeHtml(u.email)}</td>
+            <td><span class="badge ${roleBadge}">${roleLabel}</span></td>
+            <td>
+              <span style="font-size: 12px; color: #475569; display: flex; align-items: center; gap: 4px;">
+                ${u.oauth_provider === 'google' ? '🟢 Google SSO' : '🔑 Standard Password'}
+              </span>
+            </td>
+            <td><span class="badge ${statusBadge}">${escapeHtml(u.status.toUpperCase())}</span></td>
+            <td>${permsSummary}</td>
+            <td style="text-align: right;">
+              <div style="display: inline-flex; gap: 6px;">
+                <button class="btn btn-secondary btn-sm" title="Configure Module Access & CRUD" onclick="openPermissionsModal(${u.id})">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  Permissions
+                </button>
+                <button class="btn btn-secondary btn-sm" title="Edit user" onclick="openEditUserModal(${u.id})">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                ${!isSuper ? `
+                  <button class="btn btn-secondary btn-sm" style="color: #DC2626;" title="Delete user" onclick="deleteUser(${u.id}, '${escapeHtml(u.username)}')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    tbody.innerHTML = cachedUsers.map(u => {
-      const isSuper = u.role === 'super_admin';
-      const roleBadge = isSuper ? 'badge-priority-rush' : (u.role === 'artist' ? 'badge-artist' : (u.role === 'sales' ? 'badge-sales' : 'badge-ongoing'));
-      const statusBadge = u.status === 'active' ? 'badge-completed' : 'badge-not-started';
-      const avatarText = u.full_name ? u.full_name.split(' ').map(n=>n[0]).join('').slice(0, 2).toUpperCase() : 'U';
+    // Sync info label
+    if (infoEl) {
+      const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
+      const endDisplay = Math.min(startIndex + usersPerPage, totalItems);
+      infoEl.textContent = `Showing ${startDisplay}-${endDisplay} of ${totalItems} users`;
+    }
 
-      // Summary of readable modules
-      let permsSummary = '';
-      if (isSuper) {
-        permsSummary = '<span style="color: #176B55; font-weight: 700;">★ Full Master CRUD (All 10 Modules)</span>';
-      } else {
-        const perms = u.permissions || {};
-        const readableMods = Object.keys(perms).filter(k => perms[k] && perms[k].r);
-        permsSummary = `<span style="font-weight: 600; color: #475569;">${readableMods.length} of 10 Modules</span> <span style="color: #94A3B8; font-size: 11px;">(${readableMods.slice(0, 3).join(', ')}${readableMods.length > 3 ? '...' : ''})</span>`;
-      }
-
-      let roleLabel = escapeHtml(u.role.replace('_', ' ').toUpperCase());
-      if (u.role === 'artist') {
-        roleLabel = u.assigned_artist ? `ARTIST (${escapeHtml(u.assigned_artist)})` : 'ARTIST';
-      }
-
-      return `
-        <tr>
-          <td>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 34px; height: 34px; border-radius: 50%; background: #0F172A; color: #FFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;">
-                ${avatarText}
-              </div>
-              <div>
-                <div style="font-weight: 700; color: #0F172A;">${escapeHtml(u.full_name)}</div>
-                <div style="font-size: 11px; color: #64748B;">@${escapeHtml(u.username)}</div>
-              </div>
-            </div>
-          </td>
-          <td>${escapeHtml(u.email)}</td>
-          <td><span class="badge ${roleBadge}">${roleLabel}</span></td>
-          <td>
-            <span style="font-size: 12px; color: #475569; display: flex; align-items: center; gap: 4px;">
-              ${u.oauth_provider === 'google' ? '🟢 Google SSO' : '🔑 Standard Password'}
-            </span>
-          </td>
-          <td><span class="badge ${statusBadge}">${escapeHtml(u.status.toUpperCase())}</span></td>
-          <td>${permsSummary}</td>
-          <td style="text-align: right;">
-            <div style="display: inline-flex; gap: 6px;">
-              <button class="btn btn-secondary btn-sm" title="Configure Module Access & CRUD" onclick="openPermissionsModal(${u.id})">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                Permissions
-              </button>
-              <button class="btn btn-secondary btn-sm" title="Edit user" onclick="openEditUserModal(${u.id})">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              ${!isSuper ? `
-                <button class="btn btn-secondary btn-sm" style="color: #DC2626;" title="Delete user" onclick="deleteUser(${u.id}, '${escapeHtml(u.username)}')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-              ` : ''}
-            </div>
-          </td>
-        </tr>
+    // Render controls
+    if (controlsEl) {
+      let btnsHTML = `
+        <button class="page-btn" ${usersCurrentPage === 1 ? 'disabled' : ''} onclick="changeUsersPage(${usersCurrentPage - 1})" aria-label="Previous Page" title="Previous Page">&laquo;</button>
       `;
-    }).join('');
+
+      if (totalPages <= 7) {
+        for (let p = 1; p <= totalPages; p++) {
+          btnsHTML += `<button class="page-btn ${p === usersCurrentPage ? 'active' : ''}" onclick="changeUsersPage(${p})">${p}</button>`;
+        }
+      } else {
+        btnsHTML += `<button class="page-btn ${usersCurrentPage === 1 ? 'active' : ''}" onclick="changeUsersPage(1)">1</button>`;
+        const startP = Math.max(2, usersCurrentPage - 1);
+        const endP = Math.min(totalPages - 1, usersCurrentPage + 1);
+
+        if (startP > 2) {
+          btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+        }
+        for (let p = startP; p <= endP; p++) {
+          btnsHTML += `<button class="page-btn ${p === usersCurrentPage ? 'active' : ''}" onclick="changeUsersPage(${p})">${p}</button>`;
+        }
+        if (endP < totalPages - 1) {
+          btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+        }
+        btnsHTML += `<button class="page-btn ${usersCurrentPage === totalPages ? 'active' : ''}" onclick="changeUsersPage(${totalPages})">${totalPages}</button>`;
+      }
+
+      btnsHTML += `
+        <button class="page-btn" ${usersCurrentPage === totalPages ? 'disabled' : ''} onclick="changeUsersPage(${usersCurrentPage + 1})" aria-label="Next Page" title="Next Page">&raquo;</button>
+      `;
+
+      controlsEl.innerHTML = btnsHTML;
+    }
   }
 
   function escapeHtml(str) {
@@ -897,6 +1009,19 @@ require_once __DIR__ . '/includes/sidebar.php';
       closeModal('permissionsModal');
     }
   });
+
+  // Bind per-page selector
+  const usersPerPageSelect = document.getElementById('usersPaginationPerPage');
+  if (usersPerPageSelect) {
+    usersPerPageSelect.addEventListener('change', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        usersPerPage = val;
+        usersCurrentPage = 1;
+        renderUsersTable();
+      }
+    });
+  }
 
   // Load initial list
   document.addEventListener('DOMContentLoaded', loadUsersList);

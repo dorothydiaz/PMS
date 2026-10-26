@@ -94,13 +94,16 @@ if (empty($auditLogs)) {
                 </tr>
               </thead>
               <tbody id="auditTrailBody">
-                <?php foreach ($auditLogs as $log): 
+                <?php 
+                $initialLogs = array_slice($auditLogs, 0, 10);
+                foreach ($initialLogs as $log): 
                   $badgeColor = match($log['action']) {
                     'CREATE' => 'background:#F0FDF4; color:#166534; border:1px solid #86EFAC;',
                     'UPDATE' => 'background:#EFF6FF; color:#1E40AF; border:1px solid #93C5FD;',
                     'APPROVE' => 'background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7;',
                     'AUTH' => 'background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD;',
                     'CONFIG' => 'background:#FFFBEB; color:#92400E; border:1px solid #FCD34D;',
+                    'EXPORT' => 'background:#F5F3FF; color:#4F46E5; border:1px solid #C7D2FE;',
                     default => 'background:#F8FAFC; color:#334155; border:1px solid #CBD5E1;'
                   };
                 ?>
@@ -123,8 +126,31 @@ if (empty($auditLogs)) {
                   </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php if (empty($initialLogs)): ?>
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 30px; color: #64748B;">No audit logs recorded yet.</td>
+                </tr>
+                <?php endif; ?>
               </tbody>
             </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container" id="auditPagination" style="margin-top: 14px;">
+            <div class="pagination-info-group">
+              <div class="pagination-info" id="auditPaginationInfo">Showing <?= min(1, count($auditLogs)) ?>-<?= min(10, count($auditLogs)) ?> of <?= count($auditLogs) ?> records</div>
+              <div class="pagination-rows-select-wrap">
+                <label for="auditPerPage">Show:</label>
+                <select class="filter-input-sm" id="auditPerPage" title="Rows to display">
+                  <option value="10" selected>10 rows</option>
+                  <option value="15">15 rows</option>
+                  <option value="20">20 rows</option>
+                  <option value="25">25 rows</option>
+                  <option value="30">30 rows</option>
+                </select>
+              </div>
+            </div>
+            <div class="pagination-controls" id="auditPaginationControls"></div>
           </div>
         </div>
       </section>
@@ -133,24 +159,153 @@ if (empty($auditLogs)) {
 </div>
 
 <script>
-function filterAuditRows(query) {
-  const q = query.toLowerCase().trim();
-  document.querySelectorAll('.audit-row').forEach(row => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(q) ? '' : 'none';
+window.rawAuditLogs = <?= json_encode($auditLogs) ?>;
+
+let auditCurrentPage = 1;
+let auditPerPage = 10;
+let auditSearchQuery = '';
+let auditActionFilterVal = '';
+
+function getAuditBadgeStyle(action) {
+  switch (action) {
+    case 'CREATE': return 'background:#F0FDF4; color:#166534; border:1px solid #86EFAC;';
+    case 'UPDATE': return 'background:#EFF6FF; color:#1E40AF; border:1px solid #93C5FD;';
+    case 'APPROVE': return 'background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7;';
+    case 'AUTH': return 'background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD;';
+    case 'CONFIG': return 'background:#FFFBEB; color:#92400E; border:1px solid #FCD34D;';
+    case 'EXPORT': return 'background:#F5F3FF; color:#4F46E5; border:1px solid #C7D2FE;';
+    default: return 'background:#F8FAFC; color:#334155; border:1px solid #CBD5E1;';
+  }
+}
+
+function escapeAuditHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function renderAuditTable() {
+  const tbody = document.getElementById('auditTrailBody');
+  const infoEl = document.getElementById('auditPaginationInfo');
+  const controlsEl = document.getElementById('auditPaginationControls');
+  if (!tbody) return;
+
+  const q = auditSearchQuery.toLowerCase().trim();
+  const filtered = (window.rawAuditLogs || []).filter(item => {
+    if (auditActionFilterVal && item.action !== auditActionFilterVal) return false;
+    if (!q) return true;
+    const searchable = `${item.time || ''} ${item.user || ''} ${item.role || ''} ${item.action || ''} ${item.module || ''} ${item.desc || ''} ${item.ip || ''} ${item.status || ''}`.toLowerCase();
+    return searchable.includes(q);
   });
+
+  const totalItems = filtered.length;
+  const totalPages = Math.max(Math.ceil(totalItems / auditPerPage), 1);
+  if (auditCurrentPage > totalPages) auditCurrentPage = totalPages;
+  if (auditCurrentPage < 1) auditCurrentPage = 1;
+
+  const startIndex = (auditCurrentPage - 1) * auditPerPage;
+  const pagedRows = filtered.slice(startIndex, startIndex + auditPerPage);
+
+  if (pagedRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748B;">No audit trail records found.</td></tr>';
+  } else {
+    tbody.innerHTML = pagedRows.map(log => {
+      const badgeStyle = getAuditBadgeStyle(log.action);
+      return `
+        <tr class="audit-row" data-action="${escapeAuditHtml(log.action)}">
+          <td style="font-size:12px; font-family:monospace; color:#64748B;">${escapeAuditHtml(log.time)}</td>
+          <td>
+            <strong>${escapeAuditHtml(log.user)}</strong>
+            <div style="font-size:11px; color:#64748B;">${escapeAuditHtml(log.role)}</div>
+          </td>
+          <td>
+            <span class="badge" style="${badgeStyle} font-weight:700;">${escapeAuditHtml(log.action)}</span>
+          </td>
+          <td><strong>${escapeAuditHtml(log.module)}</strong></td>
+          <td>${escapeAuditHtml(log.desc)}</td>
+          <td style="font-size:12px; font-family:monospace; color:#64748B;">${escapeAuditHtml(log.ip)}</td>
+          <td>
+            <span class="badge" style="background:#F0FDF4; color:#166534; font-weight:600;">
+              ${escapeAuditHtml(log.status)}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Info label
+  if (infoEl) {
+    const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
+    const endDisplay = Math.min(startIndex + auditPerPage, totalItems);
+    infoEl.textContent = `Showing ${startDisplay}-${endDisplay} of ${totalItems} records`;
+  }
+
+  // Pagination controls
+  if (controlsEl) {
+    let btnsHTML = `
+      <button class="page-btn" ${auditCurrentPage === 1 ? 'disabled' : ''} onclick="changeAuditPage(${auditCurrentPage - 1})" aria-label="Previous Page" title="Previous Page">&laquo;</button>
+    `;
+
+    if (totalPages <= 7) {
+      for (let p = 1; p <= totalPages; p++) {
+        btnsHTML += `<button class="page-btn ${p === auditCurrentPage ? 'active' : ''}" onclick="changeAuditPage(${p})">${p}</button>`;
+      }
+    } else {
+      btnsHTML += `<button class="page-btn ${auditCurrentPage === 1 ? 'active' : ''}" onclick="changeAuditPage(1)">1</button>`;
+      const startP = Math.max(2, auditCurrentPage - 1);
+      const endP = Math.min(totalPages - 1, auditCurrentPage + 1);
+
+      if (startP > 2) {
+        btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+      }
+      for (let p = startP; p <= endP; p++) {
+        btnsHTML += `<button class="page-btn ${p === auditCurrentPage ? 'active' : ''}" onclick="changeAuditPage(${p})">${p}</button>`;
+      }
+      if (endP < totalPages - 1) {
+        btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+      }
+      btnsHTML += `<button class="page-btn ${auditCurrentPage === totalPages ? 'active' : ''}" onclick="changeAuditPage(${totalPages})">${totalPages}</button>`;
+    }
+
+    btnsHTML += `
+      <button class="page-btn" ${auditCurrentPage === totalPages ? 'disabled' : ''} onclick="changeAuditPage(${auditCurrentPage + 1})" aria-label="Next Page" title="Next Page">&raquo;</button>
+    `;
+
+    controlsEl.innerHTML = btnsHTML;
+  }
+}
+
+function changeAuditPage(p) {
+  auditCurrentPage = p;
+  renderAuditTable();
+}
+
+function filterAuditRows(query) {
+  auditSearchQuery = query;
+  auditCurrentPage = 1;
+  renderAuditTable();
 }
 
 function filterAuditAction(action) {
-  document.querySelectorAll('.audit-row').forEach(row => {
-    const act = row.getAttribute('data-action');
-    if (!action || act === action) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
+  auditActionFilterVal = action;
+  auditCurrentPage = 1;
+  renderAuditTable();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('auditPerPage');
+  if (sel) {
+    sel.addEventListener('change', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        auditPerPage = val;
+        auditCurrentPage = 1;
+        renderAuditTable();
+      }
+    });
+  }
+  renderAuditTable();
+});
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

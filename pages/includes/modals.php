@@ -18,7 +18,8 @@
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label required">Request ID</label>
-            <input type="text" class="form-control" id="salesFormReqId" placeholder="e.g. LR-26-2103" required>
+            <input type="text" class="form-control" id="salesFormReqId" placeholder="e.g. LR-26-2104" required autocomplete="off">
+            <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Auto-generated sequential ID with separator dash (e.g. LR-26-2104)</div>
           </div>
           <div class="form-group">
             <label class="form-label">JO Number</label>
@@ -26,7 +27,9 @@
           </div>
           <div class="form-group">
             <label class="form-label required">Sales Representative</label>
-            <select class="form-control" id="salesFormSalesRep" required></select>
+            <select class="form-control" id="salesFormSalesRep" required>
+              <option value="">Select Sales Rep...</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label required">Client Name</label>

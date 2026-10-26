@@ -260,15 +260,6 @@
   </div>
 
   <div class="topbar-right">
-    ${(currentPage && (currentPage.key === 'monthly-output' || currentPage.key === 'reports')) ? `
-    <!-- Timeframe Pills (Today | This Week | This Month | All Time) like Panze -->
-    <div class="timeframe-pill-group" id="navbarTimeframePillGroup">
-      <button class="timeframe-btn" data-timeframe="today">Today</button>
-      <button class="timeframe-btn" data-timeframe="week">This Week</button>
-      <button class="timeframe-btn" data-timeframe="month">This Month</button>
-      <button class="timeframe-btn active" data-timeframe="all">All Time</button>
-    </div>` : ''}
-
     <!-- Live Auto-Save Indicator -->
     <div class="auto-save-pill" >
       <span class="auto-save-dot"></span>
