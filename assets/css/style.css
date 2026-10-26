@@ -1738,6 +1738,63 @@ body.sidebar-open {
   font-size: 11.5px;
 }
 
+.draft-custom-select {
+  height: 32px;
+  min-width: 85px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--radius-xs);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1 !important;
+  color: var(--text-main);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.draft-custom-select:hover {
+  border-color: var(--primary-green) !important;
+}
+
+.draft-custom-select:focus,
+.draft-custom-select.is-active {
+  outline: none;
+  border-color: var(--primary-green) !important;
+  box-shadow: 0 0 0 2.5px rgba(23, 107, 85, 0.2) !important;
+}
+
+.draft-custom-select.is-blank {
+  background: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1 !important;
+  color: #94A3B8 !important;
+}
+
+.draft-custom-select .custom-select-label {
+  display: inline-block;
+  min-width: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draft-custom-select .custom-select-arrow {
+  color: #64748B;
+  margin-left: 6px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+  pointer-events: none;
+}
+
+.draft-custom-select.is-active .custom-select-arrow {
+  transform: rotate(180deg);
+  color: var(--primary-green);
+}
+
 .btn-save-draft {
   width: 32px;
   height: 32px;

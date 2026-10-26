@@ -5093,13 +5093,11 @@
   // Generates directly editable custom themed dropdown trigger HTML (or locked read-only badge)
   function renderInlineSelect(reqId, fieldName, currentValue, optionsList) {
     if (typeof currentValue === 'object' || currentValue === null || currentValue === undefined || currentValue === '[object Object]') {
-      if (fieldName === 'designStatus') currentValue = 'Not Started';
-      else if (fieldName === 'projectStatus') currentValue = 'Pending';
-      else currentValue = '';
+      currentValue = '';
     }
     const canEdit = canUserEditField(null, fieldName);
-    const badgeClass = getBadgeClassForValue(fieldName, currentValue);
-    const safeVal = escapeHTML(currentValue || 'Select');
+    const badgeClass = currentValue ? getBadgeClassForValue(fieldName, currentValue) : '';
+    const safeVal = escapeHTML(currentValue || '');
 
     if (!canEdit) {
       return `
@@ -5112,9 +5110,10 @@
       `;
     }
 
-    const safeOptions = JSON.stringify(optionsList).replace(/"/g, '&quot;');
+    const optionsWithBlank = optionsList.includes('') ? optionsList : [''].concat(optionsList);
+    const safeOptions = JSON.stringify(optionsWithBlank).replace(/"/g, '&quot;');
     return `
-      <button type="button" class="custom-select-btn ${badgeClass}"
+      <button type="button" class="custom-select-btn ${badgeClass} ${!currentValue ? 'is-blank' : ''}"
         data-req-id="${reqId}"
         data-field="${fieldName}"
         data-current="${escapeHTML(currentValue || '')}"
@@ -5158,7 +5157,8 @@
     }
 
     const fld = triggerBtn.getAttribute('data-field');
-    if (!canUserEditField(null, fld)) {
+    const isDraft = triggerBtn.getAttribute('data-is-draft') === 'true' || (triggerBtn.id && triggerBtn.id.startsWith('draft'));
+    if (!isDraft && !canUserEditField(null, fld)) {
       showToast(`Editing Locked: You do not have permission to edit the '${fld}' column.`, 'error');
       return;
     }
@@ -5225,10 +5225,11 @@
         const label = typeof opt === 'object' ? opt.label : String(opt);
         const isSelected = String(val) === String(currentVal);
         const indicator = getIndicatorClass(fieldName, val);
+        const displayLabel = label || '— Blank —';
         return `
           <div class="custom-dropdown-opt ${isSelected ? 'selected' : ''}" data-val="${escapeHTML(val)}" data-label="${escapeHTML(label)}">
             <span class="opt-indicator ${indicator}"></span>
-            <span class="opt-label">${escapeHTML(label)}</span>
+            <span class="opt-label">${escapeHTML(displayLabel)}</span>
             ${isSelected ? '<svg class="opt-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
           </div>
         `;
@@ -5301,18 +5302,31 @@
     closeCustomDropdown();
     if (!triggerBtn) return;
 
-    triggerBtn.setAttribute('data-current', selectedVal);
+    const finalVal = selectedVal || '';
+    triggerBtn.setAttribute('data-current', finalVal);
     const labelSpan = triggerBtn.querySelector('.custom-select-label');
-    if (labelSpan) labelSpan.textContent = selectedLabel || selectedVal;
+    if (labelSpan) {
+      labelSpan.textContent = finalVal ? (selectedLabel || finalVal) : '';
+    }
+
+    const isDraft = triggerBtn.getAttribute('data-is-draft') === 'true' || (triggerBtn.id && triggerBtn.id.startsWith('draft'));
+    if (isDraft) {
+      const badgeClass = finalVal ? getBadgeClassForValue(fieldName, finalVal) : '';
+      triggerBtn.className = `custom-select-btn draft-custom-select ${badgeClass} ${!finalVal ? 'is-blank' : ''}`;
+      if (state.draftSalesRequest) {
+        state.draftSalesRequest[fieldName] = finalVal;
+      }
+      return;
+    }
 
     if (reqId) {
-      triggerBtn.className = `custom-select-btn ${getBadgeClassForValue(fieldName, selectedVal)} cell-just-saved`;
-      updateRequestField(reqId, fieldName, selectedVal, triggerBtn);
-      showToast(`Updated ${fieldName} to ${selectedVal}.`);
+      triggerBtn.className = `custom-select-btn ${getBadgeClassForValue(fieldName, finalVal)} cell-just-saved`;
+      updateRequestField(reqId, fieldName, finalVal, triggerBtn);
+      showToast(`Updated ${fieldName} to ${finalVal}.`);
     } else if (triggerBtn._nativeSelect) {
-      triggerBtn._nativeSelect.value = selectedVal;
+      triggerBtn._nativeSelect.value = finalVal;
       triggerBtn._nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-      if (selectedVal) {
+      if (finalVal) {
         triggerBtn.classList.add('has-value');
       } else {
         triggerBtn.classList.remove('has-value');
@@ -6757,14 +6771,14 @@
             <td>${renderEditableCell(r.id, 'client', r.client, '', 'min-width: 140px;')}</td>
             <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
             <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
-            <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
-            <td>${renderInlineSelect(r.id, 'releasingMode', r.releasingMode || 'Install', RELEASING_MODES)}</td>
+            <td>${renderInlineSelect(r.id, 'location', r.location || '', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
+            <td>${renderInlineSelect(r.id, 'releasingMode', r.releasingMode || '', RELEASING_MODES)}</td>
             <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
             <td>${renderInlineDate(r.id, 'releasingDate', r.releasingDate)}</td>
-            <td>${renderInlineSelect(r.id, 'fileSent', r.fileSent, FILE_SENT_LEVELS)}</td>
-            <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus || 'Pending', PROJECT_STATUSES)}</td>
-            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || 'Pending', APPROVAL_LEVELS)}</td>
-            <td>${renderInlineSelect(r.id, 'priority', r.priority || 'Normal', PRIORITY_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'fileSent', r.fileSent || '', FILE_SENT_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus || '', PROJECT_STATUSES)}</td>
+            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || '', APPROVAL_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'priority', r.priority || '', PRIORITY_LEVELS)}</td>
             <td>${renderEditableCell(r.id, 'contactPerson', r.contactPerson, '', 'min-width: 130px;')}</td>
             <td>${renderEditableCell(r.id, 'contactNumber', r.contactNumber, '', 'min-width: 120px;')}</td>
             <td>${renderEditableCell(r.id, 'completeAddress', r.completeAddress, '', 'min-width: 190px;')}</td>
@@ -10870,41 +10884,35 @@
   }
   window.openNewSalesRequestModal = openNewSalesRequestModal;
 
+  function renderDraftCustomSelect(fieldName, currentValue, optionsList, elementId, styleWidth) {
+    const val = currentValue || '';
+    const badgeClass = val ? getBadgeClassForValue(fieldName, val) : '';
+    const safeLabel = escapeHTML(val || '');
+    const optionsWithBlank = optionsList.includes('') ? optionsList : [''].concat(optionsList);
+    const safeOptions = JSON.stringify(optionsWithBlank).replace(/"/g, '&quot;');
+    const isBlank = !val;
+    const widthStyle = styleWidth ? `style="width:${styleWidth};"` : '';
+
+    return `
+      <button type="button" class="custom-select-btn draft-custom-select ${badgeClass} ${isBlank ? 'is-blank' : ''}"
+        id="${elementId}"
+        ${widthStyle}
+        data-is-draft="true"
+        data-field="${fieldName}"
+        data-current="${escapeHTML(val)}"
+        data-options="${safeOptions}"
+        title="Click to select ${fieldName}"
+        onclick="window.SignDepotApp.openCustomDropdown(this, event)">
+        <span class="custom-select-label">${safeLabel}</span>
+        <svg class="custom-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    `;
+  }
+
   function renderDraftSalesRowHTML(d) {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const orderDateVal = d.orderDate || todayStr;
+    const orderDateVal = d.orderDate || '';
     const deadlineVal = d.designDeadline || '';
     const releasingVal = d.releasingDate || '';
-
-    const repOptions = ['<option value="">Select Sales Rep...</option>']
-      .concat(state.salesReps.map(rep => `<option value="${escapeHTML(rep)}" ${rep === d.salesRep ? 'selected' : ''}>${escapeHTML(rep)}</option>`))
-      .join('');
-
-    const artistOptions = state.artists.map(art => `<option value="${escapeHTML(art)}" ${art === d.artist ? 'selected' : ''}>${escapeHTML(art)}</option>`).join('');
-
-    const locationOptions = ['Indoor', 'Outdoor', 'Indoor & Outdoor']
-      .map(loc => `<option value="${loc}" ${loc === d.location ? 'selected' : ''}>${loc}</option>`)
-      .join('');
-
-    const relModeOptions = RELEASING_MODES
-      .map(rm => `<option value="${rm}" ${rm === d.releasingMode ? 'selected' : ''}>${rm}</option>`)
-      .join('');
-
-    const fileSentOptions = FILE_SENT_LEVELS
-      .map(fs => `<option value="${fs}" ${fs === d.fileSent ? 'selected' : ''}>${fs}</option>`)
-      .join('');
-
-    const statusOptions = PROJECT_STATUSES
-      .map(st => `<option value="${st}" ${st === d.projectStatus ? 'selected' : ''}>${st}</option>`)
-      .join('');
-
-    const approvalOptions = APPROVAL_LEVELS
-      .map(ap => `<option value="${ap}" ${ap === d.clientApproval ? 'selected' : ''}>${ap}</option>`)
-      .join('');
-
-    const priorityOptions = PRIORITY_LEVELS
-      .map(pr => `<option value="${pr}" ${pr === d.priority ? 'selected' : ''}>${pr}</option>`)
-      .join('');
 
     return `
       <tr class="table-draft-row" id="draftSalesRow">
@@ -10913,16 +10921,16 @@
         <td><input type="date" class="draft-cell-input" id="draftOrderDate" value="${escapeHTML(orderDateVal)}" style="width:125px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
         <td><input type="text" class="draft-cell-input" id="draftProjectName" value="${escapeHTML(d.projectName || '')}" placeholder="Enter project name..." style="width:170px; font-weight:600;" required autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
         <td><input type="text" class="draft-cell-input" id="draftClient" value="${escapeHTML(d.client || '')}" placeholder="Enter client name..." style="width:140px;" autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
-        <td><select class="draft-cell-select" id="draftSalesRep" style="width:120px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${repOptions}</select></td>
-        <td><select class="draft-cell-select" id="draftArtist" style="width:120px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${artistOptions}</select></td>
-        <td><select class="draft-cell-select" id="draftLocation" style="width:115px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${locationOptions}</select></td>
-        <td><select class="draft-cell-select" id="draftRelMode" style="width:90px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${relModeOptions}</select></td>
+        <td>${renderDraftCustomSelect('salesRep', d.salesRep, state.salesReps, 'draftSalesRep', '120px')}</td>
+        <td>${renderDraftCustomSelect('artist', d.artist, state.artists, 'draftArtist', '120px')}</td>
+        <td>${renderDraftCustomSelect('location', d.location, ['Indoor', 'Outdoor', 'Indoor & Outdoor'], 'draftLocation', '115px')}</td>
+        <td>${renderDraftCustomSelect('releasingMode', d.releasingMode, RELEASING_MODES, 'draftRelMode', '95px')}</td>
         <td><input type="date" class="draft-cell-input" id="draftDeadline" value="${escapeHTML(deadlineVal)}" style="width:125px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
         <td><input type="date" class="draft-cell-input" id="draftReleasing" value="${escapeHTML(releasingVal)}" style="width:125px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
-        <td><select class="draft-cell-select" id="draftFileSent" style="width:100px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${fileSentOptions}</select></td>
-        <td><select class="draft-cell-select" id="draftProjectStatus" style="width:110px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${statusOptions}</select></td>
-        <td><select class="draft-cell-select" id="draftClientApproval" style="width:110px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${approvalOptions}</select></td>
-        <td><select class="draft-cell-select" id="draftPriority" style="width:95px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${priorityOptions}</select></td>
+        <td>${renderDraftCustomSelect('fileSent', d.fileSent, FILE_SENT_LEVELS, 'draftFileSent', '100px')}</td>
+        <td>${renderDraftCustomSelect('projectStatus', d.projectStatus, PROJECT_STATUSES, 'draftProjectStatus', '110px')}</td>
+        <td>${renderDraftCustomSelect('clientApproval', d.clientApproval, APPROVAL_LEVELS, 'draftClientApproval', '115px')}</td>
+        <td>${renderDraftCustomSelect('priority', d.priority, PRIORITY_LEVELS, 'draftPriority', '95px')}</td>
         <td><input type="text" class="draft-cell-input" id="draftContactPerson" value="${escapeHTML(d.contactPerson || '')}" placeholder="Contact person..." style="width:130px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
         <td><input type="text" class="draft-cell-input" id="draftContactNumber" value="${escapeHTML(d.contactNumber || '')}" placeholder="Phone #..." style="width:120px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
         <td><input type="text" class="draft-cell-input" id="draftAddress" value="${escapeHTML(d.completeAddress || '')}" placeholder="Full address..." style="width:190px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
@@ -10953,40 +10961,26 @@
     }
 
     const nextReqId = getNextRequestId();
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    // Default design deadline (+3 days from today)
-    const d3 = new Date();
-    d3.setDate(d3.getDate() + 3);
-    const deadlineStr = d3.toISOString().split('T')[0];
-
-    // Default sales rep from logged-in user if sales rep, or first available rep in list
-    let defaultRep = '';
-    if (window.PMS_CURRENT_USER && (window.PMS_CURRENT_USER.role === 'sales' || window.PMS_CURRENT_USER.role === 'sales_rep')) {
-      defaultRep = window.PMS_CURRENT_USER.full_name || window.PMS_CURRENT_USER.username || '';
-    } else if (state.salesReps && state.salesReps.length > 0) {
-      defaultRep = state.salesReps[0];
-    }
 
     state.draftSalesRequest = {
       requestId: nextReqId,
       joNumber: '',
-      orderDate: todayStr,
-      salesRep: defaultRep,
+      orderDate: '',
+      salesRep: '',
       client: '',
       projectName: '',
-      artist: 'Unassigned',
-      designDeadline: deadlineStr,
+      artist: '',
+      designDeadline: '',
       releasingDate: '',
-      fileSent: 'Pending',
+      fileSent: '',
       completeAddress: '',
-      location: 'Indoor',
-      releasingMode: 'Install',
+      location: '',
+      releasingMode: '',
       contactPerson: '',
       contactNumber: '',
-      projectStatus: 'Pending',
-      clientApproval: 'Pending',
-      priority: 'Normal',
+      projectStatus: '',
+      clientApproval: '',
+      priority: '',
       remarks: ''
     };
 
@@ -11012,22 +11006,32 @@
   function saveDraftSalesRequest() {
     if (!state.draftSalesRequest) return;
 
+    const getDraftSelectVal = (elemId, fieldName) => {
+      const el = document.getElementById(elemId);
+      if (el) {
+        const cur = el.getAttribute('data-current');
+        if (cur !== null && cur !== undefined) return cur.trim();
+        if (el.value !== undefined) return el.value.trim();
+      }
+      return (state.draftSalesRequest && state.draftSalesRequest[fieldName]) || '';
+    };
+
     const reqIdInput = document.getElementById('draftReqId');
     const reqId = (reqIdInput && reqIdInput.value.trim()) || state.draftSalesRequest.requestId || getNextRequestId();
     const joNumber = document.getElementById('draftJoNumber') ? document.getElementById('draftJoNumber').value.trim() : '';
-    const orderDate = document.getElementById('draftOrderDate') ? document.getElementById('draftOrderDate').value.trim() : new Date().toISOString().split('T')[0];
+    const orderDate = document.getElementById('draftOrderDate') ? document.getElementById('draftOrderDate').value.trim() : '';
     const projectName = document.getElementById('draftProjectName') ? document.getElementById('draftProjectName').value.trim() : '';
     const client = document.getElementById('draftClient') ? document.getElementById('draftClient').value.trim() : '';
-    const salesRep = document.getElementById('draftSalesRep') ? document.getElementById('draftSalesRep').value.trim() : '';
-    const artist = document.getElementById('draftArtist') ? document.getElementById('draftArtist').value.trim() : 'Unassigned';
-    const location = document.getElementById('draftLocation') ? document.getElementById('draftLocation').value.trim() : 'Indoor';
-    const releasingMode = document.getElementById('draftRelMode') ? document.getElementById('draftRelMode').value.trim() : 'Install';
+    const salesRep = getDraftSelectVal('draftSalesRep', 'salesRep');
+    const artist = getDraftSelectVal('draftArtist', 'artist');
+    const location = getDraftSelectVal('draftLocation', 'location');
+    const releasingMode = getDraftSelectVal('draftRelMode', 'releasingMode');
     const designDeadline = document.getElementById('draftDeadline') ? document.getElementById('draftDeadline').value.trim() : '';
     const releasingDate = document.getElementById('draftReleasing') ? document.getElementById('draftReleasing').value.trim() : '';
-    const fileSent = document.getElementById('draftFileSent') ? document.getElementById('draftFileSent').value.trim() : 'Pending';
-    const projectStatus = document.getElementById('draftProjectStatus') ? document.getElementById('draftProjectStatus').value.trim() : 'Pending';
-    const clientApproval = document.getElementById('draftClientApproval') ? document.getElementById('draftClientApproval').value.trim() : 'Pending';
-    const priority = document.getElementById('draftPriority') ? document.getElementById('draftPriority').value.trim() : 'Normal';
+    const fileSent = getDraftSelectVal('draftFileSent', 'fileSent');
+    const projectStatus = getDraftSelectVal('draftProjectStatus', 'projectStatus');
+    const clientApproval = getDraftSelectVal('draftClientApproval', 'clientApproval');
+    const priority = getDraftSelectVal('draftPriority', 'priority');
     const contactPerson = document.getElementById('draftContactPerson') ? document.getElementById('draftContactPerson').value.trim() : '';
     const contactNumber = document.getElementById('draftContactNumber') ? document.getElementById('draftContactNumber').value.trim() : '';
     const completeAddress = document.getElementById('draftAddress') ? document.getElementById('draftAddress').value.trim() : '';
