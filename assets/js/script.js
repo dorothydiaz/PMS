@@ -12221,10 +12221,14 @@
 
     // Delegated click handler for 100% reliable clicks on buttons and child SVGs
     document.addEventListener('click', (e) => {
+      // If modular components.js navigation is already active, prevent duplicate handling
+      if (window.SignDepotNav) return;
+
       const mobileBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn');
       if (mobileBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         toggleMobileSidebar();
         return;
       }
@@ -12233,6 +12237,7 @@
       if (closeBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         closeMobileSidebar();
         return;
       }
@@ -12241,6 +12246,7 @@
       if (collapseBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         if (window.innerWidth <= 992) {
           closeMobileSidebar();
         } else {

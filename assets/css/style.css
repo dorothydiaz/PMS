@@ -76,6 +76,10 @@ body {
   overflow-x: hidden;
 }
 
+body.sidebar-open {
+  overflow: hidden !important;
+}
+
 /* Pure Clean Layout */
 .app-container {
   display: flex;
@@ -234,6 +238,11 @@ body {
   background: #E2E8F0;
   color: #0F172A;
   box-shadow: 0 3px 8px rgba(15, 23, 42, 0.10);
+}
+
+.sidebar-close-btn svg,
+.sidebar-close-btn svg * {
+  pointer-events: none;
 }
 
 .sidebar-collapse-btn .toggle-arrow {
@@ -3579,6 +3588,11 @@ textarea.form-control {
 
   .mobile-menu-btn:hover {
     background: #E2E8F0;
+  }
+
+  .mobile-menu-btn:active {
+    background: #CBD5E1;
+    transform: scale(0.96);
   }
 
   .topbar {

@@ -11,6 +11,15 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
 ?>
 <header class="topbar" id="appTopbar">
   <div class="topbar-left">
+    <!-- Mobile Hamburger Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu" title="Open Navigation Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
     <div class="page-header-info">
       <span class="page-category-tag" id="pageCategoryTag"><?= htmlspecialchars($pageCategory) ?></span>
       <h1 class="module-title" id="moduleTitle">

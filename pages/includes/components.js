@@ -250,6 +250,13 @@
     return `
 <header class="topbar" id="appTopbar">
   <div class="topbar-left">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu" title="Open Navigation Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
     <div class="page-header-info">
       <span class="page-category-tag" id="pageCategoryTag">${category}</span>
       <h1 class="module-title" id="moduleTitle">
@@ -379,7 +386,10 @@
   function openMobileSidebar() {
     const sidebar = document.getElementById('appSidebar');
     const backdrop = ensureBackdrop();
-    if (sidebar) sidebar.classList.add('mobile-open');
+    if (sidebar) {
+      sidebar.classList.remove('collapsed');
+      sidebar.classList.add('mobile-open');
+    }
     if (backdrop) backdrop.classList.add('active');
     document.body.classList.add('sidebar-open');
   }
@@ -441,6 +451,7 @@
       if (menuBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         if (window.innerWidth <= 992) {
           toggleMobileSidebar();
         } else {
@@ -454,6 +465,7 @@
       if (closeBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         closeMobileSidebar();
         return;
       }
@@ -463,6 +475,7 @@
       if (collapseBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         if (window.innerWidth <= 992) {
           closeMobileSidebar();
         } else {
