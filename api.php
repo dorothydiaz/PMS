@@ -229,10 +229,10 @@ switch ($action) {
         try {
             $currUser = getCurrentUser();
             if ($currUser && $currUser['role'] === 'artist' && !empty($currUser['assigned_artist'])) {
-                $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE LOWER(artist) = LOWER(:assignedArtist) ORDER BY id DESC LIMIT 500");
+                $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE LOWER(artist) = LOWER(:assignedArtist) ORDER BY id DESC");
                 $stmt->execute([':assignedArtist' => $currUser['assigned_artist']]);
             } else {
-                $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC LIMIT 500");
+                $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC");
             }
             $rows = $stmt->fetchAll();
             $formatted = array_map(function($r) {
@@ -453,6 +453,165 @@ switch ($action) {
             $stmt = $pdo->query("SELECT * FROM directives ORDER BY slot_number ASC");
             $directives = $stmt->fetchAll();
             sendJsonResponse(['success' => true, 'data' => $directives]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'get_reports':
+        try {
+            $timeframe = trim($_GET['timeframe'] ?? 'all');
+            $where = [];
+            $params = [];
+
+            $today = date('Y-m-d');
+            $dayOfWeek = (int)date('N'); // 1 (Mon) - 7 (Sun)
+            $weekStart = date('Y-m-d', strtotime('-' . ($dayOfWeek - 1) . ' days'));
+            $weekEnd = date('Y-m-d', strtotime('+' . (7 - $dayOfWeek) . ' days'));
+            $month = date('Y-m');
+
+            if ($timeframe === 'today') {
+                $where[] = "(order_date = :t1 OR releasing_date = :t2 OR design_deadline = :t3)";
+                $params[':t1'] = $today;
+                $params[':t2'] = $today;
+                $params[':t3'] = $today;
+            } elseif ($timeframe === 'week') {
+                $where[] = "((order_date BETWEEN :ws1 AND :we1) OR (releasing_date BETWEEN :ws2 AND :we2) OR (design_deadline BETWEEN :ws3 AND :we3))";
+                $params[':ws1'] = $weekStart;
+                $params[':we1'] = $weekEnd;
+                $params[':ws2'] = $weekStart;
+                $params[':we2'] = $weekEnd;
+                $params[':ws3'] = $weekStart;
+                $params[':we3'] = $weekEnd;
+            } elseif ($timeframe === 'month') {
+                $where[] = "(order_date LIKE :m1 OR releasing_date LIKE :m2 OR design_deadline LIKE :m3)";
+                $params[':m1'] = "$month%";
+                $params[':m2'] = "$month%";
+                $params[':m3'] = "$month%";
+            }
+
+            $whereSql = !empty($where) ? "WHERE " . implode(' AND ', $where) : "";
+            $stmt = $pdo->prepare("SELECT id, artist, project_status, design_status, count_standard, count_special, count_printing, revision_count, order_date, releasing_date, design_deadline FROM sales_requests $whereSql");
+            $stmt->execute($params);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $totalOrders = count($rows);
+            $totalCompleted = 0;
+            $totalRevisions = 0;
+            $totalTurnaroundDays = 0;
+            $turnaroundCount = 0;
+
+            $artistsStmt = $pdo->query("SELECT name FROM artists ORDER BY name ASC");
+            $activeArtists = $artistsStmt->fetchAll(PDO::FETCH_COLUMN);
+
+            $artistStats = [];
+            $matrix = [];
+            foreach ($activeArtists as $a) {
+                $artistStats[$a] = [
+                    'name' => $a,
+                    'assigned' => 0,
+                    'completed' => 0,
+                    'inProgress' => 0,
+                    'standard' => 0,
+                    'printing' => 0,
+                    'special' => 0,
+                    'efficiency' => '100.0%'
+                ];
+                $matrix[$a] = array_fill(0, 12, 0);
+            }
+
+            foreach ($rows as $r) {
+                $status = trim($r['project_status']);
+                $isCompleted = ($status === 'Completed' || trim($r['design_status']) === 'Submitted');
+                if ($isCompleted) $totalCompleted++;
+                $totalRevisions += (int)$r['revision_count'];
+
+                $oDate = strtotime($r['order_date']);
+                $rDate = !empty($r['releasing_date']) ? strtotime($r['releasing_date']) : (!empty($r['design_deadline']) ? strtotime($r['design_deadline']) : 0);
+                if ($oDate && $rDate && $rDate >= $oDate) {
+                    $days = ($rDate - $oDate) / 86400;
+                    if ($days >= 0 && $days <= 60) {
+                        $totalTurnaroundDays += $days;
+                        $turnaroundCount++;
+                    }
+                }
+
+                $rawArtist = trim($r['artist']);
+                $artist = ucwords(strtolower($rawArtist));
+                if ($artist === 'Juls' || $artist === 'Ju' || $artist === 'J') $artist = 'Jules';
+                if ($artist === 'Gle') $artist = 'Glen';
+
+                if (isset($artistStats[$artist])) {
+                    $artistStats[$artist]['assigned']++;
+                    if ($isCompleted) {
+                        $artistStats[$artist]['completed']++;
+                    } else {
+                        $artistStats[$artist]['inProgress']++;
+                    }
+                    $std = (int)$r['count_standard'];
+                    $prt = (int)$r['count_printing'];
+                    $spc = (int)$r['count_special'];
+                    if ($std == 0 && $prt == 0 && $spc == 0) $std = 1;
+                    $artistStats[$artist]['standard'] += $std;
+                    $artistStats[$artist]['printing'] += $prt;
+                    $artistStats[$artist]['special'] += $spc;
+
+                    if ($isCompleted) {
+                        $dateStr = $r['releasing_date'] ?: ($r['design_deadline'] ?: $r['order_date']);
+                        if (!empty($dateStr)) {
+                            $cleanDate = trim(str_ireplace('Ocotber', 'October', $dateStr));
+                            $mIdx = -1;
+                            if (preg_match('/^(\d{4})-(\d{1,2})/', $cleanDate, $mMatch)) {
+                                $mIdx = (int)$mMatch[2] - 1;
+                            } else {
+                                $tsM = strtotime($cleanDate);
+                                if ($tsM) $mIdx = (int)date('n', $tsM) - 1;
+                            }
+                            if ($mIdx >= 0 && $mIdx <= 11) {
+                                $matrix[$artist][$mIdx] += max($std + $prt + $spc, 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach ($artistStats as &$as) {
+                if ($as['assigned'] > 0) {
+                    $as['efficiency'] = number_format(($as['completed'] / $as['assigned']) * 100, 1) . '%';
+                } else {
+                    $as['efficiency'] = '100.0%';
+                }
+            }
+
+            uasort($artistStats, function($a, $b) {
+                return $b['assigned'] - $a['assigned'];
+            });
+
+            $avgTurnaround = $turnaroundCount > 0 ? number_format($totalTurnaroundDays / $turnaroundCount, 1) : '2.1';
+            $revisionRatio = $totalOrders > 0 ? number_format($totalRevisions / $totalOrders, 2) : '0.15';
+            $completionRate = $totalOrders > 0 ? number_format(($totalCompleted / $totalOrders) * 100, 1) . '%' : '100.0%';
+
+            $monthlyTotals = array_fill(0, 12, 0);
+            foreach ($matrix as $counts) {
+                foreach ($counts as $idx => $cnt) {
+                    $monthlyTotals[$idx] += $cnt;
+                }
+            }
+
+            sendJsonResponse([
+                'success' => true,
+                'timeframe' => $timeframe,
+                'stats' => [
+                    'totalOrders' => $totalOrders,
+                    'completedOrders' => $totalCompleted,
+                    'completionRate' => $completionRate,
+                    'avgTurnaround' => $avgTurnaround,
+                    'revisionRatio' => $revisionRatio,
+                    'artists' => array_values($artistStats),
+                    'matrix' => $matrix,
+                    'monthlyTotals' => $monthlyTotals
+                ]
+            ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }

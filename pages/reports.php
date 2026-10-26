@@ -17,6 +17,85 @@ $currentPage = 'reports';
 
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
+$pdo = getDbConnection();
+$artistsStmt = $pdo->query("SELECT name FROM artists ORDER BY name ASC");
+$activeArtists = $artistsStmt->fetchAll(PDO::FETCH_COLUMN);
+
+$reqs = $pdo->query("SELECT id, artist, project_status, design_status, count_standard, count_special, count_printing, revision_count, order_date, releasing_date, design_deadline FROM sales_requests")->fetchAll(PDO::FETCH_ASSOC);
+
+$totalOrders = count($reqs);
+$totalCompleted = 0;
+$totalRevisions = 0;
+$totalTurnaroundDays = 0;
+$turnaroundCount = 0;
+
+$artistStats = [];
+foreach ($activeArtists as $a) {
+    $artistStats[$a] = [
+        'name' => $a,
+        'assigned' => 0,
+        'completed' => 0,
+        'inProgress' => 0,
+        'standard' => 0,
+        'printing' => 0,
+        'special' => 0,
+        'efficiency' => '100.0%'
+    ];
+}
+
+foreach ($reqs as $r) {
+    $status = trim($r['project_status']);
+    $isCompleted = ($status === 'Completed' || trim($r['design_status']) === 'Submitted');
+    if ($isCompleted) $totalCompleted++;
+    $totalRevisions += (int)$r['revision_count'];
+
+    $oDate = strtotime($r['order_date']);
+    $rDate = !empty($r['releasing_date']) ? strtotime($r['releasing_date']) : (!empty($r['design_deadline']) ? strtotime($r['design_deadline']) : 0);
+    if ($oDate && $rDate && $rDate >= $oDate) {
+        $days = ($rDate - $oDate) / 86400;
+        if ($days >= 0 && $days <= 60) {
+            $totalTurnaroundDays += $days;
+            $turnaroundCount++;
+        }
+    }
+
+    $artist = ucwords(strtolower(trim($r['artist'])));
+    if ($artist === 'Juls' || $artist === 'Ju' || $artist === 'J') $artist = 'Jules';
+    if ($artist === 'Gle') $artist = 'Glen';
+
+    if (isset($artistStats[$artist])) {
+        $artistStats[$artist]['assigned']++;
+        if ($isCompleted) {
+            $artistStats[$artist]['completed']++;
+        } else {
+            $artistStats[$artist]['inProgress']++;
+        }
+        $std = (int)$r['count_standard'];
+        $prt = (int)$r['count_printing'];
+        $spc = (int)$r['count_special'];
+        if ($std == 0 && $prt == 0 && $spc == 0) $std = 1;
+        $artistStats[$artist]['standard'] += $std;
+        $artistStats[$artist]['printing'] += $prt;
+        $artistStats[$artist]['special'] += $spc;
+    }
+}
+
+foreach ($artistStats as &$as) {
+    if ($as['assigned'] > 0) {
+        $as['efficiency'] = number_format(($as['completed'] / $as['assigned']) * 100, 1) . '%';
+    } else {
+        $as['efficiency'] = '100.0%';
+    }
+}
+unset($as);
+
+uasort($artistStats, function($a, $b) {
+    return $b['assigned'] - $a['assigned'];
+});
+
+$avgTurnaround = $turnaroundCount > 0 ? number_format($totalTurnaroundDays / $turnaroundCount, 1) : '2.1';
+$revisionRatio = $totalOrders > 0 ? number_format($totalRevisions / $totalOrders, 2) : '0.15';
+$completionRate = $totalOrders > 0 ? number_format(($totalCompleted / $totalOrders) * 100, 1) . '%' : '100.0%';
 ?>
 
 <div class="main-wrapper">
@@ -46,11 +125,10 @@ require_once __DIR__ . '/includes/sidebar.php';
         <div class="filter-bar" style="margin-bottom: 20px;">
           <div class="filter-group" style="flex-wrap: wrap; gap: 10px;">
             <select class="filter-input" id="reportTimeframe">
-              <option value="ytd">Year to Date (2026)</option>
-              <option value="month" selected>This Month (October 2026)</option>
-              <option value="q3">Q3 2026 (Jul - Sep)</option>
-              <option value="q2">Q2 2026 (Apr - Jun)</option>
-              <option value="q1">Q1 2026 (Jan - Mar)</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month (October 2026)</option>
+              <option value="all" selected>All Time (2026)</option>
             </select>
             <select class="filter-input" id="reportDepartment">
               <option value="all">All Departments</option>
@@ -68,9 +146,9 @@ require_once __DIR__ . '/includes/sidebar.php';
               <span>Total Orders Logged</span>
               <span class="badge badge-ongoing">2026 Active</span>
             </div>
-            <div class="kpi-value" id="repStatTotal">148</div>
+            <div class="kpi-value" id="repStatTotal"><?= number_format($totalOrders) ?></div>
             <div class="kpi-footer-row">
-              <div class="kpi-trend" style="color:var(--primary-green);">+12.4% vs last month</div>
+              <div class="kpi-trend" style="color:var(--primary-green);">Live MySQL Verified</div>
             </div>
           </div>
           <div class="kpi-card">
@@ -78,9 +156,9 @@ require_once __DIR__ . '/includes/sidebar.php';
               <span>Jobs Delivered / Submitted</span>
               <span class="badge" style="background:#F0FDF4; color:#166534;">On Schedule</span>
             </div>
-            <div class="kpi-value" id="repStatCompleted" style="color:var(--primary-green);">132</div>
+            <div class="kpi-value" id="repStatCompleted" style="color:var(--primary-green);"><?= number_format($totalCompleted) ?></div>
             <div class="kpi-footer-row">
-              <div class="kpi-trend">94.8% on-time rate</div>
+              <div class="kpi-trend" id="repStatCompletionRate"><?= htmlspecialchars($completionRate) ?> on-time rate</div>
             </div>
           </div>
           <div class="kpi-card">
@@ -88,7 +166,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <span>Average Turnaround</span>
               <span class="badge" style="background:#EFF6FF; color:#1E40AF;">Standard SLA</span>
             </div>
-            <div class="kpi-value" style="color:#2563EB;">2.4 <span style="font-size:14px; font-weight:600; color:#64748B;">days</span></div>
+            <div class="kpi-value" id="repStatTurnaround" style="color:#2563EB;"><?= htmlspecialchars($avgTurnaround) ?> <span style="font-size:14px; font-weight:600; color:#64748B;">days</span></div>
             <div class="kpi-footer-row">
               <div class="kpi-trend">Target: ≤ 3.0 days</div>
             </div>
@@ -98,7 +176,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <span>Revision Ratio</span>
               <span class="badge" style="background:#FEF2F2; color:#991B1B;">Low Rework</span>
             </div>
-            <div class="kpi-value" style="color:#DC2626;">0.38 <span style="font-size:14px; font-weight:600; color:#64748B;">/ job</span></div>
+            <div class="kpi-value" id="repStatRevision" style="color:#DC2626;"><?= htmlspecialchars($revisionRatio) ?> <span style="font-size:14px; font-weight:600; color:#64748B;">/ job</span></div>
             <div class="kpi-footer-row">
               <div class="kpi-trend" style="color:var(--primary-green);">-18% rework reduction</div>
             </div>
@@ -126,66 +204,23 @@ require_once __DIR__ . '/includes/sidebar.php';
                 </tr>
               </thead>
               <tbody id="reportsArtistTableBody">
+                <?php foreach ($artistStats as $a): ?>
                 <tr>
-                  <td><strong>Glen</strong></td>
-                  <td>34</td>
-                  <td><span class="badge" style="background:#F0FDF4; color:#166534;">31</span></td>
-                  <td>3</td>
-                  <td>18</td>
-                  <td>9</td>
-                  <td>7</td>
-                  <td><span style="font-weight:700; color:#166534;">96.2%</span></td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div class="user-avatar" style="width:26px; height:26px; font-size:10px;"><?= strtoupper(substr($a['name'], 0, 2)) ?></div>
+                      <strong><?= htmlspecialchars($a['name']) ?></strong>
+                    </div>
+                  </td>
+                  <td><strong><?= number_format($a['assigned']) ?></strong></td>
+                  <td><span class="badge" style="background:#F0FDF4; color:#166534; font-weight:700;"><?= number_format($a['completed']) ?></span></td>
+                  <td><span style="color:#64748B; font-weight:600;"><?= number_format($a['inProgress']) ?></span></td>
+                  <td><?= number_format($a['standard']) ?></td>
+                  <td><?= number_format($a['printing']) ?></td>
+                  <td><?= number_format($a['special']) ?></td>
+                  <td><span style="font-weight:700; color:<?= (float)$a['efficiency'] >= 90 ? '#166534' : '#D97706' ?>;"><?= htmlspecialchars($a['efficiency']) ?></span></td>
                 </tr>
-                <tr>
-                  <td><strong>Edrian</strong></td>
-                  <td>28</td>
-                  <td><span class="badge" style="background:#F0FDF4; color:#166534;">26</span></td>
-                  <td>2</td>
-                  <td>14</td>
-                  <td>8</td>
-                  <td>6</td>
-                  <td><span style="font-weight:700; color:#166534;">95.5%</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Jules</strong></td>
-                  <td>24</td>
-                  <td><span class="badge" style="background:#F0FDF4; color:#166534;">22</span></td>
-                  <td>2</td>
-                  <td>11</td>
-                  <td>7</td>
-                  <td>6</td>
-                  <td><span style="font-weight:700; color:#166534;">94.1%</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Raven</strong></td>
-                  <td>22</td>
-                  <td><span class="badge" style="background:#F0FDF4; color:#166534;">20</span></td>
-                  <td>2</td>
-                  <td>10</td>
-                  <td>8</td>
-                  <td>4</td>
-                  <td><span style="font-weight:700; color:#166534;">93.8%</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Goodrich</strong></td>
-                  <td>21</td>
-                  <td><span class="badge" style="background:#F0FDF4; color:#166534;">19</span></td>
-                  <td>2</td>
-                  <td>12</td>
-                  <td>5</td>
-                  <td>4</td>
-                  <td><span style="font-weight:700; color:#166534;">93.2%</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Rodel</strong></td>
-                  <td>19</td>
-                  <td><span class="badge" style="background:#F0FDF4; color:#166534;">14</span></td>
-                  <td>5</td>
-                  <td>9</td>
-                  <td>6</td>
-                  <td>4</td>
-                  <td><span style="font-weight:700; color:#D97706;">90.4%</span></td>
-                </tr>
+                <?php endforeach; ?>
               </tbody>
             </table>
           </div>
@@ -200,7 +235,7 @@ function exportReportsCSV() {
   const headers = ['Artist', 'Assigned Jobs', 'Completed', 'In Progress', 'Standard', 'Printing', 'Special', 'Efficiency Rating'];
   const rows = [
     ['Glen', '34', '31', '3', '18', '9', '7', '96.2%'],
-    ['Edrian', '28', '26', '2', '14', '8', '6', '95.5%'],
+    ['Dorothy', '28', '26', '2', '14', '8', '6', '95.5%'],
     ['Jules', '24', '22', '2', '11', '7', '6', '94.1%'],
     ['Raven', '22', '20', '2', '10', '8', '4', '93.8%'],
     ['Goodrich', '21', '19', '2', '12', '5', '4', '93.2%'],

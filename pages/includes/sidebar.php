@@ -182,11 +182,4 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
     <?php endif; ?>
     <?php endif; ?>
   </nav>
-
-  <div class="sidebar-footer">
-    <div class="system-status-pill" title="Role: <?= htmlspecialchars($roleName) ?>">
-      <span class="status-indicator-dot online"></span>
-      <span class="status-text"><?= htmlspecialchars($roleName) ?></span>
-    </div>
-  </div>
 </aside>

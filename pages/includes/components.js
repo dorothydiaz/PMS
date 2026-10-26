@@ -238,13 +238,6 @@
       <span class="nav-label">Settings</span>
     </a>
   </nav>
-
-  <div class="sidebar-footer">
-    <div class="system-status-pill">
-      <span class="status-indicator-dot online"></span>
-      <span class="status-text">${isPhp ? 'MySQL Live' : 'Live Inline'}</span>
-    </div>
-  </div>
 </aside>
 `;
   }
@@ -267,13 +260,14 @@
   </div>
 
   <div class="topbar-right">
-    <!-- Timeframe Pills (Today | This Week | This Month) like Panze -->
-    <div class="timeframe-pill-group">
+    ${(currentPage && (currentPage.key === 'monthly-output' || currentPage.key === 'reports')) ? `
+    <!-- Timeframe Pills (Today | This Week | This Month | All Time) like Panze -->
+    <div class="timeframe-pill-group" id="navbarTimeframePillGroup">
       <button class="timeframe-btn" data-timeframe="today">Today</button>
       <button class="timeframe-btn" data-timeframe="week">This Week</button>
-      <button class="timeframe-btn active" data-timeframe="month">This Month</button>
-      <button class="timeframe-btn" data-timeframe="all">All Time</button>
-    </div>
+      <button class="timeframe-btn" data-timeframe="month">This Month</button>
+      <button class="timeframe-btn active" data-timeframe="all">All Time</button>
+    </div>` : ''}
 
     <!-- Live Auto-Save Indicator -->
     <div class="auto-save-pill" >

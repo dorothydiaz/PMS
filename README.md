@@ -75,7 +75,7 @@ d:\DOROTHY\PMS\PMS\
 
 ### 4. Artist Workload & Capacity Management
 - Tracks artist assignments across:
-  - Bob, Edrian, Glen, Goodrich, Jules, Raven, Rodel, Tim, Seven
+  - Bob, Dorothy, Glen, Goodrich, Jules, Raven, Rodel, Tim
 - Workload thresholds:
   - 🟢 **Available** (0-3 active tasks)
   - 🔵 **Moderate** (4-7 active tasks)

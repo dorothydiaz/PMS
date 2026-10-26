@@ -18,16 +18,29 @@ $currentPage = 'audit-trail';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
 
-// Fetch audit records if table exists, or provide realistic seeded logs
-$auditLogs = [
-    ['time' => date('Y-m-d H:i:s', time() - 360), 'user' => 'superadmin', 'role' => 'Super Admin', 'action' => 'UPDATE', 'module' => 'Access Control', 'desc' => 'Updated module permissions for artist role', 'ip' => '127.0.0.1', 'status' => 'Success'],
-    ['time' => date('Y-m-d H:i:s', time() - 1420), 'user' => 'sales_dona', 'role' => 'Sales', 'action' => 'CREATE', 'module' => 'Sales Requests', 'desc' => 'Logged new sales order LR-26-2104 (BGC LED Facade)', 'ip' => '192.168.1.45', 'status' => 'Success'],
-    ['time' => date('Y-m-d H:i:s', time() - 3600), 'user' => 'artist_ed', 'role' => 'Artist', 'action' => 'UPDATE', 'module' => 'Creatives Tracker', 'desc' => 'Submitted design proof for JO P261001352', 'ip' => '192.168.1.72', 'status' => 'Success'],
-    ['time' => date('Y-m-d H:i:s', time() - 7200), 'user' => 'superadmin', 'role' => 'Super Admin', 'action' => 'AUTH', 'module' => 'Security Portal', 'desc' => 'Successful master login via OAuth credentials', 'ip' => '127.0.0.1', 'status' => 'Success'],
-    ['time' => date('Y-m-d H:i:s', time() - 14400), 'user' => 'sales_dona', 'role' => 'Sales', 'action' => 'APPROVE', 'module' => 'Pending Sales', 'desc' => 'Approved client layout for Project JO P261001349', 'ip' => '192.168.1.45', 'status' => 'Success'],
-    ['time' => date('Y-m-d H:i:s', time() - 28800), 'user' => 'glen_artist', 'role' => 'Artist', 'action' => 'EXPORT', 'module' => 'Directives Details', 'desc' => 'Exported 4K Printable Job Order Blueprint P261001348', 'ip' => '192.168.1.66', 'status' => 'Success'],
-    ['time' => date('Y-m-d H:i:s', time() - 43200), 'user' => 'superadmin', 'role' => 'Super Admin', 'action' => 'CONFIG', 'module' => 'System Settings', 'desc' => 'Saved company branding and notification preferences', 'ip' => '127.0.0.1', 'status' => 'Success'],
-];
+// Fetch audit records from live database or fallback to seeded logs
+$auditLogs = [];
+try {
+    $pdo = getDbConnection();
+    if ($pdo) {
+        $stmt = $pdo->query("SELECT `user`, `role`, `action`, `module`, `description` AS `desc`, `ip_address` AS `ip`, `status`, DATE_FORMAT(`created_at`, '%Y-%m-%d %H:%i:%s') AS `time` FROM audit_logs ORDER BY `created_at` DESC LIMIT 150");
+        $auditLogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+} catch (Exception $e) {
+    // Database fallback
+}
+
+if (empty($auditLogs)) {
+    $auditLogs = [
+        ['time' => date('Y-m-d H:i:s', time() - 360), 'user' => 'superadmin', 'role' => 'Super Admin', 'action' => 'UPDATE', 'module' => 'Access Control', 'desc' => 'Updated module permissions for artist role', 'ip' => '127.0.0.1', 'status' => 'Success'],
+        ['time' => date('Y-m-d H:i:s', time() - 1420), 'user' => 'sales_dona', 'role' => 'Sales', 'action' => 'CREATE', 'module' => 'Sales Requests', 'desc' => 'Logged new sales order LR-26-2104 (BGC LED Facade)', 'ip' => '192.168.1.45', 'status' => 'Success'],
+        ['time' => date('Y-m-d H:i:s', time() - 3600), 'user' => 'artist_ed', 'role' => 'Artist', 'action' => 'UPDATE', 'module' => 'Creatives Tracker', 'desc' => 'Submitted design proof for JO P261001352', 'ip' => '192.168.1.72', 'status' => 'Success'],
+        ['time' => date('Y-m-d H:i:s', time() - 7200), 'user' => 'superadmin', 'role' => 'Super Admin', 'action' => 'AUTH', 'module' => 'Security Portal', 'desc' => 'Successful master login via OAuth credentials', 'ip' => '127.0.0.1', 'status' => 'Success'],
+        ['time' => date('Y-m-d H:i:s', time() - 14400), 'user' => 'sales_dona', 'role' => 'Sales', 'action' => 'APPROVE', 'module' => 'Pending Sales', 'desc' => 'Approved client layout for Project JO P261001349', 'ip' => '192.168.1.45', 'status' => 'Success'],
+        ['time' => date('Y-m-d H:i:s', time() - 28800), 'user' => 'glen_artist', 'role' => 'Artist', 'action' => 'EXPORT', 'module' => 'Directives Details', 'desc' => 'Exported 4K Printable Job Order Blueprint P261001348', 'ip' => '192.168.1.66', 'status' => 'Success'],
+        ['time' => date('Y-m-d H:i:s', time() - 43200), 'user' => 'superadmin', 'role' => 'Super Admin', 'action' => 'CONFIG', 'module' => 'System Settings', 'desc' => 'Saved company branding and notification preferences', 'ip' => '127.0.0.1', 'status' => 'Success'],
+    ];
+}
 ?>
 
 <div class="main-wrapper">

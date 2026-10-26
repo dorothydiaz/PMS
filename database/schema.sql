@@ -1,6 +1,9 @@
 -- ============================================================================
 -- Sign Depot Operations PMS Database Schema & Seed Data
--- Generated from: D:\DOROTHY\PMS\PMS\sales_requests.html (2103 records)
+-- Comprehensive Enterprise Schema & Data Seed
+-- Tables: sales_requests, artists, sales_reps, directives, users, audit_logs
+-- Total Production Sales Requests: 2,104 records
+-- Generated / Updated: 2026-10-26
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS `pms_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -8,6 +11,9 @@ USE `pms_db`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- ----------------------------------------------------------------------------
+-- Table: sales_requests (Core Operations Intake & Project Orders)
+-- ----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `sales_requests`;
 CREATE TABLE `sales_requests` (
   `id` VARCHAR(64) NOT NULL,
@@ -39,12 +45,19 @@ CREATE TABLE `sales_requests` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_request_id` (`request_id`),
+  KEY `idx_jo_number` (`jo_number`),
   KEY `idx_artist` (`artist`),
   KEY `idx_sales_rep` (`sales_rep`),
   KEY `idx_status` (`project_status`),
-  KEY `idx_deadline` (`design_deadline`)
+  KEY `idx_approval` (`client_approval`),
+  KEY `idx_priority` (`priority`),
+  KEY `idx_deadline` (`design_deadline`),
+  KEY `idx_order_date` (`order_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ----------------------------------------------------------------------------
+-- Table: artists (Graphic Designers & 3D Visualizers Roster)
+-- ----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `artists`;
 CREATE TABLE `artists` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,12 +66,18 @@ CREATE TABLE `artists` (
   `availability` VARCHAR(50) NOT NULL DEFAULT 'AVAILABLE'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ----------------------------------------------------------------------------
+-- Table: sales_reps (Account Executives & Sales Representatives)
+-- ----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `sales_reps`;
 CREATE TABLE `sales_reps` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ----------------------------------------------------------------------------
+-- Table: directives (Print Preview & Production Queue Directives)
+-- ----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `directives`;
 CREATE TABLE `directives` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -75,47 +94,121 @@ CREATE TABLE `directives` (
   `reference` VARCHAR(50) DEFAULT 'FILE SENT'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert Artists
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Bob', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Edrian', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Glen', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Goodrich', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Jules', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Raven', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Rodel', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Tim', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `artists` (`name`, `availability`) VALUES ('Seven', 'AVAILABLE') ON DUPLICATE KEY UPDATE `name`=`name`;
+-- ----------------------------------------------------------------------------
+-- Table: users (Enterprise Authentication & Role-Based Access Control)
+-- ----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `email` VARCHAR(100) NOT NULL UNIQUE,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `full_name` VARCHAR(100) NOT NULL,
+  `role` VARCHAR(50) NOT NULL DEFAULT 'user',
+  `assigned_artist` VARCHAR(100) DEFAULT NULL,
+  `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  `permissions` LONGTEXT DEFAULT NULL,
+  `oauth_provider` VARCHAR(50) DEFAULT NULL,
+  `oauth_id` VARCHAR(100) DEFAULT NULL,
+  `avatar_url` VARCHAR(255) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_role` (`role`),
+  KEY `idx_status` (`status`),
+  KEY `idx_assigned_artist` (`assigned_artist`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert Sales Reps
-INSERT INTO `sales_reps` (`name`) VALUES ('Mae') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Mariel') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Jay') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Kim') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Joyce') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Shella') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Sheena') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Janet') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Flora') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Sol') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Dona') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Jen') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Seven') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Mike') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Pia') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Jastine') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Jade') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Joie') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Ed') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Dave') ON DUPLICATE KEY UPDATE `name`=`name`;
-INSERT INTO `sales_reps` (`name`) VALUES ('Alvic') ON DUPLICATE KEY UPDATE `name`=`name`;
+-- ----------------------------------------------------------------------------
+-- Table: audit_logs (System Audit Trail & Security Activity Tracking)
+-- ----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `audit_logs`;
+CREATE TABLE `audit_logs` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user` VARCHAR(100) NOT NULL,
+  `role` VARCHAR(50) NOT NULL,
+  `action` VARCHAR(50) NOT NULL,
+  `module` VARCHAR(100) NOT NULL,
+  `description` TEXT NOT NULL,
+  `ip_address` VARCHAR(50) DEFAULT '127.0.0.1',
+  `status` VARCHAR(50) DEFAULT 'Success',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_action` (`action`),
+  KEY `idx_user` (`user`),
+  KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert Directives Slots (from Print_Preview)
+-- ============================================================================
+-- SEED DATA
+-- ============================================================================
+
+-- 1. Insert Artists
+INSERT INTO `artists` (`name`, `availability`) VALUES
+('Bob', 'AVAILABLE'),
+('Dorothy', 'AVAILABLE'),
+('Glen', 'AVAILABLE'),
+('Goodrich', 'AVAILABLE'),
+('Jules', 'AVAILABLE'),
+('Raven', 'AVAILABLE'),
+('Rodel', 'AVAILABLE'),
+('Tim', 'AVAILABLE')
+ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
+
+-- 2. Insert Sales Reps
+INSERT INTO `sales_reps` (`name`) VALUES
+('Mae'),
+('Mariel'),
+('Jay'),
+('Kim'),
+('Joyce'),
+('Shella'),
+('Sheena'),
+('Janet'),
+('Flora'),
+('Sol'),
+('Dona'),
+('Jen'),
+('Seven'),
+('Mike'),
+('Pia'),
+('Jastine'),
+('Jade'),
+('Joie'),
+('Ed'),
+('Dave'),
+('Alvic')
+ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
+
+-- 3. Insert Directives Slots (from Print_Preview)
 INSERT INTO `directives` (`jo_number`, `request_id`, `slot_number`, `project_name`, `client`, `artist`, `sales_rep`, `order_date`, `deadline`, `releasing_date`, `reference`) VALUES
 ('P261001348', 'LR-26-2100', 1, 'LACOST & SMH & MK', 'DEcalpro Printing Services', 'Glen', 'DONA', '2026-10-24', '2026-10-24', '2026-10-24', 'FILE SENT'),
 ('SD261021-028', 'LR-26-2099', 3, 'STICKERS', 'ANYTIME FITNESS', 'Glen', 'JEN', '2026-10-24', '2026-10-24', '2026-10-26', 'FILE SENT'),
 ('SD261022-013', 'LR-26-2061', 4, 'L-STAND MENU', 'PARADIGMA', 'Glen', 'FLORA', '2026-10-22', '2026-10-22', '2026-10-23', 'FILE SENT');
 
--- Insert Sales Requests from sales_requests.html (2103 records)
+-- 4. Insert Users (Default Password for all seed accounts: Password123!)
+INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `full_name`, `role`, `assigned_artist`, `status`, `permissions`) VALUES
+(1, 'superadmin', 'admin@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Super Admin', 'super_admin', NULL, 'active', '{"dashboard":{"c":true,"r":true,"u":true,"d":true},"sales-requests":{"c":true,"r":true,"u":true,"d":true},"creatives-tracker":{"c":true,"r":true,"u":true,"d":true},"artist-workload":{"c":true,"r":true,"u":true,"d":true},"directives-details":{"c":true,"r":true,"u":true,"d":true},"monthly-output":{"c":true,"r":true,"u":true,"d":true},"reports":{"c":true,"r":true,"u":true,"d":true},"access-control":{"c":true,"r":true,"u":true,"d":true},"audit-trail":{"c":true,"r":true,"u":true,"d":true},"settings":{"c":true,"r":true,"u":true,"d":true}}'),
+(2, 'artist_dorothy', 'dorothy@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Dorothy Diaz', 'artist', 'Dorothy', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(3, 'sales_dona', 'dona@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Dona Sales Rep', 'sales', NULL, 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":true,"r":true,"u":true,"d":true},"creatives-tracker":{"c":false,"r":true,"u":false,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":false,"r":true,"u":false,"d":false},"monthly-output":{"c":false,"r":false,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(5, 'artist_glen', 'glen@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Glen Artist', 'artist', 'Glen', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(6, 'artist_jules', 'jules@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Jules Artist', 'artist', 'Jules', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(7, 'artist_raven', 'raven@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Raven Artist', 'artist', 'Raven', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(8, 'artist_bob', 'bob@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Bob Artist', 'artist', 'Bob', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(9, 'artist_tim', 'tim@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Tim Artist', 'artist', 'Tim', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(10, 'artist_goodrich', 'goodrich@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Goodrich Artist', 'artist', 'Goodrich', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}'),
+(11, 'artist_rodel', 'rodel@signdepot.com', '$2y$10$9oEMoc24qqsQBWLyfXAvXe7vr5qDIuY.lHMIgoTjrNvGcxEqgmFqy', 'Rodel Artist', 'artist', 'Rodel', 'active', '{"dashboard":{"c":false,"r":true,"u":false,"d":false},"sales-requests":{"c":false,"r":true,"u":false,"d":false},"creatives-tracker":{"c":true,"r":true,"u":true,"d":false},"artist-workload":{"c":false,"r":true,"u":false,"d":false},"directives-details":{"c":true,"r":true,"u":true,"d":false},"monthly-output":{"c":false,"r":true,"u":false,"d":false},"reports":{"c":false,"r":true,"u":false,"d":false},"access-control":{"c":false,"r":false,"u":false,"d":false},"audit-trail":{"c":false,"r":false,"u":false,"d":false},"settings":{"c":false,"r":false,"u":false,"d":false}}')
+ON DUPLICATE KEY UPDATE `username`=VALUES(`username`), `password_hash`=VALUES(`password_hash`), `permissions`=VALUES(`permissions`), `full_name`=VALUES(`full_name`), `role`=VALUES(`role`), `assigned_artist`=VALUES(`assigned_artist`);
+
+-- 5. Insert Audit Logs (Initial Security & Operational Logs)
+INSERT INTO `audit_logs` (`user`, `role`, `action`, `module`, `description`, `ip_address`, `status`, `created_at`) VALUES
+('superadmin', 'Super Admin', 'UPDATE', 'Access Control', 'Updated module permissions for artist role', '127.0.0.1', 'Success', DATE_SUB(NOW(), INTERVAL 6 MINUTE)),
+('sales_dona', 'Sales', 'CREATE', 'Sales Requests', 'Logged new sales order LR-26-2104 (BGC LED Facade)', '192.168.1.45', 'Success', DATE_SUB(NOW(), INTERVAL 24 MINUTE)),
+('artist_ed', 'Artist', 'UPDATE', 'Creatives Tracker', 'Submitted design proof for JO P261001352', '192.168.1.72', 'Success', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+('superadmin', 'Super Admin', 'AUTH', 'Security Portal', 'Successful master login via OAuth credentials', '127.0.0.1', 'Success', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+('sales_dona', 'Sales', 'APPROVE', 'Pending Sales', 'Approved client layout for Project JO P261001349', '192.168.1.45', 'Success', DATE_SUB(NOW(), INTERVAL 4 HOUR)),
+('artist_glen', 'Artist', 'EXPORT', 'Directives Details', 'Exported 4K Printable Job Order Blueprint P261001348', '192.168.1.66', 'Success', DATE_SUB(NOW(), INTERVAL 8 HOUR)),
+('superadmin', 'Super Admin', 'CONFIG', 'System Settings', 'Saved company branding and notification preferences', '127.0.0.1', 'Success', DATE_SUB(NOW(), INTERVAL 12 HOUR));
+
+-- 6. Insert Sales Requests (2,104 Production Records)
 INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
 ('lr-26-0001', 'LR-26-0001', 'SD260311-017', '2026-03-10', 'Mae', 'Everbuild', 'Everbuild Matcha Tokyo Board Up', 'Rodel', '2026-03-11', '2026-13-03', 'FILE SENT', 'SM DASMARINAS CAVITE', 'Indoor', 'INSTALL', 'Sir Tyron', '09178869926', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0002', 'LR-26-0002', 'SD260325-018', '2026-03-11', 'Mariel', 'SAVEMORE', 'POTATO CORNER', 'Bob', '2026-03-11', '2026-03-31', 'FILE SENT', 'SAVEMORE ALAPAN', 'Indoor', 'INSTALL', 'Ma''am Shaira', 'N/A', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -216,9 +309,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0097', 'LR-26-0097', 'TF', '2026-03-23', 'Mariel', 'SM SUPERMARKET', 'FRUITAS', 'Bob', '2026-03-23', '', 'FILE SENT', 'SM AURA', 'Indoor', 'INSTALL', 'Ma''am Elle', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0098', 'LR-26-0098', 'SD260323-007', '2026-03-23', 'Kim', 'PMTC MANAGEMENT CONSULTANCY', 'ONE VASKO KIOSK SIGNAGE', 'Tim', '2026-03-24', '2026-03-26', 'FILE SENT', 'SOUTH GATE MALL CHINO ROCES AVE MAKATI CITY', 'Indoor', 'INSTALL', 'SIR GREGORIO CABRERA', '9558370003', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0099', 'LR-26-0099', 'SD260321-001', '2026-03-23', 'Kim', 'M SPACE TAGAYTAY', 'PYLON SIGNAGE', 'Raven', '2026-03-24', '2026-03-26', 'FILE SENT', 'M SPACE TAGAYTAY', 'Outdoor', 'INSTALL', 'MS. ALECXA', '9510146794', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0100', 'LR-26-0100', 'SD260323-008', '2026-03-23', 'Joyce', 'yoks', 'stainless', 'Tim', '2026-03-23', '2026-03-23', 'FILE SENT', 'TACLOBAN', 'Indoor & Outdoor', 'DELIVER', 'YOKS', '9663565725', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0100', 'LR-26-0100', 'SD260323-008', '2026-03-23', 'Joyce', 'yoks', 'stainless', 'Tim', '2026-03-23', '2026-03-23', 'FILE SENT', 'TACLOBAN', 'Indoor & Outdoor', 'DELIVER', 'YOKS', '9663565725', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0101', 'LR-26-0101', 'SD260227-025', '2026-03-24', 'Mae', 'TOP VALUE', 'ALLIE PH ADDITIONALS', 'Tim', '2026-04-30', '2026-03-30', 'FILE SENT', 'Sta. Mesa heights QC', 'Indoor', 'DELIVER', 'Sir Xergg', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0102', 'LR-26-0102', 'SD260323-024', '2026-03-24', 'Sol', 'NEW CENTURY', 'NEW CENTURY ACRYLIC CUT OUT AND LETTERS', 'Bob', '2026-03-25', '2026-03-26', 'FILE SENT', '9F TOWER 6789 AYALA AVENUE MAKATI CITY', 'Indoor', 'INSTALL', 'Sir Ehly', '9569275183', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0103', 'LR-26-0103', 'SD260323-016', '2026-03-24', 'Mae', 'POWERHOUSE', 'POWERHOUSE SAMPLE 2', 'Raven', '2026-05-25', '2026-03-31', 'FILE SENT', 'BINONDO MANILA', 'Indoor', 'DELIVER', 'Ma''am Rica', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -318,9 +409,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0197', 'LR-26-0197', 'SD260407-023', '2026-04-07', 'Jen', 'Anytime Fitness', 'floor line', 'Rodel', '2026-04-08', '2026-04-08', '​', 'AF J. Abad Santos', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0198', 'LR-26-0198', 'SD260407-024', '2026-04-07', 'Pia', 'IDISPLAY', 'THE BISTRO MEDALLION', 'Bob', '2026-04-07', '2026-04-08', 'TO FOLLOW', '', 'Indoor', 'DELIVER', 'SIR REY', '9171376902', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0199', 'LR-26-0199', 'SD260107-017', '2026-04-07', 'Kim', 'ADVOS ADVERTISING AGENCY', 'RACK SIGNAGE 4-7-2026', 'Glen', '2026-04-08', '2026-04-10', 'FILE SENT', 'MUZON', 'Indoor', 'DELIVER', 'Maam Jessica', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0200', 'LR-26-0200', 'SD260224-014', '2026-04-07', 'Joyce', 'Planet Sports', 'HOKA - Lightbox ILOILO', 'Raven', '2026-04-08', '2026-04-08', 'FILE SENT', 'hoka ilo ilo', 'Indoor', 'DELIVER', 'Ms. Jie Ann', '9663565725', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0200', 'LR-26-0200', 'SD260224-014', '2026-04-07', 'Joyce', 'Planet Sports', 'HOKA - Lightbox ILOILO', 'Raven', '2026-04-08', '2026-04-08', 'FILE SENT', 'hoka ilo ilo', 'Indoor', 'DELIVER', 'Ms. Jie Ann', '9663565725', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0201', 'LR-26-0201', 'SD260408-002', '2026-04-08', 'Jade', 'SIGHTS AND SITES OUTDOOR ADVERTISING', 'DIRECT PRINT ON MAHJONG TILES', 'Raven', '2026-08-04', '2026-08-04', 'FILE SENT', 'PICKUP ONLY', 'Indoor', 'PICKUP', 'SIR RAINIER GUITTIEREZ', '9088839740', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0202', 'LR-26-0202', 'SD260408-007', '2026-04-08', 'Dave', 'TATTOO BRANDING', 'tatoo branding lightbox', 'Raven', '2026-08-04', '2026-08-04', 'FILE SENT', 'PICK UP', 'Indoor & Outdoor', 'PICKUP', 'MAM JEN', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0203', 'LR-26-0203', 'TF', '2026-04-08', 'Mariel', 'SM SUPERMARKET', 'BUKO NI FRUITAS', 'Bob', '2026-04-09', '', 'FILE SENT', 'SM SUPERMARKET MEGA B', 'Indoor', 'INSTALL', 'MA''AM ELLE', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -420,9 +509,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0297', 'LR-26-0297', 'P260400603', '2026-04-17', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026  GLORIETTA', 'Jules', '2026-04-17', '2026-04-17', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0298', 'LR-26-0298', 'P260400604', '2026-04-17', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026 MOA', 'Jules', '2026-04-17', '2026-04-17', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0299', 'LR-26-0299', 'P260400605', '2026-04-17', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026 MANILA BAY', 'Jules', '2026-04-17', '2026-04-17', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0300', 'LR-26-0300', 'P260400606', '2026-04-17', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026 ATC', 'Jules', '2026-04-17', '2026-04-17', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0300', 'LR-26-0300', 'P260400606', '2026-04-17', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026 ATC', 'Jules', '2026-04-17', '2026-04-17', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0301', 'LR-26-0301', 'SD260418-004', '2026-04-18', 'Kim', 'HSBC', 'TELLER NUMBER', 'Raven', '2026-04-17', '2026-04-18', 'FILE SENT', 'Pick up only', 'Indoor', 'PICKUP', 'Sir Tyron', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0302', 'LR-26-0302', 'P260400628', '2026-04-18', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026 TWO PARKADE', 'Glen', '2026-04-18', '2026-04-18', 'FILE SENT', 'PICK up only', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0303', 'LR-26-0303', 'P260400630', '2026-04-18', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'ASICS FP SEASONAL VISUAL UPDATE 2026 PODIUM', 'Glen', '2026-04-18', '2026-04-18', 'FILE SENT', 'PICK up only', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -522,9 +609,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0397', 'LR-26-0397', 'SD260428-004', '2026-04-28', 'Kim', 'HSBC', 'FROSTED STICKER', 'Raven', '2026-04-28', '2026-04-30', 'FILE SENT', 'HSBC MAKATI BRANCH', 'Indoor', 'INSTALL', 'SIR FRITZ', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0398', 'LR-26-0398', 'SD26604-012', '2026-04-28', 'Mariel', 'SM HYPERMARKET', 'BINALOT', 'Bob', '2026-04-28', '', 'FILE SENT', 'SM HYPERMARKET MOA', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0399', 'LR-26-0399', 'SD260413-024', '2026-04-28', 'Joyce', 'planet sports', 'NEW BALANCE LOGHTBOX', 'Raven', '2026-04-28', '2026-04-28', 'FILE SENT', 'sm baguio', 'Indoor & Outdoor', 'INSTALL', 'mam jie ann', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0400', 'LR-26-0400', 'P260401110', '2026-04-28', 'Dona', 'Decalpro Printing Services', 'SHOKZ 4.28', 'Glen', '2026-04-28', '2026-04-28', 'FILE SENT', 'PICKUP', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0400', 'LR-26-0400', 'P260401110', '2026-04-28', 'Dona', 'Decalpro Printing Services', 'SHOKZ 4.28', 'Glen', '2026-04-28', '2026-04-28', 'FILE SENT', 'PICKUP', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0401', 'LR-26-0401', 'TF', '2026-04-28', 'Joie', 'J&F', 'CASHIER SIGNAGE', 'Goodrich', '2026-04-30', '2026-04-05', 'TO FOLLOW', 'PICK UP', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0402', 'LR-26-0402', 'SD260428-006', '2026-04-28', 'Jen', 'R SIGNS AND CUSTOM PRINTING', 'NEON SIGN', 'Raven', '2026-04-28', '2026-04-29', 'FILE SENT', 'PICK-UP', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0403', 'LR-26-0403', 'TF', '2026-04-28', 'Mariel', 'SM HYPERMARKET', 'PERSIAN AVENUE', 'Bob', '2026-04-28', '', 'FILE SENT', 'SM HYPERMARKET CUBAO', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -624,9 +709,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0497', 'LR-26-0497', 'P260500339', '2026-05-09', 'Dona', 'Decalpro Printing Services', 'FOSSIL 1.8MM  L-STAND', 'Glen', '2026-05-09', '2026-05-11', 'FILE SENT', 'PICKUP', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0498', 'LR-26-0498', 'P260500348', '2026-05-09', 'Dona', 'BCM ORGANIZATION', 'STATE SANGGUNIANG KABATAAN', 'Jules', '2026-05-09', '2026-05-09', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0499', 'LR-26-0499', 'tf', '2026-05-09', 'Joie', 'ENTER 10 BOWLING', 'ENTER 10 SIGNAGE', 'Goodrich', '2026-11-09', '2026-15-09', 'FILE SENT', 'INSTALLATION', 'Indoor', 'INSTALL', 'SIR RR', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0500', 'LR-26-0500', 'SD260508-001', '2026-05-09', 'Sol', 'ANYTHING IS POSSIBLE WITH LAVE CORP', 'DOUBLE FACE ROUND EMBOSSED LIGHTBOX', 'Rodel', '2026-05-10', '2026-05-10', 'FILE SENT', '3D Lake View Drive, Brgy. Ilog, Pasig City', 'Outdoor', 'INSTALL', 'Tina Apolinario', '9178499476', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0500', 'LR-26-0500', 'SD260508-001', '2026-05-09', 'Sol', 'ANYTHING IS POSSIBLE WITH LAVE CORP', 'DOUBLE FACE ROUND EMBOSSED LIGHTBOX', 'Rodel', '2026-05-10', '2026-05-10', 'FILE SENT', '3D Lake View Drive, Brgy. Ilog, Pasig City', 'Outdoor', 'INSTALL', 'Tina Apolinario', '9178499476', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0501', 'LR-26-0501', 'SD230125-009', '2026-05-09', 'Flora', 'SMDC PARK', 'SMDC PARK SIGNAGE', 'Raven', '2026-05-09', '2026-05-15', 'N/A', 'STA. ROSA LAGUNA', 'Indoor', 'INSTALL', 'KIRBY SAEZ', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0502', 'LR-26-0502', 'P260500352', '2026-05-09', 'Dona', 'GKADS TRADING', 'CARWASH EXPRESS', 'Glen', '0206-05-09', '2026-05-11', 'FILE SENT', 'PICKUP', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0503', 'LR-26-0503', 'SD260509-001', '2026-05-09', 'Kim', 'ADVOS ADVERTISING AGENCY', 'SOB', 'Glen', '2026-05-09', '2026-05-12', 'FILE SENT', 'MUZON TAYTAY RIZAL', 'Indoor', 'DELIVER', 'MS. JESSICA', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -726,9 +809,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0597', 'LR-26-0597', 'SD260411-017', '2026-05-19', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE & MURAL', 'Rodel', '2026-05-20', '2026-05-18', 'FILE SENT', '', '​', '​', '', '', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0598', 'LR-26-0598', 'P260500909', '2026-05-20', 'Jay', 'HEIZEL NUEZCA', 'D''ALLEY BURGER', 'Glen', '2026-05-20', '2026-05-20', 'FILE SENT', 'VALENZUELA', 'Indoor', 'PICKUP', 'MS. HEIZEL', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0599', 'LR-26-0599', 'SD260520-006', '2026-05-20', 'Jen', 'ANYTIME FITNESS', 'PUNCHLIST', 'Edrian', '2026-05-20', '2026-05-20', 'FILE SENT', 'XELAND MARIKINA', 'Indoor', '​', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0600', 'LR-26-0600', 'SD260415-011', '2026-05-20', 'Jen', 'ANYTIME FITNESS', 'SIGANGE & MURAL', 'Edrian', '2026-05-20', '2026-05-20', 'FILE SENT', 'BACOOR CAVITE', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0600', 'LR-26-0600', 'SD260415-011', '2026-05-20', 'Jen', 'ANYTIME FITNESS', 'SIGANGE & MURAL', 'Edrian', '2026-05-20', '2026-05-20', 'FILE SENT', 'BACOOR CAVITE', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0601', 'LR-26-0601', 'SD260428-021', '2026-05-20', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE & MURAL', 'Edrian', '2026-05-20', '2026-05-20', 'FILE SENT', 'BINONDO MANILA', 'Indoor', 'INSTALL', 'Mr. John Paul Bagamaspad', '9177017049', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0602', 'LR-26-0602', 'SD260520-003', '2026-05-20', 'Flora', 'SUNWEALTH', 'CTC TUBULAR', 'Goodrich', '2026-05-20', 'ASAP', 'FILE SENT', 'CONGRESSIONAL TOWN CENTER', 'Outdoor', 'INSTALL', 'JOBY', '639190755719', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0603', 'LR-26-0603', 'SD260520-004', '2026-05-20', 'Flora', 'SUNWEALTH', 'CTC BACKLIT SIGN', 'Goodrich', '2026-05-21', 'ASAP', 'FILE SENT', 'CONGRESSIONAL TOWN CENTER', 'Outdoor', 'INSTALL', 'JOBY', '639190755719', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -743,7 +824,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0612', 'LR-26-0612', 'P260500859', '2026-05-20', 'Jastine', 'HOME CREATIONS', 'HBE TARPAULIN', 'Jules', '2026-05-21', '2026-05-21', 'FILE SENT', 'PANDACAN MANILA', 'Indoor', 'DELIVER', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0613', 'LR-26-0613', 'P260500854', '2026-05-20', 'Jastine', 'Ms. Luisa Atienza', 'KENJIE & KATE SOB', 'Jules', '2026-05-20', '2026-05-20', 'FILE SENT', 'Caloocan', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0614', 'LR-26-0614', 'SD260520-011', '2026-05-20', 'Joyce', 'WHIZTCRAFT', 'LIGHTBOX', 'Raven', '2026-05-20', '2026-05-20', 'FILE SENT', 'PICK UP', 'Indoor & Outdoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('0', '0', 'SD260520-010', '2026-05-20', 'Flora', 'MODULART', 'MODULART ASUS ACRYLIC', 'Raven', '2026-05-21', '2026-05-22', 'FILE SENT', 'PICK UP', 'Indoor', 'PICKUP', 'CHRISTINE', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
+('lr-26-0615', 'LR-26-0615', 'SD260520-010', '2026-05-20', 'Flora', 'MODULART', 'MODULART ASUS ACRYLIC', 'Raven', '2026-05-21', '2026-05-22', 'FILE SENT', 'PICK UP', 'Indoor', 'PICKUP', 'CHRISTINE', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0616', 'LR-26-0616', 'P260500893', '2026-05-21', 'Jay', '247 SUPERSIGN', '247 FIRE EX', 'Glen', '2026-05-21', '2026-05-22', 'FILE SENT', 'MEYCAUYAN', 'Indoor', 'PICKUP', 'SIR FERDS', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0617', 'LR-26-0617', 'P260500898', '2026-05-21', 'Jay', 'Sir Ben Donato', 'BENCH ACTIVE HYBRID GAMES LEG 2 5-18-26', 'Jules', '2026-05-21', '2026-05-21', 'FILE SENT', 'BGC', 'Indoor', 'DELIVER', 'SIR BEN', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0618', 'LR-26-0618', 'SD260520-023', '2026-05-21', 'Sol', 'KAMP KOFI', 'KAMP KOFI FLAT ROUND LIGHTBOX', 'Goodrich', '2026-05-21', '2026-05-21', 'FILE SENT', '10A, C. Molina St. Bartolome Subd., Veinte Reales, Valenzuela City', 'Outdoor', 'PICKUP', 'SIR FRANCIS', '9771527820', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -828,9 +909,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0697', 'LR-26-0697', 'P260501215', '2026-05-28', 'Jay', '247 SUPERSIGN', '247 TAPA KING', 'Glen', '2026-05-29', '2026-05-29', 'FILE SENT', '', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0698', 'LR-26-0698', 'sd260523-011', '2026-05-28', 'Kim', 'ADVOS ADVERTISING AGENCY', 'SOB', 'Glen', '2026-05-29', '2026-05-30', 'FILE SENT', 'MUZON TAYTAY RIZAL', 'Indoor', 'DELIVER', 'MS. JESSICA', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0699', 'LR-26-0699', 'P260501136', '2026-05-29', 'Jastine', 'CITY SAVINGS', 'DATA PRIVACY', 'Glen', '2026-05-29', '2026-05-30', 'FILE SENT', 'Ground, 29th, and 35th Flr. UnionBank Plaza Building, Meralco Avenue, corner Onyx Rd, Ortigas Center, Pasig', '​', 'PICKUP', 'MS. JAJA', '9564199004', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0700', 'LR-26-0700', 'SD260529-014', '2026-05-29', 'Mariel', 'SINITIC', 'SINITIC EAST OCEAN PALACE', 'Bob', '2026-05-29', '', 'FILE SENT', 'EAST OCEAN PALACE', 'Indoor', 'INSTALL', 'BOSS DANNY', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0700', 'LR-26-0700', 'SD260529-014', '2026-05-29', 'Mariel', 'SINITIC', 'SINITIC EAST OCEAN PALACE', 'Bob', '2026-05-29', '', 'FILE SENT', 'EAST OCEAN PALACE', 'Indoor', 'INSTALL', 'BOSS DANNY', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0701', 'LR-26-0701', 'N/A', '2026-05-29', 'Flora', 'NIU BY VIKINGS THE PODIUM', 'NIU THE PODIUM', 'Tim', '2026-06-01', 'TF', 'FILE SENT', 'LEVEL 5, THE PODIUM', 'Indoor', 'INSTALL', 'JILLIAN CHUA', '639173003578', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0702', 'LR-26-0702', 'N/A', '2026-05-29', 'Flora', 'NIU BY VIKINGS SM AURA', 'NIU SM AURA', 'Tim', '2026-06-01', 'TF', 'FILE SENT', 'LEVEL 6, SM AURA', 'Indoor', 'INSTALL', 'JILLIAN CHUA', '639173003578', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0703', 'LR-26-0703', 'SD260529-029', '2026-05-29', 'Sol', 'VILMA PINPIN', 'ROUND EMBOSSED LIGHTBOX', 'Rodel', '2026-05-29', '2026-05-29', 'FILE SENT', 'San Pedro, Laguna', 'Indoor & Outdoor', 'PICKUP', 'Vilma Pinpin', 'N/A', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -930,9 +1009,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0798', 'LR-26-0798', 'SD260609-010', '2026-06-09', 'Pia', 'TRION DEVELOPMENT CORP.', 'TARP', 'Goodrich', '2026-06-09', '2026-06-11', 'FILE SENT', 'MANILA', 'Outdoor', 'PICKUP', 'KRISTI', '0968 6091789', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0799', 'LR-26-0799', 'SD260609-014', '2026-06-10', 'Pia', 'PNS TRADING', 'PRISTINE PARADIGM', 'Tim', '2026-06-09', '2026-06-10', 'FILE SENT', 'QUEZON CITY', 'Indoor', 'PICKUP', 'CHESKA', '0977 750 8128', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0800', 'LR-26-0800', 'P260600431', '2026-06-09', 'Dona', 'Mantis Graphics & Prints', 'SINTRA 5MM AND MAD POTATO', 'Jules', '2026-06-09', '2026-06-09', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0801', 'LR-26-0801', 'P260600440', '2026-06-10', 'Dona', 'SPACEY  DESIGN', 'TIGER SUGAR', 'Jules', '2026-06-09', '2026-06-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0801', 'LR-26-0801', 'P260600440', '2026-06-10', 'Dona', 'SPACEY  DESIGN', 'TIGER SUGAR', 'Jules', '2026-06-09', '2026-06-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0802', 'LR-26-0802', 'SD260608-015', '2026-06-11', 'Flora', 'RPM BUILDERS', 'RPM SIGNAGE', 'Raven', '3036-06-20', '2026-06-15', 'FILE SENT', '-', 'Indoor', 'PICKUP', 'Mark Bajaro', '639171859588', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0803', 'LR-26-0803', 'P260600442', '2026-06-12', 'Dona', 'SMARTSIGN', 'i- bizness consultancy', 'Glen', '2026-06-09', '2026-06-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0803-2', 'LR-26-0803', 'SD260610-004', '2026-06-10', 'Jastine', 'SINOBRIDGE PHILIPPINES INC', 'SINOBRIDGE SIGNAGE REPAIR v2', 'Tim', '2026-06-10', '2026-06-11', 'FILE SENT', '', 'Outdoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1032,9 +1109,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0897', 'LR-26-0897', 'SD260611-0274', '2026-06-18', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Rodel', '2026-06-18', '2026-06-17', 'FILE SENT', 'CROSSROAD TANDANG SORA', 'Indoor', 'INSTALL', 'Mr. Dimos Karantzas', '639674715387', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0898', 'LR-26-0898', 'P260600852', '2026-06-18', 'Jastine', 'Exordium Trading and Services Corporation', 'Tension Banner', 'Glen', '2026-06-18', '2026-06-19', 'FILE SENT', '', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0899', 'LR-26-0899', 'SD260313-015', '2026-06-18', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Rodel', '2026-06-18', '2026-06-17', 'FILE SENT', 'MY ZONE MENDIOLA', 'Indoor', 'INSTALL', 'Mr. Jan Carlo del Rosario', '639178315266', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-0900', 'LR-26-0900', 'SD260608-019', '2026-06-18', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Rodel', '2026-06-18', '2026-06-17', 'FILE SENT', 'STA MARIA BULACAN', 'Indoor', 'INSTALL', 'MR. JAMES SY', '639228402612', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-0900', 'LR-26-0900', 'SD260608-019', '2026-06-18', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Rodel', '2026-06-18', '2026-06-17', 'FILE SENT', 'STA MARIA BULACAN', 'Indoor', 'INSTALL', 'MR. JAMES SY', '639228402612', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0901', 'LR-26-0901', 'SD260615-026', '2026-06-18', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Rodel', '2026-06-18', '2026-06-17', 'FILE SENT', 'SAN JOSE DEL MONTE BULACAN', 'Indoor', 'INSTALL', 'Ms. Dianne Bass', '639178740536', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0902', 'LR-26-0902', 'P260600863', '2026-06-18', 'Jastine', 'SIGN DEPOT', 'BGC Tombstone Resticker', 'Glen', '2026-06-18', '2026-06-20', 'FILE SENT', 'BGC', 'Outdoor', 'INSTALL', 'Ms. Cez', '639178740536', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0903', 'LR-26-0903', 'SD260618-025', '2026-06-18', 'Jastine', 'CRISPAL ENTERPRISES', 'DENNY''S SAMPLE', 'BOB', '2026-06-17', '2026-06-18', 'FILE SENT', '1336 V CONCEPCION ST. STA CRUZ MANILA', '​', 'PICKUP', 'BUTCH GRATIL', '9063702992', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1134,9 +1209,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-0997', 'LR-26-0997', 'SD260625-007', '2026-06-26', 'Joyce', 'Whizcraft Interior Design', 'LightBox Game one - Polycloth', 'Tim', '2026-06-26', '2026-06-26', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0998', 'LR-26-0998', 'P260601354', '2026-06-27', 'Jastine', 'Zhong Jian Steel Structure', 'ZHONGJIAN Sticker', 'Jules', '2026-06-27', '2026-06-27', 'FILE SENT', '', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-0999', 'LR-26-0999', 'P260601364', '2026-06-27', 'Dona', 'APJD ADVERSTING SERVICES', 'THW POLYCLOTH', 'Jules', '2026-06-27', '2026-06-29', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1000', 'LR-26-1000', 'P260601365', '2026-06-27', 'Dona', 'SPACEY DESIGN MANILA', 'HP GRAPHICS - DTF', 'Jules', '2026-06-27', '2026-06-26', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1000', 'LR-26-1000', 'P260601365', '2026-06-27', 'Dona', 'SPACEY DESIGN MANILA', 'HP GRAPHICS - DTF', 'Jules', '2026-06-27', '2026-06-26', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1001', 'LR-26-1001', 'P260601390', '2026-06-28', 'Dona', 'RANDY CABUNILAS', 'HK1 GAS STATION', 'Rodel', '2026-06-27', '2026-06-26', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1002', 'LR-26-1002', 'SD260626-012', '2026-06-29', 'Flora', 'POPEYES', 'POPEYES DRIVE THRU PANELS', 'Raven', '2026-06-29', '2026-07-02', 'FILE SENT', 'CARMONA', 'Outdoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1003', 'LR-26-1003', 'SD260629-004', '2026-06-29', 'Joana', 'TATTOO BRANDING', 'MESH TARP', 'Jules', '2026-06-29', '2026-06-29', 'FILE SENT', 'quezon city', 'Indoor & Outdoor', 'PICKUP', 'Ma''am Imee', '9189417279', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1236,9 +1309,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1097', 'LR-26-1097', 'P260700456', '2026-07-09', 'Dona', 'HAPPY FOODS CORP.', 'SOBAN SM NORTH EDSA', 'Jules', '2026-07-09', '2026-07-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1098', 'LR-26-1098', 'P260700479', '2026-07-10', 'Dona', 'NLV Signmaker', 'SAMS UV 2S STICKER', 'Glen', '2026-07-10', '2026-07-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1099', 'LR-26-1099', 'N/A', '2026-07-10', 'Jastine', 'Luxor international trdg corp.', 'BH PANEL', 'Jules', '2026-07-10', '2026-07-10', 'FILE SENT', '', 'Outdoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1100', 'LR-26-1100', 'P260700497', '2026-07-10', 'Dona', 'Smart Sign', 'LOT FOR LEASE', 'Glen', '2026-07-10', '2026-07-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1100', 'LR-26-1100', 'P260700497', '2026-07-10', 'Dona', 'Smart Sign', 'LOT FOR LEASE', 'Glen', '2026-07-10', '2026-07-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1101', 'LR-26-1101', 'P260700524', '2026-07-11', 'Shella', 'INFINITY PRINTS', 'ARMY STANDEE', 'JULES', '2026-07-10', '2026-07-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1102', 'LR-26-1102', '', '2026-07-11', 'Shella', 'INFINITY PRINTS', 'GENE A STAND', 'JULES', '2026-07-10', '2026-07-10', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1103', 'LR-26-1103', 'P260700545', '2026-07-11', 'Dona', 'PAU ACILAC', 'LAPTOP', 'Glen', '2026-07-11', '2026-07-11', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1338,9 +1409,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1197', 'LR-26-1197', 'SD260709-030', '2026-07-25', 'Mariel', 'SM HYPERMARKET', 'TURKS', 'Bob', '2026-07-09', '2026-07-11', 'FILE SENT', 'SM HYPERMARKET MOA', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1198', 'LR-26-1198', 'SD260709-023', '2026-07-25', 'Mariel', 'SM HYPERMARKET', 'PEPA WINGS', 'Glen', '2026-07-09', '2026-07-11', 'FILE SENT', 'SM HYPERMARKET NOVALICHES', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1199', 'LR-26-1199', 'SD260711-004', '2026-07-25', 'Mariel', 'SM HYPERMARKET', 'MIGOY''S BURGER', 'Bob', '2026-07-11', '2026-07-17', 'FILE SENT', 'SM HYPERMARKET SUCAT', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1200', 'LR-26-1200', 'SD260711-003', '2026-07-25', 'Mariel', 'SM HYPERMARKET', 'POTATO CORNER', 'Bob', '2026-07-11', '2026-07-17', 'FILE SENT', 'SM HYPERMARKET SUCAT', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1200', 'LR-26-1200', 'SD260711-003', '2026-07-25', 'Mariel', 'SM HYPERMARKET', 'POTATO CORNER', 'Bob', '2026-07-11', '2026-07-17', 'FILE SENT', 'SM HYPERMARKET SUCAT', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1201', 'LR-26-1201', 'SD260717-009', '2026-07-25', 'Mariel', 'SM HYPERMARKET', 'MANG PASTIL', 'Bob', '2026-07-17', '2026-07-22', 'FILE SENT', 'SM HYPERMARKET BICUTA', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1202', 'LR-26-1202', 'SD260717-007', '2026-07-25', 'Mariel', 'SM SUPERMARKET', 'TURKS/ JAMAICAN/ PAOTSIN/ GOTO PILIPINAS', 'Bob', '2026-07-17', '2026-07-24', 'FILE SENT', 'SM SUPERMARKET GRAND CENTRAL', 'Indoor', 'INSTALL', 'MA''AM JOCEL', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1203', 'LR-26-1203', 'SD260722-013', '2026-07-25', 'Mariel', 'SM SAVEMORE', 'SIOMAI HOUSE', 'Bob', '2026-07-22', '2026-07-24', 'FILE SENT', 'SM SAVEMORE ONE MALL', 'Indoor', 'INSTALL', 'MA''AM SHAIRA', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1440,9 +1509,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1297', 'LR-26-1297', 'SD260803-020', '2026-08-05', 'Jen', 'ANYTIME FITNESS', 'STICKER', 'Glen', '2026-08-05', '2026-08-05', 'FILE SENT', 'AF MEXICO PAMPANGA', 'Indoor', 'INSTALL', 'Mr. John Paul Bagamaspad', '9177017049', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1298', 'LR-26-1298', 'SD260803-020', '2026-08-05', 'Jen', 'ANYTIME FITNESS', 'DIAGONAL ACRYLIC', 'Raven', '2026-08-05', '2026-08-05', 'FILE SENT', 'AF MEXICO PAMPANGA', 'Indoor', 'INSTALL', 'Mr. John Paul Bagamaspad', '9177017049', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1299', 'LR-26-1299', '', '2026-08-05', 'Dona', 'HAPPY FOODS', 'SOBAN ONE BONI', 'Glen', '2026-08-05', '2026-08-06', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1300', 'LR-26-1300', '', '2026-08-05', 'Dona', 'HAPPY FOODS CORP.', 'SOBAN NE GRILLING GUIDE', 'Glen', '2026-08-05', '2026-08-06', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1300', 'LR-26-1300', '', '2026-08-05', 'Dona', 'HAPPY FOODS CORP.', 'SOBAN NE GRILLING GUIDE', 'Glen', '2026-08-05', '2026-08-06', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1301', 'LR-26-1301', '', '2026-08-05', 'Dona', 'HAPPY FOODS CORP.', 'SIBYULEE OPEN-CLOSED MANILA BAY', 'Glen', '2026-08-05', '2026-08-06', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1302', 'LR-26-1302', 'P260800204', '2026-08-05', 'Dona', 'PROFIX ADS', 'KONZERT & ALPHATHETA & SILENT NOISE', 'Glen', '2026-08-05', '2026-08-06', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1303', 'LR-26-1303', 'SD260702-020', '2026-08-05', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Raven', '2026-08-05', '2026-08-05', 'FILE SENT', 'AF NAIC CAVITE', 'Indoor', 'INSTALL', 'Jotham Tsai', '639178805364', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1542,9 +1609,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1397', 'LR-26-1397', 'P260800528', '2026-08-12', 'Jastine', 'HOME CREATIONS', 'CAPAS TARP', 'Jules', '2026-08-12', '2026-08-14', 'FILE SENT', '', '​', 'DELIVER', 'Sir JOMAR BERINO', '9516263131', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1398', 'LR-26-1398', 'SD260811-014', '2026-08-12', 'Flora', 'VIKINGS GROUP', 'TAKUMI STICKER REPLACEMENT', 'Tim', '2026-08-13', '2026-08-18', 'FILE SENT', 'MAKATI', 'Outdoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1399', 'LR-26-1399', 'SD260812-010', '2026-08-12', 'Joyce', 'CHINABANKING CORPORATION', 'TENSION FABRIX PHOTOWALL PRINT ONLY', 'Jules', '2026-08-12', '2026-08-12', 'FILE SENT', '', 'Indoor', 'DELIVER', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1400', 'LR-26-1400', 'SD260812-014', '2026-08-12', 'Joana', 'WILFRED CHUA', '212 PLATES', 'Goodrich', '2026-08-12', '2026-08-12', 'FILE SENT', 'pick up', 'Indoor & Outdoor', 'PICKUP', 'wlfred chua', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1400', 'LR-26-1400', 'SD260812-014', '2026-08-12', 'Joana', 'WILFRED CHUA', '212 PLATES', 'Goodrich', '2026-08-12', '2026-08-12', 'FILE SENT', 'pick up', 'Indoor & Outdoor', 'PICKUP', 'wlfred chua', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1401', 'LR-26-1401', 'SD260812-006', '2026-08-12', 'Joana', 'Eivance Optical', '6cm KAPOOR LIGHTBOX  SINGLE FACE', 'Goodrich', '2026-08-12', '2026-08-12', 'FILE SENT', 'Ventura Mall Dasmariñas cavite', 'Indoor', 'DELIVER', 'Gio Eridani', '985910000', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1402', 'LR-26-1402', 'P260800525', '2026-08-12', 'Jastine', 'Red Octagon Detailing Studio Phil', 'PLATECARD  DETAILING', 'Jules', '2026-08-12', '2026-08-13', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', '​', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1403', 'LR-26-1403', 'SD260813-003', '2026-08-12', 'Joyce', 'PLANET SPORTS', 'FOOTLOCKER BRAND SIGNAGES', 'Raven', '2026-08-12', '2026-08-12', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1637,16 +1702,14 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1490', 'LR-26-1490', 'SD260825-020', '2026-08-25', 'Kim', 'ADVOS ADVERTISING AGENCY', 'SOB', 'Glen', '2026-08-26', '2026-09-01', 'FILE SENT', '', 'Indoor', 'DELIVER', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1491', 'LR-26-1491', 'P260801002', '2026-08-25', 'Dona', 'PROFIX ADS', 'Skyworth Table Riser', 'Glen', '2026-08-26', '2026-08-26', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1492', 'LR-26-1492', 'SD260817-008', '2026-08-25', 'Joyce', 'PLANET SPORTS', 'New Balance Trinoma', 'Raven', '2026-08-24', '2026-08-24', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1493', 'LR-26-1493', 'SD260826-016,SD260826-015,SD260826-014,SD260826-009,SD260826-010', '2026-08-25', 'Joyce', 'PLANET SPORTS', 'CONVERSE ACRYLIC SIGNAGE (SM MANILA, SM FAIRVIEW, SMNE, SM SOUTHMALL, SM ILOILO)', 'Raven', '2026-08-25', '2026-08-25', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
+('lr-26-1493', 'LR-26-1493', 'SD260826-016,SD260826-015,SD260826-014,SD260826-00', '2026-08-25', 'Joyce', 'PLANET SPORTS', 'CONVERSE ACRYLIC SIGNAGE (SM MANILA, SM FAIRVIEW, SMNE, SM SOUTHMALL, SM ILOILO)', 'Raven', '2026-08-25', '2026-08-25', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1494', 'LR-26-1494', 'SD260902-023', '2026-08-25', 'Joyce', 'PLANET SPORTS', 'NEW BALANCE STOREFRONT (RESIZE)', 'Raven', '2026-08-25', '2026-08-25', 'FILE SENT', '', 'Outdoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1495', 'LR-26-1495', 'P260801003', '2026-08-25', 'Dona', 'SPACEY DESIGN', 'SBI GRAPHICS 08.25', 'Glen', '2026-08-25', '2026-08-26', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1496', 'LR-26-1496', 'SD260825-007', '2026-08-25', 'Joyce', 'IRIDIUM TECHNOLOGIES INC', 'LIGHTBOX', 'Goodrich', '2026-08-25', '2026-08-25', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1497', 'LR-26-1497', 'SD260815-009', '2026-08-25', 'Joyce', 'PLANET SPORTS', 'SKECHERS SLIM LIGHTBOX', 'Raven', '2026-08-25', '2026-08-25', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1498', 'LR-26-1498', 'TF', '2026-08-25', 'Joyce', 'PLANET SPORTS', 'SPORTS DIRECT BRAND SIGNAGES (ILOILO)', 'Raven', '2026-08-25', '2026-08-25', 'FILE SENT', 'ILOILO', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1499', 'LR-26-1499', 'SD260826-011', '2026-08-26', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Raven', '2026-08-27', '2026-08-26', 'FILE SENT', 'NCC MALL DAVAO', 'Indoor', 'INSTALL', 'Mr. James Sy', '639228402612', 'On-going', 'Pending', 'Normal', 'Pending', 0, 0, 0, 'In Progress', 0, ''),
-('lr-26-1500', 'LR-26-1500', 'SD260825-015', '2026-08-26', 'Kim', 'HAHSY', 'Readymade Lightbox', 'Tim', '2026-08-26', '2026-08-26', 'FILE SENT', '', 'Outdoor', 'PICKUP', 'Ms. Elaine', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1500', 'LR-26-1500', 'SD260825-015', '2026-08-26', 'Kim', 'HAHSY', 'Readymade Lightbox', 'Tim', '2026-08-26', '2026-08-26', 'FILE SENT', '', 'Outdoor', 'PICKUP', 'Ms. Elaine', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1501', 'LR-26-1501', 'SD260826-011', '2026-08-26', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE AND MURAL', 'Glen', '2026-08-27', '2026-08-26', 'FILE SENT', 'NCC MALL DAVAO', 'Indoor', 'INSTALL', 'Mr. James Sy', '639228402612', 'On-going', 'Pending', 'Normal', 'Pending', 0, 0, 0, 'In Progress', 0, ''),
 ('lr-26-1502', 'LR-26-1502', 'SD260825-014', '2026-08-26', 'Kim', 'HAHSY', 'TARPULIN', 'Tim', '2026-08-26', '2026-08-26', 'FILE SENT', '', 'Outdoor', 'PICKUP', 'Ms. Elaine', '639228402612', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1503', 'LR-26-1503', 'P260801038', '2026-08-26', 'Dona', 'Big Signs Advertising', 'BASKETBALL COURT SAMPLE', 'Jules', '2026-08-26', '2026-08-26', 'FILE SENT', '', '​', 'PICKUP', '', '639228402612', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1746,9 +1809,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1597', 'LR-26-1597', 'P260900265', '2026-09-05', 'Dona', 'GKADS TRADING', 'ECAC NEW STICKER', 'Glen', '2026-09-05', '2026-09-05', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1598', 'LR-26-1598', 'SD260904-014', '2026-09-05', 'Joyce', 'PLANET SPORTS', 'SPORTS DIRECT OUTDOOR LB SUBIC', 'Raven', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', 'Outdoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1599', 'LR-26-1599', 'P260900271', '2026-09-05', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'MIKASA RED', 'Jules', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1600', 'LR-26-1600', 'P260900283', '2026-09-05', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'TRUDON', 'Jules', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1600', 'LR-26-1600', 'P260900283', '2026-09-05', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'TRUDON', 'Jules', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1601', 'LR-26-1601', 'SD260904-015', '2026-09-05', 'Joyce', 'PLANET SPORTS', 'SD BRAND SIGNAGES ADDTL SUBIC', 'Raven', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1602', 'LR-26-1602', 'SD260827-009', '2026-09-05', 'Joyce', 'PLANET SPORTS', 'SPORTS DIRECT - Stickers for Fitting Room Iloilo', 'Raven', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', 'Indoor', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1603', 'LR-26-1603', 'SD260903-031', '2026-09-05', 'Joyce', 'JOLLIBEE FOOD CORP', 'MANG INASAL MOCK UP', 'Raven', '2026-09-04', 'Sepetmber 4, 2026', 'FILE SENT', '', 'Indoor', 'DELIVER', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1848,9 +1909,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1697', 'LR-26-1697', 'SD260917-020', '2026-09-17', 'Jen', 'ANYTIME FITNESS', 'MURALS', 'Glen', '2026-09-21', '2026-09-17', 'FILE SENT', 'AF SUNORIO GUIGUINTO', 'Indoor', 'INSTALL', 'Jotham Tsai', '639178805364', 'On-going', 'Pending', 'Normal', 'Pending', 0, 0, 0, 'In Progress', 0, ''),
 ('lr-26-1698', 'LR-26-1698', 'P260900896', '2026-09-18', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'DECATHLON SHELF DRESS-UP', 'Jules', '2026-09-18', '2026-09-18', 'FILE SENT', '', '​', 'PICKUP', '', '639178805364', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1699', 'LR-26-1699', 'P260900895', '2026-09-18', 'Jastine', 'Exordium Trading and Services Corporation', 'TSUBAKI 09-09-26', 'Jules', '2026-09-18', '2026-09-18', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1700', 'LR-26-1700', 'P260900903', '2026-09-18', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'CDG MM6 SIGNAGE DIRECTIONAL', 'Jules', '2026-09-18', '2026-09-18', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1700', 'LR-26-1700', 'P260900903', '2026-09-18', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'CDG MM6 SIGNAGE DIRECTIONAL', 'Jules', '2026-09-18', '2026-09-18', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1701', 'LR-26-1701', 'P260900909', '2026-09-18', 'Dona', 'SPACEY DESIGN MANILA', 'Hiessence Podium Polycloth', 'Glen', '2026-09-18', '2026-09-19', 'FILE SENT', '', '​', 'PICKUP', '', '', '​', 'Pending', '​', 'Pending', 0, 0, 0, 'In Progress', 0, ''),
 ('lr-26-1702', 'LR-26-1702', 'SD260918-016', '2026-09-18', 'Pia', 'FLASH MEDIA', 'SINGAPORE SCHOOL P2.5 LED', 'Raven', '2026-09-19', '2026-09-25', 'FILE SENT', 'MANILA', 'Indoor', 'INSTALL', 'MS. YNAH', '', '​', 'Pending', '​', 'Pending', 0, 0, 0, 'In Progress', 0, ''),
 ('lr-26-1703', 'LR-26-1703', 'P260900926', '2026-09-16', 'Jastine', 'CHRONOPRINT', 'Deloitte', 'Jules', '2026-09-17', '2026-09-18', 'FILE SENT', '', '​', '​', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -1950,9 +2009,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1797', 'LR-26-1797', 'SD260903-007', '2026-09-30', 'Mariel', 'SM HYPERMARKET', 'PAOTSIN', 'Bob', '2026-09-03', '2026-09-04', 'FILE SENT', 'SM HYPERMARKET BICUTAN', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1798', 'LR-26-1798', 'SD260903-005', '2026-09-30', 'Mariel', 'SM HYPERMARKET', 'PEPA WINGS', 'Bob', '2026-09-03', '2026-09-04', 'FILE SENT', 'SM HYPERMARKET MANDALUYONG', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1799', 'LR-26-1799', 'P260901617', '2026-09-30', 'Jastine', 'LIMBAG ENT.', 'MA"AM CHE STANDEE', 'GLEN', '2026-09-30', '2026-09-30', 'FILE SENT', 'PICK UP', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1800', 'LR-26-1800', 'SD260930-032', '2026-09-30', 'Flora', 'VIKINGS GROUP', 'A1 SOFT FILM - BGC', 'Tim', '2026-09-30', '2026-10-02', 'FILE SENT', 'BGC', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1800', 'LR-26-1800', 'SD260930-032', '2026-09-30', 'Flora', 'VIKINGS GROUP', 'A1 SOFT FILM - BGC', 'Tim', '2026-09-30', '2026-10-02', 'FILE SENT', 'BGC', 'Indoor', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1801', 'LR-26-1801', 'SD260903-006', '2026-09-30', 'Mariel', 'SM HYPERMARKET', 'EMPANADA NATION', 'Bob', '2026-09-03', '2026-09-04', 'FILE SENT', 'SM HYPERMARKET MARILAO', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1802', 'LR-26-1802', 'SD260901-021', '2026-09-30', 'Mariel', 'SM HYPERMARKET', 'K-STREET', 'Bob', '2026-09-01', '2026-09-03', 'FILE SENT', 'SM HYPERMARKET MOLINO', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1803', 'LR-26-1803', 'SD260902-022', '2026-09-30', 'Mariel', 'SM HYPERMARKET', 'NOODLE HOUSE', 'Bob', '2026-09-03', '2026-09-07', 'FILE SENT', 'SM HYPERMARKET MOLINO', 'Indoor', 'INSTALL', 'MA''AM SAN', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -2052,9 +2109,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1897', 'LR-26-1897', 'SD261006-032', '2026-10-08', 'Kim', 'TINGTOP', 'BACKDROP', 'Tim', '2026-10-08', '2026-10-08', 'FILE SENT', 'for pick up only', 'Indoor', 'PICKUP', 'Ms. Bea', '', 'Completed', 'Approved', 'Rush', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1898', 'LR-26-1898', 'P261000439', '2026-10-08', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'NPI 2026 POLYCLOTH AND DECALS OCT.9', 'Jules', '2026-10-08', '2026-10-08', 'FILE SENT', '', 'Outdoor', '​', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1899', 'LR-26-1899', 'P261000442', '2026-10-08', 'Dona', 'SPACEY DESIGN MANILA', 'ARIH BTS - PRINT AND CUT', 'Jules', '2026-10-08', '2026-10-08', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
-('lr-26-1900', 'LR-26-1900', 'SD261008-023', '2026-10-08', 'Kim', 'ADVOS ADVERTISING AGENCY', 'SHAW BILLBOARD', 'Glen', '2026-10-09', '2026-10-09', 'FILE SENT', 'mandaue foam shaw boulevard', 'Outdoor', 'INSTALL', 'ms. jessica', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-1900', 'LR-26-1900', 'SD261008-023', '2026-10-08', 'Kim', 'ADVOS ADVERTISING AGENCY', 'SHAW BILLBOARD', 'Glen', '2026-10-09', '2026-10-09', 'FILE SENT', 'mandaue foam shaw boulevard', 'Outdoor', 'INSTALL', 'ms. jessica', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1901', 'LR-26-1901', 'SD261008-022', '2026-10-08', 'Kim', 'ADVOS ADVERTISING AGENCY', 'STA ROSA BILLBOARD', 'Glen', '2026-10-09', '2026-10-09', 'FILE SENT', 'mandaue foam sta rosa laguna', 'Outdoor', 'INSTALL', 'ms. jessica', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1902', 'LR-26-1902', 'P261000440', '2026-10-09', 'Jastine', 'GOAT CREATIVE', 'GOAT CREATIVE', 'Jules', '2026-10-09', 'Tom 8am', 'FILE SENT', 'Unit 708, 7th Floor High Street, South Corporate Plaza Tower 1, 26thStreet, Cor. 9th Ave., BGC, Fort Bonifacio, Taguig City, 1635', '​', 'DELIVER', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
 ('lr-26-1903', 'LR-26-1903', 'P261000484', '2026-10-09', 'Dona', 'PAQUETE', 'BPI DTF', 'Jules', '2026-10-09', '2026-10-09', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
@@ -2154,9 +2209,7 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-1997', 'LR-26-1997', 'SD260926-007', '2026-10-20', 'Jen', 'ANYTIME FITNESS', 'MURALS', 'Glen', '2026-10-20', '2026-10-21', 'FILE SENT', 'AF SAN FERNANDO', 'Indoor', 'INSTALL', 'Mr. James Sy', '639228402612', 'On-going', 'Pending', 'Rush', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-1998', 'LR-26-1998', 'SD261020-019', '2026-10-20', 'Flora', 'RASHEED TASHID', 'Congratulatory Tarp', 'Jules', '2026-10-20', '2026-10-20', 'FILE SENT', 'pick up', '​', '​', '', '', 'Completed', 'Approved', '​', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-1999', 'LR-26-1999', 'P261001082', '2026-10-20', 'Jastine', 'FULTON TRADING', 'TRAFFIC ADVISORY V7', 'Glen', '2026-10-20', '2026-10-21', 'FILE SENT', 'pick up', '​', 'PICKUP', '', '', '​', 'Pending', '​', 'Pending', 0, 0, 0, '', 0, ''),
-('lr-26-2000', 'LR-26-2000', 'SD261015-025', '2026-10-20', 'Kim', 'WAGS AND WHISKERS BY DOC FERDS ANIMAL WELLNESS', 'Christmas UV Backlit Film', 'Raven', '2026-10-15', '2026-10-15', 'FILE SENT', '', '​', '​', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-2000', 'LR-26-2000', 'SD261015-025', '2026-10-20', 'Kim', 'WAGS AND WHISKERS BY DOC FERDS ANIMAL WELLNESS', 'Christmas UV Backlit Film', 'Raven', '2026-10-15', '2026-10-15', 'FILE SENT', '', '​', '​', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2001', 'LR-26-2001', 'SD261021-010', '2026-10-21', 'Kim', 'ADVOS ADVERTISING AGENCY', 'SOB', 'Glen', 'Octobert 21, 2026', '2026-10-21', 'FILE SENT', 'Muzon Taytay Rizal', 'Indoor', 'DELIVER', 'Ms. Jesicca', '', 'On-going', 'Pending', '​', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2002', 'LR-26-2002', 'P261001125', '2026-10-21', 'Dona', 'Global Link MP Events Intl Inc.', 'CINEPROD EXPO BACKDROP  ADDITIONAL', 'Jules', 'Octobert 21, 2026', '2026-10-21', 'FILE SENT', '', '​', 'INSTALL', '', '', 'Completed', 'Approved', 'Rush', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2003', 'LR-26-2003', 'P261001127', '2026-10-21', 'Dona', 'Decalpro Printing Services', 'SALE 1.8MM  L-STAND   10.21', 'Glen', 'Octobert 21, 2026', '2026-10-22', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
@@ -2256,11 +2309,10 @@ INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sa
 ('lr-26-2097', 'LR-26-2097', 'SD261007-021', '2026-10-24', 'Janet', 'TOPVALUE', 'WINSTON NAPKIN HOLDER & RESERVED SIGN', 'Tim', '', '', '​', '', '​', '​', '', '', '​', 'Pending', '​', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2098', 'LR-26-2098', 'SD261021-028', '2026-10-24', 'Jen', 'ANYTIME FITNESS', 'SIGNAGE', 'Raven', '2026-10-24', '2026-10-26', 'FILE SENT', 'AF VISTAHUB BGC', 'Indoor', 'INSTALL', 'Fredinel Aguinaldo', '639054576672', 'On-going', 'Pending', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2099', 'LR-26-2099', 'SD261021-028', '2026-10-24', 'Jen', 'ANYTIME FITNESS', 'STICKERS', 'Glen', '2026-10-24', '2026-10-26', 'FILE SENT', 'AF VISTAHUB BGC', 'Indoor', 'INSTALL', 'Fredinel Aguinaldo', '639054576672', 'On-going', 'Pending', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
-('lr-26-2100', 'LR-26-2100', 'P261001348', '2026-10-24', 'Dona', 'DEcalpro Printing Services', 'LACOST & SMH & MK', 'Glen', '2026-10-24', '2026-10-24', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, '');
-
-INSERT INTO `sales_requests` (`id`, `request_id`, `jo_number`, `order_date`, `sales_rep`, `client`, `project_name`, `artist`, `design_deadline`, `releasing_date`, `file_sent`, `complete_address`, `location`, `releasing_mode`, `contact_person`, `contact_number`, `project_status`, `client_approval`, `priority`, `head_approval`, `count_standard`, `count_special`, `count_printing`, `design_status`, `revision_count`, `remarks`) VALUES
+('lr-26-2100', 'LR-26-2100', 'P261001348', '2026-10-24', 'Dona', 'DEcalpro Printing Services', 'LACOST & SMH & MK', 'Glen', '2026-10-24', '2026-10-24', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2101', 'LR-26-2101', 'P261001337', '2026-10-24', 'Dona', 'TRADEMASTERS VENTURES OPC', 'TIEN MA''S RE-ORDER', 'Jules', '2026-10-24', '2026-10-24', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
 ('lr-26-2102', 'LR-26-2102', 'P261001356', '2026-10-24', 'Dona', 'CDJJ DYNAMIC MERCHANDISING', 'UNIVERS GB THOM BROWNE & ACNE STUDIOS WINDOW', 'Jules', '2026-10-24', '2026-10-24', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Pending', 0, 0, 0, '', 0, ''),
-('lr-26-2103', 'LR-26-2103', 'P261001357', '', 'Dona', 'RGM Exhibit And Events Services', 'FIRST GEN PANLIPON AND BACKWALL', 'Jules', '2026-10-24', '2026-10-24', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, '');
+('lr-26-2103', 'LR-26-2103', 'P261001357', '', 'Dona', 'RGM Exhibit And Events Services', 'FIRST GEN PANLIPON AND BACKWALL', 'Jules', '2026-10-24', '2026-10-24', 'FILE SENT', '', '​', 'PICKUP', '', '', 'Completed', 'Approved', 'Normal', 'Approved', 0, 0, 0, 'Submitted', 0, ''),
+('lr-26-2104', 'LR-26-2104', 'SD261024-030', '2026-10-24', 'Dona', 'Fort Bonifacio Development Corp', 'BGC LED Facade', 'Jules', '2026-10-26', '2026-10-28', 'FILE SENT', 'Bonifacio Global City, Taguig', 'Outdoor', 'INSTALL', 'Engr. Mark Santos', '09175551234', 'On-going', 'Pending', 'Rush', 'Approved', 1, 1, 0, 'In Progress', 0, 'Logged via Sales Requests intake (Ref: audit trail)');
 
 SET FOREIGN_KEY_CHECKS = 1;

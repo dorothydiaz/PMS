@@ -274,15 +274,15 @@ function loginUser($usernameOrEmail, $password) {
     // Resolve assigned artist name for artists
     $assignedArtist = !empty($user['assigned_artist']) ? $user['assigned_artist'] : null;
     if (empty($assignedArtist) && $user['role'] === 'artist') {
-        $known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Edrian', 'Russel', 'Gilbert', 'Benjie'];
+        $known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Dorothy', 'Russel', 'Gilbert', 'Benjie'];
         foreach ($known as $k) {
             if (stripos($user['username'], $k) !== false || stripos($user['full_name'], $k) !== false) {
                 $assignedArtist = $k;
                 break;
             }
         }
-        if (empty($assignedArtist) && (stripos($user['username'], 'ed') !== false || stripos($user['full_name'], 'ed') !== false)) {
-            $assignedArtist = 'Edrian';
+        if (empty($assignedArtist) && (stripos($user['username'], 'dorothy') !== false || stripos($user['full_name'], 'dorothy') !== false)) {
+            $assignedArtist = 'Dorothy';
         }
     }
 
@@ -298,6 +298,8 @@ function loginUser($usernameOrEmail, $password) {
         'permissions' => $perms,
         'oauth_provider' => $user['oauth_provider'] ?: 'credentials'
     ];
+
+    logAuditEvent($user['username'], $user['role'], 'AUTH', 'Security Portal', 'Successful credentials login for user: ' . $user['username'], $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1', 'Success');
 
     return ['success' => true, 'user' => $_SESSION['pms_user']];
 }
@@ -412,6 +414,10 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
  * Log out and destroy session
  */
 function logoutUser() {
+    if (!empty($_SESSION['pms_user'])) {
+        $u = $_SESSION['pms_user'];
+        logAuditEvent($u['username'] ?? 'User', $u['role'] ?? 'user', 'AUTH', 'Security Portal', 'User signed out', $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1', 'Success');
+    }
     $_SESSION['pms_user'] = null;
     unset($_SESSION['pms_user']);
     session_regenerate_id(true);
@@ -419,3 +425,27 @@ function logoutUser() {
         session_destroy();
     }
 }
+
+/**
+ * Append entry to audit_logs table
+ */
+function logAuditEvent($user, $role, $action, $module, $description, $ip = null, $status = 'Success') {
+    try {
+        $pdo = getDbConnection();
+        if (!$pdo) return;
+        $ip = $ip ?: ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        $stmt = $pdo->prepare("INSERT INTO audit_logs (`user`, `role`, `action`, `module`, `description`, `ip_address`, `status`) VALUES (:u, :r, :a, :m, :d, :ip, :s)");
+        $stmt->execute([
+            ':u' => $user ?: 'system',
+            ':r' => $role ?: 'System',
+            ':a' => strtoupper($action ?: 'EVENT'),
+            ':m' => $module ?: 'General',
+            ':d' => $description ?: '',
+            ':ip' => $ip,
+            ':s' => $status ?: 'Success'
+        ]);
+    } catch (Exception $e) {
+        // Silently tolerate if audit_logs table is missing or readonly
+    }
+}
+

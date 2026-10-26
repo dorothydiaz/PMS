@@ -21,7 +21,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="section-header-row">
             <div class="section-title-wrap">
               <h2>Artist Workload & Capacity Management</h2>
-              <p>Real-time assignment distribution across Bob, Edrian, Glen, Goodrich, Jules, Raven, Tim, Seven</p>
+              <p>Real-time assignment distribution across Bob, Dorothy, Glen, Goodrich, Jules, Raven, Tim</p>
             </div>
             <div class="section-actions">
               <select class="filter-input" id="workloadFilterAvailability">

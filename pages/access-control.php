@@ -221,7 +221,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <select class="form-control" id="formUserAssignedArtist">
               <option value="">-- Auto-detect from Name/Username --</option>
               <option value="Bob">Bob</option>
-              <option value="Edrian">Edrian</option>
+              <option value="Dorothy">Dorothy</option>
               <option value="Glen">Glen</option>
               <option value="Goodrich">Goodrich</option>
               <option value="Jules">Jules</option>

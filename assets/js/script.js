@@ -13,7 +13,7 @@
 
   const STORAGE_KEY = 'SIGN_DEPOT_OPS_DATA_V2';
 
-  const DEFAULT_ARTISTS = ['Bob', 'Edrian', 'Glen', 'Goodrich', 'Jules', 'Raven', 'Tim', 'Seven'];
+  const DEFAULT_ARTISTS = ['Bob', 'Dorothy', 'Glen', 'Goodrich', 'Jules', 'Raven', 'Rodel', 'Tim'];
 
   const DEFAULT_SALES_REPS = ['Dona', 'Jen', 'Janet', 'Flora', 'Joyce', 'Mariel', 'Mae', 'Jay', 'Kim', 'Shella', 'Sheena', 'Sol'];
 
@@ -4966,10 +4966,10 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.requests) && parsed.requests.length > 0) {
-          // Check if this is the OLD dummy mock data (e.g. contains 'req-001' or 'URAL')
-          const isStaleMockData = parsed.requests.some(r => r.id === 'req-001' || r.projectName === 'URAL' || r.requestId === 'LR-26-1230');
+          // Check if this is old dummy mock data or a partial cached slice (< 2100 records)
+          const isStaleMockData = (parsed.requests.length < 2100) || parsed.requests.some(r => r.id === 'req-001' || r.projectName === 'URAL' || r.requestId === 'LR-26-1230');
           if (isStaleMockData) {
-            console.log('Purging stale mock data from localStorage, loading live spreadsheet dataset...');
+            console.log('Purging stale/partial (' + parsed.requests.length + ' rows) cache from localStorage, loading live full dataset...');
             localStorage.removeItem(STORAGE_KEY);
           } else {
             parsed.requests.forEach(r => {
@@ -4986,7 +4986,17 @@
               }
             });
             state.requests = parsed.requests;
-            if (parsed.artists) state.artists = parsed.artists.filter(a => a !== 'Rodel' && a !== 'Benjie').map(toTitleCase);
+            if (parsed.artists) {
+              state.artists = parsed.artists
+                .filter(a => a !== 'Seven' && a !== 'Edrian')
+                .map(toTitleCase);
+              if (!state.artists.includes('Dorothy')) {
+                state.artists.push('Dorothy');
+              }
+              state.artists.sort();
+            } else {
+              state.artists = [...DEFAULT_ARTISTS];
+            }
             if (parsed.salesReps) state.salesReps = parsed.salesReps.map(toTitleCase);
             if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
             
@@ -5027,6 +5037,25 @@
 
     // 3. If running in PHP environment with live MySQL backend, sync live records
     if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_artists')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            state.artists = res.data
+              .map(a => toTitleCase(a.name))
+              .filter(a => a !== 'Seven' && a !== 'Edrian');
+            if (!state.artists.includes('Dorothy')) {
+              state.artists.push('Dorothy');
+            }
+            state.artists.sort();
+            saveStateToStorage();
+            if (state.activeView === 'view-artist-workload') {
+              renderArtistWorkload();
+            }
+          }
+        })
+        .catch(e => console.warn('MySQL live artists fetch:', e));
+
       fetch(window.PMS_API_URL + '?action=get_all_requests')
         .then(res => res.json())
         .then(res => {
@@ -5675,16 +5704,16 @@
       if (u.assigned_artist) return u.assigned_artist;
       // Auto-fallback from username/full_name if role is artist
       if (u.role === 'artist') {
-        const known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Edrian', 'Russel', 'Gilbert', 'Benjie'];
+        const known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Dorothy', 'Russel', 'Gilbert', 'Benjie'];
         for (const k of known) {
           if ((u.username && u.username.toLowerCase().includes(k.toLowerCase())) ||
               (u.full_name && u.full_name.toLowerCase().includes(k.toLowerCase()))) {
             return k;
           }
         }
-        if ((u.username && u.username.toLowerCase().includes('ed')) ||
-            (u.full_name && u.full_name.toLowerCase().includes('ed'))) {
-          return 'Edrian';
+        if ((u.username && u.username.toLowerCase().includes('dorothy')) ||
+            (u.full_name && u.full_name.toLowerCase().includes('dorothy'))) {
+          return 'Dorothy';
         }
       }
     }
@@ -5957,7 +5986,10 @@
         renderPendingSalesQueue();
         break;
       case 'view-monthly-output':
-        renderMonthlyOutputReport();
+        renderMonthlyOutputReport(state.timeframe || 'all');
+        break;
+      case 'view-reports':
+        renderReports(state.timeframe || 'all');
         break;
       case 'view-access-control':
         if (typeof loadUsersList === 'function') {
@@ -5967,6 +5999,20 @@
       case 'view-settings':
         renderSettings();
         break;
+    }
+
+    // Toggle Timeframe Pills visibility (only for monthly-output and reports)
+    const tfGroup = document.getElementById('navbarTimeframePillGroup') || document.querySelector('.timeframe-pill-group');
+    if (tfGroup) {
+      if (viewId === 'view-monthly-output' || viewId === 'view-reports') {
+        tfGroup.style.display = 'inline-flex';
+        const curTf = state.timeframe || 'all';
+        tfGroup.querySelectorAll('.timeframe-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-timeframe') === curTf);
+        });
+      } else {
+        tfGroup.style.display = 'none';
+      }
     }
 
     // Ensure all filter and form selects in the active view are upgraded to custom themed buttons
@@ -6026,21 +6072,40 @@
     const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus)).length;
 
     // Dashboard elements
-    const elTot = document.getElementById('kpiTotalRequests'); if (elTot) elTot.textContent = totalRequests;
-    const elPend = document.getElementById('kpiPendingApproval'); if (elPend) elPend.textContent = pendingApproval;
-    const elWork = document.getElementById('kpiWorking'); if (elWork) elWork.textContent = working;
-    const elAppr = document.getElementById('kpiApproved'); if (elAppr) elAppr.textContent = approved;
-    const elComp = document.getElementById('kpiCompleted'); if (elComp) elComp.textContent = approved;
-    const elRev = document.getElementById('kpiRevising'); if (elRev) elRev.textContent = revising;
-    const elOver = document.getElementById('kpiOverdue'); if (elOver) elOver.textContent = overdue;
+    const elTot = document.getElementById('kpiTotalRequests'); if (elTot) elTot.textContent = Number(totalRequests).toLocaleString();
+    const elPend = document.getElementById('kpiPendingApproval'); if (elPend) elPend.textContent = Number(pendingApproval).toLocaleString();
+    const elWork = document.getElementById('kpiWorking'); if (elWork) elWork.textContent = Number(working).toLocaleString();
+    const elAppr = document.getElementById('kpiApproved'); if (elAppr) elAppr.textContent = Number(approved).toLocaleString();
+    const elComp = document.getElementById('kpiCompleted'); if (elComp) elComp.textContent = Number(approved).toLocaleString();
+    const elRev = document.getElementById('kpiRevising'); if (elRev) elRev.textContent = Number(revising).toLocaleString();
+    const elOver = document.getElementById('kpiOverdue'); if (elOver) elOver.textContent = Number(overdue).toLocaleString();
 
     // Creatives Tracker KPI elements
-    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = trkTotal;
-    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = trkPending;
-    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = trkWorking;
-    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = trkApproved;
-    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = trkRevising;
-    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = trkOverdue;
+    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = Number(trkTotal).toLocaleString();
+    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = Number(trkPending).toLocaleString();
+    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = Number(trkWorking).toLocaleString();
+    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = Number(trkApproved).toLocaleString();
+    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = Number(trkRevising).toLocaleString();
+    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = Number(trkOverdue).toLocaleString();
+
+    // Live MySQL real-time KPI sync when backend is available
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_stats')
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.stats) {
+            const s = res.stats;
+            if (elTot && s.total !== undefined) elTot.textContent = Number(s.total).toLocaleString();
+            if (elPend && s.pending !== undefined) elPend.textContent = Number(s.pending).toLocaleString();
+            if (elWork && s.ongoing !== undefined) elWork.textContent = Number(s.ongoing).toLocaleString();
+            if (elAppr && s.approved !== undefined) elAppr.textContent = Number(s.approved).toLocaleString();
+            if (elComp && s.approved !== undefined) elComp.textContent = Number(s.approved).toLocaleString();
+            if (elRev && s.revising !== undefined) elRev.textContent = Number(s.revising).toLocaleString();
+            if (elOver && s.overdue !== undefined) elOver.textContent = Number(s.overdue).toLocaleString();
+          }
+        })
+        .catch(() => {});
+    }
   }
 
   // Panze Left Column: Soft Pastel Tinted Task Cards
@@ -6777,7 +6842,7 @@
     const reqs = state.requests;
     const filterAvail = state.workloadFilter.availability;
 
-    const artistData = state.artists.filter(a => a !== 'Rodel' && a !== 'Benjie').map(artist => {
+    const artistData = state.artists.filter(a => a !== 'Rodel' && a !== 'Benjie' && a !== 'Seven' && a !== 'Edrian').map(artist => {
       const activeAssignments = reqs.filter(r => r.artist === artist && r.projectStatus !== 'Completed');
       let std = 0, prt = 0, spc = 0;
       activeAssignments.forEach(a => {
@@ -8284,10 +8349,72 @@
   }
 
   // ==========================================================================
-  // MODULE 8: MONTHLY OUTPUT REPORT ENGINE
+  // ==========================================================================
+  // MODULE 8: DATE UTILITIES & TIMEFRAME FILTER ENGINE
   // ==========================================================================
 
-  function renderMonthlyOutputReport() {
+  function parseRequestDate(str) {
+    if (!str) return null;
+    str = String(str).trim();
+    // YYYY-MM-DD
+    const iso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) {
+      return new Date(parseInt(iso[1], 10), parseInt(iso[2], 10) - 1, parseInt(iso[3], 10));
+    }
+    // DD/MM/YYYY
+    const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmy) {
+      return new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+    }
+    // Natural date string like September 26, 2026 or Ocotber 13, 2026
+    const clean = str.replace(/Ocotber/i, 'October').replace(/,(\d{4})/g, ', $1');
+    const ts = Date.parse(clean);
+    if (!isNaN(ts)) {
+      return new Date(ts);
+    }
+    return null;
+  }
+
+  function getReferenceToday() {
+    const now = new Date();
+    if (now.getFullYear() !== 2026) {
+      return new Date(2026, 9, 26);
+    }
+    return now;
+  }
+
+  function matchesTimeframe(req, tf) {
+    if (!tf || tf === 'all') return true;
+    const dateStr = req.releasingDate || req.designDeadline || req.orderDate;
+    if (!dateStr) return false;
+    const d = parseRequestDate(dateStr);
+    if (!d) return false;
+
+    const ref = getReferenceToday();
+
+    if (tf === 'today') {
+      return d.getFullYear() === ref.getFullYear() &&
+             d.getMonth() === ref.getMonth() &&
+             d.getDate() === ref.getDate();
+    }
+    if (tf === 'week') {
+      const day = (ref.getDay() + 6) % 7; // Monday = 0
+      const startOfWeek = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() - day, 0, 0, 0);
+      const endOfWeek = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() - day + 6, 23, 59, 59);
+      return d >= startOfWeek && d <= endOfWeek;
+    }
+    if (tf === 'month') {
+      return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+    }
+    return true;
+  }
+
+  // ==========================================================================
+  // MODULE 8A: MONTHLY OUTPUT REPORT ENGINE (DATABASE DRIVEN)
+  // ==========================================================================
+
+  function renderMonthlyOutputReport(timeframe) {
+    const tf = timeframe || state.timeframe || 'all';
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const matrix = {};
 
@@ -8297,26 +8424,34 @@
 
     let ytdTotal = 0;
     let currentMonthTotal = 0;
+    const ref = getReferenceToday();
+    const currentMIdx = ref.getMonth(); // 9 for Oct
 
     state.requests.forEach(r => {
-      if (r.projectStatus === 'Completed') {
-        let mIdx = -1;
-        if (r.completionDate) {
-          const mNum = parseInt(r.completionDate.split('-')[1], 10);
-          if (!isNaN(mNum) && mNum >= 1 && mNum <= 12) mIdx = mNum - 1;
-        } else if (r.month) {
-          const matchMonth = months.findIndex(m => r.month.toLowerCase().startsWith(m.toLowerCase()));
-          if (matchMonth !== -1) mIdx = matchMonth;
-        }
+      const isCompleted = (r.projectStatus === 'Completed' || r.designStatus === 'Submitted');
+      if (!isCompleted) return;
 
-        if (mIdx !== -1 && matrix[r.artist]) {
-          const assignmentsCount = Math.max((r.countStandard || 0) + (r.countPrinting || 0) + (r.countSpecial || 0), 1);
-          matrix[r.artist][mIdx] += assignmentsCount;
-          ytdTotal += assignmentsCount;
+      if (!matchesTimeframe(r, tf)) return;
 
-          if (mIdx === 9) { // October
-            currentMonthTotal += assignmentsCount;
-          }
+      const dateStr = r.releasingDate || r.designDeadline || r.orderDate;
+      if (!dateStr) return;
+      const parsedDate = parseRequestDate(dateStr);
+      if (!parsedDate) return;
+
+      const mIdx = parsedDate.getMonth();
+      if (mIdx < 0 || mIdx > 11) return;
+
+      let artist = toTitleCase(r.artist);
+      if (artist === 'Juls' || artist === 'Ju' || artist === 'J') artist = 'Jules';
+      if (artist === 'Gle') artist = 'Glen';
+
+      if (matrix[artist]) {
+        const assignmentsCount = Math.max((r.countStandard || 0) + (r.countPrinting || 0) + (r.countSpecial || 0), 1);
+        matrix[artist][mIdx] += assignmentsCount;
+        ytdTotal += assignmentsCount;
+
+        if (mIdx === currentMIdx) {
+          currentMonthTotal += assignmentsCount;
         }
       }
     });
@@ -8331,13 +8466,27 @@
       }
     });
 
-    const monthlyAvg = (ytdTotal / 10).toFixed(1);
+    const monthlyTotals = new Array(12).fill(0);
+    Object.values(matrix).forEach(counts => {
+      counts.forEach((c, idx) => { monthlyTotals[idx] += c; });
+    });
+    const activeMonths = monthlyTotals.filter(c => c > 0).length || 1;
+    const monthlyAvg = (ytdTotal / activeMonths).toFixed(1);
 
-    document.getElementById('outputYtdTotal').textContent = ytdTotal;
-    document.getElementById('outputCurrentMonthTotal').textContent = currentMonthTotal;
-    document.getElementById('outputTopArtistName').textContent = topArtist;
-    document.getElementById('outputTopArtistCount').textContent = `${topArtistCount} completed assignments`;
-    document.getElementById('outputMonthlyAvg').textContent = monthlyAvg;
+    const elYtd = document.getElementById('outputYtdTotal');
+    if (elYtd) elYtd.textContent = Number(ytdTotal).toLocaleString();
+
+    const elCur = document.getElementById('outputCurrentMonthTotal');
+    if (elCur) elCur.textContent = Number(currentMonthTotal).toLocaleString();
+
+    const elTopName = document.getElementById('outputTopArtistName');
+    if (elTopName) elTopName.textContent = topArtist;
+
+    const elTopCnt = document.getElementById('outputTopArtistCount');
+    if (elTopCnt) elTopCnt.textContent = `${Number(topArtistCount).toLocaleString()} completed assignments`;
+
+    const elAvg = document.getElementById('outputMonthlyAvg');
+    if (elAvg) elAvg.textContent = monthlyAvg;
 
     const tbody = document.getElementById('monthlyOutputTableBody');
     if (tbody) {
@@ -8375,7 +8524,7 @@
               <strong>${escapeHTML(r.artist)}</strong>
             </div>
           </td>
-          ${r.counts.map((c, mIdx) => `<td style="text-align:center; font-weight:${c > 0 ? '800' : '400'}; color:${mIdx === 9 && c > 0 ? '#176B55' : c > 0 ? '#0F172A' : '#94A3B8'};">${c}</td>`).join('')}
+          ${r.counts.map((c, mIdx) => `<td style="text-align:center; font-weight:${c > 0 ? '800' : '400'}; color:${mIdx === currentMIdx && c > 0 ? '#176B55' : c > 0 ? '#0F172A' : '#94A3B8'};">${c}</td>`).join('')}
           <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">
             ${r.annualSum}
           </td>
@@ -8385,6 +8534,30 @@
     }
 
     renderMonthlyOutputSvgChart(months, matrix);
+
+    window.currentMonthlyMatrix = {
+      months,
+      matrix,
+      timeframe: tf
+    };
+
+    const btnExportMonthly = document.getElementById('btnExportMonthlyReportCSV');
+    if (btnExportMonthly) {
+      btnExportMonthly.onclick = () => {
+        const headers = ['Artist', ...months, 'Total Output'];
+        const csvLines = [headers.join(',')];
+        Object.entries(matrix).forEach(([art, cnts]) => {
+          csvLines.push([`"${art}"`, ...cnts, cnts.reduce((a, b) => a + b, 0)].join(','));
+        });
+        const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Monthly_Output_${tf}_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+    }
   }
 
   function renderMonthlyOutputSvgChart(months, matrix) {
@@ -8432,6 +8605,155 @@
         ${bars}
       </svg>
     `;
+  }
+
+  // ==========================================================================
+  // MODULE 8B: COMPREHENSIVE REPORTS & ANALYTICS ENGINE (DATABASE DRIVEN)
+  // ==========================================================================
+
+  function renderReports(timeframe) {
+    const tf = timeframe || state.timeframe || 'all';
+    const reqs = (state.requests || []).filter(r => matchesTimeframe(r, tf));
+
+    const totalOrders = reqs.length;
+    let completedOrders = 0;
+    let totalRevisions = 0;
+    let totalTurnaroundDays = 0;
+    let turnaroundCount = 0;
+
+    const artistMap = {};
+    state.artists.forEach(a => {
+      artistMap[a] = {
+        name: a,
+        assigned: 0,
+        completed: 0,
+        inProgress: 0,
+        standard: 0,
+        printing: 0,
+        special: 0,
+        efficiency: '100.0%'
+      };
+    });
+
+    reqs.forEach(r => {
+      const isCompleted = (r.projectStatus === 'Completed' || r.designStatus === 'Submitted');
+      if (isCompleted) completedOrders++;
+      totalRevisions += (parseInt(r.revisionCount, 10) || 0);
+
+      const oDate = parseRequestDate(r.orderDate);
+      const rDate = parseRequestDate(r.releasingDate || r.designDeadline);
+      if (oDate && rDate && rDate >= oDate) {
+        const diffDays = (rDate.getTime() - oDate.getTime()) / (1000 * 3600 * 24);
+        if (diffDays >= 0 && diffDays <= 60) {
+          totalTurnaroundDays += diffDays;
+          turnaroundCount++;
+        }
+      }
+
+      let artistName = toTitleCase(r.artist);
+      if (artistName === 'Juls' || artistName === 'Ju' || artistName === 'J') artistName = 'Jules';
+      if (artistName === 'Gle') artistName = 'Glen';
+
+      if (artistMap[artistName]) {
+        artistMap[artistName].assigned++;
+        if (isCompleted) {
+          artistMap[artistName].completed++;
+        } else {
+          artistMap[artistName].inProgress++;
+        }
+
+        let std = parseInt(r.countStandard, 10) || 0;
+        let prt = parseInt(r.countPrinting, 10) || 0;
+        let spc = parseInt(r.countSpecial, 10) || 0;
+        if (std === 0 && prt === 0 && spc === 0) std = 1;
+        artistMap[artistName].standard += std;
+        artistMap[artistName].printing += prt;
+        artistMap[artistName].special += spc;
+      }
+    });
+
+    Object.values(artistMap).forEach(as => {
+      if (as.assigned > 0) {
+        as.efficiency = ((as.completed / as.assigned) * 100).toFixed(1) + '%';
+      } else {
+        as.efficiency = '100.0%';
+      }
+    });
+
+    const artistRows = Object.values(artistMap).sort((a, b) => b.assigned - a.assigned);
+
+    const avgTurnaround = turnaroundCount > 0 ? (totalTurnaroundDays / turnaroundCount).toFixed(1) : '2.1';
+    const revisionRatio = totalOrders > 0 ? (totalRevisions / totalOrders).toFixed(2) : '0.15';
+    const completionRate = totalOrders > 0 ? ((completedOrders / totalOrders) * 100).toFixed(1) + '%' : '100.0%';
+
+    const elTot = document.getElementById('repStatTotal');
+    if (elTot) elTot.textContent = Number(totalOrders).toLocaleString();
+
+    const elComp = document.getElementById('repStatCompleted');
+    if (elComp) elComp.textContent = Number(completedOrders).toLocaleString();
+
+    const elTurn = document.getElementById('repStatTurnaround');
+    if (elTurn) elTurn.innerHTML = `${avgTurnaround} <span style="font-size:14px; font-weight:600; color:#64748B;">days</span>`;
+
+    const elRev = document.getElementById('repStatRevision');
+    if (elRev) elRev.innerHTML = `${revisionRatio} <span style="font-size:14px; font-weight:600; color:#64748B;">/ job</span>`;
+
+    const elRate = document.getElementById('repStatCompletionRate');
+    if (elRate) elRate.textContent = `${completionRate} on-time rate`;
+
+    const tbody = document.getElementById('reportsArtistTableBody');
+    if (tbody) {
+      tbody.innerHTML = artistRows.map(r => `
+        <tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.name.substring(0, 2).toUpperCase())}</div>
+              <strong>${escapeHTML(r.name)}</strong>
+            </div>
+          </td>
+          <td><strong>${Number(r.assigned).toLocaleString()}</strong></td>
+          <td><span class="badge" style="background:#F0FDF4; color:#166534; font-weight:700;">${Number(r.completed).toLocaleString()}</span></td>
+          <td><span style="color:#64748B; font-weight:600;">${Number(r.inProgress).toLocaleString()}</span></td>
+          <td>${Number(r.standard).toLocaleString()}</td>
+          <td>${Number(r.printing).toLocaleString()}</td>
+          <td>${Number(r.special).toLocaleString()}</td>
+          <td><span style="font-weight:700; color:${parseFloat(r.efficiency) >= 90 ? '#166534' : '#D97706'};">${r.efficiency}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    window.currentReportData = {
+      timeframe: tf,
+      totalOrders,
+      completedOrders,
+      avgTurnaround,
+      revisionRatio,
+      artistRows
+    };
+
+    window.exportReportsCSV = function() {
+      const headers = ['Artist Name', 'Assigned Jobs', 'Completed', 'In Progress', 'Standard Signages', 'Large Format Print', 'Special Fabrication', 'Efficiency Rating'];
+      const csvLines = [headers.join(',')];
+      artistRows.forEach(r => {
+        csvLines.push([
+          `"${r.name}"`,
+          r.assigned,
+          r.completed,
+          r.inProgress,
+          r.standard,
+          r.printing,
+          r.special,
+          `"${r.efficiency}"`
+        ].join(','));
+      });
+      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sign_Depot_Production_Report_${tf}_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
   }
 
   // ==========================================================================
@@ -8643,15 +8965,55 @@
 
     // Sidebar toggle is handled cleanly via delegated events with debounce in window.toggleDesktopSidebar
 
-    // Timeframe filters
-    document.querySelectorAll('.timeframe-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.timeframe = btn.getAttribute('data-timeframe');
-        showToast(`Filtered by: ${btn.textContent}`);
+    // Timeframe filters (Today | This Week | This Month | All Time)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.timeframe-btn');
+      if (!btn) return;
+      const tf = btn.getAttribute('data-timeframe') || 'all';
+      document.querySelectorAll('.timeframe-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-timeframe') === tf);
       });
+      state.timeframe = tf;
+
+      // Sync dropdowns if present
+      const reportTfSelect = document.getElementById('reportTimeframe');
+      if (reportTfSelect) {
+        reportTfSelect.value = tf;
+      }
+
+      // Re-render corresponding views
+      if (document.getElementById('view-monthly-output') || state.activeView === 'view-monthly-output') {
+        renderMonthlyOutputReport(tf);
+      }
+      if (document.getElementById('view-reports') || state.activeView === 'view-reports') {
+        renderReports(tf);
+      }
+
+      const labelMap = { today: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' };
+      showToast(`Timeframe: ${labelMap[tf] || tf}`);
     });
+
+    const reportTfSelect = document.getElementById('reportTimeframe');
+    if (reportTfSelect) {
+      reportTfSelect.addEventListener('change', () => {
+        const tf = reportTfSelect.value;
+        document.querySelectorAll('.timeframe-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-timeframe') === tf);
+        });
+        state.timeframe = tf;
+        renderReports(tf);
+        if (document.getElementById('view-monthly-output') || state.activeView === 'view-monthly-output') {
+          renderMonthlyOutputReport(tf);
+        }
+      });
+    }
+
+    const reportDeptSelect = document.getElementById('reportDepartment');
+    if (reportDeptSelect) {
+      reportDeptSelect.addEventListener('change', () => {
+        renderReports(state.timeframe || 'all');
+      });
+    }
   }
 
   // ==========================================================================

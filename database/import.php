@@ -9,6 +9,15 @@ require_once dirname(__DIR__) . '/config.php';
 $message = '';
 $status = 'info';
 
+$counts = [
+    'sales_requests' => 0,
+    'users' => 0,
+    'artists' => 0,
+    'sales_reps' => 0,
+    'directives' => 0,
+    'audit_logs' => 0
+];
+
 if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
     try {
         $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
@@ -32,15 +41,22 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
         $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
         $pdo->exec($sql);
 
-        // Verify count
-        $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests");
-        $count = (int)$stmt->fetchColumn();
+        foreach (array_keys($counts) as $t) {
+            try {
+                $counts[$t] = (int)$pdo->query("SELECT COUNT(*) FROM `$t`")->fetchColumn();
+            } catch (Exception $e) {
+                $counts[$t] = 0;
+            }
+        }
 
-        $message = "Database `pms_db` initialized successfully! Imported $count sales requests directly from sales_requests.html.";
+        $message = "Database `" . DB_NAME . "` initialized & seeded successfully! ({$counts['sales_requests']} sales requests, {$counts['users']} users, {$counts['artists']} artists, {$counts['sales_reps']} sales reps, {$counts['directives']} directives, {$counts['audit_logs']} audit logs).";
         $status = 'success';
 
         if (php_sapi_name() === 'cli') {
             echo "[SUCCESS] $message\n";
+            foreach ($counts as $tbl => $cnt) {
+                echo "  - Table '$tbl': $cnt records\n";
+            }
             exit(0);
         }
     } catch (Exception $e) {
@@ -56,9 +72,14 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
     try {
         $pdo = getDbConnection();
         if ($pdo) {
-            $stmt = $pdo->query("SELECT COUNT(*) FROM sales_requests");
-            $count = (int)$stmt->fetchColumn();
-            $message = "Database is connected! Current live sales requests count in MySQL: $count records.";
+            foreach (array_keys($counts) as $t) {
+                try {
+                    $counts[$t] = (int)$pdo->query("SELECT COUNT(*) FROM `$t`")->fetchColumn();
+                } catch (Exception $e) {
+                    $counts[$t] = 0;
+                }
+            }
+            $message = "Database is connected! Live records: {$counts['sales_requests']} sales requests, {$counts['users']} users, {$counts['artists']} artists, {$counts['sales_reps']} sales reps, {$counts['directives']} directives, {$counts['audit_logs']} audit logs.";
             $status = 'success';
         } else {
             $message = "Could not connect to database. Click 'Initialize Database' below.";
@@ -78,7 +99,7 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
     body { background: #0b1120; color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 32px; max-width: 600px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 32px; max-width: 680px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
     h1 { margin-top: 0; font-size: 22px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
     .alert { padding: 16px; border-radius: 8px; margin: 20px 0; font-size: 14px; line-height: 1.5; }
     .alert-success { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; }
@@ -91,8 +112,8 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
     .btn-secondary:hover { background: #475569; }
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
     .stat-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; text-align: center; }
-    .stat-val { font-size: 20px; font-weight: 700; color: #f8fafc; }
-    .stat-lbl { font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-top: 4px; }
+    .stat-val { font-size: 20px; font-weight: 700; color: #38bdf8; }
+    .stat-lbl { font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-top: 4px; letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
@@ -107,9 +128,36 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
       <?= htmlspecialchars($message) ?>
     </div>
 
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val"><?= number_format($counts['sales_requests']) ?></div>
+        <div class="stat-lbl">Sales Requests</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val"><?= number_format($counts['users']) ?></div>
+        <div class="stat-lbl">Users (RBAC)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val"><?= number_format($counts['artists']) ?></div>
+        <div class="stat-lbl">Artists Roster</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val"><?= number_format($counts['sales_reps']) ?></div>
+        <div class="stat-lbl">Sales Reps</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val"><?= number_format($counts['directives']) ?></div>
+        <div class="stat-lbl">Directives Slots</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val"><?= number_format($counts['audit_logs']) ?></div>
+        <div class="stat-lbl">Audit Log Events</div>
+      </div>
+    </div>
+
     <form method="POST" style="margin-top: 24px;">
-      <button type="submit" name="reimport" value="1" class="btn btn-primary" onclick="return confirm('Re-importing will reset the table with all 2,100+ records from sales_requests.html. Continue?');">
-        Re-Import From sales_requests.html
+      <button type="submit" name="reimport" value="1" class="btn btn-primary" onclick="return confirm('Re-importing will reset all tables with complete seed schema (2,103 requests, users, artists, reps, directives, audit logs). Continue?');">
+        Re-Import Schema & Seeds
       </button>
       <a href="../index.php" class="btn btn-secondary">Open PMS Dashboard &rarr;</a>
     </form>

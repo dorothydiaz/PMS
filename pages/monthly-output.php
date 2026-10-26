@@ -10,6 +10,72 @@ $currentPage = 'monthly-output';
 
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
+
+$pdo = getDbConnection();
+$artistsStmt = $pdo->query("SELECT name FROM artists ORDER BY name ASC");
+$activeArtists = $artistsStmt->fetchAll(PDO::FETCH_COLUMN);
+
+$stmt = $pdo->query("SELECT artist, order_date, releasing_date, design_deadline, project_status, design_status, count_standard, count_printing, count_special FROM sales_requests WHERE project_status = 'Completed' OR design_status = 'Submitted'");
+$completed = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$matrix = [];
+foreach ($activeArtists as $a) {
+    $matrix[$a] = array_fill(0, 12, 0);
+}
+
+$ytdTotal = 0;
+$currentMonthTotal = 0;
+$currentMonthIdx = (int)date('n') - 1; // 9 for October
+
+foreach ($completed as $r) {
+    $dateStr = $r['releasing_date'] ?: ($r['design_deadline'] ?: $r['order_date']);
+    if (empty($dateStr)) continue;
+    $clean = trim(str_ireplace('Ocotber', 'October', $dateStr));
+    $mIdx = -1;
+    if (preg_match('/^(\d{4})-(\d{1,2})/', $clean, $m)) {
+        $mIdx = (int)$m[2] - 1;
+    } else {
+        $ts = strtotime($clean);
+        if ($ts) $mIdx = (int)date('n', $ts) - 1;
+    }
+    if ($mIdx < 0 || $mIdx > 11) continue;
+
+    $artist = ucwords(strtolower(trim($r['artist'])));
+    if ($artist === 'Juls' || $artist === 'Ju' || $artist === 'J') $artist = 'Jules';
+    if ($artist === 'Gle') $artist = 'Glen';
+
+    if (isset($matrix[$artist])) {
+        $cnt = max((int)$r['count_standard'] + (int)$r['count_printing'] + (int)$r['count_special'], 1);
+        $matrix[$artist][$mIdx] += $cnt;
+        $ytdTotal += $cnt;
+        if ($mIdx === $currentMonthIdx) {
+            $currentMonthTotal += $cnt;
+        }
+    }
+}
+
+$topArtist = '-';
+$topArtistCount = 0;
+$matrixRows = [];
+foreach ($matrix as $art => $counts) {
+    $annualSum = array_sum($counts);
+    if ($annualSum > $topArtistCount) {
+        $topArtistCount = $annualSum;
+        $topArtist = $art;
+    }
+    $matrixRows[] = [
+        'artist' => $art,
+        'counts' => $counts,
+        'annualSum' => $annualSum
+    ];
+}
+
+uasort($matrixRows, function($a, $b) {
+    return $b['annualSum'] - $a['annualSum'];
+});
+
+$activeMonths = 8;
+$monthlyAvg = $activeMonths > 0 ? number_format($ytdTotal / $activeMonths, 1) : '0';
 ?>
 
 <div class="main-wrapper">
@@ -34,22 +100,22 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="kpi-grid">
             <div class="kpi-card">
               <div class="kpi-header"><span>Year-to-Date Output</span></div>
-              <div class="kpi-value" id="outputYtdTotal">0</div>
+              <div class="kpi-value" id="outputYtdTotal"><?= number_format($ytdTotal) ?></div>
               <div class="kpi-trend">Total completed assignments</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-header"><span>Current Month Output</span></div>
-              <div class="kpi-value" id="outputCurrentMonthTotal" style="color: var(--primary-green);">0</div>
+              <div class="kpi-value" id="outputCurrentMonthTotal" style="color: var(--primary-green);"><?= number_format($currentMonthTotal) ?></div>
               <div class="kpi-trend">October 2026 completed jobs</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-header"><span>Top Artist</span></div>
-              <div class="kpi-value" id="outputTopArtistName" style="font-size: 20px;">-</div>
-              <div class="kpi-trend" id="outputTopArtistCount">0 completed jobs</div>
+              <div class="kpi-value" id="outputTopArtistName" style="font-size: 20px;"><?= htmlspecialchars($topArtist) ?></div>
+              <div class="kpi-trend" id="outputTopArtistCount"><?= number_format($topArtistCount) ?> completed jobs</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-header"><span>Monthly Average</span></div>
-              <div class="kpi-value" id="outputMonthlyAvg">0</div>
+              <div class="kpi-value" id="outputMonthlyAvg"><?= htmlspecialchars($monthlyAvg) ?></div>
               <div class="kpi-trend">Assignments per month</div>
             </div>
           </div>
