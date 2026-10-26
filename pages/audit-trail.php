@@ -65,7 +65,7 @@ if (empty($auditLogs)) {
         <!-- Filter bar -->
         <div class="filter-bar" style="margin-bottom: 20px;">
           <div class="filter-group" style="flex-wrap: wrap; gap: 10px;">
-            <input type="text" class="filter-input" id="auditSearchInput" placeholder="Search user, action, module..." style="width: 260px;" oninput="filterAuditRows(this.value)">
+            <input type="search" name="q_audit" class="filter-input" id="auditSearchInput" placeholder="Search user, action, module..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 260px;" oninput="filterAuditRows(this.value)">
             <select class="filter-input" id="auditActionFilter" onchange="filterAuditAction(this.value)">
               <option value="">All Action Types</option>
               <option value="CREATE">CREATE</option>

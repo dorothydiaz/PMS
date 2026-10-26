@@ -105,7 +105,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <!-- Tracker Filters -->
           <div class="filter-bar">
             <div class="filter-group">
-              <input type="text" class="filter-input" id="trackerSearchInput" placeholder="Filter tasks..." style="width: 200px;">
+              <input type="search" name="q_tasks" class="filter-input" id="trackerSearchInput" placeholder="Filter tasks..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 200px;">
               <select class="filter-input" id="trackerFilterProjectStatus">
                 <option value="">All Project Statuses</option>
                 <option value="Pending">Pending</option>

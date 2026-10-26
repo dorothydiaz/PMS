@@ -49,7 +49,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <span style="font-size: 12px; color: var(--text-secondary);">Read-only active assignment overview</span>
               </div>
               <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <input type="text" class="filter-input" id="workloadTableSearch" placeholder="Search tasks..." style="width: 200px;">
+                <input type="search" name="q_workload" class="filter-input" id="workloadTableSearch" placeholder="Search tasks..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 200px;">
                 <div class="filter-rows-wrap">
                   <label for="workloadFilterPerPage">Show:</label>
                   <select class="filter-input rows-filter-select" id="workloadFilterPerPage" title="Rows to display">

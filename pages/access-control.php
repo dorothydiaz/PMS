@@ -62,7 +62,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         <!-- Filter bar -->
         <div class="filter-bar" style="margin-bottom: 20px;">
           <div class="filter-group" style="flex-wrap: wrap; gap: 10px;">
-            <input type="text" class="filter-input" id="usersSearchInput" placeholder="Search user, name, email, role..." style="width: 260px;" oninput="filterUsers(this.value)">
+            <input type="search" name="q_users" class="filter-input" id="usersSearchInput" placeholder="Search user, name, email, role..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 260px;" oninput="filterUsers(this.value)">
             <select class="filter-input" id="usersRoleFilter" onchange="filterUserRole(this.value)">
               <option value="">All Roles</option>
               <option value="super_admin">Super Admin</option>

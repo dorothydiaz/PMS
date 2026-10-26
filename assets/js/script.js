@@ -19,7 +19,7 @@
     'Aj', 'Alvic', 'Anna', 'Dave', 'Dona', 'Ed', 'Flora', 'Jade', 'Janet',
     'Jasmin', 'Jastine', 'Jay', 'Jen', 'Joana', 'Joie', 'Joyce', 'Kate',
     'Kim', 'Levi', 'Mae', 'Mariel', 'Mike', 'Pia', 'Seven', 'Sheena',
-    'Shela', 'Shella', 'Sol', 'Tim'
+    'Shella', 'Sol', 'Tim'
   ];
 
   const PROJECT_STATUSES = [
@@ -4732,14 +4732,26 @@
               state.artists = [...DEFAULT_ARTISTS];
             }
             if (parsed.salesReps) {
-              const loadedReps = parsed.salesReps.map(toTitleCase);
-              state.salesReps = Array.from(new Set([...DEFAULT_SALES_REPS, ...loadedReps])).sort();
+              const loadedReps = parsed.salesReps
+                .filter(s => s && s.toLowerCase() !== 'shela')
+                .map(toTitleCase);
+              state.salesReps = Array.from(new Set([...DEFAULT_SALES_REPS, ...loadedReps]))
+                .filter(s => s && s.toLowerCase() !== 'shela')
+                .sort();
             } else {
               state.salesReps = [...DEFAULT_SALES_REPS];
             }
             if (!state.salesReps.includes('Jastine')) {
               state.salesReps.push('Jastine');
               state.salesReps.sort();
+            }
+            // Sanitize requests to replace typo Shela with Shella
+            if (state.requests && Array.isArray(state.requests)) {
+              state.requests.forEach(r => {
+                if (r && r.salesRep && r.salesRep.toLowerCase() === 'shela') {
+                  r.salesRep = 'Shella';
+                }
+              });
             }
             if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
             
@@ -4791,8 +4803,12 @@
         .then(res => res.json())
         .then(res => {
           if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-            const reps = res.data.map(toTitleCase);
-            state.salesReps = Array.from(new Set([...state.salesReps, ...reps])).sort();
+            const reps = res.data
+              .filter(s => s && s.toLowerCase() !== 'shela')
+              .map(toTitleCase);
+            state.salesReps = Array.from(new Set([...state.salesReps, ...reps]))
+              .filter(s => s && s.toLowerCase() !== 'shela')
+              .sort();
             saveStateToStorage();
             populateSalesFiltersDropdowns();
           }
@@ -6494,6 +6510,7 @@
   }
 
   function populateSalesFiltersDropdowns() {
+    state.salesReps = state.salesReps.filter(s => s && s.toLowerCase() !== 'shela');
     const repSelect = document.getElementById('salesFilterSalesRep');
     if (repSelect) {
       const curVal = repSelect.value;
@@ -6505,7 +6522,7 @@
         opt.textContent = titleRep;
         repSelect.appendChild(opt);
       });
-      if (curVal) repSelect.value = curVal;
+      if (curVal && curVal.toLowerCase() !== 'shela') repSelect.value = curVal;
     }
 
     const modalArtistSelect = document.getElementById('salesFormArtist');
@@ -6533,7 +6550,11 @@
         opt.textContent = titleS;
         modalSalesSelect.appendChild(opt);
       });
-      if (curRep) modalSalesSelect.value = curRep;
+      if (curRep && curRep.toLowerCase() !== 'shela') {
+        modalSalesSelect.value = curRep;
+      } else if (curRep && curRep.toLowerCase() === 'shela') {
+        modalSalesSelect.value = 'Shella';
+      }
     }
 
     upgradeAllFormSelects();
@@ -10063,40 +10084,14 @@
     }
 
     // Super Admin Deletion Security Passcode Management
-    const currentPasscodeEl = document.getElementById('settingsCurrentPasscodeDisplay');
-    const togglePasscodeBtn = document.getElementById('btnToggleSettingsPasscodeView');
     const loginPasswordEl = document.getElementById('settingsLoginPasswordInput');
     const newPasscodeEl = document.getElementById('settingsNewPasscodeInput');
     const savePasscodeBtn = document.getElementById('btnSettingsSavePasscode');
     const feedbackEl = document.getElementById('settingsPasscodeFeedback');
 
-    if (currentPasscodeEl) {
-      if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
-        fetch(window.PMS_API_URL + '?action=get_delete_passcode')
-          .then(r => r.json())
-          .then(res => {
-            if (res && res.success && res.passcode) {
-              currentPasscodeEl.value = res.passcode;
-              state.deletePasscode = res.passcode;
-            }
-          })
-          .catch(() => {});
-      } else {
-        currentPasscodeEl.value = state.deletePasscode || '1234';
-      }
-    }
-
-    if (togglePasscodeBtn && currentPasscodeEl) {
-      togglePasscodeBtn.onclick = () => {
-        if (currentPasscodeEl.type === 'password') {
-          currentPasscodeEl.type = 'text';
-          togglePasscodeBtn.textContent = 'Hide';
-        } else {
-          currentPasscodeEl.type = 'password';
-          togglePasscodeBtn.textContent = 'Show';
-        }
-      };
-    }
+    // Ensure password fields are always clean and not pre-filled by browser credential managers
+    if (loginPasswordEl) loginPasswordEl.value = '';
+    if (newPasscodeEl) newPasscodeEl.value = '';
 
     if (savePasscodeBtn && newPasscodeEl) {
       savePasscodeBtn.onclick = () => {
@@ -10126,15 +10121,12 @@
         savePasscodeBtn.textContent = 'Saving...';
 
         const updateLocal = () => {
-          state.deletePasscode = val;
-          saveStateToStorage();
-          if (currentPasscodeEl) currentPasscodeEl.value = val;
           if (loginPasswordEl) loginPasswordEl.value = '';
           newPasscodeEl.value = '';
           if (feedbackEl) {
             feedbackEl.style.display = 'block';
             feedbackEl.style.color = '#09090B';
-            feedbackEl.textContent = 'Deletion security passcode successfully saved!';
+            feedbackEl.textContent = 'Deletion security passcode successfully saved and protected!';
             setTimeout(() => { if (feedbackEl) feedbackEl.style.display = 'none'; }, 4000);
           }
           showToast('Super Admin deletion passcode updated.');
@@ -10203,6 +10195,11 @@
     const input = document.getElementById('globalSearchInput');
     const dropdown = document.getElementById('quickSearchResults');
     if (!input || !dropdown) return;
+
+    // Immediately purge if browser erroneously prefilled a user account credential
+    if (input.value && (input.value.toLowerCase().startsWith('sup_') || input.value.toLowerCase().includes('angel') || input.value.toLowerCase() === 'superadmin')) {
+      input.value = '';
+    }
 
     input.addEventListener('input', () => {
       const q = input.value.trim().toLowerCase();
@@ -10726,20 +10723,7 @@
       });
 
       // Custom Confirm & Passcode Modal Controls Setup
-      const togglePasscodeVisBtn = document.getElementById('btnToggleConfirmPasscodeVisibility');
       const confirmPasscodeInput = document.getElementById('confirmDeletePasscode');
-      if (togglePasscodeVisBtn && confirmPasscodeInput) {
-        togglePasscodeVisBtn.onclick = () => {
-          if (confirmPasscodeInput.type === 'password') {
-            confirmPasscodeInput.type = 'text';
-            togglePasscodeVisBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-          } else {
-            confirmPasscodeInput.type = 'password';
-            togglePasscodeVisBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-          }
-        };
-      }
-
       const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
       const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
       if (toggleSetupBtn && setupDrawer) {
@@ -10782,23 +10766,21 @@
           saveInsideModalBtn.textContent = 'Updating...';
 
           const onSaved = () => {
-            state.deletePasscode = val;
-            saveStateToStorage();
             if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.value = '';
             if (newPasscodeInsideModalInput) newPasscodeInsideModalInput.value = '';
             if (confirmPasscodeInput) {
-              confirmPasscodeInput.value = val;
-              confirmPasscodeInput.style.borderColor = '#09090B';
+              confirmPasscodeInput.value = '';
+              confirmPasscodeInput.style.borderColor = '#D4D4D8';
             }
             if (newPasscodeFeedback) {
               newPasscodeFeedback.style.display = 'block';
               newPasscodeFeedback.style.color = '#09090B';
-              newPasscodeFeedback.textContent = 'Passcode updated! It has been pre-filled above.';
+              newPasscodeFeedback.textContent = 'Passcode updated successfully! Enter it above to confirm deletion.';
             }
             setTimeout(() => {
               if (setupDrawer) setupDrawer.style.display = 'none';
               if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
-            }, 1500);
+            }, 1800);
             showToast('Super Admin deletion passcode updated.');
             saveInsideModalBtn.disabled = false;
             saveInsideModalBtn.textContent = 'Update';
@@ -11765,9 +11747,10 @@
         showToast('Must have at least one sales rep.', 'error');
         return;
       }
-      state.salesReps = state.salesReps.filter(s => s !== rep);
+      state.salesReps = state.salesReps.filter(s => s !== rep && s.toLowerCase() !== rep.toLowerCase());
       saveStateToStorage();
       renderSettings();
+      populateSalesFiltersDropdowns();
       showToast(`Removed sales rep ${rep}.`);
     }
   };
@@ -11970,6 +11953,12 @@
 
     const salesSearch = document.getElementById('salesSearchInput');
     if (salesSearch) {
+      // Purge any errant autofill before binding
+      if (salesSearch.value && (salesSearch.value.toLowerCase().startsWith('sup_') || salesSearch.value.toLowerCase().includes('angel') || salesSearch.value.toLowerCase() === 'superadmin')) {
+        salesSearch.value = '';
+        state.salesFilter.search = '';
+      }
+
       salesSearch.addEventListener('input', () => {
         state.salesFilter.search = salesSearch.value.trim();
         state.salesFilter.page = 1;
@@ -12376,7 +12365,55 @@
         showToast(msg, overdueCount > 0 ? 'error' : 'info');
       }
     }, 1200);
+
+    // Run active autofill scrubbing to prevent browsers from placing credentials into search bars
+    purgeSearchAutofill();
+    [20, 80, 200, 500, 1000, 2000].forEach(delay => setTimeout(purgeSearchAutofill, delay));
   }
+
+  // Guardian: Purges any errant browser credential autofill (e.g. 'sup_angel') from all search bars
+  function purgeSearchAutofill() {
+    const knownCredentials = ['sup_angel', 'superadmin', 'admin', 'angelica'];
+    const searchSelectors = [
+      '#globalSearchInput',
+      '#salesSearchInput',
+      '#pendingSalesSearchInput',
+      '#trackerSearchInput',
+      '#workloadTableSearch',
+      '#usersSearchInput',
+      '#auditSearchInput',
+      'input[type="search"]',
+      'input.global-search-input',
+      'input.filter-input'
+    ];
+    document.querySelectorAll(searchSelectors.join(',')).forEach(input => {
+      if (!input || input.type === 'password') return;
+      const val = (input.value || '').trim();
+      const lower = val.toLowerCase();
+      if (
+        knownCredentials.includes(lower) ||
+        lower.startsWith('sup_') ||
+        lower.startsWith('artist_') ||
+        lower.startsWith('sales_') ||
+        lower.includes('@')
+      ) {
+        input.value = '';
+        if (input.id === 'salesSearchInput' && state && state.salesFilter) {
+          state.salesFilter.search = '';
+          if (typeof renderSalesRequests === 'function') renderSalesRequests();
+        } else if (input.id === 'pendingSalesSearchInput' && state) {
+          state.pendingSalesSearch = '';
+          if (typeof renderSalesRequests === 'function') renderSalesRequests();
+        } else if (input.id === 'globalSearchInput') {
+          const dd = document.getElementById('quickSearchResults');
+          if (dd) dd.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  window.addEventListener('focus', purgeSearchAutofill);
+  window.addEventListener('pageshow', purgeSearchAutofill);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);

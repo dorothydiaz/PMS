@@ -686,14 +686,15 @@ switch ($action) {
     case 'get_sales_reps':
         try {
             $stmt = $pdo->query("
-                SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != ''
+                SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' AND TRIM(name) != 'Shela'
                 UNION
-                SELECT full_name AS name FROM users WHERE role = 'sales' AND full_name IS NOT NULL AND TRIM(full_name) != ''
+                SELECT full_name AS name FROM users WHERE role = 'sales' AND full_name IS NOT NULL AND TRIM(full_name) != '' AND TRIM(full_name) != 'Shela'
                 UNION
-                SELECT DISTINCT sales_rep AS name FROM sales_requests WHERE sales_rep IS NOT NULL AND TRIM(sales_rep) != ''
+                SELECT DISTINCT sales_rep AS name FROM sales_requests WHERE sales_rep IS NOT NULL AND TRIM(sales_rep) != '' AND TRIM(sales_rep) != 'Shela'
                 ORDER BY name ASC
             ");
             $reps = array_values(array_unique(array_filter(array_map('trim', $stmt->fetchAll(PDO::FETCH_COLUMN)))));
+            $reps = array_values(array_filter($reps, function($r) { return strcasecmp(trim($r), 'Shela') !== 0; }));
             sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
             sendJsonResponse(['success' => true, 'data' => $reps]);
         } catch (Exception $e) {

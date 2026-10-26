@@ -73,7 +73,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <!-- Filter & Search Controls -->
           <div class="filter-bar">
             <div class="filter-group">
-              <input type="text" class="filter-input" id="salesSearchInput" placeholder="Search orders..." style="width: 220px;">
+              <input type="search" name="q_orders" class="filter-input" id="salesSearchInput" placeholder="Search orders..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 220px;">
               <select class="filter-input" id="salesFilterPriority">
                 <option value="">All Priorities</option>
                 <option value="Rush">Rush</option>

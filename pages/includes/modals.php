@@ -283,56 +283,59 @@
         </div>
       </div>
 
-      <!-- Security Passcode Form Section -->
-      <div id="confirmPasscodeSection" style="background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 10px; padding: 16px; margin-bottom: 6px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <label for="confirmDeletePasscode" style="font-size: 11.5px; font-weight: 700; color: #09090B; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            Permission Passcode
-          </label>
-          <button type="button" id="btnTogglePasscodeSetup" style="background: none; border: none; color: #09090B; font-size: 11.5px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">
-            Change Passcode
-          </button>
-        </div>
+      <!-- Security Passcode Form Section (Isolated in form to prevent browser leaking username into page search bars) -->
+      <form autocomplete="off" onsubmit="return false;" style="margin: 0; padding: 0;">
+        <!-- Hidden decoy inputs to absorb browser autofill algorithms -->
+        <input type="text" name="decoy_username" style="display:none;" aria-hidden="true" tabindex="-1">
+        <input type="password" name="decoy_password" style="display:none;" aria-hidden="true" tabindex="-1">
 
-        <div style="position: relative;">
-          <input type="password" class="form-control" id="confirmDeletePasscode" placeholder="Enter permission passcode to confirm..." autocomplete="off" style="padding-right: 42px; font-size: 14px; background: #FFFFFF; border: 1px solid #D4D4D8; color: #09090B; letter-spacing: 1.5px; border-radius: 8px;">
-          <button type="button" id="btnToggleConfirmPasscodeVisibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #71717A; cursor: pointer; padding: 6px;" title="Show/Hide Passcode">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          </button>
-        </div>
+        <div id="confirmPasscodeSection" style="background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 10px; padding: 16px; margin-bottom: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label for="confirmDeletePasscode" style="font-size: 11.5px; font-weight: 700; color: #09090B; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Permission Passcode
+            </label>
+            <button type="button" id="btnTogglePasscodeSetup" style="background: none; border: none; color: #09090B; font-size: 11.5px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">
+              Change Passcode
+            </button>
+          </div>
 
-        <div id="confirmPasscodeError" style="display: none; color: #DC2626; font-size: 12px; font-weight: 600; margin-top: 8px; background: #FEF2F2; padding: 7px 12px; border-radius: 6px; border: 1px solid #FECACA;"></div>
+          <div>
+            <input type="password" class="form-control" id="confirmDeletePasscode" placeholder="Enter permission passcode to confirm..." autocomplete="new-password" data-lpignore="true" style="padding: 10px 14px; font-size: 14px; background: #FFFFFF; border: 1px solid #D4D4D8; color: #09090B; letter-spacing: 2px; border-radius: 8px;">
+          </div>
 
-        <div id="confirmPasscodeHint" style="font-size: 11.5px; color: #71717A; margin-top: 8px; line-height: 1.4;">
-          Security safeguard: Super Admin must authenticate with the permission passcode before permanent data deletion takes effect.
-        </div>
-      </div>
+          <div id="confirmPasscodeError" style="display: none; color: #DC2626; font-size: 12px; font-weight: 600; margin-top: 8px; background: #FEF2F2; padding: 7px 12px; border-radius: 6px; border: 1px solid #FECACA;"></div>
 
-      <!-- Change/Set Passcode Sub-drawer (collapsible) -->
-      <div id="confirmPasscodeSetupDrawer" style="display: none; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 10px; padding: 16px; margin-top: 10px;">
-        <div style="font-size: 11.5px; font-weight: 700; color: #09090B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
-          Set New Permission Passcode
-        </div>
-        <div style="font-size: 12px; color: #71717A; margin-bottom: 12px; line-height: 1.4;">
-          For security, please verify your account login password before setting a new passcode:
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-          <label for="confirmLoginPasswordInput" style="font-size: 11px; font-weight: 600; color: #52525B; margin-bottom: 4px; display: block;">Your Current Login Password</label>
-          <input type="password" class="form-control" id="confirmLoginPasswordInput" placeholder="Enter current login password..." autocomplete="current-password" style="background: #FAFAFA; border: 1px solid #D4D4D8; font-size: 13px; border-radius: 8px;">
-        </div>
-
-        <div style="margin-bottom: 6px;">
-          <label for="confirmNewPasscodeInput" style="font-size: 11px; font-weight: 600; color: #52525B; margin-bottom: 4px; display: block;">New Permission Passcode</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="password" class="form-control" id="confirmNewPasscodeInput" placeholder="Enter new passcode (e.g. 1234)..." autocomplete="new-password" style="background: #FAFAFA; border: 1px solid #D4D4D8; font-size: 13px; border-radius: 8px;">
-            <button type="button" class="btn btn-sm" id="btnSaveNewPasscodeInsideModal" style="background: #09090B; border: 1px solid #09090B; color: #FFFFFF; font-weight: 600; padding: 0 16px; border-radius: 8px; white-space: nowrap; cursor: pointer;">Update</button>
+          <div id="confirmPasscodeHint" style="font-size: 11.5px; color: #71717A; margin-top: 8px; line-height: 1.4;">
+            Security safeguard: Super Admin must authenticate with the permission passcode before permanent data deletion takes effect.
           </div>
         </div>
 
-        <div id="confirmNewPasscodeFeedback" style="font-size: 12px; font-weight: 600; margin-top: 8px; display: none;"></div>
-      </div>
+        <!-- Change/Set Passcode Sub-drawer (collapsible) -->
+        <div id="confirmPasscodeSetupDrawer" style="display: none; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 10px; padding: 16px; margin-top: 10px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: #09090B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+            Set New Permission Passcode
+          </div>
+          <div style="font-size: 12px; color: #71717A; margin-bottom: 12px; line-height: 1.4;">
+            For security, please verify your account login password before setting a new passcode:
+          </div>
+          
+          <div style="margin-bottom: 10px;">
+            <label for="confirmLoginPasswordInput" style="font-size: 11px; font-weight: 600; color: #52525B; margin-bottom: 4px; display: block;">Your Current Login Password</label>
+            <input type="password" class="form-control" id="confirmLoginPasswordInput" placeholder="Enter current login password..." autocomplete="new-password" data-lpignore="true" data-form-type="other" value="" style="background: #FAFAFA; border: 1px solid #D4D4D8; font-size: 13px; border-radius: 8px;">
+          </div>
+
+          <div style="margin-bottom: 6px;">
+            <label for="confirmNewPasscodeInput" style="font-size: 11px; font-weight: 600; color: #52525B; margin-bottom: 4px; display: block;">New Permission Passcode</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="password" class="form-control" id="confirmNewPasscodeInput" placeholder="Enter new passcode (e.g. 1234)..." autocomplete="new-password" data-lpignore="true" data-form-type="other" value="" style="background: #FAFAFA; border: 1px solid #D4D4D8; font-size: 13px; border-radius: 8px;">
+              <button type="button" class="btn btn-sm" id="btnSaveNewPasscodeInsideModal" style="background: #09090B; border: 1px solid #09090B; color: #FFFFFF; font-weight: 600; padding: 0 16px; border-radius: 8px; white-space: nowrap; cursor: pointer;">Update</button>
+            </div>
+          </div>
+
+          <div id="confirmNewPasscodeFeedback" style="font-size: 12px; font-weight: 600; margin-top: 8px; display: none;"></div>
+        </div>
+      </form>
     </div>
 
     <div class="modal-footer" style="border-top: 1px solid #F4F4F5; padding: 16px 24px; display: flex; justify-content: flex-end; gap: 10px; background: #FAFAFA;">
