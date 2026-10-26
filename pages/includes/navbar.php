@@ -59,7 +59,7 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
 
         <div class="deadline-alert-footer">
           <span class="deadline-alert-footer-note">Real-time status based on local time</span>
-          <a href="<?= $pagesBase ?>creatives-tracker.php" class="deadline-alert-view-all">View Tracker &rarr;</a>
+          <a href="<?= $pagesBase ?>creatives-production.php" class="deadline-alert-view-all">View Tracker &rarr;</a>
         </div>
       </div>
     </div>

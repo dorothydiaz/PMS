@@ -150,7 +150,7 @@
     <!-- 3. DESIGN -->
     <div class="nav-section-label">DESIGN</div>
 
-    <a class="nav-item${isAct('creatives-tracker')}" href="${pagesPrefix}creatives-tracker${ext}" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
+    <a class="nav-item${isAct('creatives-tracker')}" href="${pagesPrefix}creatives-production${ext}" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"></path>
@@ -298,7 +298,7 @@
 
         <div class="deadline-alert-footer">
           <span class="deadline-alert-footer-note">Real-time status based on local time</span>
-          <a href="${pagesPrefix}creatives-tracker${ext}" class="deadline-alert-view-all">View Tracker &rarr;</a>
+          <a href="${pagesPrefix}creatives-production${ext}" class="deadline-alert-view-all">View Tracker &rarr;</a>
         </div>
       </div>
     </div>

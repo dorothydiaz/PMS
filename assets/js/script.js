@@ -5782,7 +5782,7 @@
   const PAGE_MAP = {
     'view-dashboard': 'index.html',
     'view-sales-requests': 'sales-requests.html',
-    'view-creatives-tracker': 'creatives-tracker.html',
+    'view-creatives-tracker': 'creatives-production.html',
     'view-artist-workload': 'artist-workload.html',
     'view-directives-details': 'directives-details.html',
     'view-pending-sales': 'sales-requests.html',
@@ -11524,7 +11524,7 @@
       const isInsidePagesFolder = currentPath.toLowerCase().includes('/pages/');
       const isPhp = window.location.pathname.endsWith('.php') || typeof window.PMS_API_URL !== 'undefined';
       const ext = isPhp ? '.php' : '.html';
-      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-tracker' + ext + '?kpi=' + encodeURIComponent(type);
+      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-production' + ext + '?kpi=' + encodeURIComponent(type);
       window.location.href = targetUrl;
     },
 

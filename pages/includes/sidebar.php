@@ -74,7 +74,7 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
     <div class="nav-section-label">DESIGN</div>
 
     <?php if (hasPermission('creatives-tracker', 'r')): ?>
-    <a class="nav-item <?= ($cur === 'creatives-tracker') ? 'active' : '' ?>" href="<?= $pagesBase ?>creatives-tracker.php" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
+    <a class="nav-item <?= ($cur === 'creatives-tracker') ? 'active' : '' ?>" href="<?= $pagesBase ?>creatives-production.php" data-view="view-creatives-tracker" data-page="view-creatives-tracker" title="Creatives Tracker">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"></path>

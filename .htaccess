@@ -1,6 +1,5 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /PMS/PMS/
 
     # Redirect /pages/ or /pages/index.php to main dashboard
     RewriteRule ^pages/?$ index.php [R=301,L]
@@ -11,15 +10,16 @@
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Check if file exists with .php in root
-    RewriteCond %{DOCUMENT_ROOT}/PMS/PMS/$1.php -f
+    # Allow accessing root scripts without .php extension (e.g. /login -> /login.php)
+    RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L]
 
-    # Check if file exists in pages/ with .php
-    RewriteCond %{DOCUMENT_ROOT}/PMS/PMS/pages/$1.php -f
+    # Allow accessing pages without .php extension (e.g. /pages/creatives-tracker -> /pages/creatives-tracker.php)
+    RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^pages/([a-zA-Z0-9_-]+)$ pages/$1.php [L]
 
-    # Fallback: if root file not found, check pages/
-    RewriteCond %{DOCUMENT_ROOT}/PMS/PMS/pages/$1.php -f
-    RewriteRule ^([a-zA-Z0-9_-]+)(?:\.php)?$ pages/$1.php [L]
+    # Friendly root alias for pages (e.g. /creatives-tracker -> pages/creatives-tracker.php)
+    RewriteCond %{DOCUMENT_ROOT}/pages/$1.php -f [OR]
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([a-zA-Z0-9_-]+)$ pages/$1.php [L]
 </IfModule>
