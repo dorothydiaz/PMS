@@ -87,6 +87,12 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="Pending">Pending</option>
                 <option value="Revision Requested">Revision Requested</option>
               </select>
+              <select class="filter-input" id="salesFilterLocation">
+                <option value="">All Locations</option>
+                <option value="Indoor">Indoor</option>
+                <option value="Outdoor">Outdoor</option>
+                <option value="Indoor & Outdoor">Indoor & Outdoor</option>
+              </select>
               <select class="filter-input" id="salesFilterFileSent">
                 <option value="">File Sent Status</option>
                 <option value="Sent">File Sent</option>
@@ -126,6 +132,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <th data-sort="joNumber">JO #</th>
                   <th data-sort="projectName">Project Name (Click to Edit)</th>
                   <th data-sort="client">Client (Click to Edit)</th>
+                  <th data-sort="location">Location</th>
                   <th data-sort="artist">Artist</th>
                   <th data-sort="designDeadline">Deadline</th>
                   <th data-sort="releasingDate">Releasing</th>

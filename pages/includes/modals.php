@@ -69,6 +69,14 @@
             </select>
           </div>
           <div class="form-group">
+            <label class="form-label required">Location / Environment</label>
+            <select class="form-control" id="salesFormLocation" required>
+              <option value="Indoor">Indoor</option>
+              <option value="Outdoor">Outdoor</option>
+              <option value="Indoor & Outdoor">Indoor & Outdoor</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label class="form-label">File Sent Status</label>
             <select class="form-control" id="salesFormFileSent">
               <option value="File Sent">File Sent</option>
@@ -228,6 +236,111 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" data-close-modal="attachmentPreviewModal">Close Preview</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CUSTOM DESIGNED CONFIRMATION & SUPER ADMIN DELETE SECURITY PASSCODE DIALOG -->
+<!-- MODAL: CUSTOM DESIGNED CONFIRMATION & SUPER ADMIN DELETE SECURITY PASSCODE DIALOG (CLEAN MINIMALIST MONOCHROME) -->
+<div class="modal-backdrop" id="customConfirmModal">
+  <div class="modal-container" style="max-width: 500px; width: 94%; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 14px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.1); animation: modalSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+    <div class="modal-header" style="border-bottom: 1px solid #F4F4F5; padding: 20px 24px; background: #FFFFFF;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div id="confirmModalIconWrap" style="width: 40px; height: 40px; border-radius: 10px; background: #09090B; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        <div>
+          <h3 class="modal-title" id="confirmModalTitle" style="font-size: 17px; font-weight: 700; color: #09090B; margin: 0 0 2px 0; letter-spacing: -0.2px;">Permanent Data Deletion</h3>
+          <span id="confirmModalSubtitle" style="font-size: 11px; font-weight: 600; color: #71717A; letter-spacing: 0.6px; text-transform: uppercase;">Super Admin Security Authorization</span>
+        </div>
+      </div>
+      <button class="modal-close-btn" data-close-modal="customConfirmModal" aria-label="Close" style="background: none; border: none; cursor: pointer; color: #71717A; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: color 0.15s;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="modal-body" style="padding: 22px 24px; background: #FFFFFF;">
+      <div id="confirmModalMessage" style="font-size: 13.5px; line-height: 1.55; color: #3F3F46; margin-bottom: 16px;">
+        Are you sure you want to permanently delete this record? This action will permanently remove it from both your local workspace and the live MySQL database.
+      </div>
+
+      <!-- Record detail summary card -->
+      <div id="confirmModalRecordCard" style="display: none; background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; font-size: 13px;">
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; align-items: baseline;">
+          <span style="color: #71717A; font-weight: 600;">Request ID:</span>
+          <strong id="confirmRecordRequestId" style="color: #09090B; font-size: 13.5px; font-weight: 700;">-</strong>
+          <span style="color: #71717A; font-weight: 600;">JO Number:</span>
+          <strong id="confirmRecordJoNumber" style="color: #09090B; font-weight: 700;">-</strong>
+          <span style="color: #71717A; font-weight: 600;">Project:</span>
+          <span id="confirmRecordProjectName" style="color: #18181B; font-weight: 600;">-</span>
+          <span style="color: #71717A; font-weight: 600;">Client:</span>
+          <span id="confirmRecordClient" style="color: #52525B;">-</span>
+        </div>
+      </div>
+
+      <!-- Security Passcode Form Section -->
+      <div id="confirmPasscodeSection" style="background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 10px; padding: 16px; margin-bottom: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label for="confirmDeletePasscode" style="font-size: 11.5px; font-weight: 700; color: #09090B; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Permission Passcode
+          </label>
+          <button type="button" id="btnTogglePasscodeSetup" style="background: none; border: none; color: #09090B; font-size: 11.5px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">
+            Change Passcode
+          </button>
+        </div>
+
+        <div style="position: relative;">
+          <input type="password" class="form-control" id="confirmDeletePasscode" placeholder="Enter permission passcode to confirm..." autocomplete="off" style="padding-right: 42px; font-size: 14px; background: #FFFFFF; border: 1px solid #D4D4D8; color: #09090B; letter-spacing: 1.5px; border-radius: 8px;">
+          <button type="button" id="btnToggleConfirmPasscodeVisibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #71717A; cursor: pointer; padding: 6px;" title="Show/Hide Passcode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+
+        <div id="confirmPasscodeError" style="display: none; color: #DC2626; font-size: 12px; font-weight: 600; margin-top: 8px; background: #FEF2F2; padding: 7px 12px; border-radius: 6px; border: 1px solid #FECACA;"></div>
+
+        <div id="confirmPasscodeHint" style="font-size: 11.5px; color: #71717A; margin-top: 8px; line-height: 1.4;">
+          Security safeguard: Super Admin must authenticate with the permission passcode before permanent data deletion takes effect.
+        </div>
+      </div>
+
+      <!-- Change/Set Passcode Sub-drawer (collapsible) -->
+      <div id="confirmPasscodeSetupDrawer" style="display: none; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 10px; padding: 16px; margin-top: 10px;">
+        <div style="font-size: 11.5px; font-weight: 700; color: #09090B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+          Set New Permission Passcode
+        </div>
+        <div style="font-size: 12px; color: #71717A; margin-bottom: 12px; line-height: 1.4;">
+          For security, please verify your account login password before setting a new passcode:
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <label for="confirmLoginPasswordInput" style="font-size: 11px; font-weight: 600; color: #52525B; margin-bottom: 4px; display: block;">Your Current Login Password</label>
+          <input type="password" class="form-control" id="confirmLoginPasswordInput" placeholder="Enter current login password..." autocomplete="current-password" style="background: #FAFAFA; border: 1px solid #D4D4D8; font-size: 13px; border-radius: 8px;">
+        </div>
+
+        <div style="margin-bottom: 6px;">
+          <label for="confirmNewPasscodeInput" style="font-size: 11px; font-weight: 600; color: #52525B; margin-bottom: 4px; display: block;">New Permission Passcode</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="password" class="form-control" id="confirmNewPasscodeInput" placeholder="Enter new passcode (e.g. 1234)..." autocomplete="new-password" style="background: #FAFAFA; border: 1px solid #D4D4D8; font-size: 13px; border-radius: 8px;">
+            <button type="button" class="btn btn-sm" id="btnSaveNewPasscodeInsideModal" style="background: #09090B; border: 1px solid #09090B; color: #FFFFFF; font-weight: 600; padding: 0 16px; border-radius: 8px; white-space: nowrap; cursor: pointer;">Update</button>
+          </div>
+        </div>
+
+        <div id="confirmNewPasscodeFeedback" style="font-size: 12px; font-weight: 600; margin-top: 8px; display: none;"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer" style="border-top: 1px solid #F4F4F5; padding: 16px 24px; display: flex; justify-content: flex-end; gap: 10px; background: #FAFAFA;">
+      <button type="button" class="btn" data-close-modal="customConfirmModal" id="btnCancelCustomConfirm" style="background: #FFFFFF; border: 1px solid #D4D4D8; color: #18181B; font-weight: 600; padding: 8px 18px; border-radius: 8px;">Cancel</button>
+      <button type="button" class="btn" id="btnExecuteCustomConfirm" style="background: #000000; border: 1px solid #000000; color: #FFFFFF; font-weight: 700; padding: 8px 20px; border-radius: 8px; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); cursor: pointer;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span id="confirmModalSubmitLabel">Permanently Delete</span>
+      </button>
     </div>
   </div>
 </div>

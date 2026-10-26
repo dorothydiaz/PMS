@@ -4643,7 +4643,7 @@
     attachments: [...DEFAULT_ATTACHMENTS],
     activeView: 'view-dashboard',
     currentDirectiveJo: 'P261001348',
-    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
+    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
     trackerFilter: { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: initialRowsPerPage },
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
@@ -5024,6 +5024,12 @@
   function getBadgeClassForValue(fieldName, val) {
     if (!val) return 'badge-neutral';
     const v = String(val).toLowerCase();
+    if (fieldName === 'location') {
+      if (v.includes('&') || (v.includes('indoor') && v.includes('outdoor'))) return 'badge-location-both';
+      if (v.includes('outdoor')) return 'badge-location-outdoor';
+      if (v.includes('indoor')) return 'badge-location-indoor';
+      return 'badge-location-indoor';
+    }
     if (fieldName === 'artist') return 'badge-artist';
     if (fieldName === 'salesRep') return 'badge-sales';
     if (['completed', 'approved', 'sent', 'submitted'].includes(v)) return 'badge-completed';
@@ -5039,6 +5045,12 @@
   function getIndicatorClass(fieldName, val) {
     if (!val) return 'indicator-neutral';
     const v = String(val).toLowerCase();
+    if (fieldName === 'location' || fieldName === 'salesFormLocation' || fieldName === 'salesFilterLocation') {
+      if (v.includes('&') || (v.includes('indoor') && v.includes('outdoor'))) return 'indicator-location-both';
+      if (v.includes('outdoor')) return 'indicator-location-outdoor';
+      if (v.includes('indoor')) return 'indicator-location-indoor';
+      return 'indicator-location-indoor';
+    }
     if (fieldName === 'artist' || fieldName === 'salesFormArtist' || fieldName === 'trackerFormArtist' || fieldName === 'trackerFilterArtist') return 'indicator-artist';
     if (fieldName === 'salesRep' || fieldName === 'salesFormSalesRep' || fieldName === 'salesFilterSalesRep') return 'indicator-sales';
     if (['completed', 'approved', 'sent', 'file sent', 'submitted'].includes(v)) return 'indicator-completed';
@@ -6310,7 +6322,7 @@
     const pagedList = list.slice(startIndex, startIndex + perPage);
 
     if (pagedList.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">No projects match current filters.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted);">No projects match current filters.</td></tr>`;
       return;
     }
 
@@ -6321,6 +6333,7 @@
         <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700;')}</td>
         <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
         <td>${renderEditableCell(r.id, 'client', r.client)}</td>
+        <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
         <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
         <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
         <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
@@ -6382,7 +6395,7 @@
     });
 
     let list = [...state.requests];
-    const { search, priority, approval, fileSent, salesRep, sortField, sortDir, page, perPage } = state.salesFilter;
+    const { search, priority, approval, fileSent, salesRep, location, sortField, sortDir, page, perPage } = state.salesFilter;
 
     // Filter by approval tab
     if (activeApprovalTab) {
@@ -6396,13 +6409,15 @@
         r.requestId.toLowerCase().includes(q) ||
         r.joNumber.toLowerCase().includes(q) ||
         r.projectName.toLowerCase().includes(q) ||
-        r.client.toLowerCase().includes(q)
+        r.client.toLowerCase().includes(q) ||
+        (r.location && r.location.toLowerCase().includes(q))
       );
     }
     if (priority) list = list.filter(r => r.priority === priority);
     if (approval) list = list.filter(r => r.clientApproval === approval);
     if (fileSent) list = list.filter(r => r.fileSent === fileSent);
     if (salesRep) list = list.filter(r => r.salesRep === salesRep);
+    if (location) list = list.filter(r => (r.location || 'Indoor').toLowerCase() === location.toLowerCase());
     if (state.salesFilter.deadline) {
       list = list.filter(r => {
         const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
@@ -6440,7 +6455,7 @@
     const tbody = document.getElementById('salesRequestsTableBody');
     if (tbody) {
       if (pagedList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:var(--text-muted);">No sales requests match the current filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding:30px; color:var(--text-muted);">No sales requests match the current filters.</td></tr>`;
       } else {
         const isSuper = isCurrentUserSuperAdmin();
         tbody.innerHTML = pagedList.map(r => `
@@ -6449,6 +6464,7 @@
             <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color: var(--accent-red); font-weight: 700;')}</td>
             <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
             <td>${renderEditableCell(r.id, 'client', r.client)}</td>
+            <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
             <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
             <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
             <td>${renderInlineDate(r.id, 'releasingDate', r.releasingDate)}</td>
@@ -6463,9 +6479,6 @@
                 </button>
                 <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.editSalesRequest('${r.id}')" title="Edit Full Details">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
-                <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.duplicateSalesRequest('${r.id}')" title="Duplicate">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
                 ${isSuper ? `
                   <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Request (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
@@ -10049,20 +10062,135 @@
       };
     }
 
+    // Super Admin Deletion Security Passcode Management
+    const currentPasscodeEl = document.getElementById('settingsCurrentPasscodeDisplay');
+    const togglePasscodeBtn = document.getElementById('btnToggleSettingsPasscodeView');
+    const loginPasswordEl = document.getElementById('settingsLoginPasswordInput');
+    const newPasscodeEl = document.getElementById('settingsNewPasscodeInput');
+    const savePasscodeBtn = document.getElementById('btnSettingsSavePasscode');
+    const feedbackEl = document.getElementById('settingsPasscodeFeedback');
+
+    if (currentPasscodeEl) {
+      if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+        fetch(window.PMS_API_URL + '?action=get_delete_passcode')
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.success && res.passcode) {
+              currentPasscodeEl.value = res.passcode;
+              state.deletePasscode = res.passcode;
+            }
+          })
+          .catch(() => {});
+      } else {
+        currentPasscodeEl.value = state.deletePasscode || '1234';
+      }
+    }
+
+    if (togglePasscodeBtn && currentPasscodeEl) {
+      togglePasscodeBtn.onclick = () => {
+        if (currentPasscodeEl.type === 'password') {
+          currentPasscodeEl.type = 'text';
+          togglePasscodeBtn.textContent = 'Hide';
+        } else {
+          currentPasscodeEl.type = 'password';
+          togglePasscodeBtn.textContent = 'Show';
+        }
+      };
+    }
+
+    if (savePasscodeBtn && newPasscodeEl) {
+      savePasscodeBtn.onclick = () => {
+        const loginPass = loginPasswordEl ? loginPasswordEl.value.trim() : '';
+        if (!loginPass) {
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#DC2626';
+            feedbackEl.textContent = 'Please enter your current account login password.';
+          }
+          if (loginPasswordEl) loginPasswordEl.focus();
+          return;
+        }
+
+        const val = newPasscodeEl.value.trim();
+        if (!val) {
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#DC2626';
+            feedbackEl.textContent = 'Please enter a valid new passcode.';
+          }
+          newPasscodeEl.focus();
+          return;
+        }
+
+        savePasscodeBtn.disabled = true;
+        savePasscodeBtn.textContent = 'Saving...';
+
+        const updateLocal = () => {
+          state.deletePasscode = val;
+          saveStateToStorage();
+          if (currentPasscodeEl) currentPasscodeEl.value = val;
+          if (loginPasswordEl) loginPasswordEl.value = '';
+          newPasscodeEl.value = '';
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#09090B';
+            feedbackEl.textContent = 'Deletion security passcode successfully saved!';
+            setTimeout(() => { if (feedbackEl) feedbackEl.style.display = 'none'; }, 4000);
+          }
+          showToast('Super Admin deletion passcode updated.');
+          savePasscodeBtn.disabled = false;
+          savePasscodeBtn.textContent = 'Save Passcode';
+        };
+
+        if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+          fetch(window.PMS_API_URL + '?action=set_delete_passcode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ passcode: val, login_password: loginPass })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.success) {
+              updateLocal();
+            } else {
+              if (feedbackEl) {
+                feedbackEl.style.display = 'block';
+                feedbackEl.style.color = '#DC2626';
+                feedbackEl.textContent = res.error || 'Failed to update passcode on server.';
+              }
+              savePasscodeBtn.disabled = false;
+              savePasscodeBtn.textContent = 'Save Passcode';
+            }
+          })
+          .catch(() => updateLocal());
+        } else {
+          updateLocal();
+        }
+      };
+    }
+
     const btnResetAll = document.getElementById('btnSettingsResetDefaults');
     if (btnResetAll) {
       btnResetAll.onclick = () => {
-        if (confirm('Reset all mock data to factory defaults?')) {
-          localStorage.removeItem(STORAGE_KEY);
-          state.artists = [...DEFAULT_ARTISTS];
-          state.salesReps = [...DEFAULT_SALES_REPS];
-          state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
-          state.templateElements = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS));
-          state.attachments = [...DEFAULT_ATTACHMENTS];
-          saveStateToStorage();
-          renderCurrentView(state.activeView);
-          showToast('Sample dataset restored to factory defaults.');
-        }
+        showCustomConfirm({
+          title: 'Reset to Factory Defaults',
+          subtitle: 'LOCALSTORAGE DATA RESET',
+          message: 'Are you sure you want to reset all mock data to factory defaults? All unsynced local drafts will be cleared.',
+          requiresPasscode: false,
+          confirmText: 'Reset Defaults',
+          onConfirm: () => {
+            localStorage.removeItem(STORAGE_KEY);
+            state.artists = [...DEFAULT_ARTISTS];
+            state.salesReps = [...DEFAULT_SALES_REPS];
+            state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+            state.templateElements = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS));
+            state.attachments = [...DEFAULT_ATTACHMENTS];
+            saveStateToStorage();
+            renderCurrentView(state.activeView);
+            showToast('Sample dataset restored to factory defaults.');
+            return true;
+          }
+        });
       };
     }
   }
@@ -10320,6 +10448,9 @@
       deadlineInput.value = d.toISOString().split('T')[0];
     }
 
+    const locInput = document.getElementById('salesFormLocation');
+    if (locInput) locInput.value = 'Indoor';
+
     populateSalesFiltersDropdowns();
     document.getElementById('salesModal').classList.add('show');
   }
@@ -10345,6 +10476,7 @@
     setVal('salesFormJo', rec.joNumber);
     setVal('salesFormProject', rec.projectName);
     setVal('salesFormClient', rec.client);
+    setVal('salesFormLocation', rec.location || 'Indoor');
     setVal('salesFormArtist', rec.artist);
     setVal('salesFormSalesRep', rec.salesRep);
     setVal('salesFormDeadline', rec.designDeadline);
@@ -10365,50 +10497,213 @@
   }
   window.editSalesRequest = editSalesRequest;
 
+  function showCustomConfirm(options) {
+    const modal = document.getElementById('customConfirmModal');
+    if (!modal) {
+      if (confirm(options.message || 'Are you sure?')) {
+        if (options.onConfirm) options.onConfirm('', () => {});
+      }
+      return;
+    }
+
+    const titleEl = document.getElementById('confirmModalTitle');
+    const subtitleEl = document.getElementById('confirmModalSubtitle');
+    const msgEl = document.getElementById('confirmModalMessage');
+    const recordCard = document.getElementById('confirmModalRecordCard');
+    const passcodeSection = document.getElementById('confirmPasscodeSection');
+    const passcodeInput = document.getElementById('confirmDeletePasscode');
+    const passcodeError = document.getElementById('confirmPasscodeError');
+    const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
+    const submitBtn = document.getElementById('btnExecuteCustomConfirm');
+    const submitLabel = document.getElementById('confirmModalSubmitLabel');
+    const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
+
+    if (titleEl) titleEl.textContent = options.title || 'Permanent Data Deletion';
+    if (subtitleEl) subtitleEl.textContent = options.subtitle || (options.requiresPasscode ? 'SUPER ADMIN SECURITY PASSCODE REQUIRED' : 'CONFIRM ACTION');
+    if (msgEl) msgEl.innerHTML = options.message || 'Are you sure you want to proceed?';
+    if (submitLabel) submitLabel.textContent = options.confirmText || 'Permanently Delete';
+
+    if (passcodeError) {
+      passcodeError.style.display = 'none';
+      passcodeError.textContent = '';
+    }
+    if (setupDrawer) setupDrawer.style.display = 'none';
+    if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
+
+    const loginPassModalInput = document.getElementById('confirmLoginPasswordInput');
+    const newPasscodeModalInput = document.getElementById('confirmNewPasscodeInput');
+    const newPasscodeFeedback = document.getElementById('confirmNewPasscodeFeedback');
+    if (loginPassModalInput) loginPassModalInput.value = '';
+    if (newPasscodeModalInput) newPasscodeModalInput.value = '';
+    if (newPasscodeFeedback) {
+      newPasscodeFeedback.style.display = 'none';
+      newPasscodeFeedback.textContent = '';
+    }
+
+    if (recordCard && options.record) {
+      recordCard.style.display = 'block';
+      const reqIdEl = document.getElementById('confirmRecordRequestId');
+      const joEl = document.getElementById('confirmRecordJoNumber');
+      const projEl = document.getElementById('confirmRecordProjectName');
+      const clientEl = document.getElementById('confirmRecordClient');
+      if (reqIdEl) reqIdEl.textContent = options.record.requestId || '-';
+      if (joEl) joEl.textContent = options.record.joNumber || 'Unassigned';
+      if (projEl) projEl.textContent = options.record.projectName || '-';
+      if (clientEl) clientEl.textContent = options.record.client || '-';
+    } else if (recordCard) {
+      recordCard.style.display = 'none';
+    }
+
+    if (passcodeSection) {
+      passcodeSection.style.display = options.requiresPasscode ? 'block' : 'none';
+      if (passcodeInput) {
+        passcodeInput.value = '';
+        passcodeInput.classList.remove('input-shake');
+        passcodeInput.style.borderColor = '#D4D4D8';
+      }
+    }
+
+    modal.classList.add('show');
+    if (options.requiresPasscode && passcodeInput) {
+      setTimeout(() => passcodeInput.focus(), 150);
+    }
+
+    const handleSubmit = async () => {
+      const enteredPasscode = passcodeInput ? passcodeInput.value.trim() : '';
+
+      if (options.requiresPasscode) {
+        if (!enteredPasscode) {
+          if (passcodeError) {
+            passcodeError.style.display = 'block';
+            passcodeError.textContent = 'Please enter the Super Admin permission passcode.';
+          }
+          if (passcodeInput) {
+            passcodeInput.style.borderColor = '#DC2626';
+            passcodeInput.classList.add('input-shake');
+            setTimeout(() => passcodeInput.classList.remove('input-shake'), 400);
+            passcodeInput.focus();
+          }
+          return;
+        }
+      }
+
+      if (typeof options.onConfirm === 'function') {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        try {
+          const success = await options.onConfirm(enteredPasscode, () => modal.classList.remove('show'));
+          if (success) {
+            modal.classList.remove('show');
+          }
+        } catch (err) {
+          if (passcodeError) {
+            passcodeError.style.display = 'block';
+            passcodeError.textContent = err.message || 'Operation failed.';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+        }
+      } else {
+        modal.classList.remove('show');
+      }
+    };
+
+    submitBtn.onclick = handleSubmit;
+    if (passcodeInput) {
+      passcodeInput.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSubmit();
+        }
+      };
+    }
+  }
+  window.showCustomConfirm = showCustomConfirm;
+
   function deleteSalesRequest(id) {
     if (!isCurrentUserSuperAdmin()) {
       showToast('Permission Denied: Only Super Admin can delete records.', 'error');
       return;
     }
 
-    const rec = state.requests.find(r => r.id === id || r.requestId === id);
-    if (!rec) return;
+    let rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) {
+      rec = { id: id, requestId: id, projectName: 'Sales Request', client: '' };
+    }
 
     const reqLabel = rec.requestId || id;
-    if (!confirm(`Are you sure you want to permanently delete ${reqLabel}? This action cannot be undone.`)) {
-      return;
-    }
 
-    // Remove from local state
-    state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+    showCustomConfirm({
+      title: 'Permanent Data Deletion',
+      subtitle: 'SUPER ADMIN SECURITY PASSCODE REQUIRED',
+      message: `Are you sure you want to permanently delete <strong>${escapeHTML(reqLabel)}</strong>? This action will permanently remove it from both your local workspace and the live MySQL database.`,
+      record: {
+        requestId: rec.requestId,
+        joNumber: rec.joNumber,
+        projectName: rec.projectName,
+        client: rec.client
+      },
+      requiresPasscode: true,
+      confirmText: 'Permanently Delete',
+      onConfirm: async (passcode, closeModal) => {
+        if (window.PMS_API_URL) {
+          try {
+            const res = await fetch(window.PMS_API_URL + '?action=delete_request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: rec.id || id,
+                requestId: rec.requestId,
+                passcode: passcode
+              })
+            }).then(r => r.json());
 
-    saveStateToStorage();
-    renderCurrentView(state.activeView);
-    updateDashboardKPIs();
-    updateDeadlineAlertCenter();
-
-    // Sync deletion to live MySQL database
-    if (window.PMS_API_URL) {
-      fetch(window.PMS_API_URL + '?action=delete_request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: rec.id || id, requestId: rec.requestId })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res && res.success) {
-          showToast(`Request ${reqLabel} deleted successfully.`);
+            if (res && res.success) {
+              state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+              saveStateToStorage();
+              renderCurrentView(state.activeView);
+              updateDashboardKPIs();
+              updateDeadlineAlertCenter();
+              showToast(`Request ${reqLabel} deleted successfully.`);
+              return true;
+            } else {
+              const passcodeError = document.getElementById('confirmPasscodeError');
+              const passcodeInput = document.getElementById('confirmDeletePasscode');
+              if (passcodeError) {
+                passcodeError.style.display = 'block';
+                passcodeError.textContent = res.error || 'Invalid permission passcode. Deletion rejected.';
+              }
+              if (passcodeInput) {
+                passcodeInput.style.borderColor = '#DC2626';
+                passcodeInput.classList.add('input-shake');
+                setTimeout(() => passcodeInput.classList.remove('input-shake'), 400);
+                passcodeInput.focus();
+                passcodeInput.select();
+              }
+              return false;
+            }
+          } catch (err) {
+            console.warn('MySQL delete error:', err);
+            state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+            saveStateToStorage();
+            renderCurrentView(state.activeView);
+            updateDashboardKPIs();
+            updateDeadlineAlertCenter();
+            showToast(`Deleted ${reqLabel} locally.`, 'info');
+            return true;
+          }
         } else {
-          showToast(res.error || 'Server error deleting request.', 'error');
+          state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+          saveStateToStorage();
+          renderCurrentView(state.activeView);
+          updateDashboardKPIs();
+          updateDeadlineAlertCenter();
+          showToast(`Request ${reqLabel} deleted successfully.`);
+          return true;
         }
-      })
-      .catch(err => {
-        console.warn('MySQL delete error:', err);
-        showToast(`Deleted ${reqLabel} locally.`, 'info');
-      });
-    } else {
-      showToast(`Request ${reqLabel} deleted successfully.`);
-    }
+      }
+    });
   }
   window.deleteSalesRequest = deleteSalesRequest;
 
@@ -10429,6 +10724,112 @@
       modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.remove('show');
       });
+
+      // Custom Confirm & Passcode Modal Controls Setup
+      const togglePasscodeVisBtn = document.getElementById('btnToggleConfirmPasscodeVisibility');
+      const confirmPasscodeInput = document.getElementById('confirmDeletePasscode');
+      if (togglePasscodeVisBtn && confirmPasscodeInput) {
+        togglePasscodeVisBtn.onclick = () => {
+          if (confirmPasscodeInput.type === 'password') {
+            confirmPasscodeInput.type = 'text';
+            togglePasscodeVisBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+          } else {
+            confirmPasscodeInput.type = 'password';
+            togglePasscodeVisBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+          }
+        };
+      }
+
+      const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
+      const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
+      if (toggleSetupBtn && setupDrawer) {
+        toggleSetupBtn.onclick = () => {
+          const isHidden = setupDrawer.style.display === 'none' || !setupDrawer.style.display;
+          setupDrawer.style.display = isHidden ? 'block' : 'none';
+          toggleSetupBtn.textContent = isHidden ? 'Close Setup' : 'Change Passcode';
+        };
+      }
+
+      const saveInsideModalBtn = document.getElementById('btnSaveNewPasscodeInsideModal');
+      const loginPasswordInsideModalInput = document.getElementById('confirmLoginPasswordInput');
+      const newPasscodeInsideModalInput = document.getElementById('confirmNewPasscodeInput');
+      const newPasscodeFeedback = document.getElementById('confirmNewPasscodeFeedback');
+      if (saveInsideModalBtn && newPasscodeInsideModalInput) {
+        saveInsideModalBtn.onclick = () => {
+          const loginPass = loginPasswordInsideModalInput ? loginPasswordInsideModalInput.value.trim() : '';
+          if (!loginPass) {
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#DC2626';
+              newPasscodeFeedback.textContent = 'Please enter your current account login password.';
+            }
+            if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.focus();
+            return;
+          }
+
+          const val = newPasscodeInsideModalInput.value.trim();
+          if (!val) {
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#DC2626';
+              newPasscodeFeedback.textContent = 'Please enter a valid passcode.';
+            }
+            newPasscodeInsideModalInput.focus();
+            return;
+          }
+
+          saveInsideModalBtn.disabled = true;
+          saveInsideModalBtn.textContent = 'Updating...';
+
+          const onSaved = () => {
+            state.deletePasscode = val;
+            saveStateToStorage();
+            if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.value = '';
+            if (newPasscodeInsideModalInput) newPasscodeInsideModalInput.value = '';
+            if (confirmPasscodeInput) {
+              confirmPasscodeInput.value = val;
+              confirmPasscodeInput.style.borderColor = '#09090B';
+            }
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#09090B';
+              newPasscodeFeedback.textContent = 'Passcode updated! It has been pre-filled above.';
+            }
+            setTimeout(() => {
+              if (setupDrawer) setupDrawer.style.display = 'none';
+              if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
+            }, 1500);
+            showToast('Super Admin deletion passcode updated.');
+            saveInsideModalBtn.disabled = false;
+            saveInsideModalBtn.textContent = 'Update';
+          };
+
+          if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+            fetch(window.PMS_API_URL + '?action=set_delete_passcode', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ passcode: val, login_password: loginPass })
+            })
+            .then(r => r.json())
+            .then(res => {
+              if (res && res.success) {
+                onSaved();
+              } else {
+                if (newPasscodeFeedback) {
+                  newPasscodeFeedback.style.display = 'block';
+                  newPasscodeFeedback.style.color = '#DC2626';
+                  newPasscodeFeedback.textContent = res.error || 'Failed to update passcode.';
+                }
+                saveInsideModalBtn.disabled = false;
+                saveInsideModalBtn.textContent = 'Update';
+              }
+            })
+            .catch(() => onSaved());
+          } else {
+            onSaved();
+          }
+        };
+      }
 
       // Automatically upgrade and sync all form selects whenever any modal becomes visible
       const observer = new MutationObserver((mutations) => {
@@ -10467,6 +10868,7 @@
         const clientApproval = document.getElementById('salesFormClientApproval')?.value || 'Pending';
         const priority = document.getElementById('salesFormPriority')?.value || 'Normal';
         const mode = normalizeReleasingMode((document.getElementById('salesFormRelMode') || document.getElementById('salesFormReleasingMode'))?.value);
+        const location = document.getElementById('salesFormLocation')?.value || 'Indoor';
         const contactPerson = document.getElementById('salesFormContactPerson').value.trim();
         const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
         const address = document.getElementById('salesFormAddress').value.trim();
@@ -10483,6 +10885,7 @@
             rec.designDeadline = deadline;
             rec.releasingDate = releasingDate || deadline;
             rec.fileSent = fileSent;
+            rec.location = location;
             rec.clientApproval = clientApproval;
             rec.priority = priority;
             rec.releasingMode = mode;
@@ -10513,7 +10916,7 @@
             designDeadline: deadline,
             releasingDate: releasingDate || deadline,
             releasingMode: mode,
-            location: 'Manila Branch',
+            location: location,
             completeAddress: address || 'Metro Manila',
             contactPerson: contactPerson || '-',
             contactNumber: contactNumber || '-',
@@ -10759,6 +11162,8 @@
     deleteSalesRequest: deleteSalesRequest,
     formatRequestIdInput: formatRequestIdInput,
     getNextRequestId: getNextRequestId,
+    showCustomConfirm: showCustomConfirm,
+    getState: () => state,
 
     // KPI Cards Clickable & Viewable Public API (SPA + Multi-Page Aware)
     navigateToPageTable: (type) => {
@@ -11572,7 +11977,7 @@
       });
     }
 
-    ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep'].forEach(id => {
+    ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep', 'salesFilterLocation'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener('change', () => {
@@ -11580,6 +11985,7 @@
           if (id === 'salesFilterApproval') state.salesFilter.approval = el.value;
           if (id === 'salesFilterFileSent') state.salesFilter.fileSent = el.value;
           if (id === 'salesFilterSalesRep') state.salesFilter.salesRep = el.value;
+          if (id === 'salesFilterLocation') state.salesFilter.location = el.value;
           state.salesFilter.page = 1;
           renderSalesRequests();
         });
@@ -11599,9 +12005,9 @@
     const btnResetSales = document.getElementById('btnResetSalesFilters');
     if (btnResetSales) {
       btnResetSales.addEventListener('click', () => {
-        state.salesFilter = { search: '', priority: '', approval: '', fileSent: '', salesRep: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: getStoredRowsPerPage(), approvalTab: '' };
+        state.salesFilter = { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: getStoredRowsPerPage(), approvalTab: '' };
         if (salesSearch) salesSearch.value = '';
-        ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep'].forEach(id => {
+        ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep', 'salesFilterLocation'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.value = '';
         });

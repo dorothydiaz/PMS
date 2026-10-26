@@ -1517,6 +1517,46 @@ body {
 .indicator-neutral   { background: #94A3B8; }
 .indicator-artist    { background: #6366F1; }
 .indicator-sales     { background: #8B5CF6; }
+.indicator-location-indoor  { background: #0284C7; }
+.indicator-location-outdoor { background: #D97706; }
+.indicator-location-both    { background: #7C3AED; }
+
+/* Location Environment Badges */
+.badge-location-indoor {
+  background: #E0F2FE !important;
+  color: #0369A1 !important;
+  border: 1px solid #BAE6FD !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px 10px !important;
+  font-weight: 700;
+}
+.badge-location-indoor:hover {
+  background: #BAE6FD !important;
+}
+
+.badge-location-outdoor {
+  background: #FEF3C7 !important;
+  color: #B45309 !important;
+  border: 1px solid #FDE68A !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px 10px !important;
+  font-weight: 700;
+}
+.badge-location-outdoor:hover {
+  background: #FDE68A !important;
+}
+
+.badge-location-both {
+  background: #EDE9FE !important;
+  color: #6D28D9 !important;
+  border: 1px solid #DDD6FE !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px 10px !important;
+  font-weight: 700;
+}
+.badge-location-both:hover {
+  background: #DDD6FE !important;
+}
 
 /* Custom Badge Extras (Soft Gray Pill with No Outlines) */
 .badge-artist {
@@ -2654,6 +2694,27 @@ body {
   display: flex !important;
 }
 
+@keyframes modalSlideDown {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes inputShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.input-shake {
+  animation: inputShake 0.35s ease-in-out;
+}
+
 .modal-container {
   background: #FFFFFF;
   border: none;
@@ -2665,6 +2726,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: modalSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-header {

@@ -205,7 +205,7 @@ function canUserEditField($user, $field, $module = null) {
         'project_status' => 'projectStatus', 'client_approval' => 'clientApproval', 'head_approval' => 'headApproval',
         'count_standard' => 'countStandard', 'count_special' => 'countSpecial', 'count_printing' => 'countPrinting',
         'design_status' => 'designStatus', 'revision_count' => 'revisionCount', 'remarks' => 'remarks',
-        'client' => 'client'
+        'client' => 'client', 'location' => 'location'
     ];
     $normField = $fieldMap[$field] ?? $field;
 

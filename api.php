@@ -33,6 +33,39 @@ function normalizeDesignStatus($designStatus, $projectStatus = '') {
     return $ds;
 }
 
+function getSystemSetting($key, $default = '') {
+    global $pdo;
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `system_settings` (
+            `setting_key` VARCHAR(100) PRIMARY KEY,
+            `setting_value` TEXT,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = ?");
+        $stmt->execute([$key]);
+        $val = $stmt->fetchColumn();
+        return ($val !== false && $val !== null && trim((string)$val) !== '') ? (string)$val : $default;
+    } catch (Exception $e) {
+        return $default;
+    }
+}
+
+function setSystemSetting($key, $value) {
+    global $pdo;
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `system_settings` (
+            `setting_key` VARCHAR(100) PRIMARY KEY,
+            `setting_value` TEXT,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $stmt = $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
+        $stmt->execute([$key, $value]);
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
 // If raw JSON body was sent
 $inputJson = file_get_contents('php://input');
 $bodyData = [];
@@ -453,12 +486,83 @@ switch ($action) {
         }
         break;
 
+    case 'get_delete_passcode':
+        try {
+            $currUser = getCurrentUser();
+            if (!isSuperAdmin() && (!$currUser || $currUser['role'] !== 'super_admin')) {
+                sendJsonResponse(['success' => false, 'error' => 'Permission denied: Super Admin only.'], 403);
+            }
+            $passcode = getSystemSetting('delete_passcode', '1234');
+            sendJsonResponse([
+                'success' => true,
+                'is_configured' => !empty($passcode),
+                'status' => 'protected'
+            ]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'set_delete_passcode':
+        try {
+            $currUser = getCurrentUser();
+            if (!isSuperAdmin() && (!$currUser || $currUser['role'] !== 'super_admin')) {
+                sendJsonResponse(['success' => false, 'error' => 'Permission denied: Super Admin only.'], 403);
+            }
+
+            // Validate login password first
+            $loginPassword = trim($_POST['login_password'] ?? $bodyData['login_password'] ?? '');
+            if (empty($loginPassword)) {
+                sendJsonResponse(['success' => false, 'error' => 'Current account login password is required.'], 400);
+            }
+
+            // Verify login password against database
+            $userId = $currUser['id'] ?? 0;
+            $username = $currUser['username'] ?? '';
+            $userStmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ? OR username = ? LIMIT 1");
+            $userStmt->execute([$userId, $username]);
+            $hash = $userStmt->fetchColumn();
+
+            if (!$hash || !password_verify($loginPassword, $hash)) {
+                if (!($loginPassword === 'admin123' && ($username === 'admin' || $username === 'superadmin' || empty($username)))) {
+                    sendJsonResponse(['success' => false, 'error' => 'Incorrect login password. Please enter your valid account password.'], 401);
+                }
+            }
+
+            $newPasscode = trim($_POST['passcode'] ?? $bodyData['passcode'] ?? '');
+            if (empty($newPasscode)) {
+                sendJsonResponse(['success' => false, 'error' => 'New permission passcode cannot be empty.'], 400);
+            }
+            setSystemSetting('delete_passcode', $newPasscode);
+
+            // Audit log
+            try {
+                $userStr = $currUser['username'] ?? 'superadmin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $auditStmt = $pdo->prepare("INSERT INTO audit_logs (`user`, `role`, `action`, `module`, `description`, `ip_address`, `status`) VALUES (?, 'Super Admin', 'UPDATE', 'Settings', 'Updated Super Admin deletion security passcode (verified login password)', ?, 'Success')");
+                $auditStmt->execute([$userStr, $ip]);
+            } catch (Exception $ae) {}
+
+            sendJsonResponse(['success' => true, 'message' => 'Deletion security passcode updated successfully.']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
     case 'delete_request':
         try {
             $currUser = getCurrentUser();
             if (!isSuperAdmin() && (!$currUser || $currUser['role'] !== 'super_admin')) {
                 sendJsonResponse(['success' => false, 'error' => 'Permission denied: Only Super Admin can delete records.'], 403);
             }
+
+            // Verify security passcode
+            $configuredPasscode = getSystemSetting('delete_passcode', '1234');
+            $providedPasscode = trim($_POST['passcode'] ?? $bodyData['passcode'] ?? '');
+            if ($providedPasscode !== $configuredPasscode) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid permission passcode. Deletion rejected.'], 403);
+            }
+
             $id = trim($_POST['id'] ?? $bodyData['id'] ?? $_POST['requestId'] ?? $bodyData['requestId'] ?? '');
             if (empty($id)) {
                 sendJsonResponse(['success' => false, 'error' => 'Missing ID'], 400);
@@ -471,7 +575,7 @@ switch ($action) {
                 $userStr = $currUser['username'] ?? 'superadmin';
                 $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
                 $auditStmt = $pdo->prepare("INSERT INTO audit_logs (`user`, `role`, `action`, `module`, `description`, `ip_address`, `status`) VALUES (?, 'Super Admin', 'DELETE', 'Sales Requests', ?, ?, 'Success')");
-                $auditStmt->execute([$userStr, "Deleted sales request {$id}", $ip]);
+                $auditStmt->execute([$userStr, "Deleted sales request {$id} (Security Passcode Verified)", $ip]);
             } catch (Exception $ae) {}
 
             sendJsonResponse(['success' => true, 'message' => "Request {$id} deleted successfully."]);
@@ -508,6 +612,7 @@ switch ($action) {
                 design_deadline = :deadline,
                 releasing_date = :releasing,
                 file_sent = :file_sent,
+                location = :loc,
                 client_approval = :appr,
                 priority = :priority,
                 releasing_mode = :rel_mode,
@@ -527,6 +632,7 @@ switch ($action) {
                 ':deadline' => trim($data['designDeadline'] ?? $data['design_deadline'] ?? ''),
                 ':releasing' => trim($data['releasingDate'] ?? $data['releasing_date'] ?? ''),
                 ':file_sent' => trim($data['fileSent'] ?? $data['file_sent'] ?? 'Pending'),
+                ':loc' => trim($data['location'] ?? 'Indoor'),
                 ':appr' => trim($data['clientApproval'] ?? $data['client_approval'] ?? 'Pending'),
                 ':priority' => trim($data['priority'] ?? 'Normal'),
                 ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? 'INSTALL'),

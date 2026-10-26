@@ -257,6 +257,7 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
                 <th>JO #</th>
                 <th>Project Name (Editable)</th>
                 <th>Client (Editable)</th>
+                <th>Location</th>
                 <th>Artist</th>
                 <th>Deadline</th>
                 <th>Project Status</th>
