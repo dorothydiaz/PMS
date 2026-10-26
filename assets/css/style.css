@@ -1669,6 +1669,33 @@ body.sidebar-open {
   animation: cellSavedAnim 0.9s ease;
 }
 
+.editable-cell:empty::before {
+  content: attr(data-placeholder);
+  color: #94A3B8;
+  font-size: 11.5px;
+  font-style: italic;
+  pointer-events: none;
+}
+
+@keyframes newRowGlow {
+  0% {
+    background-color: #DCFCE7 !important;
+    box-shadow: inset 0 0 0 2px var(--primary-green);
+  }
+  60% {
+    background-color: #F0FDF4 !important;
+    box-shadow: inset 0 0 0 1px rgba(23, 107, 85, 0.4);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.table-row-new-entry {
+  animation: newRowGlow 3.5s ease forwards;
+}
+
 /* ==========================================================================
    CUSTOM THEMED DROPDOWNS (Studio Minimalist & Drop Shadows)
    ========================================================================== */

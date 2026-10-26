@@ -5032,8 +5032,19 @@
       return `<span class="read-only-cell ${extraClass}" data-req-id="${reqId}" data-field="${fieldName}" title="Editing locked: Read-only for your role"${styleAttr}>${escapeHTML(currentValue || '—')}</span>`;
     }
 
+    const placeholderMap = {
+      projectName: 'Enter project name...',
+      client: 'Enter client name...',
+      joNumber: 'Enter JO #...',
+      contactPerson: 'Contact name...',
+      contactNumber: 'Phone #...',
+      completeAddress: 'Enter full address...',
+      remarks: 'Add remarks...'
+    };
+    const ph = placeholderMap[fieldName] || 'Click to edit...';
+
     return `<span class="editable-cell ${extraClass}" contenteditable="true"${styleAttr} 
-      data-req-id="${reqId}" data-field="${fieldName}"
+      data-req-id="${reqId}" data-field="${fieldName}" data-placeholder="${ph}"
       onblur="window.SignDepotApp.handleInlineTextBlur(this)" 
       onkeydown="window.SignDepotApp.handleInlineTextKey(event, this)">${escapeHTML(currentValue || '')}</span>`;
   }
@@ -6731,26 +6742,33 @@
     const tbody = document.getElementById('salesRequestsTableBody');
     if (tbody) {
       if (pagedList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding:30px; color:var(--text-muted);">No sales requests match the current filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:32px 20px; color:var(--text-muted); font-size:13px;">No sales requests match the current filters. Click <strong>+ Add Request</strong> above to add a new row directly to this table!</td></tr>`;
       } else {
         const isSuper = isCurrentUserSuperAdmin();
         tbody.innerHTML = pagedList.map(r => `
           <tr data-req-id="${r.id}">
-            <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color: var(--primary-green); font-weight: 700;')}</td>
-            <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color: var(--accent-red); font-weight: 700;')}</td>
-            <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
-            <td>${renderEditableCell(r.id, 'client', r.client)}</td>
-            <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
+            <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color: var(--primary-green); font-weight: 700; min-width: 95px;')}</td>
+            <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color: var(--accent-red); font-weight: 700; min-width: 105px;')}</td>
+            <td>${renderInlineDate(r.id, 'orderDate', r.orderDate)}</td>
+            <td>${renderEditableCell(r.id, 'projectName', r.projectName, '', 'min-width: 170px; font-weight: 600;')}</td>
+            <td>${renderEditableCell(r.id, 'client', r.client, '', 'min-width: 140px;')}</td>
+            <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
             <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
+            <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
+            <td>${renderInlineSelect(r.id, 'releasingMode', r.releasingMode || 'Install', RELEASING_MODES)}</td>
             <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
             <td>${renderInlineDate(r.id, 'releasingDate', r.releasingDate)}</td>
             <td>${renderInlineSelect(r.id, 'fileSent', r.fileSent, FILE_SENT_LEVELS)}</td>
-            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval, APPROVAL_LEVELS)}</td>
-            <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
-            <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
+            <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus || 'Pending', PROJECT_STATUSES)}</td>
+            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || 'Pending', APPROVAL_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'priority', r.priority || 'Normal', PRIORITY_LEVELS)}</td>
+            <td>${renderEditableCell(r.id, 'contactPerson', r.contactPerson, '', 'min-width: 130px;')}</td>
+            <td>${renderEditableCell(r.id, 'contactNumber', r.contactNumber, '', 'min-width: 120px;')}</td>
+            <td>${renderEditableCell(r.id, 'completeAddress', r.completeAddress, '', 'min-width: 190px;')}</td>
+            <td>${renderEditableCell(r.id, 'remarks', r.remarks, '', 'min-width: 160px;')}</td>
             <td>
               <div style="display:flex; gap:4px; align-items:center;">
-                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Directive">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
                   Directive
                 </button>
                 <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.editSalesRequest('${r.id}')" title="Edit Full Details">
@@ -10847,6 +10865,117 @@
   }
   window.openNewSalesRequestModal = openNewSalesRequestModal;
 
+  function addNewSalesRequestRow() {
+    // Auto-generate sequential Request ID (e.g. LR-26-2105)
+    const nextReqId = getNextRequestId();
+    const newId = nextReqId.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Default design deadline (+3 days from today)
+    const d3 = new Date();
+    d3.setDate(d3.getDate() + 3);
+    const deadlineStr = d3.toISOString().split('T')[0];
+
+    // Default sales rep from logged-in user if sales rep, or first available rep in list
+    let defaultRep = '';
+    if (window.PMS_CURRENT_USER && (window.PMS_CURRENT_USER.role === 'sales' || window.PMS_CURRENT_USER.role === 'sales_rep')) {
+      defaultRep = window.PMS_CURRENT_USER.full_name || window.PMS_CURRENT_USER.username || '';
+    } else if (state.salesReps && state.salesReps.length > 0) {
+      defaultRep = state.salesReps[0];
+    }
+
+    const newReq = {
+      id: newId,
+      requestId: nextReqId,
+      joNumber: '',
+      orderDate: todayStr,
+      salesRep: defaultRep,
+      client: '',
+      projectName: '',
+      artist: 'Unassigned',
+      designDeadline: deadlineStr,
+      releasingDate: '',
+      fileSent: 'Pending',
+      completeAddress: '',
+      location: 'Indoor',
+      releasingMode: 'Install',
+      contactPerson: '',
+      contactNumber: '',
+      projectStatus: 'Pending',
+      clientApproval: 'Pending',
+      priority: 'Normal',
+      headApproval: 'Pending',
+      countStandard: 0,
+      countSpecial: 0,
+      countPrinting: 0,
+      designStatus: 'Not Started',
+      revisionCount: 0,
+      remarks: ''
+    };
+
+    // Prepend to requests list so it appears at the very top of the table
+    state.requests.unshift(newReq);
+
+    // Reset filters so the new row is directly visible on page 1
+    state.salesFilter.search = '';
+    state.salesFilter.approvalTab = '';
+    state.salesFilter.priority = '';
+    state.salesFilter.approval = '';
+    state.salesFilter.fileSent = '';
+    state.salesFilter.salesRep = '';
+    state.salesFilter.location = '';
+    state.salesFilter.deadline = '';
+    state.salesFilter.page = 1;
+    state.salesFilter.sortField = 'requestId';
+    state.salesFilter.sortDir = 'desc';
+
+    const sSearch = document.getElementById('salesSearchInput');
+    if (sSearch) sSearch.value = '';
+
+    saveStateToStorage();
+
+    // Persist immediately to MySQL backend
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=add_sales_request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newReq)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && res.success) {
+          if (res.id) newReq.id = res.id;
+          if (res.requestId && res.requestId !== newReq.requestId) {
+            newReq.requestId = res.requestId;
+            renderSalesRequests();
+          }
+        }
+      })
+      .catch(err => console.warn('MySQL create request failed:', err));
+    }
+
+    // Render sales requests table
+    renderSalesRequests();
+
+    // Scroll into view, highlight, and focus editable Project Name cell
+    setTimeout(() => {
+      const row = document.querySelector(`tr[data-req-id="${newReq.id}"]`);
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        row.classList.add('table-row-new-entry');
+
+        const projCell = row.querySelector('.editable-cell[data-field="projectName"]');
+        if (projCell) {
+          projCell.focus();
+        }
+      }
+    }, 120);
+
+    showToast(`New request row ${nextReqId} added! Fill in the cells directly.`, 'success');
+    return newReq;
+  }
+  window.addNewSalesRequestRow = addNewSalesRequestRow;
+
   function editSalesRequest(id) {
     const rec = state.requests.find(r => r.id === id || r.requestId === id);
     if (!rec) return;
@@ -11896,6 +12025,8 @@
     upgradeAllFormSelects: () => upgradeAllFormSelects(),
     syncAllFormDropdowns: () => syncAllFormDropdowns(),
 
+    addNewSalesRequestRow: () => addNewSalesRequestRow(),
+
     // Direct Inline Editing Handlers
     handleInlineTextBlur: (el) => {
       const reqId = el.getAttribute('data-req-id');
@@ -11907,6 +12038,20 @@
       if (e.key === 'Enter') {
         e.preventDefault();
         el.blur();
+      } else if (e.key === 'Tab') {
+        const row = el.closest('tr');
+        if (row) {
+          const cells = Array.from(row.querySelectorAll('.editable-cell, .custom-select-btn:not(.is-readonly), .inline-date-input:not([disabled])'));
+          const idx = cells.indexOf(el);
+          if (idx !== -1) {
+            const next = e.shiftKey ? cells[idx - 1] : cells[idx + 1];
+            if (next) {
+              e.preventDefault();
+              el.blur();
+              next.focus();
+            }
+          }
+        }
       }
     },
     handleInlineSelectChange: (el) => {
@@ -12327,19 +12472,39 @@
       });
     }
 
+    const handleNewRequestTrigger = (e) => {
+      if (e) e.preventDefault();
+      if (document.getElementById('salesRequestsTableBody')) {
+        addNewSalesRequestRow();
+      } else {
+        const pagesPrefix = window.location.pathname.includes('/pages/') ? './' : './pages/';
+        window.location.href = pagesPrefix + 'sales-requests.php?action=add_new';
+      }
+    };
+
     const btnNewReqDash = document.getElementById('btnDashboardNewRequest');
     if (btnNewReqDash) {
-      btnNewReqDash.addEventListener('click', openNewSalesRequestModal);
+      btnNewReqDash.addEventListener('click', handleNewRequestTrigger);
     }
 
     const btnPanzeAdd = document.getElementById('btnPanzeAddTask');
     if (btnPanzeAdd) {
-      btnPanzeAdd.addEventListener('click', openNewSalesRequestModal);
+      btnPanzeAdd.addEventListener('click', handleNewRequestTrigger);
     }
 
     const btnSalesNewReq = document.getElementById('btnSalesNewRequest');
     if (btnSalesNewReq) {
-      btnSalesNewReq.addEventListener('click', openNewSalesRequestModal);
+      btnSalesNewReq.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    // Auto-trigger new row if navigated from external page with ?action=add_new
+    if (window.location.search.includes('action=add_new') && document.getElementById('salesRequestsTableBody')) {
+      setTimeout(() => {
+        addNewSalesRequestRow();
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 300);
     }
 
     // Automatic separator dash formatting on Request ID input

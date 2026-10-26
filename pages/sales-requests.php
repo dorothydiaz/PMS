@@ -25,7 +25,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="section-header-row">
             <div class="section-title-wrap">
               <h2>Sales Requests Management</h2>
-              <p>Directly click and edit any field inline. Press Enter or click outside to auto-save.</p>
+              <p>Click <strong>+ Add Request</strong> to insert a new row directly into the table. Click any cell to edit inline; changes auto-save instantly to MySQL.</p>
             </div>
             <div class="section-actions">
               <?php if (hasPermission('sales-requests', 'c')): ?>
@@ -128,18 +128,25 @@ require_once __DIR__ . '/includes/sidebar.php';
             <table class="data-table">
               <thead>
                 <tr>
-                  <th data-sort="requestId">Req ID</th>
-                  <th data-sort="joNumber">JO #</th>
-                  <th data-sort="projectName">Project Name (Click to Edit)</th>
-                  <th data-sort="client">Client (Click to Edit)</th>
-                  <th data-sort="location">Location</th>
-                  <th data-sort="artist">Artist</th>
-                  <th data-sort="designDeadline">Deadline</th>
-                  <th data-sort="releasingDate">Releasing</th>
-                  <th data-sort="fileSent">File Sent</th>
-                  <th data-sort="clientApproval">Approval</th>
-                  <th data-sort="priority">Priority</th>
-                  <th data-sort="salesRep">Sales</th>
+                  <th data-sort="requestId" title="Request ID">Req ID</th>
+                  <th data-sort="joNumber" title="Job Order Number">JO #</th>
+                  <th data-sort="orderDate" title="Order Intake Date">Order Date</th>
+                  <th data-sort="projectName" title="Project Name (Click to edit)">Project Name</th>
+                  <th data-sort="client" title="Client / Company (Click to edit)">Client</th>
+                  <th data-sort="salesRep" title="Sales Representative">Sales Rep</th>
+                  <th data-sort="artist" title="Assigned Artist">Artist</th>
+                  <th data-sort="location" title="Environment / Location">Location</th>
+                  <th data-sort="releasingMode" title="Mode of Releasing">Rel Mode</th>
+                  <th data-sort="designDeadline" title="Design Drafting Deadline">Deadline</th>
+                  <th data-sort="releasingDate" title="Production Due Date">Prod Due</th>
+                  <th data-sort="fileSent" title="Artwork Sent Status">File Sent</th>
+                  <th data-sort="projectStatus" title="Overall Project Status">Status</th>
+                  <th data-sort="clientApproval" title="Client Approval State">Approval</th>
+                  <th data-sort="priority" title="Production Priority Level">Priority</th>
+                  <th data-sort="contactPerson" title="Client Contact Person">Contact Person</th>
+                  <th data-sort="contactNumber" title="Contact Mobile / Phone">Contact #</th>
+                  <th data-sort="completeAddress" title="Delivery or Installation Address">Delivery Address</th>
+                  <th data-sort="remarks" title="Production Notes & Remarks">Remarks</th>
                   <th class="no-sort">Actions</th>
                 </tr>
               </thead>
