@@ -89,14 +89,14 @@ require_once __DIR__ . '/includes/sidebar.php';
      MODAL: GRANULAR MODULE CRUD PERMISSIONS MATRIX
      ========================================================================== -->
 <div class="modal-backdrop" id="permissionsModal">
-  <div class="modal-container" style="max-width: 860px; width: 95%;">
-    <div class="modal-header">
+  <div class="modal-container" style="max-width: 940px; width: 95%;">
+    <div class="modal-header" style="border-bottom: none; padding-bottom: 10px;">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div style="width: 32px; height: 32px; background: #E0F2FE; color: #0284C7; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <div style="width: 38px; height: 38px; background: #E0F2FE; color: #0284C7; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         </div>
         <div>
-          <h3 class="modal-title" style="font-size: 16px; margin: 0;">Module Access & CRUD Permissions</h3>
+          <h3 class="modal-title" style="font-size: 16px; margin: 0; font-weight: 800;">Permissions & Data Customization Engine</h3>
           <div style="font-size: 12px; color: #64748B;" id="permModalTargetUser">User: Loading...</div>
         </div>
       </div>
@@ -105,62 +105,136 @@ require_once __DIR__ . '/includes/sidebar.php';
       </button>
     </div>
 
-    <!-- Quick Role Presets -->
-    <div style="background: #F8FAFC; padding: 12px 24px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-      <span style="font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Quick Presets:</span>
-      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-        <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('all')">Full Access (All)</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('readonly')">Read Only (All)</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('artist')">Creative Artist</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('sales')">Sales Rep</button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('none')">Revoke All</button>
-      </div>
+    <!-- Dual Tab Navigation: 1. Module & Tab Access | 2. Column-Level Permissions -->
+    <div class="perm-modal-tabs">
+      <button type="button" class="perm-tab-btn active" id="btnTabPermModules" onclick="switchPermTab('modules')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        1. Module & Tab Privileges (CRUD)
+      </button>
+      <button type="button" class="perm-tab-btn" id="btnTabPermColumns" onclick="switchPermTab('columns')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        2. Column-Level Edit Permissions (Per Table)
+      </button>
     </div>
 
     <form id="permissionsForm">
       <input type="hidden" id="permUserId" name="userId">
-      <div class="modal-body" style="padding: 0; max-height: 56vh; overflow-y: auto;">
-        <table class="data-table" style="margin: 0; border: none; font-size: 13px;">
-          <thead style="position: sticky; top: 0; background: #F1F5F9; z-index: 5;">
-            <tr>
-              <th style="padding-left: 24px;">Module Name</th>
-              <th style="text-align: center; width: 85px;">Create (C)</th>
-              <th style="text-align: center; width: 85px;">Read (R)</th>
-              <th style="text-align: center; width: 85px;">Update (U)</th>
-              <th style="text-align: center; width: 85px;">Delete (D)</th>
-              <th style="text-align: center; width: 95px;">Quick Toggle</th>
-            </tr>
-          </thead>
-          <tbody id="permMatrixTbody">
-            <?php foreach ($modules as $modKey => $modInfo): ?>
-              <tr data-module="<?= htmlspecialchars($modKey) ?>">
-                <td style="padding-left: 24px;">
-                  <div style="font-weight: 700; color: #0F172A;"><?= htmlspecialchars($modInfo['label']) ?></div>
-                  <div style="font-size: 11px; color: #64748B;"><?= htmlspecialchars($modInfo['desc']) ?></div>
-                </td>
-                <td style="text-align: center;">
-                  <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="c">
-                </td>
-                <td style="text-align: center;">
-                  <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="r">
-                </td>
-                <td style="text-align: center;">
-                  <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="u">
-                </td>
-                <td style="text-align: center;">
-                  <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="d">
-                </td>
-                <td style="text-align: center;">
-                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="toggleRowPerms('<?= $modKey ?>')">Row</button>
-                </td>
+      
+      <!-- TAB 1: MODULES & CRUD PERMISSIONS -->
+      <div id="permPanelModules">
+        <!-- Quick Role Presets -->
+        <div style="background: #F8FAFC; padding: 12px 24px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Quick Presets:</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('all')">Full Access (All)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('readonly')">Read Only (All)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('artist')">Creative Artist</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('sales')">Sales Rep</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('none')">Revoke All</button>
+          </div>
+        </div>
+
+        <div class="modal-body" style="padding: 0; max-height: 52vh; overflow-y: auto;">
+          <table class="data-table" style="margin: 0; border: none; font-size: 13px;">
+            <thead style="position: sticky; top: 0; background: #F1F5F9; z-index: 5;">
+              <tr>
+                <th style="padding-left: 24px;">Module & Table Name</th>
+                <th style="text-align: center; width: 85px;">Create (C)</th>
+                <th style="text-align: center; width: 85px;">Read (R)</th>
+                <th style="text-align: center; width: 85px;">Update (U)</th>
+                <th style="text-align: center; width: 85px;">Delete (D)</th>
+                <th style="text-align: center; width: 95px;">Quick Toggle</th>
               </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+            </thead>
+            <tbody id="permMatrixTbody">
+              <?php foreach ($modules as $modKey => $modInfo): ?>
+                <tr data-module="<?= htmlspecialchars($modKey) ?>">
+                  <td style="padding-left: 24px;">
+                    <div style="font-weight: 700; color: #0F172A;"><?= htmlspecialchars($modInfo['label']) ?></div>
+                    <div style="font-size: 11px; color: #64748B;"><?= htmlspecialchars($modInfo['desc']) ?></div>
+                  </td>
+                  <td style="text-align: center;">
+                    <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="c">
+                  </td>
+                  <td style="text-align: center;">
+                    <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="r">
+                  </td>
+                  <td style="text-align: center;">
+                    <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="u">
+                  </td>
+                  <td style="text-align: center;">
+                    <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="d">
+                  </td>
+                  <td style="text-align: center;">
+                    <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="toggleRowPerms('<?= $modKey ?>')">Row</button>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: space-between;">
-        <button type="button" class="btn btn-secondary" data-close-modal="permissionsModal">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="btnSavePermissions">Save Permissions</button>
+
+      <!-- TAB 2: SPECIFIC COLUMN EDIT PERMISSIONS (PER TABLE) -->
+      <div id="permPanelColumns" style="display: none;">
+        <div style="background: #F8FAFC; padding: 14px 24px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 12px; font-weight: 700; color: #334155; text-transform: uppercase;">Configuring Table:</label>
+            <select class="form-control" id="permTableSelect" style="width: auto; font-weight: 700; font-size: 13px;" onchange="onPermTableSelectChange(this.value)">
+              <option value="sales-requests">Sales Requests Table</option>
+              <option value="creatives-tracker">Creatives Tracker Table</option>
+              <option value="artist-workload">Artist Workload Table</option>
+              <option value="directives-details">Directive Details Spec Sheet</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('all')">Select All Columns</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('artist')">Artist Preset</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('sales')">Sales Preset</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('none')">Deselect All</button>
+          </div>
+        </div>
+
+        <div class="modal-body" style="padding: 20px 24px; max-height: 52vh; overflow-y: auto;">
+          <!-- Column Permission Mode Switcher -->
+          <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="font-weight: 800; font-size: 14px; color: #0F172A;" id="permTableTitle">Sales Requests Table</div>
+              <div style="font-size: 12px; color: #64748B;" id="permTableSubtitle">Choose whether all columns are freely editable or restrict to specific columns.</div>
+            </div>
+            <div style="display: flex; gap: 14px; align-items: center;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; cursor: pointer; color: #0F172A;">
+                <input type="radio" name="colEditMode" id="colModeAll" value="all" onchange="onColModeToggle('all')">
+                All Columns Editable
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; cursor: pointer; color: #0F172A;">
+                <input type="radio" name="colEditMode" id="colModeCustom" value="custom" onchange="onColModeToggle('custom')">
+                Restrict to Specific Columns
+              </label>
+            </div>
+          </div>
+
+          <!-- Status Alert if Module has no Update Permission -->
+          <div id="permUpdateWarningBanner" style="display: none; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; color: #92400E; font-size: 12px; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Notice: <strong>Update (U)</strong> permission is currently disabled for this module in Tab 1. Be sure to check Update (U) so this user is allowed to edit the table.</span>
+          </div>
+
+          <!-- Column Checkbox Grid -->
+          <div id="permColumnGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;">
+            <!-- Dynamically populated per table -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 12px; color: #64748B;" id="permModalFooterSummary">
+          Changes take effect instantly on live tables upon saving.
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary" data-close-modal="permissionsModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSavePermissions">Save Permissions</button>
+        </div>
       </div>
     </form>
   </div>
@@ -487,7 +561,90 @@ require_once __DIR__ . '/includes/sidebar.php';
   }
   window.deleteUser = deleteUser;
 
-  // --- Permissions Matrix Modal Handling ---
+  // --- Permissions Engine Configuration ---
+  const TABLE_COLUMNS_CONFIG = {
+    'sales-requests': {
+      label: 'Sales Requests Table',
+      subtitle: 'Customer orders intake, specifications, contact details, and releasing records.',
+      columns: [
+        { key: 'joNumber', label: 'JO Number', desc: 'Job Order ID Number', type: 'Text' },
+        { key: 'orderDate', label: 'Order Date', desc: 'Order intake timestamp', type: 'Date' },
+        { key: 'salesRep', label: 'Sales Representative', desc: 'Assigned Sales Agent', type: 'Dropdown' },
+        { key: 'client', label: 'Client / Account', desc: 'Customer Account Name', type: 'Text' },
+        { key: 'projectName', label: 'Project Description', desc: 'Signage specifications', type: 'Text' },
+        { key: 'artist', label: 'Assigned Artist', desc: 'Graphic designer assigned', type: 'Dropdown' },
+        { key: 'designDeadline', label: 'Design Deadline', desc: 'Target blueprint deadline', type: 'Date' },
+        { key: 'releasingDate', label: 'Release Date', desc: 'Production release date', type: 'Date' },
+        { key: 'releasingMode', label: 'Releasing Mode', desc: 'Install / Delivery / Pick-up', type: 'Dropdown' },
+        { key: 'fileSent', label: 'File Sent Status', desc: 'File Sent / Pending / To Follow', type: 'Dropdown' },
+        { key: 'clientApproval', label: 'Client Approval', desc: 'Pending / Approved / Revising', type: 'Dropdown' },
+        { key: 'projectStatus', label: 'Project Status', desc: 'Pending / On-going / Approved / Completed', type: 'Dropdown' },
+        { key: 'priority', label: 'Priority', desc: 'Normal / Rush / High / Low', type: 'Dropdown' },
+        { key: 'completeAddress', label: 'Complete Address', desc: 'Installation venue & address', type: 'Text' },
+        { key: 'location', label: 'Location', desc: 'Indoor / Outdoor installation', type: 'Dropdown' },
+        { key: 'contactPerson', label: 'Contact Person', desc: 'On-site contact name', type: 'Text' },
+        { key: 'contactNumber', label: 'Contact Number', desc: 'Phone / mobile number', type: 'Text' },
+        { key: 'remarks', label: 'Remarks', desc: 'Special production instructions', type: 'Text' }
+      ]
+    },
+    'creatives-tracker': {
+      label: 'Creatives Tracker Table',
+      subtitle: 'Production queue, design progress, release dates, and assignment counts.',
+      columns: [
+        { key: 'designStatus', label: 'Design Status', desc: 'Not Started / In Progress / Submitted', type: 'Dropdown' },
+        { key: 'projectStatus', label: 'Project Status', desc: 'Pending / On-going / Approved / Completed', type: 'Dropdown' },
+        { key: 'artist', label: 'Assigned Artist', desc: 'Assigned graphic designer', type: 'Dropdown' },
+        { key: 'releasingDate', label: 'Target Release Date', desc: 'Target completion date', type: 'Date' },
+        { key: 'fileSent', label: 'File Sent Status', desc: 'File Sent / Pending / To Follow', type: 'Dropdown' },
+        { key: 'countStandard', label: 'Std Count', desc: 'Standard signages count', type: 'Number' },
+        { key: 'countPrinting', label: 'Prt Count', desc: 'Large format print count', type: 'Number' },
+        { key: 'countSpecial', label: 'Spc Count', desc: 'Special fabrication count', type: 'Number' },
+        { key: 'revisionCount', label: 'Revision Iterations', desc: 'Client revision count', type: 'Number' },
+        { key: 'remarks', label: 'Remarks & Directives', desc: 'Creative team remarks', type: 'Text' },
+        { key: 'projectName', label: 'Project Description', desc: 'Signage specifications', type: 'Text' }
+      ]
+    },
+    'artist-workload': {
+      label: 'Artist Workload Table',
+      subtitle: 'Artist capacity thresholds, queue balancing, and job reassignment.',
+      columns: [
+        { key: 'artist', label: 'Reassign Artist', desc: 'Change task ownership', type: 'Dropdown' },
+        { key: 'priority', label: 'Task Priority', desc: 'Urgent / Rush / Normal', type: 'Dropdown' },
+        { key: 'designDeadline', label: 'Design Deadline', desc: 'Reschedule deadline', type: 'Date' },
+        { key: 'projectStatus', label: 'Project Status', desc: 'Workload active status', type: 'Dropdown' }
+      ]
+    },
+    'directives-details': {
+      label: 'Directive Details Spec Sheet',
+      subtitle: 'Blueprint job orders, technical parameters, and image attachments.',
+      columns: [
+        { key: 'projectName', label: 'Project Name', desc: 'Blueprint specification', type: 'Text' },
+        { key: 'client', label: 'Client Name', desc: 'Blueprint client account', type: 'Text' },
+        { key: 'artist', label: 'Artist Assignment', desc: 'Blueprint artist', type: 'Dropdown' },
+        { key: 'salesRep', label: 'Sales Rep', desc: 'Blueprint sales agent', type: 'Dropdown' },
+        { key: 'designDeadline', label: 'Design Deadline', desc: 'Target spec deadline', type: 'Date' },
+        { key: 'releasingDate', label: 'Release Date', desc: 'Target release date', type: 'Date' },
+        { key: 'reference', label: 'Reference / Sent Status', desc: 'File sent reference', type: 'Dropdown' }
+      ]
+    }
+  };
+
+  let currentEditingPerms = {};
+  let currentPermTable = 'sales-requests';
+
+  function switchPermTab(tab) {
+    const isMod = (tab === 'modules');
+    document.getElementById('btnTabPermModules').classList.toggle('active', isMod);
+    document.getElementById('btnTabPermColumns').classList.toggle('active', !isMod);
+    document.getElementById('permPanelModules').style.display = isMod ? 'block' : 'none';
+    document.getElementById('permPanelColumns').style.display = isMod ? 'none' : 'block';
+
+    if (!isMod) {
+      renderColumnPermGrid(currentPermTable);
+    }
+  }
+  window.switchPermTab = switchPermTab;
+
   function openPermissionsModal(userId) {
     const user = cachedUsers.find(u => Number(u.id) === Number(userId));
     if (!user) {
@@ -495,27 +652,148 @@ require_once __DIR__ . '/includes/sidebar.php';
       return;
     }
     currentTargetUser = user;
+    currentEditingPerms = JSON.parse(JSON.stringify(user.permissions || {}));
 
     document.getElementById('permUserId').value = user.id;
     document.getElementById('permModalTargetUser').textContent = `User: ${user.full_name} (@${user.username}) — Role: ${user.role.toUpperCase()}`;
 
-    // Populate checkboxes according to user's permissions
-    const perms = user.permissions || {};
     const isSuper = user.role === 'super_admin';
 
+    // Populate Tab 1 Checkboxes
     document.querySelectorAll('.perm-check').forEach(chk => {
       const mod = chk.getAttribute('data-mod');
       const act = chk.getAttribute('data-act');
       if (isSuper) {
         chk.checked = true;
       } else {
-        chk.checked = Boolean(perms[mod] && perms[mod][act]);
+        chk.checked = Boolean(currentEditingPerms[mod] && currentEditingPerms[mod][act]);
       }
     });
+
+    // Reset to Tab 1
+    switchPermTab('modules');
+    currentPermTable = 'sales-requests';
+    const select = document.getElementById('permTableSelect');
+    if (select) select.value = currentPermTable;
 
     openModal('permissionsModal');
   }
   window.openPermissionsModal = openPermissionsModal;
+
+  function onPermTableSelectChange(tableKey) {
+    currentPermTable = tableKey;
+    renderColumnPermGrid(tableKey);
+  }
+  window.onPermTableSelectChange = onPermTableSelectChange;
+
+  function renderColumnPermGrid(tableKey) {
+    const cfg = TABLE_COLUMNS_CONFIG[tableKey];
+    if (!cfg) return;
+
+    document.getElementById('permTableTitle').textContent = cfg.label;
+    document.getElementById('permTableSubtitle').textContent = cfg.subtitle;
+
+    const modPerm = currentEditingPerms[tableKey] || {};
+    const hasUpdate = Boolean(modPerm.u || currentTargetUser?.role === 'super_admin');
+    
+    // Warning banner if Update is disabled in Tab 1
+    const banner = document.getElementById('permUpdateWarningBanner');
+    if (banner) {
+      banner.style.display = hasUpdate ? 'none' : 'flex';
+    }
+
+    // Determine current editable columns setting
+    const rawCols = modPerm.editable_columns;
+    const isAll = (rawCols === undefined || rawCols === null || rawCols === '*' || (Array.isArray(rawCols) && (rawCols.length === 0 || rawCols.includes('*'))));
+
+    document.getElementById('colModeAll').checked = isAll;
+    document.getElementById('colModeCustom').checked = !isAll;
+
+    const selectedCols = Array.isArray(rawCols) ? rawCols : (isAll ? cfg.columns.map(c => c.key) : []);
+
+    const container = document.getElementById('permColumnGridContainer');
+    container.innerHTML = cfg.columns.map(col => {
+      const isChecked = isAll || selectedCols.includes(col.key);
+      return `
+        <label class="column-perm-card ${isChecked ? 'is-checked' : ''}" style="${isAll ? 'opacity: 0.7;' : ''}">
+          <input type="checkbox" class="perm-col-checkbox" data-col="${col.key}" ${isChecked ? 'checked' : ''} ${isAll ? 'disabled' : ''} onchange="toggleColCheckbox('${tableKey}', '${col.key}', this.checked)">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+              <strong style="font-size: 13px; color: #0F172A;">${escapeHtml(col.label)}</strong>
+              <span class="badge badge-ongoing" style="font-size: 9px; padding: 2px 6px;">${col.type}</span>
+            </div>
+            <div style="font-size: 11px; color: #64748B;">${escapeHtml(col.desc)}</div>
+          </div>
+        </label>
+      `;
+    }).join('');
+  }
+
+  function onColModeToggle(mode) {
+    if (!currentEditingPerms[currentPermTable]) {
+      currentEditingPerms[currentPermTable] = { c: false, r: true, u: true, d: false };
+    }
+    const cfg = TABLE_COLUMNS_CONFIG[currentPermTable];
+    if (mode === 'all') {
+      currentEditingPerms[currentPermTable].editable_columns = ['*'];
+    } else {
+      // Initialize with all columns checked so user can uncheck the ones they want to restrict
+      currentEditingPerms[currentPermTable].editable_columns = cfg ? cfg.columns.map(c => c.key) : [];
+    }
+    renderColumnPermGrid(currentPermTable);
+  }
+  window.onColModeToggle = onColModeToggle;
+
+  function toggleColCheckbox(tableKey, colKey, isChecked) {
+    if (!currentEditingPerms[tableKey]) {
+      currentEditingPerms[tableKey] = { c: false, r: true, u: true, d: false };
+    }
+    let cols = currentEditingPerms[tableKey].editable_columns;
+    const cfg = TABLE_COLUMNS_CONFIG[tableKey];
+    if (!Array.isArray(cols) || cols.includes('*')) {
+      cols = cfg ? cfg.columns.map(c => c.key) : [];
+    }
+
+    if (isChecked) {
+      if (!cols.includes(colKey)) cols.push(colKey);
+    } else {
+      cols = cols.filter(k => k !== colKey);
+    }
+
+    currentEditingPerms[tableKey].editable_columns = cols;
+    renderColumnPermGrid(tableKey);
+  }
+  window.toggleColCheckbox = toggleColCheckbox;
+
+  function applyColPreset(presetType) {
+    if (!currentEditingPerms[currentPermTable]) {
+      currentEditingPerms[currentPermTable] = { c: false, r: true, u: true, d: false };
+    }
+    const cfg = TABLE_COLUMNS_CONFIG[currentPermTable];
+    if (!cfg) return;
+
+    if (presetType === 'all') {
+      currentEditingPerms[currentPermTable].editable_columns = ['*'];
+      document.getElementById('colModeAll').checked = true;
+      document.getElementById('colModeCustom').checked = false;
+    } else if (presetType === 'none') {
+      currentEditingPerms[currentPermTable].editable_columns = [];
+      document.getElementById('colModeAll').checked = false;
+      document.getElementById('colModeCustom').checked = true;
+    } else if (presetType === 'artist') {
+      document.getElementById('colModeAll').checked = false;
+      document.getElementById('colModeCustom').checked = true;
+      const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'];
+      currentEditingPerms[currentPermTable].editable_columns = cfg.columns.map(c => c.key).filter(k => artistCols.includes(k));
+    } else if (presetType === 'sales') {
+      document.getElementById('colModeAll').checked = false;
+      document.getElementById('colModeCustom').checked = true;
+      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
+      currentEditingPerms[currentPermTable].editable_columns = cfg.columns.map(c => c.key).filter(k => salesCols.includes(k));
+    }
+    renderColumnPermGrid(currentPermTable);
+  }
+  window.applyColPreset = applyColPreset;
 
   function toggleRowPerms(mod) {
     const checkboxes = document.querySelectorAll(`.perm-check[data-mod="${mod}"]`);
@@ -554,22 +832,19 @@ require_once __DIR__ . '/includes/sidebar.php';
   }
   window.applyPermPreset = applyPermPreset;
 
-  // Save Permissions Matrix
+  // Save Permissions Matrix & Column Restrictions
   document.getElementById('permissionsForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const userId = document.getElementById('permUserId').value;
     
-    // Build JSON permissions object
-    const newPerms = {};
+    // Sync Tab 1 checkboxes into currentEditingPerms
     document.querySelectorAll('.perm-check').forEach(chk => {
       const mod = chk.getAttribute('data-mod');
       const act = chk.getAttribute('data-act');
-      if (!newPerms[mod]) {
-        newPerms[mod] = { c: false, r: false, u: false, d: false };
+      if (!currentEditingPerms[mod]) {
+        currentEditingPerms[mod] = { c: false, r: false, u: false, d: false };
       }
-      if (chk.checked) {
-        newPerms[mod][act] = true;
-      }
+      currentEditingPerms[mod][act] = chk.checked;
     });
 
     try {
@@ -579,12 +854,12 @@ require_once __DIR__ . '/includes/sidebar.php';
         body: JSON.stringify({
           action: 'users_update_permissions',
           id: userId,
-          permissions: newPerms
+          permissions: currentEditingPerms
         })
       });
       const data = await res.json();
       if (data && data.success) {
-        notify('Permissions updated and applied successfully!');
+        notify('Permissions & column customizations updated successfully!');
         closeModal('permissionsModal');
         loadUsersList();
       } else {

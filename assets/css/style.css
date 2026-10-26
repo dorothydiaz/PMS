@@ -4412,4 +4412,84 @@ textarea.form-control {
   color: #FFFFFF;
 }
 
+/* ==========================================================================
+   GRANULAR PERMISSIONS & READ-ONLY COLUMN STYLES
+   ========================================================================== */
+.read-only-cell {
+  cursor: default !important;
+  color: #334155;
+  user-select: text;
+  display: inline-block;
+  padding: 2px 4px;
+}
+.custom-select-btn.is-readonly {
+  cursor: default !important;
+  pointer-events: none;
+  opacity: 0.9;
+  box-shadow: none !important;
+}
+.inline-date-input.is-readonly,
+.inline-num-input.is-readonly,
+.inline-date-input:disabled,
+.inline-num-input:disabled {
+  background: #F8FAFC !important;
+  color: #64748B !important;
+  border-color: #E2E8F0 !important;
+  cursor: not-allowed !important;
+  opacity: 0.85;
+}
+.perm-modal-tabs {
+  display: flex;
+  border-bottom: 1px solid #E2E8F0;
+  background: #F8FAFC;
+  padding: 0 24px;
+  gap: 8px;
+}
+.perm-tab-btn {
+  padding: 12px 18px;
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 13px;
+  color: #64748B;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.perm-tab-btn:hover {
+  color: #0F172A;
+}
+.perm-tab-btn.active {
+  color: var(--primary-green, #176B55);
+  border-bottom-color: var(--primary-green, #176B55);
+  background: #FFF;
+}
+.column-perm-card {
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #FFF;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.column-perm-card:hover {
+  border-color: #CBD5E1;
+  background: #F8FAFC;
+}
+.column-perm-card.is-checked {
+  border-color: #176B55;
+  background: #F0FDF4;
+}
+.column-perm-card input[type="checkbox"] {
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+
 

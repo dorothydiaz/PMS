@@ -4,6 +4,10 @@
  */
 
 require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__) . '/includes/auth.php';
+
+requireLogin();
+requirePermission('directives-details', 'r');
 
 $pageTitle = 'Directives Details';
 $currentPage = 'directives-details';

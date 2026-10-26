@@ -5120,11 +5120,98 @@
   }
 
   // ==========================================================================
+  // GRANULAR PERMISSION ENGINE (Module, Tab, Table & Column Level)
+  // ==========================================================================
+
+  function getCurrentUserPermissions() {
+    if (window.PMS_CURRENT_USER && window.PMS_CURRENT_USER.permissions) {
+      let p = window.PMS_CURRENT_USER.permissions;
+      if (typeof p === 'string') {
+        try { p = JSON.parse(p); } catch (e) { p = {}; }
+      }
+      return p;
+    }
+    return null;
+  }
+
+  function isCurrentUserSuperAdmin() {
+    return window.PMS_CURRENT_USER && (window.PMS_CURRENT_USER.role === 'super_admin');
+  }
+
+  function getModuleForCurrentView() {
+    const view = state.activeView || detectCurrentPage();
+    const map = {
+      'view-sales-requests': 'sales-requests',
+      'view-pending-sales': 'sales-requests',
+      'view-creatives-tracker': 'creatives-tracker',
+      'view-artist-workload': 'artist-workload',
+      'view-directives-details': 'directives-details',
+      'view-dashboard': 'dashboard',
+      'view-monthly-output': 'monthly-output',
+      'view-reports': 'reports',
+      'view-access-control': 'access-control',
+      'view-audit-trail': 'audit-trail',
+      'view-settings': 'settings'
+    };
+    return map[view] || 'sales-requests';
+  }
+
+  function canUserEditField(module, fieldName) {
+    if (!window.PMS_CURRENT_USER) return true; // Standalone demo fallback
+    if (isCurrentUserSuperAdmin()) return true;
+
+    const perms = getCurrentUserPermissions();
+    if (!perms) return true;
+
+    const mod = module || getModuleForCurrentView();
+
+    // 1. Check if user has general update (u) permission for this module/table
+    if (!perms[mod] || !perms[mod].u) {
+      return false;
+    }
+
+    // 2. Check if specific columns are restricted
+    const editableCols = perms[mod].editable_columns;
+    if (editableCols === undefined || editableCols === null || editableCols === '*' || (Array.isArray(editableCols) && (editableCols.length === 0 || editableCols.includes('*')))) {
+      return true; // All columns editable
+    }
+
+    if (Array.isArray(editableCols)) {
+      return editableCols.includes(fieldName);
+    }
+
+    return false;
+  }
+
+  function canUserAccessTab(module, tabKey) {
+    if (!window.PMS_CURRENT_USER) return true;
+    if (isCurrentUserSuperAdmin()) return true;
+    const perms = getCurrentUserPermissions();
+    if (!perms || !perms[module]) return true;
+    if (perms[module].tabs && typeof perms[module].tabs[tabKey] !== 'undefined') {
+      return Boolean(perms[module].tabs[tabKey]);
+    }
+    return true;
+  }
+
+  // ==========================================================================
   // DIRECT INLINE TABLE EDITING ENGINE
   // ==========================================================================
 
   // Updates any field on a request directly, recalculates dependent views and persists
   function updateRequestField(requestId, fieldName, newValue, domElement) {
+    const currentMod = getModuleForCurrentView();
+
+    // Enforce column-level permissions
+    if (!canUserEditField(currentMod, fieldName)) {
+      showToast(`Editing Locked: You do not have permission to edit the '${fieldName}' column on this table.`, 'error');
+      if (domElement && domElement.isContentEditable) {
+        const existing = state.requests.find(r => r.id === requestId);
+        domElement.textContent = existing ? (existing[fieldName] || '') : '';
+      }
+      return;
+    }
+
     const rec = state.requests.find(r => r.id === requestId);
     if (!rec) return;
 
@@ -5161,9 +5248,17 @@
         body: JSON.stringify({
           id: rec.id || requestId,
           field: fieldName,
-          value: rec[fieldName]
+          value: rec[fieldName],
+          module: currentMod
         })
-      }).catch(err => console.warn('MySQL update sync failed:', err));
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && !res.success) {
+          showToast(res.error || 'Server rejected update.', 'error');
+        }
+      })
+      .catch(err => console.warn('MySQL update sync failed:', err));
     }
 
     updateDeadlineAlertCenter();
@@ -5180,8 +5275,13 @@
     }
   }
 
-  // Generates directly editable text cell HTML
+  // Generates directly editable text cell HTML (or locked read-only span)
   function renderEditableCell(reqId, fieldName, currentValue) {
+    const canEdit = canUserEditField(null, fieldName);
+    if (!canEdit) {
+      return `<span class="read-only-cell" data-req-id="${reqId}" data-field="${fieldName}" title="Editing locked: Read-only for your role">${escapeHTML(currentValue || '—')}</span>`;
+    }
+
     return `<span class="editable-cell" contenteditable="true" 
       data-req-id="${reqId}" data-field="${fieldName}"
       onblur="window.SignDepotApp.handleInlineTextBlur(this)" 
@@ -5216,11 +5316,24 @@
     return 'indicator-neutral';
   }
 
-  // Generates directly editable custom themed dropdown trigger HTML
+  // Generates directly editable custom themed dropdown trigger HTML (or locked read-only badge)
   function renderInlineSelect(reqId, fieldName, currentValue, optionsList) {
+    const canEdit = canUserEditField(null, fieldName);
     const badgeClass = getBadgeClassForValue(fieldName, currentValue);
-    const safeOptions = JSON.stringify(optionsList).replace(/"/g, '&quot;');
     const safeVal = escapeHTML(currentValue || 'Select');
+
+    if (!canEdit) {
+      return `
+        <span class="custom-select-btn is-readonly ${badgeClass}"
+          data-req-id="${reqId}"
+          data-field="${fieldName}"
+          title="Editing locked: Read-only for your role">
+          <span class="custom-select-label">${safeVal}</span>
+        </span>
+      `;
+    }
+
+    const safeOptions = JSON.stringify(optionsList).replace(/"/g, '&quot;');
     return `
       <button type="button" class="custom-select-btn ${badgeClass}"
         data-req-id="${reqId}"
@@ -5259,6 +5372,16 @@
     if (e) {
       e.preventDefault();
       e.stopPropagation();
+    }
+
+    if (!triggerBtn || triggerBtn.classList.contains('is-readonly')) {
+      return;
+    }
+
+    const fld = triggerBtn.getAttribute('data-field');
+    if (!canUserEditField(null, fld)) {
+      showToast(`Editing Locked: You do not have permission to edit the '${fld}' column.`, 'error');
+      return;
     }
 
     if (activeDropdownTrigger === triggerBtn) {
@@ -5644,8 +5767,17 @@
     window.addEventListener('scroll', () => tooltip.classList.remove('show'), { passive: true });
   }
 
-  // Generates directly editable date picker HTML
+  // Generates directly editable date picker HTML (or locked read-only date)
   function renderInlineDate(reqId, fieldName, currentDateValue, projectStatus) {
+    const canEdit = canUserEditField(null, fieldName);
+    if (!canEdit) {
+      return `
+        <div class="inline-date-cell-wrap" style="opacity: 0.85;">
+          <input type="date" class="inline-date-input is-readonly" value="${currentDateValue || ''}" disabled title="Editing locked: Read-only for your role" style="cursor: default;">
+        </div>
+      `;
+    }
+
     return `
       <div class="inline-date-cell-wrap">
         <input type="date" class="inline-date-input" value="${currentDateValue || ''}"
@@ -5655,8 +5787,15 @@
     `;
   }
 
-  // Generates directly editable number input HTML
+  // Generates directly editable number input HTML (or locked read-only number)
   function renderInlineNumber(reqId, fieldName, currentNumValue) {
+    const canEdit = canUserEditField(null, fieldName);
+    if (!canEdit) {
+      return `
+        <input type="number" class="inline-num-input is-readonly" min="0" value="${currentNumValue || 0}" disabled title="Editing locked: Read-only for your role" style="cursor: default; opacity: 0.85;">
+      `;
+    }
+
     return `
       <input type="number" class="inline-num-input" min="0" value="${currentNumValue || 0}"
         data-req-id="${reqId}" data-field="${fieldName}"
@@ -6482,7 +6621,16 @@
     const elApproved = document.getElementById('badgeCountApproved');
     if (elApproved) elApproved.textContent = approvedCount;
 
-    // Sync active approval tab button
+    // Sync active approval tab button respecting permissions
+    const tabKeyMap = { '': 'all', 'Pending': 'pending', 'Revision Requested': 'revision', 'Approved': 'approved' };
+    let curTabKey = tabKeyMap[state.salesFilter.approvalTab || ''] || 'all';
+    if (!canUserAccessTab('sales-requests', curTabKey)) {
+      const allowedTabKey = ['all', 'pending', 'revision', 'approved'].find(k => canUserAccessTab('sales-requests', k));
+      if (allowedTabKey) {
+        const revMap = { 'all': '', 'pending': 'Pending', 'revision': 'Revision Requested', 'approved': 'Approved' };
+        state.salesFilter.approvalTab = revMap[allowedTabKey];
+      }
+    }
     const activeApprovalTab = state.salesFilter.approvalTab || '';
     document.querySelectorAll('.sales-approval-tab').forEach(tabBtn => {
       const tabVal = tabBtn.getAttribute('data-tab-approval') || '';
@@ -9344,6 +9492,9 @@
 
   window.SignDepotApp = {
     switchView: switchView,
+    canUserEditField: canUserEditField,
+    canUserAccessTab: canUserAccessTab,
+    getCurrentUserPermissions: getCurrentUserPermissions,
 
     // KPI Cards Clickable & Viewable Public API (SPA + Multi-Page Aware)
     navigateToPageTable: (type) => {

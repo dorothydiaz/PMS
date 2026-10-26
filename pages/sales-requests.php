@@ -4,6 +4,10 @@
  */
 
 require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__) . '/includes/auth.php';
+
+requireLogin();
+requirePermission('sales-requests', 'r');
 
 $pageTitle = 'Sales Requests';
 $currentPage = 'sales-requests';
@@ -24,35 +28,45 @@ require_once __DIR__ . '/includes/sidebar.php';
               <p>Directly click and edit any field inline. Press Enter or click outside to auto-save.</p>
             </div>
             <div class="section-actions">
+              <?php if (hasPermission('sales-requests', 'c')): ?>
               <button class="btn btn-primary" id="btnSalesNewRequest">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Add Request
               </button>
+              <?php endif; ?>
             </div>
           </div>
 
           <!-- Client Approval Status Tabs -->
           <div class="sales-tabs-container">
             <div class="sales-approval-tabs" role="tablist">
+              <?php if (hasTabPermission('sales-requests', 'all')): ?>
               <button type="button" class="sales-approval-tab active" data-tab-approval="" id="tabSalesAll" role="tab" aria-selected="true">
                 <span class="tab-label">All Requests</span>
                 <span class="tab-count-pill" id="badgeCountAll">0</span>
               </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'pending')): ?>
               <button type="button" class="sales-approval-tab" data-tab-approval="Pending" id="tabSalesPending" role="tab" aria-selected="false">
                 <span class="tab-status-dot dot-pending"></span>
                 <span class="tab-label">Pending</span>
                 <span class="tab-count-pill pill-pending" id="badgeCountPending">0</span>
               </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'revision')): ?>
               <button type="button" class="sales-approval-tab" data-tab-approval="Revision Requested" id="tabSalesRevision" role="tab" aria-selected="false">
                 <span class="tab-status-dot dot-revision"></span>
                 <span class="tab-label">Revision Requested</span>
                 <span class="tab-count-pill pill-revision" id="badgeCountRevision">0</span>
               </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'approved')): ?>
               <button type="button" class="sales-approval-tab" data-tab-approval="Approved" id="tabSalesApproved" role="tab" aria-selected="false">
                 <span class="tab-status-dot dot-approved"></span>
                 <span class="tab-label">Approved</span>
                 <span class="tab-count-pill pill-approved" id="badgeCountApproved">0</span>
               </button>
+              <?php endif; ?>
             </div>
           </div>
 

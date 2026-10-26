@@ -82,7 +82,37 @@ function getCurrentUser() {
     if (!isLoggedIn()) {
         return null;
     }
-    return $_SESSION['pms_user'];
+    static $cachedFreshUser = null;
+    $userId = $_SESSION['pms_user']['id'] ?? 0;
+    if ($cachedFreshUser !== null && ($cachedFreshUser['id'] ?? 0) === $userId) {
+        return $cachedFreshUser;
+    }
+    if ($userId > 0 && function_exists('getDbConnection')) {
+        try {
+            $pdo = getDbConnection();
+            if ($pdo) {
+                $stmt = $pdo->prepare("SELECT id, username, email, full_name, role, assigned_artist, status, permissions, oauth_provider, avatar_url FROM users WHERE id = ? LIMIT 1");
+                $stmt->execute([$userId]);
+                $fresh = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($fresh && $fresh['status'] === 'active') {
+                    $perms = [];
+                    if (!empty($fresh['permissions'])) {
+                        $perms = is_array($fresh['permissions']) ? $fresh['permissions'] : (json_decode($fresh['permissions'], true) ?: []);
+                    }
+                    $_SESSION['pms_user']['role'] = $fresh['role'];
+                    $_SESSION['pms_user']['assigned_artist'] = $fresh['assigned_artist'];
+                    $_SESSION['pms_user']['full_name'] = $fresh['full_name'];
+                    $_SESSION['pms_user']['permissions'] = $perms;
+                    $cachedFreshUser = $_SESSION['pms_user'];
+                    return $cachedFreshUser;
+                }
+            }
+        } catch (Exception $e) {
+            // fallback to session
+        }
+    }
+    $cachedFreshUser = $_SESSION['pms_user'];
+    return $cachedFreshUser;
 }
 
 /**
@@ -115,6 +145,9 @@ function hasPermission($module, $action = 'r') {
     }
     
     $user = getCurrentUser();
+    if (!$user) {
+        return false;
+    }
     if ($user['role'] === 'super_admin') {
         return true;
     }
@@ -130,6 +163,86 @@ function hasPermission($module, $action = 'r') {
 
     $action = strtolower($action);
     return !empty($perms[$module][$action]);
+}
+
+/**
+ * Check if the user is allowed to access a specific tab within a module/table
+ */
+function hasTabPermission($module, $tab) {
+    if (!isLoggedIn()) return false;
+    if (isSuperAdmin()) return true;
+    $user = getCurrentUser();
+    if (!$user) return false;
+    $perms = $user['permissions'] ?? [];
+    if (is_string($perms)) $perms = json_decode($perms, true) ?: [];
+
+    // Check if module read permission is granted
+    if (empty($perms[$module]['r'])) return false;
+
+    // Check tab permission if defined
+    if (isset($perms[$module]['tabs'][$tab])) {
+        return !empty($perms[$module]['tabs'][$tab]);
+    }
+    return true; // Default to allow if not explicitly restricted
+}
+
+/**
+ * Check if the user is allowed to edit a specific column/field on a table
+ */
+function canUserEditField($user, $field, $module = null) {
+    if (empty($user)) return false;
+    if (($user['role'] ?? '') === 'super_admin') return true;
+
+    $perms = $user['permissions'] ?? [];
+    if (is_string($perms)) $perms = json_decode($perms, true) ?: [];
+
+    // Normalize field name to camelCase or SQL column
+    $fieldMap = [
+        'request_id' => 'requestId', 'jo_number' => 'joNumber', 'order_date' => 'orderDate',
+        'sales_rep' => 'salesRep', 'project_name' => 'projectName', 'design_deadline' => 'designDeadline',
+        'releasing_date' => 'releasingDate', 'file_sent' => 'fileSent', 'complete_address' => 'completeAddress',
+        'releasing_mode' => 'releasingMode', 'contact_person' => 'contactPerson', 'contact_number' => 'contactNumber',
+        'project_status' => 'projectStatus', 'client_approval' => 'clientApproval', 'head_approval' => 'headApproval',
+        'count_standard' => 'countStandard', 'count_special' => 'countSpecial', 'count_printing' => 'countPrinting',
+        'design_status' => 'designStatus', 'revision_count' => 'revisionCount', 'remarks' => 'remarks',
+        'client' => 'client'
+    ];
+    $normField = $fieldMap[$field] ?? $field;
+
+    // If module not provided, check across known editable tables
+    $modulesToCheck = $module ? [$module] : ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'dashboard'];
+
+    foreach ($modulesToCheck as $mod) {
+        if (!empty($perms[$mod]['u'])) {
+            $editableCols = $perms[$mod]['editable_columns'] ?? null;
+            // If editable_columns is not set, empty, or includes '*', all columns can be edited
+            if ($editableCols === null || $editableCols === '*' || (is_array($editableCols) && (empty($editableCols) || in_array('*', $editableCols)))) {
+                return true;
+            }
+            if (is_array($editableCols) && (in_array($normField, $editableCols) || in_array($field, $editableCols))) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns array of editable columns for a module for the current user (or '*' for all)
+ */
+function getEditableColumnsForUser($user, $module) {
+    if (empty($user)) return [];
+    if (($user['role'] ?? '') === 'super_admin') return ['*'];
+
+    $perms = $user['permissions'] ?? [];
+    if (is_string($perms)) $perms = json_decode($perms, true) ?: [];
+
+    if (empty($perms[$module]['u'])) return [];
+    $cols = $perms[$module]['editable_columns'] ?? null;
+    if ($cols === null || $cols === '*' || (is_array($cols) && (empty($cols) || in_array('*', $cols)))) {
+        return ['*'];
+    }
+    return (array)$cols;
 }
 
 /**

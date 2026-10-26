@@ -275,12 +275,23 @@ switch ($action) {
     case 'update_field':
         // Inline cell editing direct to MySQL!
         try {
+            $currentUser = getCurrentUser();
+            if (!$currentUser && !isSuperAdmin()) {
+                sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+            }
+
             $id = trim($_POST['id'] ?? $bodyData['id'] ?? '');
             $field = trim($_POST['field'] ?? $bodyData['field'] ?? '');
             $value = trim($_POST['value'] ?? $bodyData['value'] ?? '');
+            $module = trim($_POST['module'] ?? $bodyData['module'] ?? '');
 
             if (empty($id) || empty($field)) {
                 sendJsonResponse(['success' => false, 'error' => 'Missing ID or field name'], 400);
+            }
+
+            // Enforce column permission!
+            if (!isSuperAdmin() && !canUserEditField($currentUser, $field, $module)) {
+                sendJsonResponse(['success' => false, 'error' => "Permission Denied: You do not have permission to edit the '{$field}' column on this table."], 403);
             }
 
             // Map field camelCase or form name to SQL column
@@ -323,6 +334,26 @@ switch ($action) {
             $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
 
             sendJsonResponse(['success' => true, 'message' => "Field $field updated successfully"]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'get_my_permissions':
+        try {
+            $user = getCurrentUser();
+            if (!$user) {
+                sendJsonResponse(['success' => false, 'error' => 'Not authenticated'], 401);
+            }
+            sendJsonResponse([
+                'success' => true,
+                'user' => [
+                    'id' => $user['id'],
+                    'username' => $user['username'],
+                    'role' => $user['role'],
+                    'permissions' => $user['permissions'] ?? []
+                ]
+            ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
