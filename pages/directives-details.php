@@ -12,6 +12,42 @@ requirePermission('directives-details', 'r');
 $pageTitle = 'Directives Details';
 $currentPage = 'directives-details';
 
+$targetIdentifier = trim($_GET['id'] ?? $_GET['jo'] ?? $_GET['req'] ?? $_GET['requestId'] ?? '');
+$targetRecord = null;
+try {
+    $pdo = getDbConnection();
+    if (!empty($targetIdentifier)) {
+        $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE request_id = :id1 OR jo_number = :id2 OR id = :id3 LIMIT 1");
+        $stmt->execute([':id1' => $targetIdentifier, ':id2' => $targetIdentifier, ':id3' => is_numeric($targetIdentifier) ? (int)$targetIdentifier : 0]);
+        $targetRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$targetRecord) {
+            $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE project_name LIKE :pn LIMIT 1");
+            $stmt->execute([':pn' => "%$targetIdentifier%"]);
+            $targetRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+    }
+    if (!$targetRecord) {
+        $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC LIMIT 1");
+        $targetRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+} catch (Exception $e) {}
+
+$docJo = $targetRecord ? ($targetRecord['jo_number'] ?: $targetRecord['request_id'] ?: '—') : '—';
+$docProj = $targetRecord ? ($targetRecord['project_name'] ?: '—') : '—';
+$docContact = $targetRecord ? ($targetRecord['contact_person'] ?: '—') : '—';
+$docPhone = $targetRecord ? ($targetRecord['contact_number'] ?: '—') : '—';
+$docDueDate = ($targetRecord && !empty($targetRecord['design_deadline'])) ? date('F j, Y', strtotime($targetRecord['design_deadline'])) : '—';
+$docClient = $targetRecord ? ($targetRecord['client'] ?: '—') : '—';
+$docOrderDate = ($targetRecord && !empty($targetRecord['order_date'])) ? date('d/m/Y', strtotime($targetRecord['order_date'])) : '—';
+$docLocation = $targetRecord ? ($targetRecord['location'] ?: '—') : '—';
+$docReleasingDate = ($targetRecord && !empty($targetRecord['releasing_date'])) ? date('F j, Y', strtotime($targetRecord['releasing_date'])) : '—';
+$docInCharge = $targetRecord ? strtoupper($targetRecord['sales_rep'] ?: '—') : '—';
+$docDrawnBy = $targetRecord ? strtoupper($targetRecord['artist'] ?: '—') : '—';
+$docReleasingMode = $targetRecord ? ($targetRecord['releasing_mode'] ?: 'Pickup') : 'Pickup';
+$docAddress = $targetRecord ? ($targetRecord['complete_address'] ?: $targetRecord['location'] ?: '—') : '—';
+$docLookupVal = $targetRecord ? ($targetRecord['jo_number'] ?: $targetRecord['request_id'] ?: $targetRecord['project_name'] ?: '') : '';
+$initialDirectiveKey = $targetRecord ? ($targetRecord['request_id'] ?: $targetRecord['jo_number'] ?: $targetRecord['id'] ?: '') : '';
+
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
 ?>
@@ -39,7 +75,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div class="lookup-flex">
               <div class="lookup-input-wrap">
                 <svg class="lookup-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" class="lookup-input" id="directiveLookupInput" placeholder="e.g. P260701373, URAL, or LR-26-1230..." autocomplete="off">
+                <input type="text" class="lookup-input" id="directiveLookupInput" value="<?= htmlspecialchars($docLookupVal) ?>" placeholder="e.g. P260701373, URAL, or LR-26-1230..." autocomplete="off">
                 <div class="autocomplete-box" id="directiveAutocompleteBox"></div>
               </div>
               <button class="btn btn-primary" id="btnDirectiveSearch">Load Job</button>
@@ -96,35 +132,35 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- ROW 1 -->
                     <tr>
                       <td rowspan="2" class="doc-label-cell doc-cell-center doc-jo-lbl" id="docFieldJoLabel" contenteditable="true" title="Click to edit JO# Label">JO#:</td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-jo-val" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number">P260701373</td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-proj-cell" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name">URAL</td>
+                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-jo-val" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number"><?= htmlspecialchars($docJo) ?></td>
+                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-proj-cell" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name"><?= htmlspecialchars($docProj) ?></td>
                       <td class="doc-label-cell" id="docFieldContactPersonLabel" contenteditable="true" title="Click to edit Label">CONTACT PERSON:</td>
-                      <td class="doc-value-cell" id="docFieldContactPerson" contenteditable="true" title="Click to edit">-</td>
+                      <td class="doc-value-cell" id="docFieldContactPerson" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docContact) ?></td>
                       <td class="doc-label-cell doc-cell-center" id="docFieldInstallersLabel" contenteditable="true" title="Click to edit Label">NUMBER OF INSTALLERS</td>
                     </tr>
 
                     <!-- ROW 2 -->
                     <tr>
                       <td class="doc-label-cell" id="docFieldContactNumberLabel" contenteditable="true" title="Click to edit Label">CONTACT NUMBER:</td>
-                      <td class="doc-value-cell" id="docFieldContactNumber" contenteditable="true" title="Click to edit">639178805364</td>
+                      <td class="doc-value-cell" id="docFieldContactNumber" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docPhone) ?></td>
                       <td rowspan="2" class="doc-value-cell doc-cell-center doc-box-val" id="docFieldInstallers" contenteditable="true" title="Click to edit Installers">2 Installers</td>
                     </tr>
 
                     <!-- ROW 3 -->
                     <tr>
                       <td class="doc-label-cell doc-cell-center" id="docFieldDueDateLabel" contenteditable="true" title="Click to edit Label">DUE DATE:</td>
-                      <td class="doc-value-cell doc-cell-center doc-date-val" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date">JULY 30, 2026</td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-client-cell" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name">PAU ACILAC</td>
+                      <td class="doc-value-cell doc-cell-center doc-date-val" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date"><?= htmlspecialchars($docDueDate) ?></td>
+                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-client-cell" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name"><?= htmlspecialchars($docClient) ?></td>
                       <td class="doc-label-cell" id="docFieldOrderDateLabel" contenteditable="true" title="Click to edit Label">ORDER DATE:</td>
-                      <td class="doc-value-cell" id="docFieldOrderDate" contenteditable="true" title="Click to edit">23/10/2026</td>
+                      <td class="doc-value-cell" id="docFieldOrderDate" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docOrderDate) ?></td>
                     </tr>
 
                     <!-- ROW 4 -->
                     <tr>
                       <td class="doc-label-cell doc-cell-center" id="docFieldLocationLabel" contenteditable="true" title="Click to edit Label">LOCATION:</td>
-                      <td class="doc-value-cell doc-cell-center" id="docFieldLocation" contenteditable="true" title="Click to edit">Manila Branch</td>
+                      <td class="doc-value-cell doc-cell-center" id="docFieldLocation" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docLocation) ?></td>
                       <td class="doc-label-cell" id="docFieldReleasingDateLabel" contenteditable="true" title="Click to edit Label">RELEASING DATE:</td>
-                      <td class="doc-value-cell" id="docFieldReleasingDate" contenteditable="true" title="Click to edit">JULY 30, 2026</td>
+                      <td class="doc-value-cell" id="docFieldReleasingDate" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docReleasingDate) ?></td>
                       <td class="doc-label-cell doc-cell-center" id="docFieldDurationLabel" contenteditable="true" title="Click to edit Label">INSTALLATION DURATION</td>
                     </tr>
 
@@ -149,21 +185,21 @@ require_once __DIR__ . '/includes/sidebar.php';
                               <td class="doc-label-cell doc-cell-center" id="docFieldDrawnByLabel" contenteditable="true" title="Click to edit Label" style="border-bottom: 1.5px solid #000000; height: 26px;">DRAWN BY:</td>
                             </tr>
                             <tr>
-                              <td class="doc-value-cell doc-cell-center doc-person-val" style="border-right: 1.5px solid #000000; height: 26px;" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge">Dona</td>
-                              <td class="doc-value-cell doc-cell-center doc-person-val" style="height: 26px;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By">Glen</td>
+                              <td class="doc-value-cell doc-cell-center doc-person-val" style="border-right: 1.5px solid #000000; height: 26px;" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge"><?= htmlspecialchars($docInCharge) ?></td>
+                              <td class="doc-value-cell doc-cell-center doc-person-val" style="height: 26px;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By"><?= htmlspecialchars($docDrawnBy) ?></td>
                             </tr>
                           </tbody>
                         </table>
                       </td>
                       <td class="doc-label-cell" id="docFieldReleasingModeLabel" contenteditable="true" title="Click to edit Label">RELEASING MODE:</td>
-                      <td class="doc-value-cell" id="docFieldReleasingMode" contenteditable="true" title="Click to edit">Pickup</td>
+                      <td class="doc-value-cell" id="docFieldReleasingMode" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docReleasingMode) ?></td>
                       <td rowspan="2" class="doc-value-cell doc-cell-center doc-box-val" id="docFieldDuration" contenteditable="true" title="Click to edit Duration">1 Day (4 Hours)</td>
                     </tr>
 
                     <!-- ROW 6 -->
                     <tr>
                       <td class="doc-label-cell" id="docFieldAddressLabel" contenteditable="true" title="Click to edit Label">ADDRESS:</td>
-                      <td class="doc-value-cell" id="docFieldAddress" contenteditable="true" title="Click to edit">Manila Branch</td>
+                      <td class="doc-value-cell" id="docFieldAddress" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docAddress) ?></td>
                     </tr>
                   </tbody>
                 </table>
@@ -185,20 +221,20 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <div class="form-group">
                   <label class="form-label">Releasing Mode</label>
                   <select class="form-control" id="ctrlReleasingMode">
-                    <option value="Install">Install</option>
-                    <option value="Deliver">Deliver</option>
-                    <option value="Pickup">Pickup</option>
+                    <option value="Install" <?= $docReleasingMode === 'Install' ? 'selected' : '' ?>>Install</option>
+                    <option value="Deliver" <?= $docReleasingMode === 'Deliver' ? 'selected' : '' ?>>Deliver</option>
+                    <option value="Pickup" <?= ($docReleasingMode === 'Pickup' || empty($docReleasingMode)) ? 'selected' : '' ?>>Pickup</option>
                   </select>
                 </div>
                 <div class="form-group col-span-2">
                   <label class="form-label">Installation / Fabrication Notes</label>
-                  <textarea class="form-control" id="ctrlNotes" placeholder="Special fabrication requirements, acrylic thickness..."></textarea>
+                  <textarea class="form-control" id="ctrlNotes" placeholder="Special fabrication requirements, acrylic thickness..."><?= htmlspecialchars($targetRecord['remarks'] ?? '') ?></textarea>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Assigned In-Charge</label>
-                  <input type="text" class="form-control" id="ctrlInCharge" value="Dona">
+                  <input type="text" class="form-control" id="ctrlInCharge" value="<?= htmlspecialchars($docInCharge) ?>">
                   <label class="form-label" style="margin-top: 6px;">Drawn By (Artist)</label>
-                  <input type="text" class="form-control" id="ctrlDrawnBy" value="Glen">
+                  <input type="text" class="form-control" id="ctrlDrawnBy" value="<?= htmlspecialchars($docDrawnBy) ?>">
                 </div>
               </div>
             </div>
@@ -252,6 +288,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         </section>
   </div>
   </main>
-</div>
-
+  <script>
+    window.__INITIAL_DIRECTIVE_KEY = <?= json_encode($initialDirectiveKey) ?>;
+  </script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -4830,6 +4830,8 @@
               renderCreativesTracker();
             } else if (state.activeView === 'view-artist-workload') {
               renderArtistWorkload();
+            } else if (state.activeView === 'view-directives-details') {
+              renderDirectivePreview(state.currentDirectiveJo);
             }
           }
         })
@@ -7302,13 +7304,31 @@
   // ==========================================================================
 
   function getDirectiveRecord(joOrReq) {
-    if (!joOrReq) return null;
+    if (!joOrReq || !state.requests || state.requests.length === 0) return null;
     const clean = String(joOrReq).trim().toLowerCase();
-    return state.requests.find(r => 
-      r.joNumber.toLowerCase() === clean || 
-      r.requestId.toLowerCase() === clean ||
-      r.projectName.toLowerCase().includes(clean)
-    );
+    if (!clean) return null;
+
+    // 1. Exact match by requestId (e.g. "LR-26-2102")
+    let match = state.requests.find(r => r.requestId && String(r.requestId).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 2. Exact match by id (e.g. 15, "15", "lr-26-2102")
+    match = state.requests.find(r => r.id !== undefined && r.id !== null && String(r.id).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 3. Exact match by joNumber (e.g. "P261001356")
+    match = state.requests.find(r => r.joNumber && String(r.joNumber).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 4. Exact match by projectName
+    match = state.requests.find(r => r.projectName && String(r.projectName).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 5. Fuzzy substring match by projectName
+    match = state.requests.find(r => r.projectName && String(r.projectName).trim().toLowerCase().includes(clean));
+    if (match) return match;
+
+    return null;
   }
 
   // ==========================================================================
@@ -7450,43 +7470,69 @@
   }
 
   function renderDirectivePreview(joToLoad) {
-    const jo = joToLoad || state.currentDirectiveJo || 'P261001348';
-    const rec = getDirectiveRecord(jo) || state.requests[0];
-    state.currentDirectiveJo = rec.joNumber;
+    const jo = joToLoad || state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || (state.requests && state.requests[0] ? (state.requests[0].requestId || state.requests[0].joNumber) : '');
+    let rec = getDirectiveRecord(jo);
+
+    if (!rec && jo && window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_request&id=' + encodeURIComponent(jo))
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            normalizeRequestItem(res.data);
+            if (!state.requests) state.requests = [];
+            const idx = state.requests.findIndex(r => r.id == res.data.id || r.requestId == res.data.requestId);
+            if (idx >= 0) {
+              state.requests[idx] = res.data;
+            } else {
+              state.requests.unshift(res.data);
+            }
+            renderDirectivePreview(res.data.requestId || res.data.joNumber);
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (!rec) {
+      rec = (state.requests && state.requests.length > 0) ? state.requests[0] : null;
+    }
+    if (!rec) return;
+
+    state.currentDirectiveJo = rec.requestId || rec.joNumber || rec.id;
+    try { sessionStorage.setItem('SIGN_DEPOT_CURRENT_DIRECTIVE', state.currentDirectiveJo); } catch (e) {}
 
     const input = document.getElementById('directiveLookupInput');
-    if (input) input.value = rec.joNumber;
+    if (input) input.value = rec.joNumber || rec.requestId || rec.projectName || '';
 
     const setTxt = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.textContent = (val !== undefined && val !== null) ? val : '';
+      if (el) el.textContent = (val !== undefined && val !== null && String(val).trim() !== '') ? val : '—';
     };
 
-    setTxt('docFieldRequestId', rec.requestId || 'LR-26-2100');
-    setTxt('docFieldJoNumber', rec.joNumber || 'P261001348');
-    setTxt('docFieldDueDate', formatReadableDate(rec.designDeadline || rec.releasingDate));
-    setTxt('docFieldLocation', rec.location || 'Manila Branch');
-    setTxt('docFieldProjectName', rec.projectName || 'LACOST & SMH & MK');
-    setTxt('docFieldClientName', rec.client || 'DECALPRO PRINTING SERVICES');
-    setTxt('docFieldInCharge', (rec.inCharge || rec.salesRep || 'DONA').toUpperCase());
-    setTxt('docFieldDrawnBy', (rec.drawnBy || rec.artist || 'GLEN').toUpperCase());
-    setTxt('docFieldContactPerson', rec.contactPerson || '-');
-    setTxt('docFieldContactNumber', rec.contactNumber || '639178805364');
-    setTxt('docFieldOrderDate', formatDate(rec.orderDate));
-    setTxt('docFieldReleasingDate', formatReadableDate(rec.releasingDate));
+    setTxt('docFieldRequestId', rec.requestId || '—');
+    setTxt('docFieldJoNumber', rec.joNumber || rec.requestId || '—');
+    setTxt('docFieldDueDate', formatReadableDate(rec.designDeadline || rec.releasingDate) || '—');
+    setTxt('docFieldLocation', rec.location || '—');
+    setTxt('docFieldProjectName', rec.projectName || '—');
+    setTxt('docFieldClientName', rec.client || '—');
+    setTxt('docFieldInCharge', (rec.inCharge || rec.salesRep || '—').toUpperCase());
+    setTxt('docFieldDrawnBy', (rec.drawnBy || rec.artist || '—').toUpperCase());
+    setTxt('docFieldContactPerson', rec.contactPerson || '—');
+    setTxt('docFieldContactNumber', rec.contactNumber || '—');
+    setTxt('docFieldOrderDate', formatDate(rec.orderDate) || '—');
+    setTxt('docFieldReleasingDate', formatReadableDate(rec.releasingDate) || '—');
     setTxt('docFieldReleasingMode', normalizeReleasingMode(rec.releasingMode));
-    setTxt('docFieldAddress', rec.completeAddress || rec.location || 'Manila Branch');
-    setTxt('docFieldInstallers', rec.installers || '2 Installers');
-    setTxt('docFieldDuration', rec.duration || '1 Day (4 Hours)');
+    setTxt('docFieldAddress', rec.completeAddress || rec.location || '—');
+    setTxt('docFieldInstallers', rec.installers || '—');
+    setTxt('docFieldDuration', rec.duration || '—');
 
     const priorityEl = document.getElementById('docFieldPriorityStatus');
     if (priorityEl) {
-      priorityEl.innerHTML = `Priority: <strong>${escapeHTML(rec.priority || 'RUSH')}</strong> | Status: <strong>${escapeHTML(rec.status || 'Approved')}</strong>`;
+      priorityEl.innerHTML = `Priority: <strong>${escapeHTML(rec.priority || 'Normal')}</strong> | Status: <strong>${escapeHTML(rec.projectStatus || rec.status || 'Pending')}</strong>`;
     }
 
     const deliveryEl = document.getElementById('docFieldDeliveryAddress');
     if (deliveryEl) {
-      const addr = rec.completeAddress || 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City';
+      const addr = rec.completeAddress || rec.location || '—';
       deliveryEl.innerHTML = `<strong>DELIVERY / SITE ADDRESS:</strong> ${escapeHTML(addr)}`;
     }
 
@@ -7497,12 +7543,12 @@
     const ctrlInCharge = document.getElementById('ctrlInCharge');
     const ctrlDrawnBy = document.getElementById('ctrlDrawnBy');
 
-    if (ctrlInst) ctrlInst.value = rec.installers || '2 Installers';
-    if (ctrlDur) ctrlDur.value = rec.duration || '1 Day (4 Hours)';
+    if (ctrlInst) ctrlInst.value = rec.installers || '';
+    if (ctrlDur) ctrlDur.value = rec.duration || '';
     if (ctrlMode) ctrlMode.value = normalizeReleasingMode(rec.releasingMode);
     if (ctrlNotes) ctrlNotes.value = rec.notes || '';
-    if (ctrlInCharge) ctrlInCharge.value = rec.inCharge || rec.salesRep || 'DONA';
-    if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || 'GLEN';
+    if (ctrlInCharge) ctrlInCharge.value = rec.inCharge || rec.salesRep || '';
+    if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || '';
 
     renderAttachmentsList();
 
@@ -11899,21 +11945,25 @@
       }
     },
 
-    openDirectiveForJo: (jo) => {
-      state.currentDirectiveJo = jo;
+    openDirectiveForJo: (jo, reqId, id) => {
+      const identifier = (reqId && String(reqId).trim()) ? String(reqId).trim() :
+                         ((jo && String(jo).trim()) ? String(jo).trim() :
+                         ((id !== undefined && id !== null && String(id).trim()) ? String(id).trim() : ''));
+      state.currentDirectiveJo = identifier;
+      try { sessionStorage.setItem('SIGN_DEPOT_CURRENT_DIRECTIVE', identifier); } catch (e) {}
       saveStateToStorage();
       if (document.getElementById('view-directives-details')) {
         switchView('view-directives-details');
-        renderDirectivePreview(jo);
+        renderDirectivePreview(identifier);
       } else {
-        window.location.href = getPageUrl('directives-details.html') + '?jo=' + encodeURIComponent(jo);
+        window.location.href = getPageUrl('directives-details.html') + '?id=' + encodeURIComponent(identifier);
       }
     },
-    selectAutocompleteJo: (jo) => {
+    selectAutocompleteJo: (joOrReq) => {
       const box = document.getElementById('directiveAutocompleteBox');
       if (box) box.classList.remove('show');
-      renderDirectivePreview(jo);
-      showToast(`Loaded directive for ${jo}.`);
+      renderDirectivePreview(joOrReq);
+      showToast(`Loaded directive for ${joOrReq}.`);
     },
 
     setSalesPage: (p) => {
@@ -12685,7 +12735,7 @@
     initCustomTooltipEngine();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const joParam = urlParams.get('jo');
+    const joParam = urlParams.get('id') || urlParams.get('jo') || urlParams.get('req') || urlParams.get('requestId') || window.__INITIAL_DIRECTIVE_KEY || sessionStorage.getItem('SIGN_DEPOT_CURRENT_DIRECTIVE');
     if (joParam) {
       state.currentDirectiveJo = joParam;
     }
@@ -12701,7 +12751,7 @@
     switchView(currentView);
 
     if (currentView === 'view-directives-details') {
-      renderDirectivePreview(state.currentDirectiveJo || 'P261001348');
+      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
     }
 
     updateDeadlineAlertCenter();

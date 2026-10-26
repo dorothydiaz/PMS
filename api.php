@@ -192,6 +192,57 @@ switch ($action) {
         }
         break;
 
+    case 'get_request':
+        try {
+            $reqId = trim($_GET['id'] ?? $_GET['jo'] ?? $_GET['req'] ?? $_GET['requestId'] ?? $bodyData['id'] ?? '');
+            if (empty($reqId)) {
+                sendJsonResponse(['success' => false, 'error' => 'Missing ID or JO identifier'], 400);
+            }
+            $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE request_id = :id1 OR jo_number = :id2 OR id = :id3 LIMIT 1");
+            $stmt->execute([':id1' => $reqId, ':id2' => $reqId, ':id3' => is_numeric($reqId) ? (int)$reqId : 0]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$r) {
+                $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE project_name LIKE :pn LIMIT 1");
+                $stmt->execute([':pn' => "%$reqId%"]);
+                $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            if (!$r) {
+                sendJsonResponse(['success' => false, 'error' => 'Request not found'], 404);
+            }
+            $formatted = [
+                'id' => $r['id'],
+                'requestId' => $r['request_id'],
+                'joNumber' => $r['jo_number'],
+                'orderDate' => $r['order_date'],
+                'salesRep' => $r['sales_rep'],
+                'client' => $r['client'],
+                'projectName' => $r['project_name'],
+                'artist' => $r['artist'],
+                'designDeadline' => $r['design_deadline'],
+                'releasingDate' => $r['releasing_date'],
+                'fileSent' => $r['file_sent'],
+                'completeAddress' => $r['complete_address'],
+                'location' => $r['location'],
+                'releasingMode' => $r['releasing_mode'],
+                'contactPerson' => $r['contact_person'],
+                'contactNumber' => $r['contact_number'],
+                'projectStatus' => $r['project_status'],
+                'clientApproval' => $r['client_approval'],
+                'priority' => $r['priority'],
+                'headApproval' => $r['head_approval'],
+                'countStandard' => (int)$r['count_standard'],
+                'countSpecial' => (int)$r['count_special'],
+                'countPrinting' => (int)$r['count_printing'],
+                'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
+                'revisionCount' => (int)$r['revision_count'],
+                'remarks' => $r['remarks']
+            ];
+            sendJsonResponse(['success' => true, 'data' => $formatted]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
     case 'get_requests':
         try {
             $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
