@@ -1696,6 +1696,105 @@ body.sidebar-open {
   animation: newRowGlow 3.5s ease forwards;
 }
 
+/* Inline Draft Row & Save/Cancel Controls */
+.table-draft-row {
+  background: #F0FDF4 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(23, 107, 85, 0.35);
+  position: relative;
+}
+
+.table-draft-row td {
+  padding: 6px 8px !important;
+  background: #F0FDF4 !important;
+  vertical-align: middle;
+  border-bottom: 2px solid rgba(23, 107, 85, 0.35) !important;
+}
+
+.draft-cell-input,
+.draft-cell-select {
+  height: 32px;
+  padding: 4px 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--text-main);
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: var(--radius-xs);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.draft-cell-input:focus,
+.draft-cell-select:focus {
+  outline: none;
+  border-color: var(--primary-green) !important;
+  box-shadow: 0 0 0 2.5px rgba(23, 107, 85, 0.2);
+  background: #FFFFFF;
+}
+
+.draft-cell-input::placeholder {
+  color: #94A3B8;
+  font-style: italic;
+  font-size: 11.5px;
+}
+
+.btn-save-draft {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-xs);
+  background: var(--primary-green);
+  color: #FFFFFF;
+  border: 1px solid #135846;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(23, 107, 85, 0.25);
+}
+
+.btn-save-draft:hover {
+  background: #135846;
+  transform: scale(1.05);
+  box-shadow: 0 3px 8px rgba(23, 107, 85, 0.35);
+}
+
+.btn-save-draft:active {
+  transform: scale(0.96);
+}
+
+.btn-cancel-draft {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-xs);
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cancel-draft:hover {
+  background: #FCA5A5;
+  color: #991B1B;
+  border-color: #F87171;
+  transform: scale(1.05);
+}
+
+.btn-cancel-draft:active {
+  transform: scale(0.96);
+}
+
+.btn-save-draft svg,
+.btn-cancel-draft svg {
+  pointer-events: none;
+}
+
 /* ==========================================================================
    CUSTOM THEMED DROPDOWNS (Studio Minimalist & Drop Shadows)
    ========================================================================== */

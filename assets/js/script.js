@@ -4665,7 +4665,8 @@
     monthlyOutputPage: 1,
     monthlyOutputPerPage: initialRowsPerPage,
     selectedTemplateElemId: null,
-    customCellFonts: {}
+    customCellFonts: {},
+    draftSalesRequest: null
   };
 
   function normalizeRequestItem(r) {
@@ -6741,11 +6742,13 @@
 
     const tbody = document.getElementById('salesRequestsTableBody');
     if (tbody) {
-      if (pagedList.length === 0) {
+      const draftHTML = state.draftSalesRequest ? renderDraftSalesRowHTML(state.draftSalesRequest) : '';
+
+      if (pagedList.length === 0 && !draftHTML) {
         tbody.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:32px 20px; color:var(--text-muted); font-size:13px;">No sales requests match the current filters. Click <strong>+ Add Request</strong> above to add a new row directly to this table!</td></tr>`;
       } else {
         const isSuper = isCurrentUserSuperAdmin();
-        tbody.innerHTML = pagedList.map(r => `
+        const rowsHTML = pagedList.map(r => `
           <tr data-req-id="${r.id}">
             <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color: var(--primary-green); font-weight: 700; min-width: 95px;')}</td>
             <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color: var(--accent-red); font-weight: 700; min-width: 105px;')}</td>
@@ -6783,6 +6786,8 @@
             </td>
           </tr>
         `).join('');
+
+        tbody.innerHTML = draftHTML + rowsHTML;
       }
     }
   }
@@ -10865,10 +10870,89 @@
   }
   window.openNewSalesRequestModal = openNewSalesRequestModal;
 
+  function renderDraftSalesRowHTML(d) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const orderDateVal = d.orderDate || todayStr;
+    const deadlineVal = d.designDeadline || '';
+    const releasingVal = d.releasingDate || '';
+
+    const repOptions = ['<option value="">Select Sales Rep...</option>']
+      .concat(state.salesReps.map(rep => `<option value="${escapeHTML(rep)}" ${rep === d.salesRep ? 'selected' : ''}>${escapeHTML(rep)}</option>`))
+      .join('');
+
+    const artistOptions = state.artists.map(art => `<option value="${escapeHTML(art)}" ${art === d.artist ? 'selected' : ''}>${escapeHTML(art)}</option>`).join('');
+
+    const locationOptions = ['Indoor', 'Outdoor', 'Indoor & Outdoor']
+      .map(loc => `<option value="${loc}" ${loc === d.location ? 'selected' : ''}>${loc}</option>`)
+      .join('');
+
+    const relModeOptions = RELEASING_MODES
+      .map(rm => `<option value="${rm}" ${rm === d.releasingMode ? 'selected' : ''}>${rm}</option>`)
+      .join('');
+
+    const fileSentOptions = FILE_SENT_LEVELS
+      .map(fs => `<option value="${fs}" ${fs === d.fileSent ? 'selected' : ''}>${fs}</option>`)
+      .join('');
+
+    const statusOptions = PROJECT_STATUSES
+      .map(st => `<option value="${st}" ${st === d.projectStatus ? 'selected' : ''}>${st}</option>`)
+      .join('');
+
+    const approvalOptions = APPROVAL_LEVELS
+      .map(ap => `<option value="${ap}" ${ap === d.clientApproval ? 'selected' : ''}>${ap}</option>`)
+      .join('');
+
+    const priorityOptions = PRIORITY_LEVELS
+      .map(pr => `<option value="${pr}" ${pr === d.priority ? 'selected' : ''}>${pr}</option>`)
+      .join('');
+
+    return `
+      <tr class="table-draft-row" id="draftSalesRow">
+        <td><input type="text" class="draft-cell-input" id="draftReqId" value="${escapeHTML(d.requestId)}" style="color:var(--primary-green); font-weight:700; width:95px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftJoNumber" value="${escapeHTML(d.joNumber || '')}" placeholder="P..." style="color:var(--accent-red); font-weight:700; width:100px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="date" class="draft-cell-input" id="draftOrderDate" value="${escapeHTML(orderDateVal)}" style="width:125px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftProjectName" value="${escapeHTML(d.projectName || '')}" placeholder="Enter project name..." style="width:170px; font-weight:600;" required autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftClient" value="${escapeHTML(d.client || '')}" placeholder="Enter client name..." style="width:140px;" autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><select class="draft-cell-select" id="draftSalesRep" style="width:120px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${repOptions}</select></td>
+        <td><select class="draft-cell-select" id="draftArtist" style="width:120px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${artistOptions}</select></td>
+        <td><select class="draft-cell-select" id="draftLocation" style="width:115px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${locationOptions}</select></td>
+        <td><select class="draft-cell-select" id="draftRelMode" style="width:90px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${relModeOptions}</select></td>
+        <td><input type="date" class="draft-cell-input" id="draftDeadline" value="${escapeHTML(deadlineVal)}" style="width:125px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="date" class="draft-cell-input" id="draftReleasing" value="${escapeHTML(releasingVal)}" style="width:125px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><select class="draft-cell-select" id="draftFileSent" style="width:100px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${fileSentOptions}</select></td>
+        <td><select class="draft-cell-select" id="draftProjectStatus" style="width:110px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${statusOptions}</select></td>
+        <td><select class="draft-cell-select" id="draftClientApproval" style="width:110px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${approvalOptions}</select></td>
+        <td><select class="draft-cell-select" id="draftPriority" style="width:95px;" onkeydown="window.SignDepotApp.handleDraftKey(event)">${priorityOptions}</select></td>
+        <td><input type="text" class="draft-cell-input" id="draftContactPerson" value="${escapeHTML(d.contactPerson || '')}" placeholder="Contact person..." style="width:130px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftContactNumber" value="${escapeHTML(d.contactNumber || '')}" placeholder="Phone #..." style="width:120px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftAddress" value="${escapeHTML(d.completeAddress || '')}" placeholder="Full address..." style="width:190px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftRemarks" value="${escapeHTML(d.remarks || '')}" placeholder="Add remarks..." style="width:160px;" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td class="draft-actions-cell">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button type="button" class="btn btn-save-draft" id="btnSaveDraftRequest" onclick="if(window.SignDepotApp && window.SignDepotApp.saveDraftSalesRequest){window.SignDepotApp.saveDraftSalesRequest();}else{saveDraftSalesRequest();}" title="Save Request (✓)" aria-label="Save Request">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button type="button" class="btn btn-cancel-draft" id="btnCancelDraftRequest" onclick="if(window.SignDepotApp && window.SignDepotApp.cancelDraftSalesRequest){window.SignDepotApp.cancelDraftSalesRequest();}else{cancelDraftSalesRequest();}" title="Cancel (✕)" aria-label="Cancel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
   function addNewSalesRequestRow() {
-    // Auto-generate sequential Request ID (e.g. LR-26-2105)
+    if (state.draftSalesRequest) {
+      const projEl = document.getElementById('draftProjectName');
+      if (projEl) {
+        projEl.focus();
+        projEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      showToast('A new request row is already active. Fill in the cells and click ✓ to Save or ✕ to Cancel.', 'info');
+      return;
+    }
+
     const nextReqId = getNextRequestId();
-    const newId = nextReqId.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
     const todayStr = new Date().toISOString().split('T')[0];
 
     // Default design deadline (+3 days from today)
@@ -10884,8 +10968,7 @@
       defaultRep = state.salesReps[0];
     }
 
-    const newReq = {
-      id: newId,
+    state.draftSalesRequest = {
       requestId: nextReqId,
       joNumber: '',
       orderDate: todayStr,
@@ -10904,77 +10987,148 @@
       projectStatus: 'Pending',
       clientApproval: 'Pending',
       priority: 'Normal',
+      remarks: ''
+    };
+
+    // Ensure we are on page 1 so draft row is visible at the very top
+    state.salesFilter.page = 1;
+
+    // Render sales requests table with the new draft row
+    renderSalesRequests();
+
+    // Focus Project Name input
+    setTimeout(() => {
+      const projInput = document.getElementById('draftProjectName');
+      if (projInput) {
+        projInput.focus();
+        projInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 100);
+
+    showToast('New row ready! Fill in the cells, then click ✓ to Save or ✕ to Cancel.');
+  }
+  window.addNewSalesRequestRow = addNewSalesRequestRow;
+
+  function saveDraftSalesRequest() {
+    if (!state.draftSalesRequest) return;
+
+    const reqIdInput = document.getElementById('draftReqId');
+    const reqId = (reqIdInput && reqIdInput.value.trim()) || state.draftSalesRequest.requestId || getNextRequestId();
+    const joNumber = document.getElementById('draftJoNumber') ? document.getElementById('draftJoNumber').value.trim() : '';
+    const orderDate = document.getElementById('draftOrderDate') ? document.getElementById('draftOrderDate').value.trim() : new Date().toISOString().split('T')[0];
+    const projectName = document.getElementById('draftProjectName') ? document.getElementById('draftProjectName').value.trim() : '';
+    const client = document.getElementById('draftClient') ? document.getElementById('draftClient').value.trim() : '';
+    const salesRep = document.getElementById('draftSalesRep') ? document.getElementById('draftSalesRep').value.trim() : '';
+    const artist = document.getElementById('draftArtist') ? document.getElementById('draftArtist').value.trim() : 'Unassigned';
+    const location = document.getElementById('draftLocation') ? document.getElementById('draftLocation').value.trim() : 'Indoor';
+    const releasingMode = document.getElementById('draftRelMode') ? document.getElementById('draftRelMode').value.trim() : 'Install';
+    const designDeadline = document.getElementById('draftDeadline') ? document.getElementById('draftDeadline').value.trim() : '';
+    const releasingDate = document.getElementById('draftReleasing') ? document.getElementById('draftReleasing').value.trim() : '';
+    const fileSent = document.getElementById('draftFileSent') ? document.getElementById('draftFileSent').value.trim() : 'Pending';
+    const projectStatus = document.getElementById('draftProjectStatus') ? document.getElementById('draftProjectStatus').value.trim() : 'Pending';
+    const clientApproval = document.getElementById('draftClientApproval') ? document.getElementById('draftClientApproval').value.trim() : 'Pending';
+    const priority = document.getElementById('draftPriority') ? document.getElementById('draftPriority').value.trim() : 'Normal';
+    const contactPerson = document.getElementById('draftContactPerson') ? document.getElementById('draftContactPerson').value.trim() : '';
+    const contactNumber = document.getElementById('draftContactNumber') ? document.getElementById('draftContactNumber').value.trim() : '';
+    const completeAddress = document.getElementById('draftAddress') ? document.getElementById('draftAddress').value.trim() : '';
+    const remarks = document.getElementById('draftRemarks') ? document.getElementById('draftRemarks').value.trim() : '';
+
+    if (!projectName && !client) {
+      showToast('Please enter at least a Project Name or Client to save.', 'error');
+      const p = document.getElementById('draftProjectName');
+      if (p) p.focus();
+      return;
+    }
+
+    const finalId = reqId.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const newRecord = {
+      id: finalId,
+      requestId: reqId,
+      joNumber: joNumber,
+      orderDate: orderDate,
+      salesRep: salesRep,
+      client: client,
+      projectName: projectName,
+      artist: artist,
+      designDeadline: designDeadline,
+      releasingDate: releasingDate,
+      fileSent: fileSent,
+      completeAddress: completeAddress,
+      location: location,
+      releasingMode: releasingMode,
+      contactPerson: contactPerson,
+      contactNumber: contactNumber,
+      projectStatus: projectStatus,
+      clientApproval: clientApproval,
+      priority: priority,
       headApproval: 'Pending',
       countStandard: 0,
       countSpecial: 0,
       countPrinting: 0,
       designStatus: 'Not Started',
       revisionCount: 0,
-      remarks: ''
+      remarks: remarks
     };
 
-    // Prepend to requests list so it appears at the very top of the table
-    state.requests.unshift(newReq);
+    // Clear draft state so draft row vanishes
+    state.draftSalesRequest = null;
 
-    // Reset filters so the new row is directly visible on page 1
-    state.salesFilter.search = '';
-    state.salesFilter.approvalTab = '';
-    state.salesFilter.priority = '';
-    state.salesFilter.approval = '';
-    state.salesFilter.fileSent = '';
-    state.salesFilter.salesRep = '';
-    state.salesFilter.location = '';
-    state.salesFilter.deadline = '';
-    state.salesFilter.page = 1;
-    state.salesFilter.sortField = 'requestId';
-    state.salesFilter.sortDir = 'desc';
-
-    const sSearch = document.getElementById('salesSearchInput');
-    if (sSearch) sSearch.value = '';
-
+    // Add to requests list and save state locally
+    state.requests.unshift(newRecord);
     saveStateToStorage();
 
-    // Persist immediately to MySQL backend
-    if (window.PMS_API_URL) {
-      fetch(window.PMS_API_URL + '?action=add_sales_request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReq)
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res && res.success) {
-          if (res.id) newReq.id = res.id;
-          if (res.requestId && res.requestId !== newReq.requestId) {
-            newReq.requestId = res.requestId;
-            renderSalesRequests();
-          }
+    // Persist to MySQL backend
+    const apiUrl = window.PMS_API_URL || (window.location.pathname.includes('/pages/') ? '../api.php' : './api.php');
+    fetch(apiUrl + '?action=create_request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res && res.success) {
+        if (res.id) newRecord.id = res.id;
+        if (res.requestId && res.requestId !== newRecord.requestId) {
+          newRecord.requestId = res.requestId;
+          renderSalesRequests();
         }
-      })
-      .catch(err => console.warn('MySQL create request failed:', err));
-    }
+      }
+    })
+    .catch(err => console.warn('MySQL save failed:', err));
 
-    // Render sales requests table
+    // Re-render table with newly committed row
     renderSalesRequests();
 
-    // Scroll into view, highlight, and focus editable Project Name cell
+    // Smooth scroll and green glow animation on newly saved row
     setTimeout(() => {
-      const row = document.querySelector(`tr[data-req-id="${newReq.id}"]`);
+      const row = document.querySelector(`tr[data-req-id="${newRecord.id}"]`);
       if (row) {
         row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         row.classList.add('table-row-new-entry');
-
-        const projCell = row.querySelector('.editable-cell[data-field="projectName"]');
-        if (projCell) {
-          projCell.focus();
-        }
       }
-    }, 120);
+    }, 80);
 
-    showToast(`New request row ${nextReqId} added! Fill in the cells directly.`, 'success');
-    return newReq;
+    showToast(`Request ${reqId} saved successfully!`, 'success');
   }
-  window.addNewSalesRequestRow = addNewSalesRequestRow;
+  window.saveDraftSalesRequest = saveDraftSalesRequest;
+
+  function cancelDraftSalesRequest() {
+    state.draftSalesRequest = null;
+    renderSalesRequests();
+    showToast('New request row cancelled.', 'info');
+  }
+  window.cancelDraftSalesRequest = cancelDraftSalesRequest;
+
+  function handleDraftKey(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveDraftSalesRequest();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelDraftSalesRequest();
+    }
+  }
+  window.handleDraftKey = handleDraftKey;
 
   function editSalesRequest(id) {
     const rec = state.requests.find(r => r.id === id || r.requestId === id);
@@ -12026,6 +12180,9 @@
     syncAllFormDropdowns: () => syncAllFormDropdowns(),
 
     addNewSalesRequestRow: () => addNewSalesRequestRow(),
+    saveDraftSalesRequest: () => saveDraftSalesRequest(),
+    cancelDraftSalesRequest: () => cancelDraftSalesRequest(),
+    handleDraftKey: (e) => handleDraftKey(e),
 
     // Direct Inline Editing Handlers
     handleInlineTextBlur: (el) => {
@@ -12496,6 +12653,24 @@
     if (btnSalesNewReq) {
       btnSalesNewReq.addEventListener('click', handleNewRequestTrigger);
     }
+
+    // Delegated click handler for save (✓) and cancel (✕) buttons on the draft row
+    document.addEventListener('click', (e) => {
+      const saveBtn = e.target.closest && e.target.closest('.btn-save-draft');
+      if (saveBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        saveDraftSalesRequest();
+        return;
+      }
+      const cancelBtn = e.target.closest && e.target.closest('.btn-cancel-draft');
+      if (cancelBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        cancelDraftSalesRequest();
+        return;
+      }
+    });
 
     // Auto-trigger new row if navigated from external page with ?action=add_new
     if (window.location.search.includes('action=add_new') && document.getElementById('salesRequestsTableBody')) {

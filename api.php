@@ -514,6 +514,7 @@ switch ($action) {
         break;
 
     case 'create_request':
+    case 'add_sales_request':
         try {
             $data = !empty($bodyData) ? $bodyData : $_POST;
 
