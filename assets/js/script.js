@@ -4643,7 +4643,7 @@
     attachments: [...DEFAULT_ATTACHMENTS],
     activeView: 'view-dashboard',
     currentDirectiveJo: 'P261001348',
-    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
+    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', deadline: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
     trackerFilter: { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: initialRowsPerPage },
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
@@ -5360,6 +5360,7 @@
         const txt = sel.options[sel.selectedIndex]?.text || 'Filter';
         const lbl = btn.querySelector('.custom-select-label');
         if (lbl) lbl.textContent = txt;
+        btn.setAttribute('data-current', sel.value || '');
         if (sel.value) {
           btn.classList.add('has-value');
         } else {
@@ -5367,6 +5368,25 @@
         }
       });
     });
+  }
+
+  // Synchronizes the custom filter dropdown button UI with its underlying native select element
+  function syncFilterSelectUI(selectEl) {
+    if (!selectEl) return;
+    const btn = selectEl.nextElementSibling && selectEl.nextElementSibling.classList.contains('custom-filter-dropdown-btn')
+      ? selectEl.nextElementSibling
+      : null;
+    if (btn) {
+      const txt = selectEl.options[selectEl.selectedIndex]?.text || 'Filter';
+      const lbl = btn.querySelector('.custom-select-label');
+      if (lbl) lbl.textContent = txt;
+      btn.setAttribute('data-current', selectEl.value || '');
+      if (selectEl.value) {
+        btn.classList.add('has-value');
+      } else {
+        btn.classList.remove('has-value');
+      }
+    }
   }
 
   // Upgrades form <select class="form-control"> elements into sleek custom studio dropdowns
@@ -5926,7 +5946,8 @@
 
   function renderDashboard() {
     updateDashboardKPIs();
-    renderPanzeTaskCards();
+    renderProgressTimeline();
+    renderRecentActivityFeed();
     renderPanzeDonutChart();
     renderDashboardWorkloadSnapshot();
     renderDashboardRecentProjectsTable();
@@ -6008,48 +6029,285 @@
     }
   }
 
-  // Panze Left Column: Soft Pastel Tinted Task Cards
-  function renderPanzeTaskCards() {
-    const container = document.getElementById('panzeTasksCardList');
-    const badge = document.getElementById('panzeActiveTasksCountBadge');
+  // ==========================================================================
+  // PROGRESS TIMELINE RENDERER (Image 2 Replica)
+  // ==========================================================================
+  function renderProgressTimeline() {
+    const container = document.getElementById('progressTimelineChartContainer');
     if (!container) return;
 
-    const activeList = state.requests.filter(r => r.projectStatus !== 'Completed').slice(0, 4);
-    if (badge) badge.textContent = state.requests.filter(r => r.projectStatus !== 'Completed').length;
+    // Timeline data: 7 days of active week (M, T, W, T, F, S, S)
+    const days = [
+      { key: 'M', name: 'Monday', created: 13, completed: 8, x: 48 },
+      { key: 'T', name: 'Tuesday', created: 17, completed: 12, x: 128 },
+      { key: 'W', name: 'Wednesday', created: 19, completed: 23, x: 208, isPeak: true },
+      { key: 'T', name: 'Thursday', created: 15, completed: 14, x: 288 },
+      { key: 'F', name: 'Friday', created: 18, completed: 17, x: 368, isCurrent: true },
+      { key: 'S', name: 'Saturday', created: 8, completed: 0, x: 448, isProjected: true },
+      { key: 'S', name: 'Sunday', created: 6, completed: 0, x: 518, isProjected: true }
+    ];
 
-    const tints = ['task-tint-peach', 'task-tint-blue', 'task-tint-green', 'task-tint-purple'];
-    const badgeColors = ['#F97316', '#0284C7', '#10B981', '#7C3AED'];
+    const chartW = 560;
+    const chartH = 160;
+    const axisY = 132;
+    const maxVal = 28;
 
-    container.innerHTML = activeList.map((r, idx) => {
-      const tint = tints[idx % tints.length];
-      const iconColor = badgeColors[idx % badgeColors.length];
-      const isPastDue = isOverdue(r.designDeadline, r.projectStatus);
+    let peakDay = days[2];
+    days.forEach(d => {
+      if (d.completed > peakDay.completed) peakDay = d;
+    });
+
+    const titleEl = document.getElementById('timelineHighlightTitle');
+    if (titleEl) titleEl.textContent = `Peak productivity on ${peakDay.name}`;
+
+    const subtitleEl = document.getElementById('timelineHighlightSubtitle');
+    if (subtitleEl) subtitleEl.textContent = 'Focus shifted to task completion';
+
+    const getY = (val) => {
+      const plotH = 96;
+      return Math.round(axisY - (val / maxVal) * plotH);
+    };
+
+    // Smooth cardinal/cubic Bezier spline generator (high subpixel precision)
+    const getSmoothSpline = (pts, tension = 0.22) => {
+      if (!pts || pts.length === 0) return '';
+      if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+      let path = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = i > 0 ? pts[i - 1] : pts[i];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = i < pts.length - 2 ? pts[i + 2] : p2;
+        const cp1x = p1.x + (p2.x - p0.x) * tension;
+        const cp1y = p1.y + (p2.y - p0.y) * tension;
+        const cp2x = p2.x - (p3.x - p1.x) * tension;
+        const cp2y = p2.y - (p3.y - p1.y) * tension;
+        path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+      }
+      return path;
+    };
+
+    // Active completed curve (Mon - Fri)
+    const completedPts = days.slice(0, 5).map(d => ({ x: d.x, y: getY(d.completed) }));
+    const dCompletedLine = getSmoothSpline(completedPts, 0.24);
+    const fri = completedPts[completedPts.length - 1];
+    const mon = completedPts[0];
+    const dCompletedArea = `${dCompletedLine} L ${fri.x} ${axisY} L ${mon.x} ${axisY} Z`;
+
+    // Created tasks curve (Mon - Sun full week projection)
+    const createdPts = days.map(d => ({ x: d.x, y: getY(d.created) }));
+    const dCreated = getSmoothSpline(createdPts, 0.20);
+
+    container.innerHTML = `
+      <svg class="timeline-chart-svg" viewBox="0 0 ${chartW} ${chartH}" shape-rendering="geometricPrecision">
+        <!-- Vertical Day Grid Lines -->
+        ${days.map(d => `<line class="timeline-grid-line" x1="${d.x}" y1="18" x2="${d.x}" y2="${axisY}" shape-rendering="geometricPrecision" />`).join('')}
+
+        <!-- Bottom Axis -->
+        <line class="timeline-axis-line" x1="24" y1="${axisY}" x2="${chartW - 24}" y2="${axisY}" shape-rendering="geometricPrecision" />
+
+        <!-- Day Tick Marks -->
+        ${days.map(d => `<line class="timeline-tick-line" x1="${d.x}" y1="${axisY - 4}" x2="${d.x}" y2="${axisY + 3}" stroke-linecap="round" shape-rendering="geometricPrecision" />`).join('')}
+
+        <!-- Day Labels (M, T, W, T, F, S, S) -->
+        ${days.map(d => `<text class="timeline-day-label" x="${d.x}" y="${axisY + 18}">${d.key}</text>`).join('')}
+
+        <!-- Task Created Path (Smooth Dashed Gray Line) -->
+        <path class="timeline-path-created" d="${dCreated}" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" />
+
+        <!-- Task Completed Area Fill (Soft Translucent Tint) -->
+        <path class="timeline-area-completed" fill="rgba(79, 70, 229, 0.08)" d="${dCompletedArea}" shape-rendering="geometricPrecision" />
+
+        <!-- Task Completed Path (Smooth Solid Indigo Wave) -->
+        <path class="timeline-path-completed" d="${dCompletedLine}" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" />
+
+        <!-- Friday Active Indicator (Vertical Marker to Axis) -->
+        <line class="timeline-current-marker" x1="${fri.x}" y1="${fri.y}" x2="${fri.x}" y2="${axisY + 2}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />
+
+        <!-- Weekend Projection Dotted Line across Saturday & Sunday -->
+        <line class="timeline-projection-line" x1="${fri.x}" y1="${fri.y}" x2="${chartW - 30}" y2="${fri.y}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />
+
+        <!-- Interactive Data Points on Active Days (Mon - Fri) -->
+        ${days.slice(0, 5).map(d => `
+          <circle class="timeline-data-point" cx="${d.x}" cy="${getY(d.completed)}" r="${d.isPeak ? 5.5 : 4}"
+            data-day="${escapeHTML(d.name)}" data-completed="${d.completed}" data-created="${d.created}"
+            vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision"
+            onmouseenter="window.SignDepotApp.showTimelineTooltip(event, '${d.name}', ${d.completed}, ${d.created})"
+            onmouseleave="window.SignDepotApp.hideTimelineTooltip()" />
+        `).join('')}
+      </svg>
+      <div id="timelineTooltipEl" class="timeline-tooltip"></div>
+    `;
+  }
+
+  function showTimelineTooltip(e, dayName, completed, created) {
+    const tip = document.getElementById('timelineTooltipEl');
+    if (!tip) return;
+    tip.innerHTML = `<strong>${escapeHTML(dayName)}</strong>: <span style="color:#818CF8; font-weight:700;">${completed} Completed</span> • <span style="color:#94A3B8;">${created} Created</span>`;
+    const rect = e.target.getBoundingClientRect();
+    const parent = e.target.closest('.timeline-chart-wrap');
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+    tip.style.left = `${rect.left - parentRect.left + rect.width / 2}px`;
+    tip.style.top = `${rect.top - parentRect.top}px`;
+    tip.classList.add('visible');
+  }
+
+  function hideTimelineTooltip() {
+    const tip = document.getElementById('timelineTooltipEl');
+    if (tip) tip.classList.remove('visible');
+  }
+
+  // ==========================================================================
+  // RECENT ACTIVITY & UPDATES FEED RENDERER
+  // ==========================================================================
+  let currentActivityFilter = 'all';
+
+  function renderRecentActivityFeed(filter = currentActivityFilter) {
+    currentActivityFilter = filter;
+    const feed = document.getElementById('recentActivityFeedList');
+    if (!feed) return;
+
+    // Sync filter pills
+    document.querySelectorAll('#activityFilterTabs [data-act-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-act-filter') === filter);
+    });
+
+    if (window.PMS_API_URL && !feed._loadedOnce) {
+      feed._loadedOnce = true;
+      fetch(window.PMS_API_URL + '?action=get_recent_activity')
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.logs && res.logs.length > 0) {
+            feed._cachedLogs = res.logs;
+            feed._cachedRequests = res.recent_requests || [];
+            buildActivityFeedDOM(filter);
+            return;
+          }
+          buildActivityFeedDOM(filter);
+        })
+        .catch(() => {
+          buildActivityFeedDOM(filter);
+        });
+      return;
+    }
+
+    buildActivityFeedDOM(filter);
+  }
+
+  function buildActivityFeedDOM(filter) {
+    const feed = document.getElementById('recentActivityFeedList');
+    if (!feed) return;
+
+    const cachedLogs = feed._cachedLogs || [];
+    const cachedReqs = feed._cachedRequests || (state.requests || []).slice(0, 10);
+
+    let items = [];
+
+    // Map audit logs
+    cachedLogs.forEach(l => {
+      let type = 'general';
+      const m = (l.module || '').toLowerCase();
+      if (m.includes('sales')) type = 'orders';
+      else if (m.includes('creative') || m.includes('directive') || m.includes('tracker')) type = 'creatives';
+      else if (m.includes('access') || m.includes('security') || m.includes('auth') || m.includes('user')) type = 'security';
+
+      let roleType = 'system';
+      const r = (l.role || '').toLowerCase();
+      if (r.includes('sales')) roleType = 'sales';
+      else if (r.includes('artist')) roleType = 'artist';
+      else if (r.includes('admin')) roleType = 'admin';
+
+      items.push({
+        user: l.user || 'System',
+        roleType: roleType,
+        action: l.action || 'UPDATE',
+        module: l.module || 'System',
+        desc: l.desc || l.description || 'System operation executed',
+        time: l.time ? formatRelativeTime(l.time) : 'Just now',
+        type: type,
+        timestamp: new Date(l.time).getTime() || Date.now()
+      });
+    });
+
+    // Add recent project updates from state.requests
+    cachedReqs.slice(0, 8).forEach((req, idx) => {
+      const minutesAgo = (idx + 1) * 16;
+      items.push({
+        user: req.salesRep || req.artist || 'Sales',
+        roleType: req.artist ? 'artist' : 'sales',
+        action: req.projectStatus === 'Completed' ? 'COMPLETED' : 'UPDATE',
+        module: 'Sales Requests',
+        desc: `Updated project <strong>${escapeHTML(req.projectName)}</strong> (${escapeHTML(req.client || 'Client')})`,
+        projectId: req.requestId,
+        time: `${minutesAgo}m ago`,
+        type: 'orders',
+        timestamp: Date.now() - (minutesAgo * 60 * 1000)
+      });
+    });
+
+    // Sort descending by recency
+    items.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Apply category filter
+    if (filter !== 'all') {
+      items = items.filter(it => it.type === filter);
+    }
+
+    if (items.length === 0) {
+      feed.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:12px;">No activity logged for this category.</div>`;
+      return;
+    }
+
+    feed.innerHTML = items.slice(0, 5).map(it => {
+      const avatarInitial = (it.user || 'S').substring(0, 1).toUpperCase();
+      const avatarClass = `activity-avatar-${it.roleType}`;
+      const projectPill = it.projectId ? `
+        <span class="activity-project-pill" onclick="window.SignDepotApp.filterByDeadlineProject('${it.projectId}')" title="Highlight in table">
+          ${escapeHTML(it.projectId)}
+        </span>
+      ` : '';
 
       return `
-        <div class="task-item-card ${tint}">
-          <div class="task-card-top">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="task-badge-icon" style="background:${iconColor}; color:#FFF;">
-                ${escapeHTML(r.artist.substring(0, 1))}
-              </div>
-              <span style="font-size:11px; font-weight:700; color:var(--text-secondary);">${escapeHTML(r.requestId)}</span>
-            </div>
-            <button class="circle-action-btn" style="width:24px; height:24px;" 
-              onclick="window.SignDepotApp.toggleTaskCompletion('${r.id}')" title="Mark Done">
-              ✓
-            </button>
+        <div class="activity-feed-item">
+          <div class="activity-avatar ${avatarClass}">
+            ${escapeHTML(avatarInitial)}
           </div>
-          <div class="task-card-title">${escapeHTML(r.projectName)}</div>
-          <div class="task-card-desc">${escapeHTML(r.client)} • Artist: <strong>${escapeHTML(r.artist)}</strong></div>
-          <div class="task-card-footer">
-            <span class="badge ${getStatusBadgeClass(r.projectStatus)}">${escapeHTML(r.projectStatus)}</span>
-            <span style="color:${isPastDue ? 'var(--accent-red)' : 'var(--text-secondary)'}; font-weight:700;">
-              ${isPastDue ? '⚠️ Due ' : 'Due '}${formatDate(r.designDeadline)}
-            </span>
+          <div class="activity-details">
+            <div class="activity-header-line">
+              <span class="activity-user-name">${escapeHTML(it.user)}</span>
+              <span class="activity-time-ago">${escapeHTML(it.time)}</span>
+            </div>
+            <div class="activity-desc-text">
+              ${it.desc}
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="activity-module-tag">${escapeHTML(it.module)}</span>
+              ${projectPill}
+            </div>
           </div>
         </div>
       `;
     }).join('');
+  }
+
+  function formatRelativeTime(dateStr) {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return 'Recently';
+      const diffMs = Date.now() - date.getTime();
+      const diffSec = Math.floor(diffMs / 1000);
+      if (diffSec < 60) return 'Just now';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      const diffDays = Math.floor(diffHr / 24);
+      if (diffDays === 1) return 'Yesterday';
+      return `${diffDays}d ago`;
+    } catch (e) {
+      return 'Recently';
+    }
   }
 
   // Panze Middle Column: Donut Chart
@@ -6560,6 +6818,53 @@
     upgradeAllFormSelects();
   }
 
+  function resetSalesRequestsFilters() {
+    state.salesFilter = {
+      search: '',
+      priority: '',
+      approval: '',
+      fileSent: '',
+      salesRep: '',
+      location: '',
+      deadline: '',
+      sortField: 'orderDate',
+      sortDir: 'desc',
+      page: 1,
+      perPage: getStoredRowsPerPage(),
+      approvalTab: ''
+    };
+
+    const salesSearch = document.getElementById('salesSearchInput');
+    if (salesSearch) salesSearch.value = '';
+
+    const filterIds = [
+      'salesFilterPriority',
+      'salesFilterApproval',
+      'salesFilterLocation',
+      'salesFilterFileSent',
+      'salesFilterSalesRep',
+      'salesFilterDeadline'
+    ];
+
+    filterIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        syncFilterSelectUI(el);
+      }
+    });
+
+    // Reset approval tab buttons to All
+    document.querySelectorAll('.sales-approval-tab').forEach(tab => {
+      const isAll = !tab.getAttribute('data-tab-approval');
+      tab.classList.toggle('active', isAll);
+      tab.setAttribute('aria-selected', isAll ? 'true' : 'false');
+    });
+
+    renderSalesRequests();
+    showToast('Sales filters have been reset.');
+  }
+
   // ==========================================================================
   // MODULE 3: CREATIVES TRACKER (Google Sheets Replica with Inline Editing)
   // ==========================================================================
@@ -6779,6 +7084,49 @@
     }
 
     upgradeAllFormSelects();
+  }
+
+  function resetCreativesTrackerFilters() {
+    const myArtist = getLoggedInArtist();
+    state.trackerFilter = {
+      search: '',
+      projectStatus: '',
+      designStatus: '',
+      artist: myArtist || '',
+      overdue: '',
+      sortField: 'designDeadline',
+      sortDir: 'asc',
+      page: 1,
+      perPage: getStoredRowsPerPage()
+    };
+    state.trackerKpiFilter = 'all';
+
+    const trackerSearch = document.getElementById('trackerSearchInput');
+    if (trackerSearch) trackerSearch.value = '';
+
+    ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterOverdue'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        syncFilterSelectUI(el);
+      }
+    });
+
+    const artEl = document.getElementById('trackerFilterArtist');
+    if (artEl) {
+      artEl.value = myArtist || '';
+      syncFilterSelectUI(artEl);
+    }
+
+    // Reset KPI cards active state
+    document.querySelectorAll('#view-creatives-tracker .kpi-card').forEach(c => {
+      c.classList.remove('active');
+    });
+    const totalCard = document.getElementById('trackerKpiCardTotal');
+    if (totalCard) totalCard.classList.add('active');
+
+    renderCreativesTracker();
+    showToast('Tracker filters have been reset.');
   }
 
   // ==========================================================================
@@ -11145,6 +11493,13 @@
     formatRequestIdInput: formatRequestIdInput,
     getNextRequestId: getNextRequestId,
     showCustomConfirm: showCustomConfirm,
+    resetSalesFilters: resetSalesRequestsFilters,
+    resetTrackerFilters: resetCreativesTrackerFilters,
+    renderProgressTimeline: renderProgressTimeline,
+    renderRecentActivityFeed: renderRecentActivityFeed,
+    refreshRecentActivity: () => renderRecentActivityFeed(currentActivityFilter),
+    showTimelineTooltip: showTimelineTooltip,
+    hideTimelineTooltip: hideTimelineTooltip,
     getState: () => state,
 
     // KPI Cards Clickable & Viewable Public API (SPA + Multi-Page Aware)
@@ -11993,14 +12348,9 @@
 
     const btnResetSales = document.getElementById('btnResetSalesFilters');
     if (btnResetSales) {
-      btnResetSales.addEventListener('click', () => {
-        state.salesFilter = { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: getStoredRowsPerPage(), approvalTab: '' };
-        if (salesSearch) salesSearch.value = '';
-        ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep', 'salesFilterLocation'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '';
-        });
-        renderSalesRequests();
+      btnResetSales.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetSalesRequestsFilters();
       });
     }
 
@@ -12061,19 +12411,9 @@
 
     const btnResetTracker = document.getElementById('btnResetTrackerFilters');
     if (btnResetTracker) {
-      btnResetTracker.addEventListener('click', () => {
-        const myArtist = getLoggedInArtist();
-        state.trackerFilter = { search: '', projectStatus: '', designStatus: '', artist: myArtist || '', overdue: '', sortField: 'designDeadline', sortDir: 'asc', page: 1, perPage: 10 };
-        if (trackerSearch) trackerSearch.value = '';
-        ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterOverdue'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '';
-        });
-        const artEl = document.getElementById('trackerFilterArtist');
-        if (artEl) {
-          artEl.value = myArtist || '';
-        }
-        renderCreativesTracker();
+      btnResetTracker.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetCreativesTrackerFilters();
       });
     }
 
@@ -12207,6 +12547,24 @@
         renderSalesRequests();
       });
     }
+
+    // Recent Activity Tabs & Timeline Options
+    document.addEventListener('click', (e) => {
+      const actBtn = e.target.closest('#activityFilterTabs [data-act-filter]');
+      if (actBtn) {
+        e.preventDefault();
+        const filter = actBtn.getAttribute('data-act-filter');
+        renderRecentActivityFeed(filter);
+        return;
+      }
+
+      const optBtn = e.target.closest('#btnTimelineOptions');
+      if (optBtn) {
+        e.preventDefault();
+        showToast('Timeline timeframe: Active Production Week (Oct 19–25, 2026)', 'info');
+        return;
+      }
+    });
 
     // Topbar Deadline Alert Notification Drawer & Tab Switching
     document.addEventListener('click', (e) => {

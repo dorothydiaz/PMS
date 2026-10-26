@@ -119,7 +119,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <option value="30">30 rows</option>
                 </select>
               </div>
-              <button class="btn btn-secondary btn-sm" id="btnResetSalesFilters">Reset Filters</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnResetSalesFilters" onclick="if(window.SignDepotApp && window.SignDepotApp.resetSalesFilters) window.SignDepotApp.resetSalesFilters();">Reset Filters</button>
             </div>
           </div>
 

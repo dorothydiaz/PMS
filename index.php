@@ -142,29 +142,47 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
         </div>
       </div>
 
-      <!-- Panze Studio 3-Column Spotlight -->
+      <!-- Panze Studio Dashboard Spotlight Grid -->
       <div class="dashboard-panze-grid">
-        <!-- Left Column: "My Tasks" (Pastel Tinted Cards) -->
-        <div class="studio-card">
-          <div class="task-column-header">
-            <h3 style="font-size: 16px; font-weight: 800;">Active Tasks</h3>
-            <button class="circle-action-btn" id="btnPanzeAddTask" title="Add Task">+</button>
+        <!-- 1. Progress Timeline Card (Image 2) -->
+        <div class="studio-card progress-timeline-card">
+          <div class="task-column-header" style="margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="timeline-accent-bar"></span>
+              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0;">Progress timeline</h3>
+            </div>
+            <button class="circle-action-btn" id="btnTimelineOptions" title="Timeline Options" style="font-size: 14px; font-weight: 800; color: var(--text-muted);">⋮</button>
           </div>
 
-          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-            <button class="timeframe-btn active" style="font-size: 11px; padding: 4px 12px;">Active Queue</button>
-            <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-left: auto;">
-              <span class="badge badge-ongoing" id="panzeActiveTasksCountBadge">--</span>
-              <span>Tasks</span>
+          <!-- Highlight Subtitle & Legend Row -->
+          <div class="timeline-sub-row">
+            <div class="timeline-highlight-box">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="timeline-sparkle-icon">✨</span>
+                <span class="timeline-highlight-title" id="timelineHighlightTitle">Peak productivity on Wednesday</span>
+              </div>
+              <div class="timeline-highlight-subtitle" id="timelineHighlightSubtitle">Focus shifted to task completion</div>
+            </div>
+
+            <div class="timeline-legend">
+              <div class="timeline-legend-item">
+                <span class="legend-bar legend-bar-created"></span>
+                <span>Task created</span>
+              </div>
+              <div class="timeline-legend-item">
+                <span class="legend-bar legend-bar-completed"></span>
+                <span>Task completed</span>
+              </div>
             </div>
           </div>
 
-          <div id="panzeTasksCardList">
-            <!-- Dynamically populated task cards -->
+          <!-- SVG Progress Timeline Chart Container -->
+          <div class="timeline-chart-wrap" id="progressTimelineChartContainer">
+            <!-- Dynamically populated SVG timeline chart -->
           </div>
         </div>
 
-        <!-- Middle Column: "Projects Overview" (Donut Chart & Legend) -->
+        <!-- 2. Projects Overview (Donut Chart & Legend) -->
         <div class="studio-card" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div class="task-column-header">
             <div>
@@ -187,7 +205,37 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
           </div>
         </div>
 
-        <!-- Right Column: Artist Capacity Overview -->
+        <!-- 3. Recent Activity & Updates (Replaces Active Tasks) -->
+        <div class="studio-card recent-activity-card">
+          <div class="task-column-header" style="margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 style="font-size: 16px; font-weight: 800; margin: 0;">Recent Activity & Updates</h3>
+              <span class="live-pulse-badge">
+                <span class="pulse-dot"></span>
+                <span>Live</span>
+              </span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="circle-action-btn" id="btnRefreshActivity" onclick="window.SignDepotApp.refreshRecentActivity()" title="Refresh Feed">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              </button>
+              <button class="circle-action-btn" onclick="window.SignDepotApp.switchView('view-audit-trail')" title="View Full Audit Trail">↗</button>
+            </div>
+          </div>
+
+          <div class="activity-filter-pills" id="activityFilterTabs" style="display: flex; gap: 6px; margin-bottom: 14px;">
+            <button class="timeframe-btn active" data-act-filter="all" style="font-size: 11px; padding: 3px 10px;">All</button>
+            <button class="timeframe-btn" data-act-filter="orders" style="font-size: 11px; padding: 3px 10px;">Orders</button>
+            <button class="timeframe-btn" data-act-filter="creatives" style="font-size: 11px; padding: 3px 10px;">Creatives</button>
+            <button class="timeframe-btn" data-act-filter="security" style="font-size: 11px; padding: 3px 10px;">Security</button>
+          </div>
+
+          <div class="recent-activity-feed" id="recentActivityFeedList">
+            <!-- Dynamically populated activity items -->
+          </div>
+        </div>
+
+        <!-- 4. Artist Capacity Overview -->
         <div class="studio-card">
           <div class="task-column-header">
             <div>
