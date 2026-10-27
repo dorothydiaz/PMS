@@ -819,17 +819,100 @@ switch ($action) {
     case 'get_sales_reps':
         try {
             $stmt = $pdo->query("
-                SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' AND TRIM(name) != 'Shela'
+                SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' AND LOWER(TRIM(name)) != 'shela'
                 UNION
-                SELECT full_name AS name FROM users WHERE role = 'sales' AND full_name IS NOT NULL AND TRIM(full_name) != '' AND TRIM(full_name) != 'Shela'
-                UNION
-                SELECT DISTINCT sales_rep AS name FROM sales_requests WHERE sales_rep IS NOT NULL AND TRIM(sales_rep) != '' AND TRIM(sales_rep) != 'Shela'
+                SELECT full_name AS name FROM users WHERE role = 'sales' AND full_name IS NOT NULL AND TRIM(full_name) != '' AND LOWER(TRIM(full_name)) != 'shela'
                 ORDER BY name ASC
             ");
             $reps = array_values(array_unique(array_filter(array_map('trim', $stmt->fetchAll(PDO::FETCH_COLUMN)))));
-            $reps = array_values(array_filter($reps, function($r) { return strcasecmp(trim($r), 'Shela') !== 0; }));
             sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
             sendJsonResponse(['success' => true, 'data' => $reps]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'add_sales_rep':
+        try {
+            $data = !empty($bodyData) ? $bodyData : $_POST;
+            $name = trim($data['name'] ?? '');
+            if (empty($name)) {
+                sendJsonResponse(['success' => false, 'error' => 'Name cannot be empty'], 400);
+                return;
+            }
+            $stmt = $pdo->prepare("INSERT IGNORE INTO sales_reps (name) VALUES (?)");
+            $stmt->execute([$name]);
+
+            $stmtList = $pdo->query("SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
+            $reps = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
+            sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
+            sendJsonResponse(['success' => true, 'message' => 'Sales representative added', 'data' => $reps]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'delete_sales_rep':
+    case 'remove_sales_rep':
+        try {
+            $data = !empty($bodyData) ? $bodyData : $_POST;
+            $name = trim($data['name'] ?? $data['rep'] ?? $_GET['name'] ?? '');
+            if (empty($name)) {
+                sendJsonResponse(['success' => false, 'error' => 'Name cannot be empty'], 400);
+                return;
+            }
+            $stmt = $pdo->prepare("DELETE FROM sales_reps WHERE LOWER(TRIM(name)) = LOWER(?)");
+            $stmt->execute([$name]);
+
+            // Also cleanup if any sales request had it
+            $stmtReq = $pdo->prepare("UPDATE sales_requests SET sales_rep = 'Flora' WHERE LOWER(TRIM(sales_rep)) = LOWER(?)");
+            $stmtReq->execute([$name]);
+
+            $stmtList = $pdo->query("SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
+            $reps = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
+            sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
+            sendJsonResponse(['success' => true, 'message' => 'Sales representative removed', 'data' => $reps]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'add_artist':
+        try {
+            $data = !empty($bodyData) ? $bodyData : $_POST;
+            $name = trim($data['name'] ?? '');
+            if (empty($name)) {
+                sendJsonResponse(['success' => false, 'error' => 'Name cannot be empty'], 400);
+                return;
+            }
+            $stmt = $pdo->prepare("INSERT IGNORE INTO artists (name, active_tasks, availability) VALUES (?, 0, 'AVAILABLE')");
+            $stmt->execute([$name]);
+
+            $stmtList = $pdo->query("SELECT name FROM artists WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
+            $artists = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
+            sort($artists, SORT_NATURAL | SORT_FLAG_CASE);
+            sendJsonResponse(['success' => true, 'message' => 'Artist added', 'data' => $artists]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'delete_artist':
+    case 'remove_artist':
+        try {
+            $data = !empty($bodyData) ? $bodyData : $_POST;
+            $name = trim($data['name'] ?? $data['artist'] ?? $_GET['name'] ?? '');
+            if (empty($name)) {
+                sendJsonResponse(['success' => false, 'error' => 'Name cannot be empty'], 400);
+                return;
+            }
+            $stmt = $pdo->prepare("DELETE FROM artists WHERE LOWER(TRIM(name)) = LOWER(?)");
+            $stmt->execute([$name]);
+
+            $stmtList = $pdo->query("SELECT name FROM artists WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
+            $artists = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
+            sort($artists, SORT_NATURAL | SORT_FLAG_CASE);
+            sendJsonResponse(['success' => true, 'message' => 'Artist removed', 'data' => $artists]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }

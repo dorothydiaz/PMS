@@ -19,7 +19,7 @@
     'Aj', 'Alvic', 'Anna', 'Dave', 'Dona', 'Ed', 'Flora', 'Jade', 'Janet',
     'Jasmin', 'Jastine', 'Jay', 'Jen', 'Joana', 'Joie', 'Joyce', 'Kate',
     'Kim', 'Levi', 'Mae', 'Mariel', 'Mike', 'Pia', 'Seven', 'Sheena',
-    'Shella', 'Sol', 'Tim'
+    'Shella', 'Sol'
   ];
 
   const PROJECT_STATUSES = [
@@ -4819,13 +4819,11 @@
             } else {
               state.artists = [...DEFAULT_ARTISTS];
             }
-            if (parsed.salesReps) {
-              const loadedReps = parsed.salesReps
-                .filter(s => s && s.toLowerCase() !== 'shela')
+            if (parsed.salesReps && Array.isArray(parsed.salesReps) && parsed.salesReps.length > 0) {
+              state.salesReps = parsed.salesReps
+                .filter(s => s && s.toLowerCase() !== 'shela' && s.toLowerCase() !== 'tim')
                 .map(toTitleCase);
-              state.salesReps = Array.from(new Set([...DEFAULT_SALES_REPS, ...loadedReps]))
-                .filter(s => s && s.toLowerCase() !== 'shela')
-                .sort();
+              state.salesReps.sort();
             } else {
               state.salesReps = [...DEFAULT_SALES_REPS];
             }
@@ -4873,15 +4871,16 @@
         .then(res => {
           if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
             state.artists = res.data
-              .map(a => toTitleCase(a.name))
-              .filter(a => a !== 'Seven' && a !== 'Edrian');
-            if (!state.artists.includes('Dorothy')) {
-              state.artists.push('Dorothy');
-            }
-            state.artists.sort();
+              .map(a => toTitleCase(a.name || a))
+              .filter(a => a !== 'Seven' && a !== 'Edrian')
+              .sort();
             saveStateToStorage();
+            populateSalesFiltersDropdowns();
+            populateTrackerFiltersDropdowns();
             if (state.activeView === 'view-artist-workload') {
               renderArtistWorkload();
+            } else if (state.activeView === 'view-settings') {
+              renderSettings();
             }
           }
         })
@@ -4892,13 +4891,14 @@
         .then(res => {
           if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
             const reps = res.data
-              .filter(s => s && s.toLowerCase() !== 'shela')
+              .filter(s => s && s.toLowerCase() !== 'shela' && s.toLowerCase() !== 'tim')
               .map(toTitleCase);
-            state.salesReps = Array.from(new Set([...state.salesReps, ...reps]))
-              .filter(s => s && s.toLowerCase() !== 'shela')
-              .sort();
+            state.salesReps = reps.sort();
             saveStateToStorage();
             populateSalesFiltersDropdowns();
+            if (state.activeView === 'view-settings') {
+              renderSettings();
+            }
           }
         })
         .catch(e => console.warn('MySQL live sales reps fetch:', e));
@@ -7367,7 +7367,9 @@
         artistSelect.style.borderColor = '#10B981';
         artistSelect.style.color = '#065F46';
         artistSelect.style.fontWeight = '700';
-      } else if (artistSelect.children.length <= 1) {
+      } else {
+        const curVal = artistSelect.value;
+        artistSelect.innerHTML = '<option value="">All Artists</option>';
         state.artists.forEach(a => {
           const titleA = toTitleCase(a);
           const opt = document.createElement('option');
@@ -7375,26 +7377,30 @@
           opt.textContent = titleA;
           artistSelect.appendChild(opt);
         });
+        if (curVal) artistSelect.value = curVal;
       }
     }
 
     const modalArtistSelect = document.getElementById('trackerFormArtist');
     if (modalArtistSelect) {
-      if (modalArtistSelect.children.length === 0) {
-        state.artists.forEach(a => {
-          const titleA = toTitleCase(a);
-          const opt = document.createElement('option');
-          opt.value = titleA;
-          opt.textContent = titleA;
-          modalArtistSelect.appendChild(opt);
-        });
-      }
+      const curModalArt = modalArtistSelect.value;
+      modalArtistSelect.innerHTML = '<option value="">Select Artist...</option>';
+      state.artists.forEach(a => {
+        const titleA = toTitleCase(a);
+        const opt = document.createElement('option');
+        opt.value = titleA;
+        opt.textContent = titleA;
+        modalArtistSelect.appendChild(opt);
+      });
       if (myArtist) {
         modalArtistSelect.value = toTitleCase(myArtist);
+      } else if (curModalArt) {
+        modalArtistSelect.value = curModalArt;
       }
     }
 
     upgradeAllFormSelects();
+    syncAllFormDropdowns();
   }
 
   function resetCreativesTrackerFilters() {
@@ -10739,13 +10745,34 @@
     const inputAddArtist = document.getElementById('settingsNewArtistInput');
     if (btnAddArtist && inputAddArtist) {
       btnAddArtist.onclick = () => {
-        const val = inputAddArtist.value.trim();
+        const val = toTitleCase(inputAddArtist.value.trim());
         if (val && !state.artists.includes(val)) {
           state.artists.push(val);
+          state.artists.sort();
           inputAddArtist.value = '';
           saveStateToStorage();
           renderSettings();
+          populateSalesFiltersDropdowns();
+          populateTrackerFiltersDropdowns();
           showToast(`Artist "${val}" added.`);
+
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=add_artist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: val })
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success && res.data) {
+                state.artists = res.data;
+                saveStateToStorage();
+                populateSalesFiltersDropdowns();
+                populateTrackerFiltersDropdowns();
+              }
+            })
+            .catch(e => console.warn('add_artist API error:', e));
+          }
         }
       };
     }
@@ -10754,13 +10781,32 @@
     const inputAddSales = document.getElementById('settingsNewSalesInput');
     if (btnAddSales && inputAddSales) {
       btnAddSales.onclick = () => {
-        const val = inputAddSales.value.trim();
+        const val = toTitleCase(inputAddSales.value.trim());
         if (val && !state.salesReps.includes(val)) {
           state.salesReps.push(val);
+          state.salesReps.sort();
           inputAddSales.value = '';
           saveStateToStorage();
           renderSettings();
+          populateSalesFiltersDropdowns();
           showToast(`Sales representative "${val}" added.`);
+
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=add_sales_rep', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: val })
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success && res.data) {
+                state.salesReps = res.data;
+                saveStateToStorage();
+                populateSalesFiltersDropdowns();
+              }
+            })
+            .catch(e => console.warn('add_sales_rep API error:', e));
+          }
         }
       };
     }
@@ -12853,10 +12899,30 @@
         showToast('Must have at least one artist.', 'error');
         return;
       }
-      state.artists = state.artists.filter(a => a !== artist);
+      state.artists = state.artists.filter(a => a !== artist && a.toLowerCase() !== artist.toLowerCase());
       saveStateToStorage();
       renderSettings();
+      populateSalesFiltersDropdowns();
+      populateTrackerFiltersDropdowns();
       showToast(`Removed artist ${artist}.`);
+
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=delete_artist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: artist })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            state.artists = res.data;
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+            populateTrackerFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('delete_artist API error:', e));
+      }
     },
     removeSales: (rep) => {
       if (state.salesReps.length <= 1) {
@@ -12868,6 +12934,23 @@
       renderSettings();
       populateSalesFiltersDropdowns();
       showToast(`Removed sales rep ${rep}.`);
+
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=delete_sales_rep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: rep })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            state.salesReps = res.data;
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('delete_sales_rep API error:', e));
+      }
     }
   };
 
