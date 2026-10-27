@@ -382,13 +382,7 @@ switch ($action) {
     case 'get_all_requests':
         // For client-side dataset initialization if requested
         try {
-            $currUser = getCurrentUser();
-            if ($currUser && $currUser['role'] === 'artist' && !empty($currUser['assigned_artist'])) {
-                $stmt = $pdo->prepare("SELECT * FROM sales_requests WHERE LOWER(artist) = LOWER(:assignedArtist) ORDER BY id DESC");
-                $stmt->execute([':assignedArtist' => $currUser['assigned_artist']]);
-            } else {
-                $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC");
-            }
+            $stmt = $pdo->query("SELECT * FROM sales_requests ORDER BY id DESC");
             $rows = $stmt->fetchAll();
             $formatted = array_map(function($r) {
                 return [
