@@ -25,7 +25,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="section-header-row">
             <div class="section-title-wrap">
               <h2>Sales Requests Management</h2>
-              <p>Click <strong>+ Add Request</strong> to insert a new row. Fill in the fields and click <strong>✓</strong> to save or <strong>✕</strong> to cancel. Existing rows can be edited inline.</p>
+              <p>Click <strong>+ Add Request</strong> to open the new request modal. Existing requests can also be edited directly inline or via the full edit dialog.</p>
             </div>
             <div class="section-actions">
               <?php if (hasPermission('sales-requests', 'c')): ?>

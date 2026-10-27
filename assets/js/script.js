@@ -6877,7 +6877,7 @@
       const draftHTML = state.draftSalesRequest ? renderDraftSalesRowHTML(state.draftSalesRequest) : '';
 
       if (pagedList.length === 0 && !draftHTML) {
-        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:32px 20px; color:var(--text-muted); font-size:13px;">No sales requests match the current filters. Click <strong>+ Add Request</strong> above to add a new row directly to this table!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:32px 20px; color:var(--text-muted); font-size:13px;">No sales requests match the current filters. Click <strong>+ Add Request</strong> above to create a new sales request!</td></tr>`;
       } else {
         const isSuper = isCurrentUserSuperAdmin();
         const rowsHTML = pagedList.map(r => `
@@ -11182,9 +11182,14 @@
 
   function openNewSalesRequestModal() {
     const form = document.getElementById('salesRequestForm');
-    if (form) form.reset();
-    document.getElementById('salesFormId').value = '';
-    document.getElementById('salesModalTitle').textContent = 'New Sales Request';
+    if (form) {
+      form.reset();
+      form.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+    }
+    const idField = document.getElementById('salesFormId');
+    if (idField) idField.value = '';
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = 'New Sales Request';
 
     // Auto-generate sequential Request ID with separator dash (e.g. LR-26-2104 / LR-26-2105)
     const nextId = getNextRequestId();
@@ -11207,6 +11212,11 @@
     const joInput = document.getElementById('salesFormJo');
     if (joInput) joInput.value = '';
 
+    const orderDateInput = document.getElementById('salesFormOrderDate');
+    if (orderDateInput) {
+      orderDateInput.value = new Date().toISOString().split('T')[0];
+    }
+
     // Default design deadline (+3 days from today)
     const deadlineInput = document.getElementById('salesFormDeadline');
     if (deadlineInput && !deadlineInput.value) {
@@ -11215,11 +11225,44 @@
       deadlineInput.value = d.toISOString().split('T')[0];
     }
 
+    // Default production due (+5 days from today)
+    const releasingInput = document.getElementById('salesFormReleasing');
+    if (releasingInput && !releasingInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 5);
+      releasingInput.value = d.toISOString().split('T')[0];
+    }
+
     const locInput = document.getElementById('salesFormLocation');
     if (locInput) locInput.value = 'Indoor';
 
+    const prioInput = document.getElementById('salesFormPriority');
+    if (prioInput) prioInput.value = 'Normal';
+
+    const appInput = document.getElementById('salesFormClientApproval');
+    if (appInput) appInput.value = 'Pending Approval';
+
+    const relModeInput = document.getElementById('salesFormRelMode');
+    if (relModeInput) relModeInput.value = 'Pickup';
+
+    const fileSentInput = document.getElementById('salesFormFileSent');
+    if (fileSentInput) fileSentInput.value = 'File Sent';
+
     populateSalesFiltersDropdowns();
-    document.getElementById('salesModal').classList.add('show');
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => {
+        if (joInput) {
+          joInput.focus();
+        } else if (reqInput) {
+          reqInput.focus();
+        }
+      }, 100);
+    }
   }
   window.openNewSalesRequestModal = openNewSalesRequestModal;
 
@@ -11287,56 +11330,7 @@
   }
 
   function addNewSalesRequestRow() {
-    if (state.draftSalesRequest) {
-      const projEl = document.getElementById('draftProjectName');
-      if (projEl) {
-        projEl.focus();
-        projEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-      showToast('A new request row is already active. Fill in all cells and click ✓ to Save or ✕ to Cancel.', 'info');
-      return;
-    }
-
-    const nextReqId = getNextRequestId();
-
-    state.draftSalesRequest = {
-      requestId: nextReqId,
-      joNumber: '',
-      orderDate: new Date().toISOString().substring(0, 10),
-      salesRep: '',
-      client: '',
-      projectName: '',
-      artist: '',
-      designDeadline: '',
-      releasingDate: '',
-      fileSent: '',
-      completeAddress: '',
-      location: '',
-      releasingMode: '',
-      contactPerson: '',
-      contactNumber: '',
-      projectStatus: 'On-going',
-      clientApproval: 'Pending Approval',
-      priority: 'Normal',
-      remarks: ''
-    };
-
-    // Ensure we are on page 1 so draft row is visible at the very top
-    state.salesFilter.page = 1;
-
-    // Render sales requests table with the new draft row
-    renderSalesRequests();
-
-    // Focus JO Number input
-    setTimeout(() => {
-      const joInput = document.getElementById('draftJoNumber');
-      if (joInput) {
-        joInput.focus();
-        joInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, 100);
-
-    showToast('New row ready! All details must be filled up before saving.');
+    openNewSalesRequestModal();
   }
   window.addNewSalesRequestRow = addNewSalesRequestRow;
 
@@ -11537,6 +11531,7 @@
 
     setVal('salesFormReqId', rec.requestId);
     setVal('salesFormJo', rec.joNumber);
+    setVal('salesFormOrderDate', rec.orderDate || rec.timestamp || '');
     setVal('salesFormProject', rec.projectName);
     setVal('salesFormClient', rec.client);
     setVal('salesFormLocation', rec.location || 'Indoor');
@@ -11926,10 +11921,13 @@
         const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
         const address = document.getElementById('salesFormAddress').value.trim();
         const nowStamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+        const orderDateEl = document.getElementById('salesFormOrderDate');
+        const orderDate = (orderDateEl && orderDateEl.value) ? orderDateEl.value.trim() : nowStamp.substring(0, 10);
 
         const requiredChecks = [
           { val: reqId, id: 'salesFormReqId', name: 'Request ID' },
           { val: jo, id: 'salesFormJo', name: 'JO Number' },
+          ...(orderDateEl ? [{ val: orderDate, id: 'salesFormOrderDate', name: 'Date Encoded' }] : []),
           { val: salesRep, id: 'salesFormSalesRep', name: 'Sales Representative' },
           { val: client, id: 'salesFormClient', name: 'Client Name' },
           { val: project, id: 'salesFormProject', name: 'Project Name' },
@@ -11980,11 +11978,13 @@
           return;
         }
 
+        let newRec = null;
         if (id) {
           const rec = state.requests.find(r => r.id === id);
           if (rec) {
             rec.requestId = reqId;
             rec.joNumber = jo || 'N/A';
+            rec.orderDate = orderDate || rec.orderDate;
             rec.projectName = project || 'N/A';
             rec.client = client || 'N/A';
             rec.artist = artist || 'N/A';
@@ -12000,6 +12000,7 @@
             rec.contactNumber = contactNumber;
             rec.completeAddress = address;
             rec.dateUpdated = nowStamp;
+            rec.timestamp = orderDate || rec.timestamp;
             showToast(`Sales request ${reqId} updated.`);
             if (window.PMS_API_URL) {
               fetch(window.PMS_API_URL + '?action=update_request', {
@@ -12010,7 +12011,7 @@
             }
           }
         } else {
-          const newRec = {
+          newRec = {
             id: `req-${Date.now()}`,
             requestId: reqId,
             joNumber: jo || 'N/A',
@@ -12020,7 +12021,7 @@
             salesRep: salesRep || 'N/A',
             inCharge: toTitleCase(salesRep),
             drawnBy: toTitleCase(artist),
-            orderDate: nowStamp.substring(0, 10),
+            orderDate: orderDate || nowStamp.substring(0, 10),
             designDeadline: deadline || 'N/A',
             releasingDate: releasingDate || deadline || 'N/A',
             releasingMode: mode,
@@ -12044,7 +12045,7 @@
             remarks: 'N/A',
             month: 'October 2026',
             completionDate: null,
-            timestamp: nowStamp.substring(0, 10),
+            timestamp: orderDate || nowStamp.substring(0, 10),
             dateUpdated: nowStamp
           };
           state.requests.unshift(newRec);
@@ -12053,13 +12054,40 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(newRec)
-            }).catch(err => console.warn('MySQL create sync:', err));
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success) {
+                if (res.id) newRec.id = res.id;
+                if (res.requestId && res.requestId !== newRec.requestId) {
+                  newRec.requestId = res.requestId;
+                  if (document.getElementById('salesRequestsTableBody')) {
+                    renderSalesRequests();
+                  }
+                }
+              }
+            })
+            .catch(err => console.warn('MySQL create sync:', err));
           }
+          showToast(`Request ${reqId} created successfully!`, 'success');
         }
 
         saveStateToStorage();
         document.getElementById('salesModal').classList.remove('show');
         renderCurrentView(state.activeView);
+        if (document.getElementById('salesRequestsTableBody')) {
+          renderSalesRequests();
+          setTimeout(() => {
+            const targetId = id || (newRec && newRec.id);
+            if (targetId) {
+              const row = document.querySelector(`tr[data-req-id="${targetId}"]`);
+              if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                row.classList.add('table-row-new-entry');
+              }
+            }
+          }, 120);
+        }
       });
     }
 
@@ -13123,8 +13151,8 @@
 
     const handleNewRequestTrigger = (e) => {
       if (e) e.preventDefault();
-      if (document.getElementById('salesRequestsTableBody')) {
-        addNewSalesRequestRow();
+      if (document.getElementById('salesModal')) {
+        openNewSalesRequestModal();
       } else {
         const pagesPrefix = window.location.pathname.includes('/pages/') ? './' : './pages/';
         window.location.href = pagesPrefix + 'sales-requests.php?action=add_new';
@@ -13164,10 +13192,10 @@
       }
     });
 
-    // Auto-trigger new row if navigated from external page with ?action=add_new
-    if (window.location.search.includes('action=add_new') && document.getElementById('salesRequestsTableBody')) {
+    // Auto-trigger new request modal if navigated from external page with ?action=add_new
+    if (window.location.search.includes('action=add_new')) {
       setTimeout(() => {
-        addNewSalesRequestRow();
+        openNewSalesRequestModal();
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }

@@ -5,7 +5,7 @@
 ?>
 <!-- MODAL: ADD / EDIT SALES REQUEST -->
 <div class="modal-backdrop" id="salesModal">
-  <div class="modal-container">
+  <div class="modal-container" style="max-width: 740px;">
     <div class="modal-header">
       <h3 class="modal-title" id="salesModalTitle">New Sales Request</h3>
       <button class="modal-close-btn" data-close-modal="salesModal">
@@ -26,6 +26,10 @@
             <input type="text" class="form-control" id="salesFormJo" placeholder="e.g. P261001357" required>
           </div>
           <div class="form-group">
+            <label class="form-label required">Date Encoded (Timestamp)</label>
+            <input type="date" class="form-control" id="salesFormOrderDate" required>
+          </div>
+          <div class="form-group">
             <label class="form-label required">Sales Representative</label>
             <select class="form-control" id="salesFormSalesRep" required>
               <option value="">Select Sales Rep...</option>
@@ -34,6 +38,12 @@
           <div class="form-group">
             <label class="form-label required">Client Name</label>
             <input type="text" class="form-control" id="salesFormClient" placeholder="Company or Client" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Assigned Artist</label>
+            <select class="form-control" id="salesFormArtist" required>
+              <option value="">Select Artist...</option>
+            </select>
           </div>
           <div class="form-group col-span-2">
             <label class="form-label required">Project Name</label>
@@ -46,12 +56,6 @@
           <div class="form-group">
             <label class="form-label required">Production Due</label>
             <input type="date" class="form-control" id="salesFormReleasing" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label required">Assigned Artist</label>
-            <select class="form-control" id="salesFormArtist" required>
-              <option value="">Select Artist...</option>
-            </select>
           </div>
           <div class="form-group">
             <label class="form-label required">Priority Level</label>
