@@ -22,8 +22,8 @@
             <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Auto-generated sequential ID with separator dash (e.g. LR-26-2104)</div>
           </div>
           <div class="form-group">
-            <label class="form-label">JO Number</label>
-            <input type="text" class="form-control" id="salesFormJo" placeholder="e.g. P261001357">
+            <label class="form-label required">JO Number</label>
+            <input type="text" class="form-control" id="salesFormJo" placeholder="e.g. P261001357" required>
           </div>
           <div class="form-group">
             <label class="form-label required">Sales Representative</label>
@@ -44,57 +44,77 @@
             <input type="date" class="form-control" id="salesFormDeadline" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Production Due</label>
-            <input type="date" class="form-control" id="salesFormReleasing">
+            <label class="form-label required">Production Due</label>
+            <input type="date" class="form-control" id="salesFormReleasing" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Assigned Artist</label>
-            <select class="form-control" id="salesFormArtist"></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Priority Level</label>
-            <select class="form-control" id="salesFormPriority">
-              <option value="Normal">Normal</option>
-              <option value="Rush">Rush</option>
-              <option value="High">High</option>
-              <option value="Low">Low</option>
+            <label class="form-label required">Assigned Artist</label>
+            <select class="form-control" id="salesFormArtist" required>
+              <option value="">Select Artist...</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Releasing Mode</label>
-            <select class="form-control" id="salesFormRelMode">
+            <label class="form-label required">Priority Level</label>
+            <select class="form-control" id="salesFormPriority" required>
+              <option value="">Select Priority...</option>
+              <option value="Low">Low</option>
+              <option value="Normal" selected>Normal</option>
+              <option value="Rush">Rush</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Mode of Releasing</label>
+            <select class="form-control" id="salesFormRelMode" required>
+              <option value="">Select Mode of Releasing...</option>
               <option value="Install">Install</option>
               <option value="Deliver">Deliver</option>
               <option value="Pickup">Pickup</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label required">Location / Environment</label>
+            <label class="form-label required">Placement</label>
             <select class="form-control" id="salesFormLocation" required>
+              <option value="">Select Placement...</option>
               <option value="Indoor">Indoor</option>
               <option value="Outdoor">Outdoor</option>
               <option value="Indoor & Outdoor">Indoor & Outdoor</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">File Sent Status</label>
-            <select class="form-control" id="salesFormFileSent">
+            <label class="form-label required">File Status</label>
+            <select class="form-control" id="salesFormFileSent" required>
+              <option value="">Select File Status...</option>
               <option value="File Sent">File Sent</option>
-              <option value="Pending">Pending</option>
               <option value="To Follow">To Follow</option>
+              <option value="Incomplete">Incomplete</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Contact Person</label>
-            <input type="text" class="form-control" id="salesFormContactPerson" placeholder="Full name">
+            <label class="form-label required">Client Approval</label>
+            <select class="form-control" id="salesFormClientApproval" required>
+              <option value="">Select Approval Status...</option>
+              <option value="Pending Approval" selected>Pending Approval</option>
+              <option value="On-going">On-going</option>
+              <option value="For Review">For Review</option>
+              <option value="Revising">Revising</option>
+              <option value="Completed">Completed</option>
+              <option value="Released">Released</option>
+              <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+              <option value="Onhold">Onhold</option>
+              <option value="Approved">Approved</option>
+            </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Contact Number</label>
-            <input type="text" class="form-control" id="salesFormContactNumber" placeholder="e.g. 0917 123 4567">
+            <label class="form-label required">Contact Person</label>
+            <input type="text" class="form-control" id="salesFormContactPerson" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Contact Number</label>
+            <input type="text" class="form-control" id="salesFormContactNumber" placeholder="e.g. 0917 123 4567" required>
           </div>
           <div class="form-group col-span-2">
-            <label class="form-label">Complete Delivery/Installation Address</label>
-            <input type="text" class="form-control" id="salesFormAddress" placeholder="Full address">
+            <label class="form-label required">Complete Delivery/Installation Address</label>
+            <input type="text" class="form-control" id="salesFormAddress" placeholder="Full address" required>
           </div>
         </div>
       </div>
@@ -136,46 +156,47 @@
             <input type="date" class="form-control" id="trackerFormDeadline" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Artist Head Approval</label>
+            <label class="form-label">Head Approval</label>
             <select class="form-control" id="trackerFormHeadApproval">
               <option value="Approved">Approved</option>
-              <option value="Pending">Pending</option>
-              <option value="Needs Revision">Needs Revision</option>
+              <option value="Pending" selected>Pending</option>
+              <option value="Rejected">Rejected</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Project Status</label>
             <select class="form-control" id="trackerFormProjectStatus">
-              <option value="Pending">Pending</option>
-              <option value="On-going">On-going</option>
-              <option value="Approved">Approved</option>
-              <option value="For Review">For Review</option>
-              <option value="Revising">Revising</option>
               <option value="Completed">Completed</option>
-              <option value="On Hold">On Hold</option>
+              <option value="On-going" selected>On-going</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Design Status</label>
             <select class="form-control" id="trackerFormDesignStatus">
-              <option value="Not Started">Not Started</option>
-              <option value="In Progress">In Progress</option>
-              <option value="For Review">For Review</option>
+              <option value="On Queue" selected>On Queue</option>
+              <option value="On-hold">On-hold</option>
+              <option value="Incomplete Details">Incomplete Details</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="For Approval Design">For Approval Design</option>
+              <option value="Design Approved">Design Approved</option>
+              <option value="Sent to AE">Sent to AE</option>
+              <option value="Sent to Prod">Sent to Prod</option>
+              <option value="Cancelled">Cancelled</option>
               <option value="Revising">Revising</option>
-              <option value="Submitted">Submitted</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Standard Count</label>
+            <label class="form-label">Standard</label>
             <input type="number" class="form-control" id="trackerFormStd" min="0" value="1">
           </div>
           <div class="form-group">
-            <label class="form-label">Printing Count</label>
-            <input type="number" class="form-control" id="trackerFormPrt" min="0" value="0">
+            <label class="form-label">Special</label>
+            <input type="number" class="form-control" id="trackerFormSpc" min="0" value="0">
           </div>
           <div class="form-group">
-            <label class="form-label">Special Count</label>
-            <input type="number" class="form-control" id="trackerFormSpc" min="0" value="0">
+            <label class="form-label">Printing</label>
+            <input type="number" class="form-control" id="trackerFormPrt" min="0" value="0">
           </div>
           <div class="form-group">
             <label class="form-label">Revision Count</label>

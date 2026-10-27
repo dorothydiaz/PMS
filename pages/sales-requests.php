@@ -76,36 +76,45 @@ require_once __DIR__ . '/includes/sidebar.php';
               <input type="search" name="q_orders" class="filter-input" id="salesSearchInput" placeholder="Search orders..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 220px;">
               <select class="filter-input" id="salesFilterPriority">
                 <option value="">All Priorities</option>
-                <option value="Rush">Rush</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
+                <option value="Normal">Normal</option>
+                <option value="Rush">Rush</option>
               </select>
               <select class="filter-input" id="salesFilterApproval">
                 <option value="">All Approvals</option>
+                <option value="On-going">On-going</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+                <option value="Released">Released</option>
+                <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+                <option value="Onhold">Onhold</option>
+                <option value="Pending Approval">Pending Approval</option>
                 <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Revision Requested">Revision Requested</option>
               </select>
               <select class="filter-input" id="salesFilterLocation">
-                <option value="">All Locations</option>
+                <option value="">All Placements</option>
+                <option value="N/A">N/A (Blank)</option>
                 <option value="Indoor">Indoor</option>
                 <option value="Outdoor">Outdoor</option>
                 <option value="Indoor & Outdoor">Indoor & Outdoor</option>
               </select>
               <select class="filter-input" id="salesFilterFileSent">
-                <option value="">File Sent Status</option>
-                <option value="Sent">File Sent</option>
-                <option value="Pending">File Pending</option>
+                <option value="">All File Statuses</option>
+                <option value="N/A">N/A (Blank)</option>
+                <option value="File Sent">File Sent</option>
+                <option value="To Follow">To Follow</option>
+                <option value="Incomplete">Incomplete</option>
               </select>
               <select class="filter-input" id="salesFilterSalesRep">
                 <option value="">All Sales Reps</option>
               </select>
               <select class="filter-input" id="salesFilterDeadline" title="Filter by Deadline Status">
                 <option value="">All Deadlines</option>
-                <option value="overdue">🔴 Past Due</option>
-                <option value="today">🟠 Due Today</option>
-                <option value="soon">🟡 Almost Due (48h)</option>
+                <option value="overdue">Past Due</option>
+                <option value="today">Due Today</option>
+                <option value="soon">Almost Due (48h)</option>
+                <option value="ontrack">On Track</option>
               </select>
             </div>
             <div class="filter-group">
@@ -128,25 +137,23 @@ require_once __DIR__ . '/includes/sidebar.php';
             <table class="data-table">
               <thead>
                 <tr>
-                  <th data-sort="requestId" title="Request ID">Req ID</th>
-                  <th data-sort="joNumber" title="Job Order Number">JO #</th>
-                  <th data-sort="orderDate" title="Order Intake Date">Order Date</th>
-                  <th data-sort="projectName" title="Project Name (Click to edit)">Project Name</th>
-                  <th data-sort="client" title="Client / Company (Click to edit)">Client</th>
+                  <th data-sort="requestId" title="Request ID">Request ID</th>
+                  <th data-sort="joNumber" title="Job Order Number">JO Number</th>
+                  <th data-sort="orderDate" title="Timestamp (Date Encoded)">Timestamp (Date Encoded)</th>
                   <th data-sort="salesRep" title="Sales Representative">Sales Rep</th>
+                  <th data-sort="client" title="Client / Company">Client</th>
+                  <th data-sort="projectName" title="Project Name">Project Name</th>
                   <th data-sort="artist" title="Assigned Artist">Artist</th>
-                  <th data-sort="location" title="Environment / Location">Location</th>
-                  <th data-sort="releasingMode" title="Mode of Releasing">Rel Mode</th>
-                  <th data-sort="designDeadline" title="Design Drafting Deadline">Deadline</th>
+                  <th data-sort="designDeadline" title="Design Deadline">Design Deadline</th>
                   <th data-sort="releasingDate" title="Production Due Date">Prod Due</th>
-                  <th data-sort="fileSent" title="Artwork Sent Status">File Sent</th>
-                  <th data-sort="projectStatus" title="Overall Project Status">Status</th>
-                  <th data-sort="clientApproval" title="Client Approval State">Approval</th>
-                  <th data-sort="priority" title="Production Priority Level">Priority</th>
+                  <th data-sort="fileSent" title="File Status">File Status</th>
+                  <th data-sort="completeAddress" title="Delivery or Installation Address">Address</th>
+                  <th data-sort="location" title="Placement">Placement</th>
+                  <th data-sort="releasingMode" title="Mode of Releasing">Mode of Releasing</th>
                   <th data-sort="contactPerson" title="Client Contact Person">Contact Person</th>
-                  <th data-sort="contactNumber" title="Contact Mobile / Phone">Contact #</th>
-                  <th data-sort="completeAddress" title="Delivery or Installation Address">Delivery Address</th>
-                  <th data-sort="remarks" title="Production Notes & Remarks">Remarks</th>
+                  <th data-sort="contactNumber" title="Contact Number">Contact Number</th>
+                  <th data-sort="clientApproval" title="Client Approval State">Client Approval</th>
+                  <th data-sort="priority" title="Priority Level">Priority Level</th>
                   <th class="no-sort">Actions</th>
                 </tr>
               </thead>

@@ -278,9 +278,10 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
             </select>
             <select class="filter-input" id="dashboardFilterDeadline" title="Filter by Deadline Status">
               <option value="">All Deadlines</option>
-              <option value="overdue">🔴 Past Due</option>
-              <option value="today">🟠 Due Today</option>
-              <option value="soon">🟡 Almost Due (48h)</option>
+              <option value="overdue">Past Due</option>
+              <option value="today">Due Today</option>
+              <option value="soon">Almost Due (48h)</option>
+              <option value="ontrack">On Track</option>
             </select>
           </div>
           <div class="filter-group">

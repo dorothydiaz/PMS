@@ -105,34 +105,73 @@ require_once __DIR__ . '/includes/sidebar.php';
           <!-- Tracker Filters -->
           <div class="filter-bar">
             <div class="filter-group">
-              <input type="search" name="q_tasks" class="filter-input" id="trackerSearchInput" placeholder="Filter tasks..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 200px;">
+              <input type="search" name="q_tasks" class="filter-input" id="trackerSearchInput" placeholder="Filter tasks..." autocomplete="off" data-lpignore="true" data-form-type="other" style="width: 175px;">
+              
+              <!-- Date Filter Group -->
+              <div class="filter-date-wrap">
+                <select class="filter-input" id="trackerFilterDateColumn" title="Target Date Field">
+                  <option value="orderDate">Date: Timestamp</option>
+                  <option value="designDeadline">Date: Deadline</option>
+                  <option value="dateUpdated">Date: Updated</option>
+                  <option value="any">Date: Any Field</option>
+                </select>
+                <select class="filter-input" id="trackerFilterDatePreset" title="Date Range Preset">
+                  <option value="">All Dates</option>
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="this_week">This Week</option>
+                  <option value="this_month">This Month</option>
+                  <option value="custom">Specific Date...</option>
+                </select>
+                <input type="date" class="filter-input" id="trackerFilterDateCustom" style="display: none; width: 135px; padding: 5px 8px;" title="Pick Specific Date">
+              </div>
+
               <select class="filter-input" id="trackerFilterProjectStatus">
                 <option value="">All Project Statuses</option>
-                <option value="Pending">Pending</option>
-                <option value="On-going">On-going</option>
-                <option value="Approved">Approved</option>
-                <option value="For Review">For Review</option>
-                <option value="Revising">Revising</option>
                 <option value="Completed">Completed</option>
-                <option value="On Hold">On Hold</option>
+                <option value="On-going">On-going</option>
               </select>
               <select class="filter-input" id="trackerFilterDesignStatus">
                 <option value="">All Design Statuses</option>
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="For Review">For Review</option>
+                <option value="On Queue">On Queue</option>
+                <option value="On-hold">On-hold</option>
+                <option value="Incomplete Details">Incomplete Details</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="For Approval Design">For Approval Design</option>
+                <option value="Design Approved">Design Approved</option>
+                <option value="Sent to AE">Sent to AE</option>
+                <option value="Sent to Prod">Sent to Prod</option>
+                <option value="Cancelled">Cancelled</option>
                 <option value="Revising">Revising</option>
-                <option value="Submitted">Submitted</option>
+                <option value="Completed">Completed</option>
               </select>
               <select class="filter-input" id="trackerFilterArtist">
                 <option value="">All Artists</option>
               </select>
               <select class="filter-input" id="trackerFilterOverdue" title="Filter by Deadline Status">
                 <option value="">All Deadlines</option>
-                <option value="overdue">🔴 Past Due</option>
-                <option value="today">🟠 Due Today</option>
-                <option value="soon">🟡 Almost Due (48h)</option>
-                <option value="ontime">🟢 On Track</option>
+                <option value="overdue">Past Due</option>
+                <option value="today">Due Today</option>
+                <option value="soon">Almost Due (48h)</option>
+                <option value="ontime">On Track</option>
+              </select>
+
+              <!-- Quick Sort Dropdown -->
+              <select class="filter-input" id="trackerSortDropdown" title="Sort Table Rows">
+                <option value="requestId_desc" selected>Sort: Request ID (Latest to Old)</option>
+                <option value="requestId_asc">Sort: Request ID (Old to Latest)</option>
+                <option value="projectName_asc">Sort: Project Name (A → Z)</option>
+                <option value="projectName_desc">Sort: Project Name (Z → A)</option>
+                <option value="artist_asc">Sort: Artist (A → Z)</option>
+                <option value="artist_desc">Sort: Artist (Z → A)</option>
+                <option value="salesRep_asc">Sort: Sales Rep (A → Z)</option>
+                <option value="salesRep_desc">Sort: Sales Rep (Z → A)</option>
+                <option value="designStatus_asc">Sort: Design Status (A → Z)</option>
+                <option value="headApproval_asc">Sort: Head Approval (A → Z)</option>
+                <option value="designDeadline_asc">Sort: Deadline (Earliest)</option>
+                <option value="designDeadline_desc">Sort: Deadline (Latest)</option>
+                <option value="revisionCount_desc">Sort: Revisions (High → Low)</option>
+                <option value="dateUpdated_desc">Sort: Date Updated (Newest)</option>
               </select>
             </div>
             <div class="filter-group">
@@ -155,20 +194,22 @@ require_once __DIR__ . '/includes/sidebar.php';
             <table class="data-table">
               <thead>
                 <tr>
-                  <th data-sort="requestId">Req ID</th>
-                  <th data-sort="artist">Artist</th>
-                  <th data-sort="projectName">Project Name (Editable)</th>
-                  <th data-sort="designDeadline">Deadline</th>
-                  <th data-sort="headApproval">Head Approval</th>
-                  <th data-sort="countStandard" title="Standard Count">Std</th>
-                  <th data-sort="countPrinting" title="Printing Count">Prt</th>
-                  <th data-sort="countSpecial" title="Special Count">Spc</th>
-                  <th data-sort="projectStatus">Project Status</th>
-                  <th data-sort="designStatus">Design Status</th>
-                  <th>Overdue</th>
-                  <th data-sort="revisionCount">Rev#</th>
-                  <th>Remarks (Editable)</th>
-                  <th data-sort="salesRep">Sales</th>
+                  <th data-sort="requestId" title="Click to sort: Latest to Old / Old to Latest">Request ID</th>
+                  <th data-sort="artist" title="Click to sort alphabetically (A-Z / Z-A)">Artist</th>
+                  <th data-sort="projectName" title="Click to sort alphabetically (A-Z / Z-A)">Project Name</th>
+                  <th data-sort="designDeadline" title="Click to sort by Deadline Date">Design Deadline</th>
+                  <th data-sort="headApproval" title="Click to sort alphabetically">Head Approval</th>
+                  <th data-sort="countStandard" title="Click to sort numerically">Standard</th>
+                  <th data-sort="countSpecial" title="Click to sort numerically">Special</th>
+                  <th data-sort="countPrinting" title="Click to sort numerically">Printing</th>
+                  <th data-sort="projectStatus" title="Click to sort alphabetically">Project Status</th>
+                  <th data-sort="designStatus" title="Click to sort alphabetically">Design Status</th>
+                  <th data-sort="deadlineStatus" title="Click to sort by Overdue severity">Overdue Indicator</th>
+                  <th data-sort="revisionCount" title="Click to sort numerically">Revision Count</th>
+                  <th data-sort="remarks" title="Click to sort alphabetically">Remarks</th>
+                  <th data-sort="salesRep" title="Click to sort alphabetically (A-Z / Z-A)">Sales</th>
+                  <th data-sort="orderDate" title="Click to sort by Timestamp">Timestamp</th>
+                  <th data-sort="dateUpdated" title="Click to sort by Date Updated">Date Updated</th>
                   <th class="no-sort">Actions</th>
                 </tr>
               </thead>

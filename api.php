@@ -25,11 +25,13 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 function normalizeDesignStatus($designStatus, $projectStatus = '') {
     $ds = trim((string)$designStatus);
     if ($ds === '' || $ds === '[object Object]' || $ds === '{}') {
-        if ($projectStatus === 'Completed') return 'Submitted';
-        if ($projectStatus === 'On-going') return 'In Progress';
-        return 'Not Started';
+        if ($projectStatus === 'Completed') return 'Completed';
+        if ($projectStatus === 'On-going') return 'Ongoing';
+        return 'On Queue';
     }
-    if ($ds === 'Completed') return 'Submitted';
+    if ($ds === 'Submitted') return ($projectStatus === 'Completed') ? 'Completed' : 'Sent to AE';
+    if ($ds === 'In Progress') return 'Ongoing';
+    if ($ds === 'Not Started') return 'On Queue';
     return $ds;
 }
 
@@ -235,7 +237,9 @@ switch ($action) {
                 'countPrinting' => (int)$r['count_printing'],
                 'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                 'revisionCount' => (int)$r['revision_count'],
-                'remarks' => $r['remarks']
+                'remarks' => $r['remarks'],
+                'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
+                'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
             ];
             sendJsonResponse(['success' => true, 'data' => $formatted]);
         } catch (Exception $e) {
@@ -356,7 +360,9 @@ switch ($action) {
                     'countPrinting' => (int)$r['count_printing'],
                     'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
-                    'remarks' => $r['remarks']
+                    'remarks' => $r['remarks'],
+                    'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
+                    'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
                 ];
             }, $rows);
 
@@ -411,7 +417,9 @@ switch ($action) {
                     'countPrinting' => (int)$r['count_printing'],
                     'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
-                    'remarks' => $r['remarks']
+                    'remarks' => $r['remarks'],
+                    'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
+                    'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
                 ];
             }, $rows);
 
@@ -480,12 +488,16 @@ switch ($action) {
             }
 
             if ($col === 'design_status') {
-                if ($value === 'Completed') $value = 'Submitted';
-                if ($value === '' || $value === '[object Object]' || $value === '{}') $value = 'Not Started';
+                if ($value === '' || $value === '[object Object]' || $value === '{}') $value = 'On Queue';
             }
 
-            $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
-            $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+            try {
+                $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
+                $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+            } catch (Exception $e) {
+                $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
+                $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+            }
 
             sendJsonResponse(['success' => true, 'message' => "Field $field updated successfully"]);
         } catch (Exception $e) {
@@ -540,6 +552,21 @@ switch ($action) {
             $checkStmt->execute([$id]);
             if ((int)$checkStmt->fetchColumn() > 0) {
                 $id .= '-' . time();
+            }
+
+            $proj = trim($data['projectName'] ?? $data['project_name'] ?? '');
+            $client = trim($data['client'] ?? '');
+            $salesRep = trim($data['salesRep'] ?? $data['sales_rep'] ?? '');
+            $artist = trim($data['artist'] ?? '');
+            $jo = trim($data['joNumber'] ?? $data['jo_number'] ?? '');
+            $deadline = trim($data['designDeadline'] ?? $data['design_deadline'] ?? '');
+
+            if (empty($proj) || empty($client) || empty($salesRep) || empty($artist) || empty($jo) || empty($deadline)) {
+                sendJsonResponse([
+                    'success' => false,
+                    'error' => 'All details must be filled up on sales requests.'
+                ], 400);
+                return;
             }
 
             $sql = "INSERT INTO sales_requests (
