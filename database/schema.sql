@@ -42,6 +42,8 @@ CREATE TABLE `sales_requests` (
   `design_status` VARCHAR(50) DEFAULT 'Not Started',
   `revision_count` INT NOT NULL DEFAULT 0,
   `remarks` TEXT,
+  `artist_accepted` VARCHAR(50) DEFAULT 'Accepted',
+  `artist_accepted_date` VARCHAR(30) DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

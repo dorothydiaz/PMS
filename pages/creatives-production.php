@@ -102,6 +102,26 @@ require_once __DIR__ . '/includes/sidebar.php';
             </div>
           </div>
 
+          <!-- Creatives Tracker Artist Acceptance Stream Tabs -->
+          <div class="sales-tabs-container tracker-tabs-container" style="margin-bottom: 14px;">
+            <div class="sales-approval-tabs tracker-acceptance-tabs" role="tablist">
+              <button type="button" class="sales-approval-tab active" data-tracker-tab="accepted" id="tabTrackerAccepted" role="tab" aria-selected="true" onclick="window.SignDepotApp.switchTrackerAcceptanceTab('accepted')">
+                <span class="tab-status-dot dot-approved"></span>
+                <span class="tab-label">Accepted Projects</span>
+                <span class="tab-count-pill pill-approved" id="trackerBadgeCountAccepted">0</span>
+              </button>
+              <button type="button" class="sales-approval-tab" data-tracker-tab="pending" id="tabTrackerPending" role="tab" aria-selected="false" onclick="window.SignDepotApp.switchTrackerAcceptanceTab('pending')">
+                <span class="tab-status-dot dot-pending"></span>
+                <span class="tab-label">Pending Projects (To be Accepted)</span>
+                <span class="tab-count-pill pill-pending" id="trackerBadgeCountPending">0</span>
+              </button>
+              <button type="button" class="sales-approval-tab" data-tracker-tab="all" id="tabTrackerAll" role="tab" aria-selected="false" onclick="window.SignDepotApp.switchTrackerAcceptanceTab('all')">
+                <span class="tab-label">All Projects</span>
+                <span class="tab-count-pill" id="trackerBadgeCountAll">0</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Tracker Filters -->
           <div class="filter-bar">
             <div class="filter-group">
@@ -175,16 +195,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               </select>
             </div>
             <div class="filter-group">
-              <div class="filter-rows-wrap">
-                <label for="trackerFilterPerPage">Show:</label>
-                <select class="filter-input rows-filter-select" id="trackerFilterPerPage" title="Rows to display">
-                  <option value="10" selected>10 rows</option>
-                  <option value="15">15 rows</option>
-                  <option value="20">20 rows</option>
-                  <option value="25">25 rows</option>
-                  <option value="30">30 rows</option>
-                </select>
-              </div>
               <button type="button" class="btn btn-secondary btn-sm" id="btnResetTrackerFilters" onclick="if(window.SignDepotApp && window.SignDepotApp.resetTrackerFilters) window.SignDepotApp.resetTrackerFilters();">Reset Filters</button>
             </div>
           </div>

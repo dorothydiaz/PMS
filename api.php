@@ -238,6 +238,8 @@ switch ($action) {
                 'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                 'revisionCount' => (int)$r['revision_count'],
                 'remarks' => $r['remarks'],
+                'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Accepted',
+                'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : (!empty($r['order_date']) ? $r['order_date'] : '2026-10-24'),
                 'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
                 'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
             ];
@@ -361,6 +363,8 @@ switch ($action) {
                     'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
                     'remarks' => $r['remarks'],
+                    'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Accepted',
+                    'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : (!empty($r['order_date']) ? $r['order_date'] : '2026-10-24'),
                     'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
                     'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
                 ];
@@ -412,6 +416,8 @@ switch ($action) {
                     'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
                     'remarks' => $r['remarks'],
+                    'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Accepted',
+                    'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : (!empty($r['order_date']) ? $r['order_date'] : '2026-10-24'),
                     'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
                     'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
                 ];
@@ -471,7 +477,9 @@ switch ($action) {
                 'countPrinting' => 'count_printing',
                 'designStatus' => 'design_status',
                 'revisionCount' => 'revision_count',
-                'remarks' => 'remarks'
+                'remarks' => 'remarks',
+                'artistAccepted' => 'artist_accepted',
+                'artistAcceptedDate' => 'artist_accepted_date'
             ];
 
             $col = $fieldMap[$field] ?? $field;
@@ -494,6 +502,54 @@ switch ($action) {
             }
 
             sendJsonResponse(['success' => true, 'message' => "Field $field updated successfully"]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'accept_artist_project':
+        try {
+            $currentUser = getCurrentUser();
+            if (!$currentUser && !isSuperAdmin()) {
+                sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+            }
+            $id = trim($_POST['id'] ?? $bodyData['id'] ?? '');
+            if (empty($id)) {
+                sendJsonResponse(['success' => false, 'error' => 'Missing project ID'], 400);
+            }
+            $today = date('Y-m-d');
+            try {
+                $stmt = $pdo->prepare("UPDATE sales_requests SET 
+                    `artist_accepted` = 'Accepted', 
+                    `artist_accepted_date` = :today, 
+                    `design_status` = CASE WHEN design_status = 'On Queue' OR design_status = 'Not Started' THEN 'Ongoing' ELSE design_status END,
+                    `updated_at` = NOW() 
+                    WHERE `id` = :id1 OR `request_id` = :id2");
+                $stmt->execute([':today' => $today, ':id1' => $id, ':id2' => $id]);
+            } catch (Exception $e) {
+                $stmt = $pdo->prepare("UPDATE sales_requests SET 
+                    `artist_accepted` = 'Accepted', 
+                    `artist_accepted_date` = :today 
+                    WHERE `id` = :id1 OR `request_id` = :id2");
+                $stmt->execute([':today' => $today, ':id1' => $id, ':id2' => $id]);
+            }
+
+            logAuditEvent(
+                $currentUser['username'] ?? 'User',
+                $currentUser['role'] ?? 'Artist',
+                'ACCEPT',
+                'Creatives Tracker',
+                "Project {$id} accepted by artist.",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
+            sendJsonResponse([
+                'success' => true,
+                'message' => 'Project accepted successfully',
+                'artistAccepted' => 'Accepted',
+                'artistAcceptedDate' => $today
+            ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
@@ -563,18 +619,21 @@ switch ($action) {
                 return;
             }
 
+            $artistAccepted = trim($data['artistAccepted'] ?? $data['artist_accepted'] ?? 'Pending');
+            $artistAcceptedDate = ($artistAccepted === 'Accepted') ? date('Y-m-d') : null;
+
             $sql = "INSERT INTO sales_requests (
                 id, request_id, jo_number, order_date, sales_rep, client, project_name, 
                 artist, design_deadline, releasing_date, file_sent, complete_address, 
                 location, releasing_mode, contact_person, contact_number, project_status, 
                 client_approval, priority, head_approval, count_standard, count_special, 
-                count_printing, design_status, revision_count, remarks
+                count_printing, design_status, revision_count, remarks, artist_accepted, artist_accepted_date
             ) VALUES (
                 :id, :req_id, :jo, :order_date, :sales_rep, :client, :proj,
                 :artist, :deadline, :releasing, :file_sent, :addr,
                 :loc, :rel_mode, :contact_p, :contact_n, :status,
                 :appr, :priority, :head_appr, :std, :spc,
-                :prt, :dstat, :rev, :remarks
+                :prt, :dstat, :rev, :remarks, :art_acc, :art_acc_date
             )";
 
             $stmt = $pdo->prepare($sql);
@@ -604,7 +663,9 @@ switch ($action) {
                 ':prt' => (int)($data['countPrinting'] ?? $data['count_printing'] ?? 0),
                 ':dstat' => normalizeDesignStatus($data['designStatus'] ?? $data['design_status'] ?? '', $data['projectStatus'] ?? $data['project_status'] ?? ''),
                 ':rev' => (int)($data['revisionCount'] ?? $data['revision_count'] ?? 0),
-                ':remarks' => trim($data['remarks'] ?? '')
+                ':remarks' => trim($data['remarks'] ?? ''),
+                ':art_acc' => $artistAccepted,
+                ':art_acc_date' => $artistAcceptedDate
             ]);
 
             sendJsonResponse(['success' => true, 'id' => $id, 'requestId' => $reqId, 'message' => 'Request created']);

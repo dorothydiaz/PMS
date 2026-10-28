@@ -4650,6 +4650,7 @@
     currentDirectiveJo: 'P261001348',
     salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', deadline: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
     trackerFilter: { search: '', projectStatus: '', designStatus: '', artist: '', overdue: '', datePreset: '', dateCustom: '', dateColumn: 'orderDate', sortField: 'requestId', sortDir: 'desc', page: 1, perPage: initialRowsPerPage },
+    trackerAcceptanceTab: 'accepted',
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
     pendingSalesPage: 1,
@@ -5829,9 +5830,45 @@
     return dateStr.toUpperCase();
   }
 
-  // Real-time Deadline Alert Calculation based on user local date
-  function getDeadlineAlertStatus(deadlineStr, projectStatus) {
-    if (!deadlineStr || projectStatus === 'Completed') {
+  function isProjectArtistAccepted(valOrObj) {
+    if (valOrObj === null || valOrObj === undefined) return true; // all existing projects assumed accepted!
+    if (typeof valOrObj === 'object') {
+      const st = valOrObj.artistAccepted ?? valOrObj.artist_accepted;
+      if (st === 'Pending' || st === 'pending' || st === false) return false;
+      return true;
+    }
+    if (valOrObj === 'Pending' || valOrObj === 'pending' || valOrObj === false) return false;
+    return true;
+  }
+
+  // Real-time Deadline Alert Calculation based on user local date vs artist acceptance
+  function getDeadlineAlertStatus(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate) {
+    // Support passing full request record as first argument
+    if (typeof deadlineStr === 'object' && deadlineStr !== null) {
+      const r = deadlineStr;
+      deadlineStr = r.designDeadline || r.design_deadline;
+      projectStatus = r.projectStatus || r.project_status;
+      artistAccepted = r.artistAccepted ?? r.artist_accepted;
+      acceptedDate = r.artistAcceptedDate ?? r.artist_accepted_date;
+      orderDate = r.orderDate ?? r.order_date;
+    }
+
+    if (projectStatus === 'Completed') {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    // If pending acceptance by artist: not overdue, awaiting acceptance
+    if (!isProjectArtistAccepted(artistAccepted)) {
+      return {
+        status: 'pending_accept',
+        label: 'Pending Acceptance',
+        diffDays: null,
+        diffText: 'Pending Acceptance',
+        pillText: 'Pending Accept'
+      };
+    }
+
+    if (!deadlineStr) {
       return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
     }
 
@@ -5847,11 +5884,39 @@
       return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
     }
 
-    const targetDate = new Date(dYear, dMonth, dDay);
+    let targetDate = new Date(dYear, dMonth, dDay);
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
     const msPerDay = 1000 * 60 * 60 * 24;
+
+    // Overdue indicator based on the day project was accepted by artist vs design deadline
+    if (acceptedDate) {
+      const aParts = String(acceptedDate).trim().split('-');
+      if (aParts.length >= 3) {
+        const aYear = parseInt(aParts[0], 10);
+        const aMonth = parseInt(aParts[1], 10) - 1;
+        const aDay = parseInt(aParts[2], 10);
+        if (!isNaN(aYear) && !isNaN(aMonth) && !isNaN(aDay)) {
+          const accDate = new Date(aYear, aMonth, aDay);
+          // If project was accepted after the original deadline date:
+          // Preserve expected turnaround duration starting from the day it was accepted
+          if (accDate.getTime() > targetDate.getTime()) {
+            let turnaroundDays = 1;
+            if (orderDate) {
+              const oParts = String(orderDate).trim().split('-');
+              if (oParts.length >= 3) {
+                const oDate = new Date(parseInt(oParts[0], 10), parseInt(oParts[1], 10) - 1, parseInt(oParts[2], 10));
+                if (!isNaN(oDate.getTime()) && targetDate.getTime() > oDate.getTime()) {
+                  turnaroundDays = Math.max(1, Math.round((targetDate.getTime() - oDate.getTime()) / msPerDay));
+                }
+              }
+            }
+            targetDate = new Date(accDate.getTime() + (turnaroundDays * msPerDay));
+          }
+        }
+      }
+    }
+
     const diffDays = Math.round((targetDate.getTime() - today.getTime()) / msPerDay);
 
     if (diffDays < 0) {
@@ -5891,8 +5956,8 @@
     }
   }
 
-  function isOverdue(deadlineStr, projectStatus) {
-    return getDeadlineAlertStatus(deadlineStr, projectStatus).status === 'overdue';
+  function isOverdue(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate) {
+    return getDeadlineAlertStatus(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate).status === 'overdue';
   }
 
   function getStatusBadgeClass(status) {
@@ -6122,7 +6187,7 @@
       return reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
     }
     if (type === 'overdue') {
-      return reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+      return reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate));
     }
     return reqs; // 'all'
   }
@@ -6134,7 +6199,7 @@
     const working = reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
     const approved = reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
     const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
-    const overdue = reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus)).length;
+    const overdue = reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
 
     // Creatives Tracker KPI scoping for logged-in artist
     const myArtist = getLoggedInArtist();
@@ -6144,7 +6209,7 @@
     const trkWorking = trackerReqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
     const trkApproved = trackerReqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
     const trkRevising = trackerReqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
-    const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus)).length;
+    const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
 
     // Dashboard elements
     const elTot = document.getElementById('kpiTotalRequests'); if (elTot) elTot.textContent = Number(totalRequests).toLocaleString();
@@ -7216,6 +7281,34 @@
       }
     }
 
+    // Calculate Artist Acceptance stream counts
+    const countAccepted = list.filter(r => isProjectArtistAccepted(r)).length;
+    const countPending = list.filter(r => !isProjectArtistAccepted(r)).length;
+    const countAll = list.length;
+
+    const elBadgeAcc = document.getElementById('trackerBadgeCountAccepted');
+    if (elBadgeAcc) elBadgeAcc.textContent = countAccepted.toLocaleString();
+    const elBadgePend = document.getElementById('trackerBadgeCountPending');
+    if (elBadgePend) elBadgePend.textContent = countPending.toLocaleString();
+    const elBadgeAll = document.getElementById('trackerBadgeCountAll');
+    if (elBadgeAll) elBadgeAll.textContent = countAll.toLocaleString();
+
+    // Sync active acceptance tab styling
+    const curAcceptanceTab = state.trackerAcceptanceTab || 'accepted';
+    document.querySelectorAll('.tracker-acceptance-tabs .sales-approval-tab').forEach(btn => {
+      const tabKey = btn.getAttribute('data-tracker-tab');
+      const isAct = (tabKey === curAcceptanceTab);
+      btn.classList.toggle('active', isAct);
+      btn.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    });
+
+    // Apply acceptance tab stream filter
+    if (curAcceptanceTab === 'accepted') {
+      list = list.filter(r => isProjectArtistAccepted(r));
+    } else if (curAcceptanceTab === 'pending') {
+      list = list.filter(r => !isProjectArtistAccepted(r));
+    }
+
     const { search, projectStatus, designStatus, artist, overdue, sortField, sortDir, page, perPage } = state.trackerFilter;
 
     // Apply KPI filter if active on Creatives Tracker
@@ -7230,7 +7323,7 @@
       } else if (kf === 'revising') {
         list = list.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
       } else if (kf === 'overdue') {
-        list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+        list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate));
       }
     }
 
@@ -7285,11 +7378,11 @@
     if (!myArtist && artist) list = list.filter(r => r.artist === artist);
     if (overdue) {
       list = list.filter(r => {
-        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate);
         if (overdue === 'overdue') return info.status === 'overdue';
         if (overdue === 'today') return info.status === 'today';
         if (overdue === 'soon') return info.status === 'soon';
-        if (overdue === 'ontime') return info.status === 'ontrack' || (!isOverdue(r.designDeadline, r.projectStatus) && info.status !== 'soon' && info.status !== 'today');
+        if (overdue === 'ontime') return info.status === 'ontrack' || (!isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate) && info.status !== 'soon' && info.status !== 'today');
         return true;
       });
     }
@@ -7333,9 +7426,9 @@
 
       // Overdue severity sort
       if (effectiveSortField === 'deadlineStatus') {
-        const rank = { overdue: 4, today: 3, soon: 2, ontrack: 1, completed: 0 };
-        const statusA = getDeadlineAlertStatus(a.designDeadline, a.projectStatus).status;
-        const statusB = getDeadlineAlertStatus(b.designDeadline, b.projectStatus).status;
+        const rank = { overdue: 4, today: 3, soon: 2, ontrack: 1, completed: 0, pending_accept: -1 };
+        const statusA = getDeadlineAlertStatus(a.designDeadline, a.projectStatus, a.artistAccepted, a.artistAcceptedDate, a.orderDate).status;
+        const statusB = getDeadlineAlertStatus(b.designDeadline, b.projectStatus, b.artistAccepted, b.artistAcceptedDate, b.orderDate).status;
         const diff = (rank[statusA] || 0) - (rank[statusB] || 0);
         return effectiveSortDir === 'asc' ? diff : -diff;
       }
@@ -7400,17 +7493,20 @@
         tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding:30px; color:var(--text-muted);">No tasks match the filters.</td></tr>`;
       } else {
         tbody.innerHTML = pagedList.map(r => {
-          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate);
           let deadlineStatusBadge = '<span style="color:#10B981; font-weight:700; font-size:11px;">ON TRACK</span>';
-          if (alertInfo.status === 'overdue') {
-            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-overdue">${escapeHTML(alertInfo.diffText)}</span>`;
+          if (alertInfo.status === 'pending_accept') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-pending">PENDING ACCEPTANCE</span>`;
+          } else if (alertInfo.status === 'overdue') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-overdue">${escapeHTML(alertInfo.diffText).toUpperCase()}</span>`;
           } else if (alertInfo.status === 'today') {
-            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-today">Due Today</span>`;
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-today">DUE TODAY</span>`;
           } else if (alertInfo.status === 'soon') {
-            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText)}</span>`;
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText).toUpperCase()}</span>`;
           }
 
           const isSuper = isCurrentUserSuperAdmin();
+          const isAccepted = isProjectArtistAccepted(r);
           return `
             <tr data-req-id="${r.id}">
               <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700;')}</td>
@@ -7433,6 +7529,12 @@
               <td style="font-size:12px; color:var(--text-secondary); white-space:nowrap;">${escapeHTML(r.dateUpdated || r.orderDate || 'N/A')}</td>
               <td>
                 <div style="display:flex; gap:4px; align-items:center;">
+                  ${!isAccepted ? `
+                    <button class="btn btn-primary btn-sm" onclick="window.SignDepotApp.acceptArtistProject('${r.id}')" title="Accept project and start drafting" style="font-weight:700; background:var(--primary-green); border-color:var(--primary-green); color:#fff; display:inline-flex; align-items:center; gap:4px; padding:3px 9px; font-size:11.5px; border-radius:6px; cursor:pointer;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      Accept
+                    </button>
+                  ` : ''}
                   <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
                   ${isSuper ? `
                     <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
@@ -12478,6 +12580,54 @@
       showToast('Showing all tasks in Creatives Tracker', 'info');
     },
 
+    switchTrackerAcceptanceTab: (tabKey) => {
+      state.trackerAcceptanceTab = tabKey || 'accepted';
+      state.trackerFilter.page = 1;
+      renderCreativesTracker();
+      const labels = {
+        accepted: 'Accepted Projects',
+        pending: 'Pending Projects (To be Accepted)',
+        all: 'All Projects'
+      };
+      showToast(`Viewing ${labels[tabKey] || 'Accepted Projects'}`, 'info');
+    },
+
+    acceptArtistProject: (id) => {
+      if (!id) return;
+      const rec = (state.requests || []).find(r => String(r.id) === String(id) || String(r.requestId) === String(id));
+      if (!rec) {
+        showToast('Task not found', 'error');
+        return;
+      }
+
+      const todayStr = (new Date()).toISOString().slice(0, 10);
+      rec.artistAccepted = 'Accepted';
+      rec.artistAcceptedDate = todayStr;
+      if (rec.designStatus === 'On Queue' || rec.designStatus === 'Not Started' || !rec.designStatus) {
+        rec.designStatus = 'Ongoing';
+      }
+
+      // Sync to backend MySQL
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=accept_artist_project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: rec.id })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (!res || !res.success) {
+            console.warn('Backend sync response:', res);
+          }
+        })
+        .catch(err => console.error('Accept project network error:', err));
+      }
+
+      renderCreativesTracker();
+      updateDashboardKPIs();
+      showToast(`Project ${rec.requestId} accepted! Moved to Accepted Projects.`, 'success');
+    },
+
     handleKpiCardClick: (type) => {
       if (state.dashboardKpiFilter === type && type !== 'all') {
         state.dashboardKpiFilter = 'all';
@@ -13796,23 +13946,30 @@
 
     updateDeadlineAlertCenter();
 
-    // Non-intrusive reminder alert on load if urgent items exist
-    setTimeout(() => {
-      const activeAlerts = (state.requests || []).filter(r => r.projectStatus !== 'Completed').map(r => getDeadlineAlertStatus(r.designDeadline, r.projectStatus));
-      const overdueCount = activeAlerts.filter(a => a.status === 'overdue').length;
-      const todayCount = activeAlerts.filter(a => a.status === 'today').length;
-      if (overdueCount > 0 || todayCount > 0) {
-        let msg = 'Deadline Reminder: ';
-        if (overdueCount > 0 && todayCount > 0) {
-          msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due & ${todayCount} due today!`;
-        } else if (overdueCount > 0) {
-          msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due requiring immediate attention!`;
-        } else {
-          msg += `${todayCount} project${todayCount > 1 ? 's' : ''} due today!`;
+    // Non-intrusive reminder alert on first login ONLY
+    const hasShownReminder = sessionStorage.getItem('PMS_DEADLINE_REMINDER_SHOWN');
+    const isFirstLogin = Boolean(window.PMS_JUST_LOGGED_IN) || (!hasShownReminder && !sessionStorage.getItem('PMS_SESSION_INITIALIZED'));
+    sessionStorage.setItem('PMS_SESSION_INITIALIZED', 'true');
+
+    if (!hasShownReminder && isFirstLogin) {
+      sessionStorage.setItem('PMS_DEADLINE_REMINDER_SHOWN', 'true');
+      setTimeout(() => {
+        const activeAlerts = (state.requests || []).filter(r => r.projectStatus !== 'Completed').map(r => getDeadlineAlertStatus(r.designDeadline, r.projectStatus));
+        const overdueCount = activeAlerts.filter(a => a.status === 'overdue').length;
+        const todayCount = activeAlerts.filter(a => a.status === 'today').length;
+        if (overdueCount > 0 || todayCount > 0) {
+          let msg = 'Deadline Reminder: ';
+          if (overdueCount > 0 && todayCount > 0) {
+            msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due & ${todayCount} due today!`;
+          } else if (overdueCount > 0) {
+            msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due requiring immediate attention!`;
+          } else {
+            msg += `${todayCount} project${todayCount > 1 ? 's' : ''} due today!`;
+          }
+          showToast(msg, overdueCount > 0 ? 'error' : 'info');
         }
-        showToast(msg, overdueCount > 0 ? 'error' : 'info');
-      }
-    }, 1200);
+      }, 1200);
+    }
 
     // Run active autofill scrubbing to prevent browsers from placing credentials into search bars
     purgeSearchAutofill();

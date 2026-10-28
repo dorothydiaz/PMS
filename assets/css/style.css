@@ -5308,6 +5308,12 @@ textarea.form-control {
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+.deadline-pill-pending {
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
 .table-row-highlight {
   animation: table-row-flash 2.5s ease-out;
 }

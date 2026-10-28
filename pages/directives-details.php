@@ -63,9 +63,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               <h2>Directives Details & Job Orders</h2>
               <p>Printable Sign Depot production directive generator, template editor & attachments</p>
             </div>
-            <div class="section-actions">
-              <button class="btn btn-secondary" id="btnDirectivesLoadSampleUral">Load Sample: URAL (P260701373)</button>
-            </div>
           </div>
 
           <div class="directive-lookup-card">

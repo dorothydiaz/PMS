@@ -427,6 +427,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       document.getElementById('loginUsername').value = u;
       document.getElementById('loginPassword').value = p;
     }
+
+    // Reset reminder session flags on login page
+    try {
+      sessionStorage.removeItem('PMS_DEADLINE_REMINDER_SHOWN');
+      sessionStorage.removeItem('PMS_SESSION_INITIALIZED');
+    } catch (e) {}
   </script>
 </body>
 </html>

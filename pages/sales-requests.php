@@ -160,16 +160,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               </select>
             </div>
             <div class="filter-group">
-              <div class="filter-rows-wrap">
-                <label for="salesFilterPerPage">Show:</label>
-                <select class="filter-input rows-filter-select" id="salesFilterPerPage" title="Rows to display">
-                  <option value="10" selected>10 rows</option>
-                  <option value="15">15 rows</option>
-                  <option value="20">20 rows</option>
-                  <option value="25">25 rows</option>
-                  <option value="30">30 rows</option>
-                </select>
-              </div>
               <button type="button" class="btn btn-secondary btn-sm" id="btnResetSalesFilters" onclick="if(window.SignDepotApp && window.SignDepotApp.resetSalesFilters) window.SignDepotApp.resetSalesFilters();">Reset Filters</button>
             </div>
           </div>

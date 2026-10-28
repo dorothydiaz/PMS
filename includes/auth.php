@@ -411,6 +411,7 @@ function loginUser($usernameOrEmail, $password) {
         'permissions' => $perms,
         'oauth_provider' => $user['oauth_provider'] ?: 'credentials'
     ];
+    $_SESSION['pms_first_login_reminder'] = true;
 
     logAuditEvent($user['username'], $user['role'], 'AUTH', 'Security Portal', 'Successful credentials login for user: ' . $user['username'], $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1', 'Success');
 
@@ -464,6 +465,7 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
             'permissions' => $perms,
             'oauth_provider' => $provider
         ];
+        $_SESSION['pms_first_login_reminder'] = true;
 
         return ['success' => true, 'user' => $_SESSION['pms_user']];
     } else {
@@ -518,6 +520,7 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
             'permissions' => $defaultPerms,
             'oauth_provider' => $provider
         ];
+        $_SESSION['pms_first_login_reminder'] = true;
 
         return ['success' => true, 'user' => $_SESSION['pms_user'], 'created' => true];
     }
