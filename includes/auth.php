@@ -125,6 +125,13 @@ function requireLogin() {
         header('Location: ' . $base . 'login.php?redirect=' . urlencode($currentUrl));
         exit;
     }
+    // Check if current session has been revoked from another device
+    if (function_exists('checkUserSessionRevoked') && checkUserSessionRevoked()) {
+        logoutUser();
+        $base = function_exists('getBasePath') ? getBasePath() : './';
+        header('Location: ' . $base . 'login.php?msg=session_revoked');
+        exit;
+    }
 }
 
 /**
@@ -355,7 +362,7 @@ function renderAccessDenied($module, $action = 'r') {
 /**
  * Standard Username/Email & Password Login Handler
  */
-function loginUser($usernameOrEmail, $password) {
+function loginUser($usernameOrEmail, $password, $totpCode = null) {
     $pdo = getDbConnection();
     if (!$pdo) {
         return ['success' => false, 'error' => 'Database connection unavailable'];
@@ -376,6 +383,16 @@ function loginUser($usernameOrEmail, $password) {
 
     if (!password_verify($password, $user['password_hash'])) {
         return ['success' => false, 'error' => 'Invalid username or password'];
+    }
+
+    // If Two-Factor Authentication is enabled, verify TOTP code
+    if (!empty($user['two_factor_enabled']) && (int)$user['two_factor_enabled'] === 1 && !empty($user['two_factor_secret'])) {
+        if (empty($totpCode)) {
+            return ['success' => false, 'require_2fa' => true, 'error' => 'Please enter the 6-digit code from your Google Authenticator app.'];
+        }
+        if (!verifyTotpCode($user['two_factor_secret'], $totpCode)) {
+            return ['success' => false, 'require_2fa' => true, 'error' => 'Invalid or expired 6-digit code. Please check your Google Authenticator app.'];
+        }
     }
 
     // Parse permissions JSON
@@ -412,6 +429,7 @@ function loginUser($usernameOrEmail, $password) {
         'oauth_provider' => $user['oauth_provider'] ?: 'credentials'
     ];
     $_SESSION['pms_first_login_reminder'] = true;
+    recordUserSession((int)$user['id']);
 
     logAuditEvent($user['username'], $user['role'], 'AUTH', 'Security Portal', 'Successful credentials login for user: ' . $user['username'], $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1', 'Success');
 
@@ -466,6 +484,7 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
             'oauth_provider' => $provider
         ];
         $_SESSION['pms_first_login_reminder'] = true;
+        recordUserSession((int)$user['id']);
 
         return ['success' => true, 'user' => $_SESSION['pms_user']];
     } else {
@@ -521,6 +540,7 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
             'oauth_provider' => $provider
         ];
         $_SESSION['pms_first_login_reminder'] = true;
+        recordUserSession($newId);
 
         return ['success' => true, 'user' => $_SESSION['pms_user'], 'created' => true];
     }
@@ -564,4 +584,356 @@ function logAuditEvent($user, $role, $action, $module, $description, $ip = null,
         // Silently tolerate if audit_logs table is missing or readonly
     }
 }
+
+/**
+ * Ensure security tables and columns exist
+ */
+function ensureSecurityTables() {
+    static $ensured = false;
+    if ($ensured) return;
+    $pdo = getDbConnection();
+    if (!$pdo) return;
+
+    try {
+        // Create user_sessions table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `user_sessions` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `user_id` INT NOT NULL,
+            `session_token` VARCHAR(128) NOT NULL,
+            `ip_address` VARCHAR(45) NULL,
+            `user_agent` VARCHAR(500) NULL,
+            `device_name` VARCHAR(100) NULL,
+            `browser` VARCHAR(50) NULL,
+            `os` VARCHAR(50) NULL,
+            `is_revoked` TINYINT(1) DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `last_active` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_user_id` (`user_id`),
+            INDEX `idx_token` (`session_token`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Check if two_factor_enabled exists on users table
+        $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'two_factor_enabled'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `two_factor_enabled` TINYINT(1) DEFAULT 0");
+        }
+
+        $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'two_factor_secret'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `two_factor_secret` VARCHAR(100) NULL");
+        }
+
+        $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'google_email'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `google_email` VARCHAR(150) NULL");
+        }
+
+        $ensured = true;
+    } catch (Exception $e) {
+        // Silently tolerate
+    }
+}
+
+/**
+ * Detect client device, browser and OS from User-Agent string
+ */
+function detectClientDevice($userAgent = null) {
+    $ua = $userAgent ?: ($_SERVER['HTTP_USER_AGENT'] ?? '');
+    
+    // Detect OS
+    $os = 'Unknown OS';
+    if (preg_match('/windows nt 10/i', $ua)) {
+        $os = 'Windows 10/11';
+    } elseif (preg_match('/windows nt 6\.3/i', $ua)) {
+        $os = 'Windows 8.1';
+    } elseif (preg_match('/windows nt 6\.1/i', $ua)) {
+        $os = 'Windows 7';
+    } elseif (preg_match('/macintosh|mac os x/i', $ua)) {
+        $os = 'macOS';
+    } elseif (preg_match('/android/i', $ua)) {
+        $os = 'Android';
+    } elseif (preg_match('/iphone|ipad|ipod/i', $ua)) {
+        $os = 'iOS';
+    } elseif (preg_match('/linux/i', $ua)) {
+        $os = 'Linux';
+    }
+
+    // Detect Browser
+    $browser = 'Unknown Browser';
+    if (preg_match('/edg/i', $ua)) {
+        $browser = 'Microsoft Edge';
+    } elseif (preg_match('/chrome|crios/i', $ua) && !preg_match('/opr|opera/i', $ua)) {
+        $browser = 'Google Chrome';
+    } elseif (preg_match('/firefox|fxios/i', $ua)) {
+        $browser = 'Mozilla Firefox';
+    } elseif (preg_match('/safari/i', $ua) && !preg_match('/chrome|crios/i', $ua)) {
+        $browser = 'Apple Safari';
+    } elseif (preg_match('/opr|opera/i', $ua)) {
+        $browser = 'Opera';
+    }
+
+    $isMobile = preg_match('/mobile|android|iphone|ipad|ipod/i', $ua);
+    $deviceName = $os . ' (' . $browser . ')';
+
+    return [
+        'device_name' => $deviceName,
+        'os' => $os,
+        'browser' => $browser,
+        'is_mobile' => $isMobile
+    ];
+}
+
+/**
+ * Record or update active session for user
+ */
+function recordUserSession($userId) {
+    ensureSecurityTables();
+    $pdo = getDbConnection();
+    if (!$pdo) return;
+
+    if (empty($_SESSION['pms_session_token'])) {
+        $_SESSION['pms_session_token'] = bin2hex(random_bytes(32));
+    }
+    $token = $_SESSION['pms_session_token'];
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $device = detectClientDevice($ua);
+
+    try {
+        $stmt = $pdo->prepare("SELECT id FROM user_sessions WHERE session_token = :t LIMIT 1");
+        $stmt->execute([':t' => $token]);
+        $existing = $stmt->fetch();
+
+        if ($existing) {
+            $upd = $pdo->prepare("UPDATE user_sessions SET user_id = :u, ip_address = :ip, user_agent = :ua, device_name = :dn, browser = :b, os = :os, is_revoked = 0, last_active = NOW() WHERE id = :id");
+            $upd->execute([
+                ':u' => $userId,
+                ':ip' => $ip,
+                ':ua' => substr($ua, 0, 500),
+                ':dn' => $device['device_name'],
+                ':b' => $device['browser'],
+                ':os' => $device['os'],
+                ':id' => $existing['id']
+            ]);
+        } else {
+            $ins = $pdo->prepare("INSERT INTO user_sessions (user_id, session_token, ip_address, user_agent, device_name, browser, os, is_revoked, created_at, last_active)
+                VALUES (:u, :t, :ip, :ua, :dn, :b, :os, 0, NOW(), NOW())");
+            $ins->execute([
+                ':u' => $userId,
+                ':t' => $token,
+                ':ip' => $ip,
+                ':ua' => substr($ua, 0, 500),
+                ':dn' => $device['device_name'],
+                ':b' => $device['browser'],
+                ':os' => $device['os']
+            ]);
+        }
+    } catch (Exception $e) {
+        // tolerate
+    }
+}
+
+/**
+ * Check if the active session was marked as revoked
+ */
+function checkUserSessionRevoked() {
+    if (empty($_SESSION['pms_user']['id'])) {
+        return false;
+    }
+    if (empty($_SESSION['pms_session_token'])) {
+        recordUserSession((int)$_SESSION['pms_user']['id']);
+        return false;
+    }
+
+    $token = $_SESSION['pms_session_token'];
+    $pdo = getDbConnection();
+    if (!$pdo) return false;
+
+    try {
+        $stmt = $pdo->prepare("SELECT is_revoked FROM user_sessions WHERE session_token = :t AND user_id = :uid LIMIT 1");
+        $stmt->execute([
+            ':t' => $token,
+            ':uid' => (int)$_SESSION['pms_user']['id']
+        ]);
+        $row = $stmt->fetch();
+
+        if ($row && (int)$row['is_revoked'] === 1) {
+            return true;
+        }
+
+        // Periodically bump last_active
+        $upd = $pdo->prepare("UPDATE user_sessions SET last_active = NOW() WHERE session_token = :t");
+        $upd->execute([':t' => $token]);
+
+        return false;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * Get all active (non-revoked) devices/sessions for a user
+ */
+function getUserActiveDevices($userId) {
+    ensureSecurityTables();
+    $pdo = getDbConnection();
+    if (!$pdo) return [];
+
+    try {
+        $stmt = $pdo->prepare("SELECT id, session_token, ip_address, user_agent, device_name, browser, os, created_at, last_active
+            FROM user_sessions
+            WHERE user_id = :uid AND is_revoked = 0
+            ORDER BY last_active DESC");
+        $stmt->execute([':uid' => $userId]);
+        $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $currentToken = $_SESSION['pms_session_token'] ?? '';
+        foreach ($sessions as &$s) {
+            $s['is_current'] = (!empty($currentToken) && $s['session_token'] === $currentToken);
+            unset($s['session_token']);
+        }
+        return $sessions;
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+/**
+ * Revoke a specific session
+ */
+function revokeUserDevice($userId, $sessionId) {
+    ensureSecurityTables();
+    $pdo = getDbConnection();
+    if (!$pdo) return false;
+
+    try {
+        $stmt = $pdo->prepare("UPDATE user_sessions SET is_revoked = 1 WHERE id = :id AND user_id = :uid");
+        return $stmt->execute([
+            ':id' => $sessionId,
+            ':uid' => $userId
+        ]);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * Revoke all other sessions except current
+ */
+function revokeAllOtherDevices($userId) {
+    ensureSecurityTables();
+    $pdo = getDbConnection();
+    if (!$pdo) return false;
+
+    $currentToken = $_SESSION['pms_session_token'] ?? '';
+    try {
+        $stmt = $pdo->prepare("UPDATE user_sessions SET is_revoked = 1 WHERE user_id = :uid AND session_token != :cur");
+        return $stmt->execute([
+            ':uid' => $userId,
+            ':cur' => $currentToken
+        ]);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * =========================================================================
+ * Google Authenticator (TOTP RFC 6238) Implementation
+ * =========================================================================
+ */
+
+/**
+ * Generate a random 16-character Base32 secret for TOTP
+ */
+function generateTotpSecret($length = 16) {
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    $secret = '';
+    for ($i = 0; $i < $length; $i++) {
+        $secret .= $chars[random_int(0, 31)];
+    }
+    return $secret;
+}
+
+/**
+ * Decode Base32 string to binary
+ */
+function base32Decode($secret) {
+    if (empty($secret)) return '';
+    $base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    $base32charsFlipped = array_flip(str_split($base32chars));
+
+    $paddingCharCount = substr_count($secret, '=');
+    $allowedValues = [6, 4, 3, 1, 0];
+    if (!in_array($paddingCharCount, $allowedValues)) return false;
+    for ($i = 0; $i < 4; $i++) {
+        if ($paddingCharCount == $allowedValues[$i] &&
+            substr($secret, -($allowedValues[$i])) != str_repeat('=', $allowedValues[$i])) return false;
+    }
+    $secret = str_replace('=', '', strtoupper($secret));
+    $secret = str_split($secret);
+    $binaryString = '';
+    for ($i = 0; $i < count($secret); $i = $i + 8) {
+        $x = '';
+        if (!in_array($secret[$i], str_split($base32chars))) return false;
+        for ($j = 0; $j < 8; $j++) {
+            $x .= str_pad(base_convert((string)(@$base32charsFlipped[@$secret[$i + $j]]), 10, 2), 5, '0', STR_PAD_LEFT);
+        }
+        $eightBits = str_split($x, 8);
+        for ($z = 0; $z < count($eightBits); $z++) {
+            $binaryString .= (($y = chr(base_convert($eightBits[$z], 2, 10))) || ord($y) == 48) ? $y : '';
+        }
+    }
+    return $binaryString;
+}
+
+/**
+ * Calculate the current 6-digit TOTP code for a secret and time slice
+ */
+function getTotpCode($secret, $timeSlice = null) {
+    if ($timeSlice === null) {
+        $timeSlice = floor(time() / 30);
+    }
+    $secretKey = base32Decode($secret);
+    if ($secretKey === false || empty($secretKey)) return '';
+
+    // Pack time into 8-byte binary string (big-endian)
+    $time = chr(0) . chr(0) . chr(0) . chr(0) . pack('N*', $timeSlice);
+    $hmac = hash_hmac('sha1', $time, $secretKey, true);
+    $offset = ord(substr($hmac, -1)) & 0x0F;
+    $hashPart = substr($hmac, $offset, 4);
+    $value = unpack('N', $hashPart);
+    $value = $value[1] & 0x7FFFFFFF;
+
+    $modulo = pow(10, 6);
+    return str_pad($value % $modulo, 6, '0', STR_PAD_LEFT);
+}
+
+/**
+ * Verify a user-provided 6-digit code against secret
+ */
+function verifyTotpCode($secret, $code, $discrepancy = 1) {
+    $code = trim((string)$code);
+    if (strlen($code) !== 6) return false;
+    $currentTimeSlice = floor(time() / 30);
+
+    for ($i = -$discrepancy; $i <= $discrepancy; $i++) {
+        $calculatedCode = getTotpCode($secret, $currentTimeSlice + $i);
+        if (hash_equals($calculatedCode, $code)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Get QR code URL for Google Authenticator app
+ */
+function getTotpQrCodeUrl($secret, $accountEmail, $issuer = 'Sign Depot PMS') {
+    $encodedIssuer = rawurlencode($issuer);
+    $encodedAccount = rawurlencode($accountEmail);
+    $otpauth = "otpauth://totp/{$encodedIssuer}:{$encodedAccount}?secret={$secret}&issuer={$encodedIssuer}&algorithm=SHA1&digits=6&period=30";
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode($otpauth);
+}
+
 

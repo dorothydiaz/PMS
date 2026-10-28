@@ -233,12 +233,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               <option value="directives-details">Directive Details Spec Sheet</option>
             </select>
           </div>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('all')">Select All Columns</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('artist')">Artist Preset</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('sales')">Sales Preset</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyColPreset('none')">Deselect All</button>
-          </div>
         </div>
 
         <div class="modal-body" style="padding: 20px 24px; max-height: 52vh; overflow-y: auto;">
@@ -449,29 +443,82 @@ require_once __DIR__ . '/includes/sidebar.php';
 </div>
 
 <!-- ==========================================================================
-     MODAL: EDIT PRESET NAME/DESC
+     MODAL: EDIT PRESET DETAILS & COLUMN-LEVEL PERMISSIONS
      ========================================================================== -->
 <div class="modal-backdrop" id="editPresetModal" style="z-index: 1070;">
-  <div class="modal-container" style="max-width: 440px; width: 90%;">
+  <div class="modal-container" style="max-width: 680px; width: 92%;">
     <div class="modal-header">
-      <h3 class="modal-title" style="font-size: 15px; margin: 0; font-weight: 800;">Edit Preset Details</h3>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 32px; height: 32px; background: #EEF2FF; color: #4F46E5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </div>
+        <div>
+          <h3 class="modal-title" style="font-size: 15px; margin: 0; font-weight: 800;">Edit Preset & Column Permissions</h3>
+          <div style="font-size: 11.5px; color: #64748B;">Customize preset identity and configure permitted edit columns per table</div>
+        </div>
+      </div>
       <button class="modal-close-btn" data-close-modal="editPresetModal">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
     <form id="editPresetForm" onsubmit="handleEditPresetSubmit(event)">
       <input type="hidden" id="editPresetId">
-      <div class="modal-body" style="padding: 16px 20px;">
-        <div class="form-group" style="margin-bottom: 12px;">
-          <label class="form-label required" style="font-size: 12px; font-weight: 700;">Preset Name</label>
-          <input type="text" class="form-control" id="editPresetName" required style="font-size: 13px;">
+      <div class="modal-body" style="padding: 16px 22px; max-height: 60vh; overflow-y: auto;">
+        <div class="form-grid-2" style="margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label required" style="font-size: 12px; font-weight: 700;">Preset Name</label>
+            <input type="text" class="form-control" id="editPresetName" required style="font-size: 13px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 700;">Description</label>
+            <input type="text" class="form-control" id="editPresetDesc" style="font-size: 13px;">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size: 12px; font-weight: 700;">Description</label>
-          <input type="text" class="form-control" id="editPresetDesc" style="font-size: 13px;">
+
+        <!-- Section: Column Level Permissions -->
+        <div style="border-top: 1px solid #E2E8F0; padding-top: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <div>
+              <span style="font-size: 12px; font-weight: 700; color: #0F172A; text-transform: uppercase;">Column-Level Edit Permissions</span>
+              <div style="font-size: 11px; color: #64748B;">Choose which table columns are editable when this preset is applied.</div>
+            </div>
+            <div>
+              <select class="form-control" id="editPresetTableSelect" style="width: auto; font-size: 12px; font-weight: 700; padding: 4px 8px;" onchange="onEditPresetTableChange(this.value)">
+                <option value="sales-requests">Sales Requests Table</option>
+                <option value="creatives-tracker">Creatives Tracker Table</option>
+                <option value="artist-workload">Artist Workload Table</option>
+                <option value="directives-details">Directive Details Spec Sheet</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Mode Toggle Bar -->
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; gap: 14px; align-items: center;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer; color: #0F172A;">
+                <input type="radio" name="editPresetColMode" id="editPresetColModeAll" value="all" onchange="onEditPresetColModeToggle('all')">
+                All Columns Editable
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer; color: #0F172A;">
+                <input type="radio" name="editPresetColMode" id="editPresetColModeCustom" value="custom" onchange="onEditPresetColModeToggle('custom')">
+                Restrict Specific Columns
+              </label>
+            </div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 7px;" onclick="applyEditPresetColQuick('all')">Select All</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 7px;" onclick="applyEditPresetColQuick('artist')">Artist Preset</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 7px;" onclick="applyEditPresetColQuick('sales')">Sales Preset</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 7px;" onclick="applyEditPresetColQuick('none')">Deselect All</button>
+            </div>
+          </div>
+
+          <!-- Checklist Grid -->
+          <div id="editPresetColGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding: 2px;">
+            <!-- Rendered dynamically -->
+          </div>
         </div>
       </div>
-      <div class="modal-footer" style="padding: 10px 20px; display: flex; justify-content: flex-end; gap: 8px;">
+      <div class="modal-footer" style="padding: 12px 22px; display: flex; justify-content: flex-end; gap: 8px;">
         <button type="button" class="btn btn-secondary" data-close-modal="editPresetModal">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Changes</button>
       </div>
@@ -1047,19 +1094,46 @@ require_once __DIR__ . '/includes/sidebar.php';
 
   // --- Dynamic Customizable Permission Presets ---
   let cachedPermPresets = [];
+  let editingPresetWorkingPerms = {};
+  let editingPresetActiveTable = 'sales-requests';
 
   function getDefaultPermPresets() {
     const modules = ['dashboard', 'sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'monthly-output', 'reports', 'access-control', 'audit-trail', 'settings'];
+    const tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details'];
     const allP = {}, roP = {}, artP = {}, salP = {}, nonP = {};
+
+    const artistCols = {
+      'creatives-tracker': ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
+      'sales-requests': ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
+      'artist-workload': ['designDeadline', 'projectStatus'],
+      'directives-details': ['projectName', 'reference']
+    };
+
+    const salesCols = {
+      'sales-requests': ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
+      'creatives-tracker': ['clientApproval', 'remarks'],
+      'artist-workload': [],
+      'directives-details': ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference']
+    };
+
     modules.forEach(m => {
       allP[m] = { c: true, r: true, u: true, d: true };
       roP[m] = { c: false, r: true, u: false, d: false };
       nonP[m] = { c: false, r: false, u: false, d: false };
 
+      if (tables.includes(m)) {
+        allP[m].editable_columns = ['*'];
+        roP[m].editable_columns = [];
+        nonP[m].editable_columns = [];
+      }
+
       if (['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'].includes(m)) {
         artP[m] = { c: (m === 'creatives-tracker'), r: true, u: true, d: false };
       } else {
         artP[m] = { c: false, r: false, u: false, d: false };
+      }
+      if (artistCols[m]) {
+        artP[m].editable_columns = [...artistCols[m]];
       }
 
       if (['dashboard', 'sales-requests'].includes(m)) {
@@ -1069,14 +1143,17 @@ require_once __DIR__ . '/includes/sidebar.php';
       } else {
         salP[m] = { c: false, r: false, u: false, d: false };
       }
+      if (salesCols[m]) {
+        salP[m].editable_columns = [...salesCols[m]];
+      }
     });
 
     return [
-      { id: 'all', name: 'Full Access (All)', description: 'Grants full CRUD privileges on all modules', is_default: true, permissions: allP },
-      { id: 'readonly', name: 'Read Only (All)', description: 'Grants view-only access across all modules', is_default: true, permissions: roP },
-      { id: 'artist', name: 'Creative Artist', description: 'Access to tracker, artist workload, directives and monthly output', is_default: true, permissions: artP },
-      { id: 'sales', name: 'Sales Rep', description: 'Access to sales requests and view-only creatives tracker', is_default: true, permissions: salP },
-      { id: 'none', name: 'Revoke All', description: 'Revokes all privileges across all modules', is_default: true, permissions: nonP }
+      { id: 'all', name: 'Full Access (All)', description: 'Grants full CRUD privileges and full column edit access across all modules', is_default: true, permissions: allP },
+      { id: 'readonly', name: 'Read Only (All)', description: 'Grants view-only access across all modules without column edit rights', is_default: true, permissions: roP },
+      { id: 'artist', name: 'Creative Artist', description: 'Access to tracker, artist workload, directives with artist-specific editable columns', is_default: true, permissions: artP },
+      { id: 'sales', name: 'Sales Rep', description: 'Access to sales requests with client/order editable columns and view-only tracker', is_default: true, permissions: salP },
+      { id: 'none', name: 'Revoke All', description: 'Revokes all privileges and column edit rights across all modules', is_default: true, permissions: nonP }
     ];
   }
 
@@ -1111,45 +1188,75 @@ require_once __DIR__ . '/includes/sidebar.php';
     }).join('');
   }
 
-  function getCurrentMatrixPermissions() {
-    const perms = {};
+  function getCurrentFullPermissions() {
+    const full = JSON.parse(JSON.stringify(currentEditingPerms || {}));
+
+    // Sync Tab 1 checkboxes into it
     document.querySelectorAll('.perm-check').forEach(chk => {
       const mod = chk.getAttribute('data-mod');
       const act = chk.getAttribute('data-act');
-      if (!perms[mod]) {
-        perms[mod] = { c: false, r: false, u: false, d: false };
+      if (!full[mod]) {
+        full[mod] = { c: false, r: false, u: false, d: false };
       }
-      perms[mod][act] = chk.checked;
+      full[mod][act] = chk.checked;
     });
-    return perms;
+
+    // Ensure all tables in TABLE_COLUMNS_CONFIG have editable_columns defined
+    Object.keys(TABLE_COLUMNS_CONFIG).forEach(t => {
+      if (!full[t]) {
+        full[t] = { c: false, r: false, u: false, d: false, editable_columns: ['*'] };
+      } else if (full[t].editable_columns === undefined) {
+        full[t].editable_columns = ['*'];
+      }
+    });
+
+    return full;
   }
 
   function applyPermPreset(type) {
     const preset = cachedPermPresets.find(p => p.id === type);
-    if (!preset) {
-      // Fallback
-      document.querySelectorAll('.perm-check').forEach(chk => {
-        const act = chk.getAttribute('data-act');
-        if (type === 'all') chk.checked = true;
-        else if (type === 'none') chk.checked = false;
-        else if (type === 'readonly') chk.checked = (act === 'r');
-      });
-      return;
-    }
+    if (!preset) return;
 
     const perms = preset.permissions || {};
+
+    // 1. Sync Tab 1 checkboxes and currentEditingPerms CRUD flags
     document.querySelectorAll('.perm-check').forEach(chk => {
       const mod = chk.getAttribute('data-mod');
       const act = chk.getAttribute('data-act');
-      chk.checked = Boolean(perms[mod] && perms[mod][act]);
+      const isChecked = Boolean(perms[mod] && perms[mod][act]);
+      chk.checked = isChecked;
+
+      if (!currentEditingPerms[mod]) {
+        currentEditingPerms[mod] = { c: false, r: false, u: false, d: false };
+      }
+      currentEditingPerms[mod][act] = isChecked;
     });
 
-    notify(`Applied preset: ${preset.name}`, 'info');
+    // 2. Sync Tab 2 column permissions for all configured tables
+    Object.keys(TABLE_COLUMNS_CONFIG).forEach(tableKey => {
+      if (!currentEditingPerms[tableKey]) {
+        currentEditingPerms[tableKey] = { c: false, r: false, u: false, d: false };
+      }
+
+      if (perms[tableKey] && perms[tableKey].editable_columns !== undefined) {
+        currentEditingPerms[tableKey].editable_columns = JSON.parse(JSON.stringify(perms[tableKey].editable_columns));
+      } else if (preset.columns && preset.columns[tableKey] !== undefined) {
+        currentEditingPerms[tableKey].editable_columns = JSON.parse(JSON.stringify(preset.columns[tableKey]));
+      } else {
+        if (type === 'all') currentEditingPerms[tableKey].editable_columns = ['*'];
+        else if (type === 'none' || type === 'readonly') currentEditingPerms[tableKey].editable_columns = [];
+      }
+    });
+
+    // 3. Re-render column grid if open
+    renderColumnPermGrid(currentPermTable);
+
+    notify(`Applied preset: ${preset.name} (CRUD + Column Permissions)`, 'info');
   }
   window.applyPermPreset = applyPermPreset;
 
   function openSavePresetModal() {
-    const perms = getCurrentMatrixPermissions();
+    const perms = getCurrentFullPermissions();
     let enabledMods = 0;
     let totalChecks = 0;
     Object.keys(perms).forEach(k => {
@@ -1159,9 +1266,20 @@ require_once __DIR__ . '/includes/sidebar.php';
       totalChecks += cnt;
     });
 
+    let restrictedTables = 0;
+    Object.keys(TABLE_COLUMNS_CONFIG).forEach(t => {
+      const rawCols = perms[t]?.editable_columns;
+      if (Array.isArray(rawCols) && !rawCols.includes('*')) {
+        restrictedTables++;
+      }
+    });
+
     const summaryEl = document.getElementById('savePresetSummary');
     if (summaryEl) {
-      summaryEl.innerHTML = `<strong>Current Matrix State:</strong> ${enabledMods} module(s) enabled with ${totalChecks} total CRUD privileges.`;
+      summaryEl.innerHTML = `
+        <div style="margin-bottom: 4px;"><strong>Module Privileges:</strong> ${enabledMods} module(s) enabled (${totalChecks} CRUD flags).</div>
+        <div><strong>Column Edit Permissions:</strong> ${restrictedTables > 0 ? `${restrictedTables} table(s) configured with restricted columns` : 'All table columns freely editable'}.</div>
+      `;
     }
     document.getElementById('savePresetName').value = '';
     document.getElementById('savePresetDesc').value = '';
@@ -1179,7 +1297,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     const desc = document.getElementById('savePresetDesc').value.trim();
     if (!name) return;
 
-    const currentPerms = getCurrentMatrixPermissions();
+    const currentPerms = getCurrentFullPermissions();
     const newPreset = {
       id: 'preset_' + Date.now(),
       name: name,
@@ -1192,7 +1310,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     await savePermPresetsToServer();
     closeModal('savePresetModal');
     renderPermPresetsBar();
-    notify(`Preset "${name}" saved and added to Quick Presets!`);
+    notify(`Preset "${name}" saved with CRUD & column permissions!`);
   }
   window.handleSavePresetSubmit = handleSavePresetSubmit;
 
@@ -1201,6 +1319,23 @@ require_once __DIR__ . '/includes/sidebar.php';
     openModal('managePresetsModal');
   }
   window.openManagePresetsModal = openManagePresetsModal;
+
+  function getPresetColumnSummaryHtml(preset) {
+    const perms = preset.permissions || {};
+    const parts = [];
+    Object.keys(TABLE_COLUMNS_CONFIG).forEach(t => {
+      const cfg = TABLE_COLUMNS_CONFIG[t];
+      const rawCols = perms[t]?.editable_columns;
+      if (Array.isArray(rawCols) && !rawCols.includes('*')) {
+        const shortName = cfg.label.replace(' Table', '').replace(' Spec Sheet', '');
+        parts.push(`${shortName}: ${rawCols.length} cols`);
+      }
+    });
+    if (parts.length === 0) {
+      return `<span style="font-size: 11px; color: #16A34A; font-weight: 600;">Columns: All Editable</span>`;
+    }
+    return `<span style="font-size: 11px; color: #B45309; font-weight: 600;">Restricted Columns (${parts.join(', ')})</span>`;
+  }
 
   function renderManagePresetsList() {
     const container = document.getElementById('managePresetsList');
@@ -1227,16 +1362,19 @@ require_once __DIR__ . '/includes/sidebar.php';
               ${isSystem ? `<span class="badge" style="background: #F1F5F9; color: #475569; font-size: 10px; padding: 2px 6px; border-radius: 4px;">Default</span>` : `<span class="badge" style="background: #EFF6FF; color: #2563EB; font-size: 10px; padding: 2px 6px; border-radius: 4px;">Custom</span>`}
               <span style="font-size: 11px; color: #64748B;">(${modCount} active modules)</span>
             </div>
-            ${preset.description ? `<div style="font-size: 11.5px; color: #64748B; margin-top: 3px;">${escapeHtml(preset.description)}</div>` : ''}
+            ${preset.description ? `<div style="font-size: 11.5px; color: #64748B; margin-top: 2px;">${escapeHtml(preset.description)}</div>` : ''}
+            <div style="margin-top: 4px;">
+              ${getPresetColumnSummaryHtml(preset)}
+            </div>
           </div>
           <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('${preset.id}'); closeModal('managePresetsModal');" title="Apply to permissions form" style="font-size: 11px; padding: 3px 9px;">
               Apply
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="updatePresetWithCurrentMatrix('${preset.id}')" title="Overwrite preset with current matrix checkboxes" style="font-size: 11px; padding: 3px 9px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="updatePresetWithCurrentMatrix('${preset.id}')" title="Overwrite preset with current matrix & column checkboxes" style="font-size: 11px; padding: 3px 9px;">
               Update with Matrix
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openEditPresetModal('${preset.id}')" title="Edit name & description" style="font-size: 11px; padding: 3px 9px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openEditPresetModal('${preset.id}')" title="Edit details & column permissions" style="font-size: 11px; padding: 3px 9px;">
               Edit
             </button>
             ${!isSystem ? `
@@ -1253,23 +1391,43 @@ require_once __DIR__ . '/includes/sidebar.php';
   async function updatePresetWithCurrentMatrix(presetId) {
     const preset = cachedPermPresets.find(p => p.id === presetId);
     if (!preset) return;
-    if (!confirm(`Overwrite preset "${preset.name}" with the currently checked permissions in the matrix?`)) {
+    if (!confirm(`Overwrite preset "${preset.name}" with the currently checked module and column permissions?`)) {
       return;
     }
-    preset.permissions = getCurrentMatrixPermissions();
+    preset.permissions = getCurrentFullPermissions();
     await savePermPresetsToServer();
     renderManagePresetsList();
     renderPermPresetsBar();
-    notify(`Preset "${preset.name}" updated with current matrix configuration!`);
+    notify(`Preset "${preset.name}" updated with current module and column permissions!`);
   }
   window.updatePresetWithCurrentMatrix = updatePresetWithCurrentMatrix;
 
+  // --- Modal Edit Preset Details & Column-Level Permissions ---
   function openEditPresetModal(presetId) {
     const preset = cachedPermPresets.find(p => p.id === presetId);
     if (!preset) return;
+
     document.getElementById('editPresetId').value = preset.id;
     document.getElementById('editPresetName').value = preset.name;
     document.getElementById('editPresetDesc').value = preset.description || '';
+
+    // Clone working permissions
+    editingPresetWorkingPerms = JSON.parse(JSON.stringify(preset.permissions || {}));
+    
+    // Ensure all tables in TABLE_COLUMNS_CONFIG have structure
+    Object.keys(TABLE_COLUMNS_CONFIG).forEach(t => {
+      if (!editingPresetWorkingPerms[t]) {
+        editingPresetWorkingPerms[t] = { c: false, r: true, u: true, d: false, editable_columns: ['*'] };
+      } else if (editingPresetWorkingPerms[t].editable_columns === undefined) {
+        editingPresetWorkingPerms[t].editable_columns = ['*'];
+      }
+    });
+
+    editingPresetActiveTable = 'sales-requests';
+    const sel = document.getElementById('editPresetTableSelect');
+    if (sel) sel.value = editingPresetActiveTable;
+
+    renderEditPresetColGrid();
     openModal('editPresetModal');
     setTimeout(() => {
       const input = document.getElementById('editPresetName');
@@ -1277,6 +1435,107 @@ require_once __DIR__ . '/includes/sidebar.php';
     }, 100);
   }
   window.openEditPresetModal = openEditPresetModal;
+
+  function onEditPresetTableChange(tableKey) {
+    editingPresetActiveTable = tableKey;
+    renderEditPresetColGrid();
+  }
+  window.onEditPresetTableChange = onEditPresetTableChange;
+
+  function renderEditPresetColGrid() {
+    const tableKey = editingPresetActiveTable;
+    const cfg = TABLE_COLUMNS_CONFIG[tableKey];
+    const container = document.getElementById('editPresetColGrid');
+    if (!cfg || !container) return;
+
+    const tablePerm = editingPresetWorkingPerms[tableKey] || {};
+    const rawCols = tablePerm.editable_columns;
+    const isAll = (rawCols === undefined || rawCols === null || rawCols === '*' || (Array.isArray(rawCols) && (rawCols.length === 0 || rawCols.includes('*'))));
+
+    const radioAll = document.getElementById('editPresetColModeAll');
+    const radioCustom = document.getElementById('editPresetColModeCustom');
+    if (radioAll) radioAll.checked = isAll;
+    if (radioCustom) radioCustom.checked = !isAll;
+
+    const selectedCols = Array.isArray(rawCols) ? rawCols : (isAll ? cfg.columns.map(c => c.key) : []);
+
+    container.innerHTML = cfg.columns.map(col => {
+      const isChecked = isAll || selectedCols.includes(col.key);
+      return `
+        <label class="column-perm-card ${isChecked ? 'is-checked' : ''}" style="${isAll ? 'opacity: 0.7;' : ''} padding: 8px 10px;">
+          <input type="checkbox" class="perm-col-checkbox" ${isChecked ? 'checked' : ''} ${isAll ? 'disabled' : ''} onchange="toggleEditPresetColCheckbox('${tableKey}', '${col.key}', this.checked)">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+              <strong style="font-size: 12px; color: #0F172A;">${escapeHtml(col.label)}</strong>
+              <span class="badge badge-ongoing" style="font-size: 9px; padding: 1px 5px;">${col.type}</span>
+            </div>
+            <div style="font-size: 10.5px; color: #64748B;">${escapeHtml(col.desc)}</div>
+          </div>
+        </label>
+      `;
+    }).join('');
+  }
+  window.renderEditPresetColGrid = renderEditPresetColGrid;
+
+  function onEditPresetColModeToggle(mode) {
+    const tableKey = editingPresetActiveTable;
+    const cfg = TABLE_COLUMNS_CONFIG[tableKey];
+    if (!editingPresetWorkingPerms[tableKey]) {
+      editingPresetWorkingPerms[tableKey] = { c: false, r: true, u: true, d: false };
+    }
+    if (mode === 'all') {
+      editingPresetWorkingPerms[tableKey].editable_columns = ['*'];
+    } else {
+      editingPresetWorkingPerms[tableKey].editable_columns = cfg ? cfg.columns.map(c => c.key) : [];
+    }
+    renderEditPresetColGrid();
+  }
+  window.onEditPresetColModeToggle = onEditPresetColModeToggle;
+
+  function toggleEditPresetColCheckbox(tableKey, colKey, isChecked) {
+    if (!editingPresetWorkingPerms[tableKey]) {
+      editingPresetWorkingPerms[tableKey] = { c: false, r: true, u: true, d: false };
+    }
+    let cols = editingPresetWorkingPerms[tableKey].editable_columns;
+    const cfg = TABLE_COLUMNS_CONFIG[tableKey];
+    if (!Array.isArray(cols) || cols.includes('*')) {
+      cols = cfg ? cfg.columns.map(c => c.key) : [];
+    }
+
+    if (isChecked) {
+      if (!cols.includes(colKey)) cols.push(colKey);
+    } else {
+      cols = cols.filter(k => k !== colKey);
+    }
+
+    editingPresetWorkingPerms[tableKey].editable_columns = cols;
+    renderEditPresetColGrid();
+  }
+  window.toggleEditPresetColCheckbox = toggleEditPresetColCheckbox;
+
+  function applyEditPresetColQuick(presetType) {
+    const tableKey = editingPresetActiveTable;
+    const cfg = TABLE_COLUMNS_CONFIG[tableKey];
+    if (!cfg) return;
+
+    if (!editingPresetWorkingPerms[tableKey]) {
+      editingPresetWorkingPerms[tableKey] = { c: false, r: true, u: true, d: false };
+    }
+
+    if (presetType === 'all') {
+      editingPresetWorkingPerms[tableKey].editable_columns = ['*'];
+    } else if (presetType === 'none') {
+      editingPresetWorkingPerms[tableKey].editable_columns = [];
+    } else if (presetType === 'artist') {
+      const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'];
+      editingPresetWorkingPerms[tableKey].editable_columns = cfg.columns.map(c => c.key).filter(k => artistCols.includes(k));
+    } else if (presetType === 'sales') {
+      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
+      editingPresetWorkingPerms[tableKey].editable_columns = cfg.columns.map(c => c.key).filter(k => salesCols.includes(k));
+    }
+    renderEditPresetColGrid();
+  }
+  window.applyEditPresetColQuick = applyEditPresetColQuick;
 
   async function handleEditPresetSubmit(e) {
     e.preventDefault();
@@ -1288,11 +1547,13 @@ require_once __DIR__ . '/includes/sidebar.php';
 
     preset.name = name;
     preset.description = desc;
+    preset.permissions = editingPresetWorkingPerms;
+
     await savePermPresetsToServer();
     closeModal('editPresetModal');
     renderManagePresetsList();
     renderPermPresetsBar();
-    notify(`Preset updated successfully!`);
+    notify(`Preset "${name}" updated with column permissions!`);
   }
   window.handleEditPresetSubmit = handleEditPresetSubmit;
 
@@ -1331,7 +1592,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     localStorage.setItem('pms_perm_presets', JSON.stringify(cachedPermPresets));
     renderManagePresetsList();
     renderPermPresetsBar();
-    notify('Quick Presets restored to system defaults!');
+    notify('Quick Presets restored to system defaults (including column permissions)!');
   }
   window.resetPresetsToDefaults = resetPresetsToDefaults;
 

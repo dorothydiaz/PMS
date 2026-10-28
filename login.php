@@ -16,22 +16,27 @@ if (isLoggedIn()) {
 $error = '';
 $msg = $_GET['msg'] ?? '';
 $redirect = $_GET['redirect'] ?? 'index.php';
+$require2fa = false;
 
 // Handle Credentials Submission
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $usernameOrEmail = cleanInput($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
+    $totpCode = cleanInput($_POST['totp_code'] ?? '');
     
     if (empty($usernameOrEmail) || empty($password)) {
         $error = 'Please enter your username/email and password.';
     } else {
-        $result = loginUser($usernameOrEmail, $password);
+        $result = loginUser($usernameOrEmail, $password, $totpCode);
         if ($result['success']) {
             $dest = !empty($redirect) && strpos($redirect, 'login.php') === false ? $redirect : 'index.php';
             header('Location: ' . $dest);
             exit;
         } else {
             $error = $result['error'];
+            if (!empty($result['require_2fa'])) {
+                $require2fa = true;
+            }
         }
     }
 }
@@ -341,6 +346,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
           <span>You have been signed out safely.</span>
         </div>
+      <?php elseif ($msg === 'session_revoked'): ?>
+        <div class="login-alert alert-error">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Your session was ended remotely from another device or revoked. Please sign in again.</span>
+        </div>
       <?php endif; ?>
 
       <!-- Standard Credentials Form -->
@@ -363,6 +373,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             </button>
           </div>
         </div>
+
+        <?php if (!empty($require2fa)): ?>
+          <div class="form-group-login" style="margin-top: 14px;">
+            <label class="login-label" for="loginTotp" style="color: #DC2626; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
+              <span>Google Authenticator Code</span>
+              <span style="font-size: 10px; background: #FEF2F2; color: #DC2626; padding: 2px 6px; border-radius: 4px; border: 1px solid #FCA5A5;">2FA Required</span>
+            </label>
+            <div class="input-icon-wrap">
+              <svg class="input-left-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <input type="text" id="loginTotp" name="totp_code" placeholder="6-digit code" maxlength="6" pattern="[0-9]{6}" autofocus required style="border-color: #DC2626; font-weight: 700; font-size: 16px; letter-spacing: 3px; text-align: center;">
+            </div>
+            <span style="font-size: 11px; color: #64748B; margin-top: 4px; display: block;">Enter the 6-digit verification code from your Google Authenticator app.</span>
+          </div>
+        <?php endif; ?>
 
         <button type="submit" class="btn-submit-login">
           <span>Sign In</span>

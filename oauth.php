@@ -11,6 +11,46 @@ $provider = $_GET['provider'] ?? 'google';
 $action = $_GET['action'] ?? '';
 $error = '';
 
+// Handle linking/unlinking Google account for logged in user
+if ($action === 'link') {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    $currUser = getCurrentUser();
+    $mockEmail = $_GET['email'] ?? ($currUser['email'] ?: 'google_user@signdepot.com');
+    $mockId = 'goog_' . substr(md5($mockEmail), 0, 16);
+    
+    $pdo = getDbConnection();
+    if ($pdo) {
+        ensureSecurityTables();
+        $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'google', oauth_id = :oid, google_email = :ge WHERE id = :id");
+        $stmt->execute([':oid' => $mockId, ':ge' => $mockEmail, ':id' => (int)$currUser['id']]);
+        $_SESSION['pms_user']['oauth_provider'] = 'google';
+        logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Connected Google account: ' . $mockEmail, null, 'Success');
+    }
+    header('Location: pages/account-settings.php?msg=google_linked');
+    exit;
+}
+
+if ($action === 'unlink') {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    $currUser = getCurrentUser();
+    $pdo = getDbConnection();
+    if ($pdo) {
+        ensureSecurityTables();
+        $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'credentials', oauth_id = NULL, google_email = NULL WHERE id = :id");
+        $stmt->execute([':id' => (int)$currUser['id']]);
+        $_SESSION['pms_user']['oauth_provider'] = 'credentials';
+        logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Disconnected Google account', null, 'Success');
+    }
+    header('Location: pages/account-settings.php?msg=google_unlinked');
+    exit;
+}
+
 // 1. Google OAuth2 Flow
 if ($provider === 'google') {
     $clientId = defined('GOOGLE_CLIENT_ID') ? GOOGLE_CLIENT_ID : '';

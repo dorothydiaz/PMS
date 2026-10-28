@@ -70,6 +70,7 @@ function setSystemSetting($key, $value) {
 
 function getDefaultPermissionPresets() {
     $modules = ['dashboard', 'sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'monthly-output', 'reports', 'access-control', 'audit-trail', 'settings'];
+    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details'];
     
     $allPerms = [];
     $roPerms = [];
@@ -77,10 +78,30 @@ function getDefaultPermissionPresets() {
     $salesPerms = [];
     $nonePerms = [];
 
+    $artistCols = [
+        'creatives-tracker' => ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
+        'sales-requests' => ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
+        'artist-workload' => ['designDeadline', 'projectStatus'],
+        'directives-details' => ['projectName', 'reference']
+    ];
+
+    $salesCols = [
+        'sales-requests' => ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
+        'creatives-tracker' => ['clientApproval', 'remarks'],
+        'artist-workload' => [],
+        'directives-details' => ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference']
+    ];
+
     foreach ($modules as $m) {
         $allPerms[$m] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
         $roPerms[$m] = ['c' => false, 'r' => true, 'u' => false, 'd' => false];
         $nonePerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
+
+        if (in_array($m, $tables)) {
+            $allPerms[$m]['editable_columns'] = ['*'];
+            $roPerms[$m]['editable_columns'] = [];
+            $nonePerms[$m]['editable_columns'] = [];
+        }
         
         if (in_array($m, ['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'])) {
             $artistPerms[$m] = [
@@ -92,6 +113,9 @@ function getDefaultPermissionPresets() {
         } else {
             $artistPerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
         }
+        if (isset($artistCols[$m])) {
+            $artistPerms[$m]['editable_columns'] = $artistCols[$m];
+        }
 
         if (in_array($m, ['dashboard', 'sales-requests'])) {
             $salesPerms[$m] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
@@ -100,41 +124,44 @@ function getDefaultPermissionPresets() {
         } else {
             $salesPerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
         }
+        if (isset($salesCols[$m])) {
+            $salesPerms[$m]['editable_columns'] = $salesCols[$m];
+        }
     }
 
     return [
         [
             'id' => 'all',
             'name' => 'Full Access (All)',
-            'description' => 'Grants full CRUD privileges on all modules',
+            'description' => 'Grants full CRUD privileges and full column edit access across all modules',
             'is_default' => true,
             'permissions' => $allPerms
         ],
         [
             'id' => 'readonly',
             'name' => 'Read Only (All)',
-            'description' => 'Grants view-only access across all modules',
+            'description' => 'Grants view-only access across all modules without column edit rights',
             'is_default' => true,
             'permissions' => $roPerms
         ],
         [
             'id' => 'artist',
             'name' => 'Creative Artist',
-            'description' => 'Access to tracker, artist workload, directives and monthly output',
+            'description' => 'Access to tracker, artist workload, directives with artist-specific editable columns',
             'is_default' => true,
             'permissions' => $artistPerms
         ],
         [
             'id' => 'sales',
             'name' => 'Sales Rep',
-            'description' => 'Access to sales requests and view-only creatives tracker',
+            'description' => 'Access to sales requests with client/order editable columns and view-only tracker',
             'is_default' => true,
             'permissions' => $salesPerms
         ],
         [
             'id' => 'none',
             'name' => 'Revoke All',
-            'description' => 'Revokes all privileges across all modules',
+            'description' => 'Revokes all privileges and column edit rights across all modules',
             'is_default' => true,
             'permissions' => $nonePerms
         ]
@@ -1518,6 +1545,27 @@ switch ($action) {
             if (!empty($stored)) {
                 $decoded = json_decode($stored, true);
                 if (is_array($decoded) && count($decoded) > 0) {
+                    $defaults = getDefaultPermissionPresets();
+                    $defMap = [];
+                    foreach ($defaults as $d) {
+                        $defMap[$d['id']] = $d;
+                    }
+                    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details'];
+                    foreach ($decoded as &$p) {
+                        $pId = $p['id'] ?? '';
+                        $defP = $defMap[$pId] ?? null;
+                        if (!isset($p['permissions']) || !is_array($p['permissions'])) {
+                            $p['permissions'] = [];
+                        }
+                        foreach ($tables as $t) {
+                            if (!isset($p['permissions'][$t])) {
+                                $p['permissions'][$t] = ['c' => false, 'r' => true, 'u' => true, 'd' => false, 'editable_columns' => ['*']];
+                            } elseif (!isset($p['permissions'][$t]['editable_columns'])) {
+                                $p['permissions'][$t]['editable_columns'] = $defP['permissions'][$t]['editable_columns'] ?? ['*'];
+                            }
+                        }
+                    }
+                    unset($p);
                     sendJsonResponse(['success' => true, 'presets' => $decoded]);
                 }
             }
@@ -1551,6 +1599,380 @@ switch ($action) {
             $defaults = getDefaultPermissionPresets();
             setSystemSetting('permission_presets', json_encode($defaults));
             sendJsonResponse(['success' => true, 'presets' => $defaults]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    /* =========================================================================
+     * ACCOUNT SETTINGS ENDPOINTS
+     * ========================================================================= */
+    case 'account_get_info':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $stmt = $pdo->prepare("SELECT id, username, email, full_name, role, avatar_url, oauth_provider, oauth_id, google_email, two_factor_enabled, created_at FROM users WHERE id = ?");
+            $stmt->execute([(int)$currUser['id']]);
+            $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$userData) {
+                sendJsonResponse(['success' => false, 'error' => 'User not found'], 404);
+            }
+            $userData['two_factor_enabled'] = (bool)($userData['two_factor_enabled'] ?? false);
+            $userData['is_google_linked'] = (!empty($userData['oauth_provider']) && $userData['oauth_provider'] === 'google') || !empty($userData['google_email']);
+            sendJsonResponse(['success' => true, 'user' => $userData]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_update_profile':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+            $fullName = cleanInput($bodyData['full_name'] ?? $_POST['full_name'] ?? '');
+            $email = cleanInput($bodyData['email'] ?? $_POST['email'] ?? '');
+
+            if (empty($fullName)) {
+                sendJsonResponse(['success' => false, 'error' => 'Full name cannot be empty'], 400);
+            }
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                sendJsonResponse(['success' => false, 'error' => 'Valid email address is required'], 400);
+            }
+
+            // Check if email already used by someone else
+            $chk = $pdo->prepare("SELECT id FROM users WHERE email = :e AND id != :id LIMIT 1");
+            $chk->execute([':e' => $email, ':id' => $userId]);
+            if ($chk->fetch()) {
+                sendJsonResponse(['success' => false, 'error' => 'This email address is already in use by another account'], 400);
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET full_name = :fn, email = :e WHERE id = :id");
+            $stmt->execute([':fn' => $fullName, ':e' => $email, ':id' => $userId]);
+
+            $_SESSION['pms_user']['full_name'] = $fullName;
+            $_SESSION['pms_user']['email'] = $email;
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'USER_UPDATE', 'Account Settings', 'Updated profile information', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Profile updated successfully', 'user' => $_SESSION['pms_user']]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_change_password':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+
+            $currentPassword = $bodyData['current_password'] ?? $_POST['current_password'] ?? '';
+            $newPassword = $bodyData['new_password'] ?? $_POST['new_password'] ?? '';
+            $confirmPassword = $bodyData['confirm_password'] ?? $_POST['confirm_password'] ?? '';
+
+            if (strlen($newPassword) < 6) {
+                sendJsonResponse(['success' => false, 'error' => 'New password must be at least 6 characters long'], 400);
+            }
+            if ($newPassword !== $confirmPassword) {
+                sendJsonResponse(['success' => false, 'error' => 'New password and confirmation do not match'], 400);
+            }
+
+            // Verify current password if user has password_hash
+            $stmt = $pdo->prepare("SELECT password_hash, oauth_provider FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($userRow && !empty($userRow['password_hash'])) {
+                if (empty($currentPassword)) {
+                    sendJsonResponse(['success' => false, 'error' => 'Please enter your current password'], 400);
+                }
+                if (!password_verify($currentPassword, $userRow['password_hash'])) {
+                    sendJsonResponse(['success' => false, 'error' => 'Current password is incorrect'], 400);
+                }
+            }
+
+            $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+            $upd = $pdo->prepare("UPDATE users SET password_hash = :p WHERE id = :id");
+            $upd->execute([':p' => $newHash, ':id' => $userId]);
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'PASSWORD_CHANGE', 'Account Settings', 'User successfully changed password', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Password updated successfully!']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_upload_avatar':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+            $avatarUrl = '';
+
+            if (!empty($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                $file = $_FILES['avatar'];
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+                if (!in_array($ext, $allowedExtensions)) {
+                    sendJsonResponse(['success' => false, 'error' => 'Allowed image formats: JPG, PNG, WEBP, GIF'], 400);
+                }
+
+                if ($file['size'] > 5 * 1024 * 1024) {
+                    sendJsonResponse(['success' => false, 'error' => 'Avatar image must be under 5MB'], 400);
+                }
+
+                $targetDir = __DIR__ . '/uploads/avatars/';
+                if (!is_dir($targetDir)) {
+                    mkdir($targetDir, 0755, true);
+                }
+
+                $newFilename = 'avatar_' . $userId . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                $targetFile = $targetDir . $newFilename;
+
+                if (!move_uploaded_file($file['tmp_name'], $targetFile)) {
+                    sendJsonResponse(['success' => false, 'error' => 'Failed to save avatar image file'], 500);
+                }
+
+                $avatarUrl = 'uploads/avatars/' . $newFilename;
+            } elseif (!empty($bodyData['preset_url']) || !empty($_POST['preset_url'])) {
+                $preset = cleanInput($bodyData['preset_url'] ?? $_POST['preset_url'] ?? '');
+                if (!filter_var($preset, FILTER_VALIDATE_URL) && strpos($preset, 'assets/') !== 0 && strpos($preset, 'uploads/') !== 0) {
+                    sendJsonResponse(['success' => false, 'error' => 'Invalid avatar preset URL'], 400);
+                }
+                $avatarUrl = $preset;
+            } else {
+                sendJsonResponse(['success' => false, 'error' => 'No avatar image file or preset provided'], 400);
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET avatar_url = :a WHERE id = :id");
+            $stmt->execute([':a' => $avatarUrl, ':id' => $userId]);
+
+            $_SESSION['pms_user']['avatar_url'] = $avatarUrl;
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'USER_UPDATE', 'Account Settings', 'Updated profile picture / avatar', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'avatar_url' => $avatarUrl, 'message' => 'Profile picture updated successfully!']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_remove_avatar':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+
+            $stmt = $pdo->prepare("UPDATE users SET avatar_url = NULL WHERE id = ?");
+            $stmt->execute([$userId]);
+
+            $_SESSION['pms_user']['avatar_url'] = null;
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'USER_UPDATE', 'Account Settings', 'Removed profile picture', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Profile picture removed. Initials will be used.']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_google_link':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+            $googleEmail = cleanInput($bodyData['google_email'] ?? $_POST['google_email'] ?? ($currUser['email'] ?? ''));
+
+            if (empty($googleEmail) || !filter_var($googleEmail, FILTER_VALIDATE_EMAIL)) {
+                sendJsonResponse(['success' => false, 'error' => 'Valid Google email is required to link account'], 400);
+            }
+
+            $mockId = 'goog_' . substr(md5($googleEmail), 0, 16);
+            $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'google', oauth_id = :oid, google_email = :ge WHERE id = :id");
+            $stmt->execute([':oid' => $mockId, ':ge' => $googleEmail, ':id' => $userId]);
+
+            $_SESSION['pms_user']['oauth_provider'] = 'google';
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Connected Google account: ' . $googleEmail, null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Google account linked successfully! You can now use Google SSO.', 'google_email' => $googleEmail]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_google_unlink':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+
+            // Ensure user has a password before unlinking
+            $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $u = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (empty($u['password_hash'])) {
+                sendJsonResponse(['success' => false, 'error' => 'Please set an account password first before unlinking your Google account so you can still log in.'], 400);
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'credentials', oauth_id = NULL, google_email = NULL WHERE id = ?");
+            $stmt->execute([$userId]);
+
+            $_SESSION['pms_user']['oauth_provider'] = 'credentials';
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Disconnected Google account', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Google account disconnected successfully.']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_2fa_setup':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $secret = generateTotpSecret(16);
+            $qrUrl = getTotpQrCodeUrl($secret, $currUser['email'] ?? ($currUser['username'] . '@signdepot.com'));
+
+            $_SESSION['pms_temp_2fa_secret'] = $secret;
+
+            sendJsonResponse([
+                'success' => true,
+                'secret' => $secret,
+                'qr_url' => $qrUrl,
+                'manual_entry_key' => implode(' ', str_split($secret, 4))
+            ]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_2fa_verify':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+            $code = cleanInput($bodyData['code'] ?? $_POST['code'] ?? '');
+
+            if (empty($_SESSION['pms_temp_2fa_secret'])) {
+                sendJsonResponse(['success' => false, 'error' => 'No 2FA setup in progress. Please start setup again.'], 400);
+            }
+
+            $secret = $_SESSION['pms_temp_2fa_secret'];
+            if (!verifyTotpCode($secret, $code)) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid or expired 6-digit code. Please check your Google Authenticator app and try again.'], 400);
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET two_factor_enabled = 1, two_factor_secret = :s WHERE id = :id");
+            $stmt->execute([':s' => $secret, ':id' => $userId]);
+
+            unset($_SESSION['pms_temp_2fa_secret']);
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'AUTH_2FA', 'Account Settings', 'Enabled Google Authenticator 2FA', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Google Authenticator 2FA has been successfully activated for your account!']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_2fa_disable':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+
+            $stmt = $pdo->prepare("UPDATE users SET two_factor_enabled = 0, two_factor_secret = NULL WHERE id = ?");
+            $stmt->execute([$userId]);
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'AUTH_2FA', 'Account Settings', 'Disabled Google Authenticator 2FA', null, 'Success');
+
+            sendJsonResponse(['success' => true, 'message' => 'Two-factor authentication has been disabled.']);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_get_devices':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $devices = getUserActiveDevices((int)$currUser['id']);
+            sendJsonResponse(['success' => true, 'devices' => $devices]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_revoke_device':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $sessionId = (int)($bodyData['session_id'] ?? $_POST['session_id'] ?? 0);
+
+            if ($sessionId <= 0) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid session identifier'], 400);
+            }
+
+            revokeUserDevice((int)$currUser['id'], $sessionId);
+            logAuditEvent($currUser['username'], $currUser['role'], 'DEVICE_REVOKE', 'Account Settings', 'Revoked session #' . $sessionId, null, 'Success');
+
+            $devices = getUserActiveDevices((int)$currUser['id']);
+            sendJsonResponse(['success' => true, 'message' => 'Device session revoked successfully.', 'devices' => $devices]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_revoke_other_devices':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            revokeAllOtherDevices((int)$currUser['id']);
+            logAuditEvent($currUser['username'], $currUser['role'], 'DEVICE_REVOKE', 'Account Settings', 'Signed out of all other devices', null, 'Success');
+
+            $devices = getUserActiveDevices((int)$currUser['id']);
+            sendJsonResponse(['success' => true, 'message' => 'All other devices have been logged out successfully.', 'devices' => $devices]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
