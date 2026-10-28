@@ -5122,6 +5122,10 @@
       renderArtistWorkload();
     } else if (state.activeView === 'view-monthly-output') {
       renderMonthlyOutputReport();
+    } else if (state.activeView === 'view-sales-requests' || currentMod === 'sales-requests') {
+      if (fieldName === 'clientApproval') {
+        renderSalesRequests();
+      }
     }
   }
 
@@ -6786,27 +6790,84 @@
     populateSalesFiltersDropdowns();
 
     // Live Client Approval Status Tab Counts
-    const allCount = state.requests.length;
-    const pendingCount = state.requests.filter(r => r.clientApproval === 'Pending').length;
-    const revisionCount = state.requests.filter(r => r.clientApproval === 'Revision Requested').length;
-    const approvedCount = state.requests.filter(r => r.clientApproval === 'Approved').length;
+    const statusCounts = {
+      all: state.requests.length,
+      ongoing: 0,
+      forReview: 0,
+      revising: 0,
+      completed: 0,
+      released: 0,
+      incomplete: 0,
+      onhold: 0,
+      pendingApproval: 0,
+      approved: 0
+    };
 
-    const elAll = document.getElementById('badgeCountAll');
-    if (elAll) elAll.textContent = allCount;
-    const elPending = document.getElementById('badgeCountPending');
-    if (elPending) elPending.textContent = pendingCount;
-    const elRevision = document.getElementById('badgeCountRevision');
-    if (elRevision) elRevision.textContent = revisionCount;
-    const elApproved = document.getElementById('badgeCountApproved');
-    if (elApproved) elApproved.textContent = approvedCount;
+    state.requests.forEach(r => {
+      const ca = (r.clientApproval || '').trim();
+      const caLower = ca.toLowerCase();
+      if (ca === 'On-going' || caLower === 'ongoing' || caLower === 'on-going') statusCounts.ongoing++;
+      else if (ca === 'For Review' || caLower === 'for review') statusCounts.forReview++;
+      else if (ca === 'Revising' || caLower === 'revising' || caLower.includes('revision')) statusCounts.revising++;
+      else if (ca === 'Completed' || caLower === 'completed') statusCounts.completed++;
+      else if (ca === 'Released' || caLower === 'released') statusCounts.released++;
+      else if (ca === 'Incomplete Details/Files' || caLower.includes('incomplete')) statusCounts.incomplete++;
+      else if (ca === 'Onhold' || caLower.includes('hold')) statusCounts.onhold++;
+      else if (ca === 'Pending Approval' || caLower === 'pending approval' || caLower === 'pending') statusCounts.pendingApproval++;
+      else if (ca === 'Approved' || caLower === 'approved') statusCounts.approved++;
+      else statusCounts.pendingApproval++;
+    });
+
+    const updateBadge = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    updateBadge('badgeCountAll', statusCounts.all);
+    updateBadge('badgeCountOngoing', statusCounts.ongoing);
+    updateBadge('badgeCountForReview', statusCounts.forReview);
+    updateBadge('badgeCountRevising', statusCounts.revising);
+    updateBadge('badgeCountCompleted', statusCounts.completed);
+    updateBadge('badgeCountReleased', statusCounts.released);
+    updateBadge('badgeCountIncomplete', statusCounts.incomplete);
+    updateBadge('badgeCountOnhold', statusCounts.onhold);
+    updateBadge('badgeCountPendingApproval', statusCounts.pendingApproval);
+    updateBadge('badgeCountApproved', statusCounts.approved);
+    // Legacy fallback IDs
+    updateBadge('badgeCountPending', statusCounts.pendingApproval);
+    updateBadge('badgeCountRevision', statusCounts.revising);
 
     // Sync active approval tab button respecting permissions
-    const tabKeyMap = { '': 'all', 'Pending': 'pending', 'Revision Requested': 'revision', 'Approved': 'approved' };
+    const tabKeyMap = {
+      '': 'all',
+      'On-going': 'ongoing',
+      'For Review': 'for_review',
+      'Revising': 'revising',
+      'Revision Requested': 'revising',
+      'Completed': 'completed',
+      'Released': 'released',
+      'Incomplete Details/Files': 'incomplete',
+      'Onhold': 'onhold',
+      'Pending Approval': 'pending_approval',
+      'Pending': 'pending_approval',
+      'Approved': 'approved'
+    };
     let curTabKey = tabKeyMap[state.salesFilter.approvalTab || ''] || 'all';
     if (!canUserAccessTab('sales-requests', curTabKey)) {
-      const allowedTabKey = ['all', 'pending', 'revision', 'approved'].find(k => canUserAccessTab('sales-requests', k));
+      const allowedTabKey = ['all', 'ongoing', 'for_review', 'revising', 'completed', 'released', 'incomplete', 'onhold', 'pending_approval', 'approved'].find(k => canUserAccessTab('sales-requests', k));
       if (allowedTabKey) {
-        const revMap = { 'all': '', 'pending': 'Pending', 'revision': 'Revision Requested', 'approved': 'Approved' };
+        const revMap = {
+          'all': '',
+          'ongoing': 'On-going',
+          'for_review': 'For Review',
+          'revising': 'Revising',
+          'completed': 'Completed',
+          'released': 'Released',
+          'incomplete': 'Incomplete Details/Files',
+          'onhold': 'Onhold',
+          'pending_approval': 'Pending Approval',
+          'approved': 'Approved'
+        };
         state.salesFilter.approvalTab = revMap[allowedTabKey];
       }
     }
@@ -6818,12 +6879,40 @@
       tabBtn.setAttribute('aria-selected', isAct ? 'true' : 'false');
     });
 
+    // Keep salesFilterApproval select dropdown in sync with activeApprovalTab
+    const selApproval = document.getElementById('salesFilterApproval');
+    if (selApproval && selApproval.value !== activeApprovalTab) {
+      selApproval.value = activeApprovalTab;
+      syncFilterSelectUI(selApproval);
+    }
+
     let list = [...state.requests];
     const { search, priority, approval, fileSent, salesRep, location, sortField, sortDir, page, perPage } = state.salesFilter;
 
-    // Filter by approval tab
-    if (activeApprovalTab) {
-      list = list.filter(r => r.clientApproval === activeApprovalTab);
+    // Filter by approval tab or approval dropdown
+    const effectiveApproval = activeApprovalTab || approval || '';
+    if (effectiveApproval) {
+      list = list.filter(r => {
+        const ca = (r.clientApproval || '').trim();
+        const caLower = ca.toLowerCase();
+        const targetLower = effectiveApproval.toLowerCase();
+        if (targetLower === 'pending approval' || targetLower === 'pending') {
+          return caLower === 'pending approval' || caLower === 'pending';
+        }
+        if (targetLower === 'revising' || targetLower.includes('revision')) {
+          return caLower === 'revising' || caLower.includes('revision');
+        }
+        if (targetLower === 'on-going' || targetLower === 'ongoing') {
+          return caLower === 'on-going' || caLower === 'ongoing';
+        }
+        if (targetLower.includes('incomplete')) {
+          return caLower.includes('incomplete');
+        }
+        if (targetLower.includes('hold')) {
+          return caLower.includes('hold');
+        }
+        return ca === effectiveApproval || caLower === targetLower;
+      });
     }
 
     // Filters
@@ -13246,7 +13335,10 @@
       if (el) {
         el.addEventListener('change', () => {
           if (id === 'salesFilterPriority') state.salesFilter.priority = el.value;
-          if (id === 'salesFilterApproval') state.salesFilter.approval = el.value;
+          if (id === 'salesFilterApproval') {
+            state.salesFilter.approval = el.value;
+            state.salesFilter.approvalTab = el.value;
+          }
           if (id === 'salesFilterFileSent') state.salesFilter.fileSent = el.value;
           if (id === 'salesFilterSalesRep') state.salesFilter.salesRep = el.value;
           if (id === 'salesFilterLocation') state.salesFilter.location = el.value;
@@ -13261,6 +13353,12 @@
       btn.addEventListener('click', () => {
         const tabVal = btn.getAttribute('data-tab-approval') || '';
         state.salesFilter.approvalTab = tabVal;
+        state.salesFilter.approval = tabVal;
+        const selApproval = document.getElementById('salesFilterApproval');
+        if (selApproval) {
+          selApproval.value = tabVal;
+          syncFilterSelectUI(selApproval);
+        }
         state.salesFilter.page = 1;
         renderSalesRequests();
       });

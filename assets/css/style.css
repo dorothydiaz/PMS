@@ -5369,6 +5369,7 @@ textarea.form-control {
   white-space: nowrap;
   outline: none;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .sales-approval-tab:hover {
@@ -5390,6 +5391,13 @@ textarea.form-control {
   flex-shrink: 0;
 }
 
+.tab-status-dot.dot-ongoing { background: #3B82F6; }
+.tab-status-dot.dot-for-review { background: #F59E0B; }
+.tab-status-dot.dot-revising { background: #F59E0B; }
+.tab-status-dot.dot-completed { background: #10B981; }
+.tab-status-dot.dot-released { background: #10B981; }
+.tab-status-dot.dot-incomplete { background: #EF4444; }
+.tab-status-dot.dot-onhold { background: #64748B; }
 .tab-status-dot.dot-pending { background: #F59E0B; }
 .tab-status-dot.dot-revision { background: #8B5CF6; }
 .tab-status-dot.dot-approved { background: #10B981; }
@@ -5407,6 +5415,69 @@ textarea.form-control {
 
 .sales-approval-tab.active .tab-count-pill {
   background: #0F172A;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-ongoing {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+.sales-approval-tab.active .tab-count-pill.pill-ongoing {
+  background: #3B82F6;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-for-review {
+  background: #FEF3C7;
+  color: #B45309;
+}
+.sales-approval-tab.active .tab-count-pill.pill-for-review {
+  background: #F59E0B;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-revising {
+  background: #FEF3C7;
+  color: #B45309;
+}
+.sales-approval-tab.active .tab-count-pill.pill-revising {
+  background: #F59E0B;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-completed {
+  background: #DCFCE7;
+  color: #15803D;
+}
+.sales-approval-tab.active .tab-count-pill.pill-completed {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-released {
+  background: #DCFCE7;
+  color: #15803D;
+}
+.sales-approval-tab.active .tab-count-pill.pill-released {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-incomplete {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+.sales-approval-tab.active .tab-count-pill.pill-incomplete {
+  background: #EF4444;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-onhold {
+  background: #F1F5F9;
+  color: #475569;
+}
+.sales-approval-tab.active .tab-count-pill.pill-onhold {
+  background: #64748B;
   color: #FFFFFF;
 }
 

@@ -46,18 +46,60 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <span class="tab-count-pill" id="badgeCountAll">0</span>
               </button>
               <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'pending')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Pending" id="tabSalesPending" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-pending"></span>
-                <span class="tab-label">Pending</span>
-                <span class="tab-count-pill pill-pending" id="badgeCountPending">0</span>
+              <?php if (hasTabPermission('sales-requests', 'ongoing')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="On-going" id="tabSalesOngoing" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-ongoing"></span>
+                <span class="tab-label">On-going</span>
+                <span class="tab-count-pill pill-ongoing" id="badgeCountOngoing">0</span>
               </button>
               <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'revision')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Revision Requested" id="tabSalesRevision" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-revision"></span>
-                <span class="tab-label">Revision Requested</span>
-                <span class="tab-count-pill pill-revision" id="badgeCountRevision">0</span>
+              <?php if (hasTabPermission('sales-requests', 'for_review')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="For Review" id="tabSalesForReview" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-for-review"></span>
+                <span class="tab-label">For Review</span>
+                <span class="tab-count-pill pill-for-review" id="badgeCountForReview">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'revising')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Revising" id="tabSalesRevising" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-revising"></span>
+                <span class="tab-label">Revising</span>
+                <span class="tab-count-pill pill-revising" id="badgeCountRevising">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'completed')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Completed" id="tabSalesCompleted" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-completed"></span>
+                <span class="tab-label">Completed</span>
+                <span class="tab-count-pill pill-completed" id="badgeCountCompleted">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'released')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Released" id="tabSalesReleased" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-released"></span>
+                <span class="tab-label">Released</span>
+                <span class="tab-count-pill pill-released" id="badgeCountReleased">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'incomplete')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Incomplete Details/Files" id="tabSalesIncomplete" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-incomplete"></span>
+                <span class="tab-label">Incomplete Details/Files</span>
+                <span class="tab-count-pill pill-incomplete" id="badgeCountIncomplete">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'onhold')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Onhold" id="tabSalesOnhold" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-onhold"></span>
+                <span class="tab-label">Onhold</span>
+                <span class="tab-count-pill pill-onhold" id="badgeCountOnhold">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'pending_approval')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Pending Approval" id="tabSalesPendingApproval" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-pending"></span>
+                <span class="tab-label">Pending Approval</span>
+                <span class="tab-count-pill pill-pending" id="badgeCountPendingApproval">0</span>
               </button>
               <?php endif; ?>
               <?php if (hasTabPermission('sales-requests', 'approved')): ?>
