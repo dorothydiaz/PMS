@@ -1614,15 +1614,96 @@ switch ($action) {
         try {
             ensureSecurityTables();
             $currUser = getCurrentUser();
-            $stmt = $pdo->prepare("SELECT id, username, email, full_name, role, avatar_url, oauth_provider, oauth_id, google_email, two_factor_enabled, created_at FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT id, username, email, full_name, role, avatar_url, oauth_provider, oauth_id, google_email, two_factor_enabled, email_verified, email_verified_at, created_at FROM users WHERE id = ?");
             $stmt->execute([(int)$currUser['id']]);
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$userData) {
                 sendJsonResponse(['success' => false, 'error' => 'User not found'], 404);
             }
             $userData['two_factor_enabled'] = (bool)($userData['two_factor_enabled'] ?? false);
+            $userData['email_verified'] = (bool)($userData['email_verified'] ?? false);
             $userData['is_google_linked'] = (!empty($userData['oauth_provider']) && $userData['oauth_provider'] === 'google') || !empty($userData['google_email']);
             sendJsonResponse(['success' => true, 'user' => $userData]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_send_email_code':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+
+            $stmt = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $uEmail = $stmt->fetchColumn();
+
+            if (empty($uEmail) || !filter_var($uEmail, FILTER_VALIDATE_EMAIL)) {
+                sendJsonResponse(['success' => false, 'error' => 'Please provide a valid email address first.'], 400);
+            }
+
+            $code = (string)random_int(100000, 999999);
+            $_SESSION['pms_email_verify_code'] = $code;
+            $_SESSION['pms_email_verify_target'] = $uEmail;
+
+            $upd = $pdo->prepare("UPDATE users SET email_verification_code = :c WHERE id = :id");
+            $upd->execute([':c' => $code, ':id' => $userId]);
+
+            $subject = "Your Sign Depot Verification Code: $code";
+            $message = "Hello,\n\nYour 6-digit email verification code for Sign Depot Operations PMS is: $code\n\nEnter this code on your Settings page to verify your email address.\n\nThank you,\nSign Depot Operations";
+            $headers = "From: noreply@signdepot.com\r\nReply-To: support@signdepot.com\r\nX-Mailer: PHP/" . phpversion();
+            @mail($uEmail, $subject, $message, $headers);
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Generated email verification code for: ' . $uEmail, null, 'Success');
+
+            sendJsonResponse([
+                'success' => true,
+                'message' => 'Verification code generated for ' . htmlspecialchars($uEmail),
+                'code_preview' => $code
+            ]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'account_verify_email_code':
+        if (!isLoggedIn()) {
+            sendJsonResponse(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+        try {
+            ensureSecurityTables();
+            $currUser = getCurrentUser();
+            $userId = (int)$currUser['id'];
+            $code = cleanInput($bodyData['code'] ?? $_POST['code'] ?? '');
+
+            if (empty($code)) {
+                sendJsonResponse(['success' => false, 'error' => 'Verification code is required.'], 400);
+            }
+
+            $stmt = $pdo->prepare("SELECT email, email_verification_code FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $u = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $storedCode = $u['email_verification_code'] ?? ($_SESSION['pms_email_verify_code'] ?? '');
+
+            if (empty($storedCode) || trim($code) !== trim($storedCode)) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid or expired verification code. Please request a new code.'], 400);
+            }
+
+            $upd = $pdo->prepare("UPDATE users SET email_verified = 1, email_verified_at = NOW(), email_verification_code = NULL WHERE id = ?");
+            $upd->execute([$userId]);
+            unset($_SESSION['pms_email_verify_code']);
+
+            logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Successfully verified email: ' . $u['email'], null, 'Success');
+
+            sendJsonResponse([
+                'success' => true,
+                'message' => 'Your email address has been successfully verified!'
+            ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
@@ -1805,7 +1886,7 @@ switch ($action) {
             }
 
             $mockId = 'goog_' . substr(md5($googleEmail), 0, 16);
-            $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'google', oauth_id = :oid, google_email = :ge WHERE id = :id");
+            $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'google', oauth_id = :oid, google_email = :ge, email_verified = 1, email_verified_at = COALESCE(email_verified_at, NOW()) WHERE id = :id");
             $stmt->execute([':oid' => $mockId, ':ge' => $googleEmail, ':id' => $userId]);
 
             $_SESSION['pms_user']['oauth_provider'] = 'google';

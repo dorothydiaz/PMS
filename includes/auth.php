@@ -628,6 +628,21 @@ function ensureSecurityTables() {
             $pdo->exec("ALTER TABLE `users` ADD COLUMN `google_email` VARCHAR(150) NULL");
         }
 
+        $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'email_verified'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `email_verified` TINYINT(1) DEFAULT 0");
+        }
+
+        $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'email_verified_at'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `email_verified_at` DATETIME NULL");
+        }
+
+        $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'email_verification_code'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `email_verification_code` VARCHAR(10) NULL");
+        }
+
         $ensured = true;
     } catch (Exception $e) {
         // Silently tolerate

@@ -1,7 +1,7 @@
 <?php
 /**
  * Sign Depot™ Operations PMS — Unified Settings & Account Management
- * Merged User Account Settings and System Configuration separated with modern tabs
+ * Clean, minimalist UI matching the Sign Depot design language with full Google Auth & Email Verification
  * File: pages/settings.php
  */
 
@@ -9,6 +9,7 @@ require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 requireLogin();
+ensureSecurityTables();
 
 $user = getCurrentUser();
 $userId = (int)$user['id'];
@@ -21,7 +22,7 @@ $msg = $_GET['msg'] ?? '';
 
 $pageTitle = 'Settings & Account';
 $pageCategory = 'Configuration & Security';
-$pageBadge = 'Unified Portal';
+$pageBadge = 'Preferences';
 $currentPage = 'settings';
 
 require_once __DIR__ . '/includes/header.php';
@@ -29,552 +30,417 @@ require_once __DIR__ . '/includes/sidebar.php';
 ?>
 
 <style>
-  .settings-container {
-    max-width: 1140px;
+  /* Minimalist Settings Container */
+  .settings-wrapper {
+    max-width: 840px;
     margin: 0 auto;
-    padding-bottom: 60px;
+    padding-bottom: 40px;
   }
 
-  /* Top-Level Primary Tab Switcher */
-  .settings-top-tabs {
+  /* Clean Top-Level Tab Strip (Underline Minimalist Style) */
+  .settings-tab-strip {
     display: flex;
-    gap: 10px;
-    background: #FFFFFF;
-    padding: 8px;
-    border-radius: 14px;
-    border: 1px solid #E2E8F0;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  }
-
-  .settings-top-tab-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 12px 20px;
-    border: 1px solid transparent;
-    background: transparent;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 800;
-    color: #64748B;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .settings-top-tab-btn:hover {
-    color: #0F172A;
-    background: #F8FAFC;
-  }
-
-  .settings-top-tab-btn.active {
-    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-    color: #FFFFFF;
-    border-color: #DC2626;
-    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
-  }
-
-  /* Account Header Banner */
-  .settings-header-banner {
-    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 24px 28px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-
-  .user-header-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-
-  .header-avatar-wrap {
-    position: relative;
-    width: 68px;
-    height: 68px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-    color: #FFFFFF;
-    font-size: 24px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35);
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .header-avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .user-header-details h2 {
-    margin: 0 0 4px 0;
-    font-size: 20px;
-    font-weight: 800;
-    color: #F8FAFC;
-    letter-spacing: -0.3px;
-  }
-
-  .user-header-details p {
-    margin: 0;
-    font-size: 13px;
-    color: #94A3B8;
-    display: flex;
-    align-items: center;
     gap: 8px;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 18px;
+    background: transparent;
   }
 
-  .role-tag {
+  .settings-tab-link {
     display: inline-flex;
     align-items: center;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    background: rgba(220, 38, 38, 0.18);
-    color: #F87171;
-    border: 1px solid rgba(220, 38, 38, 0.3);
-  }
-
-  /* Secondary Sub-Nav Tabs for Account Settings */
-  .account-subnav-tabs {
-    display: flex;
     gap: 8px;
-    background: #FFFFFF;
-    padding: 6px;
-    border-radius: 12px;
-    border: 1px solid #E2E8F0;
-    margin-bottom: 22px;
-    overflow-x: auto;
-  }
-
-  .account-subtab-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 16px;
+    padding: 10px 16px;
     border: none;
+    border-bottom: 2px solid transparent;
     background: transparent;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
     color: #64748B;
+    font-size: 13.5px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    margin-bottom: -1px;
+  }
+
+  .settings-tab-link:hover {
+    color: #0F172A;
+  }
+
+  .settings-tab-link.active {
+    color: #DC2626;
+    border-bottom-color: #DC2626;
+  }
+
+  /* Account Subtabs Pill Navigation */
+  .account-subtabs-bar {
+    display: flex;
+    gap: 4px;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 8px;
+    width: fit-content;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .account-subtab-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748B;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .account-subtab-btn:hover {
     color: #0F172A;
-    background: #F1F5F9;
   }
 
   .account-subtab-btn.active {
-    background: #0F172A;
-    color: #FFFFFF;
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+    background: #FFFFFF;
+    color: #0F172A;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 
-  /* Card Styles */
-  .settings-card {
+  /* Section Card (Consistent with studio-card) */
+  .section-card {
     background: #FFFFFF;
     border: 1px solid #E2E8F0;
-    border-radius: 14px;
-    padding: 26px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   }
 
-  .settings-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+  .section-card-header {
     border-bottom: 1px solid #F1F5F9;
-    padding-bottom: 16px;
-    margin-bottom: 20px;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
   }
 
-  .settings-card-title {
-    font-size: 16px;
+  .section-card-header h3 {
+    font-size: 14.5px;
     font-weight: 800;
     color: #0F172A;
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
-  .settings-card-subtitle {
-    margin: 0;
-    font-size: 13px;
+  .section-card-header p {
+    font-size: 12px;
     color: #64748B;
+    margin: 0;
+  }
+
+  .role-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #F8FAFC;
+    color: #475569;
+    border: 1px solid #E2E8F0;
   }
 
   /* Form Elements */
-  .form-row-2 {
+  .settings-grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    gap: 14px;
   }
 
-  @media (max-width: 768px) {
-    .form-row-2 {
+  @media (max-width: 640px) {
+    .settings-grid-2 {
       grid-template-columns: 1fr;
     }
   }
 
-  .form-group-custom {
-    margin-bottom: 18px;
+  .field-group {
+    margin-bottom: 14px;
   }
 
-  .form-label-custom {
-    display: block;
-    font-size: 12px;
+  .field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
     font-weight: 700;
-    color: #334155;
-    margin-bottom: 6px;
+    color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
+    margin-bottom: 5px;
   }
 
-  .form-input-custom {
+  .field-input {
     width: 100%;
-    padding: 10px 14px;
+    padding: 8px 12px;
     border: 1px solid #CBD5E1;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 6px;
+    font-size: 13px;
     color: #0F172A;
     background: #FFFFFF;
     box-sizing: border-box;
     transition: all 0.2s;
   }
 
-  .form-input-custom:focus {
+  .field-input:focus {
     outline: none;
     border-color: #DC2626;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   }
 
-  .input-password-wrap {
+  .field-input[disabled] {
+    background: #F8FAFC;
+    color: #64748B;
+    cursor: not-allowed;
+  }
+
+  .input-with-action {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .field-password-wrap {
     position: relative;
     display: flex;
     align-items: center;
   }
 
-  .input-password-wrap input {
-    padding-right: 40px;
+  .field-password-wrap input {
+    padding-right: 36px;
   }
 
-  .btn-pwd-eye {
+  .eye-toggle-btn {
     position: absolute;
-    right: 12px;
+    right: 8px;
     background: none;
     border: none;
     color: #94A3B8;
     cursor: pointer;
-    padding: 2px;
+    padding: 4px;
     display: flex;
     align-items: center;
-    justify-content: center;
   }
-  .btn-pwd-eye:hover {
+
+  .eye-toggle-btn:hover {
     color: #0F172A;
   }
 
-  /* Avatar Picker Section */
-  .avatar-management-grid {
+  /* Avatar management minimalist */
+  .avatar-row {
     display: flex;
-    align-items: flex-start;
-    gap: 28px;
-    flex-wrap: wrap;
-  }
-
-  .avatar-preview-box {
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed #E2E8F0;
   }
 
-  .avatar-large-preview {
-    width: 110px;
-    height: 110px;
+  .avatar-circle-sm {
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-    color: #FFFFFF;
-    font-size: 38px;
-    font-weight: 800;
+    background: #F8FAFC;
+    border: 2px solid #E2E8F0;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid #FFFFFF;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px #E2E8F0;
-    overflow: hidden;
+    font-size: 18px;
+    font-weight: 800;
+    color: #334155;
+    flex-shrink: 0;
   }
 
-  .avatar-large-preview img {
+  .avatar-circle-sm img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .preset-avatars-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-
-  .preset-avatars-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-
-  .preset-avatar-btn {
-    width: 44px;
-    height: 44px;
+  .preset-avatar-chip {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 2px solid #E2E8F0;
-    cursor: pointer;
-    overflow: hidden;
+    border: 1px solid #E2E8F0;
     padding: 0;
     background: #F8FAFC;
-    transition: all 0.2s;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.15s;
   }
 
-  .preset-avatar-btn:hover {
+  .preset-avatar-chip:hover {
     transform: scale(1.1);
     border-color: #DC2626;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
   }
 
-  .preset-avatar-btn img {
+  .preset-avatar-chip img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  /* Password Strength */
-  .pwd-strength-container {
-    margin-top: 6px;
-  }
-
-  .pwd-strength-bar {
-    height: 4px;
-    width: 100%;
+  /* Password Strength Meter */
+  .meter-bar {
+    height: 3px;
     background: #E2E8F0;
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
-    margin-bottom: 4px;
+    margin-top: 5px;
+    margin-bottom: 3px;
   }
 
-  .pwd-strength-fill {
+  .meter-fill {
     height: 100%;
     width: 0%;
-    transition: all 0.3s ease;
-    border-radius: 4px;
+    transition: all 0.25s;
+    border-radius: 3px;
   }
 
-  .pwd-strength-text {
+  .meter-text {
     font-size: 11px;
     font-weight: 600;
     color: #64748B;
   }
 
-  /* Google Auth */
-  .auth-integration-box {
+  /* Integration Box */
+  .integration-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 20px;
-    background: #FAFAFA;
+    padding: 12px 14px;
     border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-
-  .integration-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .integration-icon-wrap {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  }
-
-  .totp-setup-card {
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 22px;
-    margin-top: 16px;
-  }
-
-  .totp-steps-grid {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 24px;
-    align-items: center;
-  }
-
-  @media (max-width: 680px) {
-    .totp-steps-grid {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
-  }
-
-  .totp-qr-wrapper {
-    background: #FFFFFF;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #E2E8F0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    display: inline-block;
-  }
-
-  .totp-qr-wrapper img {
-    display: block;
-    width: 170px;
-    height: 170px;
-  }
-
-  .totp-manual-box {
-    background: #FFFFFF;
-    border: 1px dashed #CBD5E1;
     border-radius: 8px;
-    padding: 10px 14px;
-    font-family: monospace;
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: #0F172A;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0 16px 0;
-  }
-
-  /* Devices List */
-  .device-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 18px;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    background: #FFFFFF;
-    transition: all 0.2s;
-    gap: 14px;
+    margin-bottom: 10px;
+    background: #FAFAFA;
     flex-wrap: wrap;
+    gap: 10px;
   }
 
-  .device-item:hover {
-    border-color: #CBD5E1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  .integration-item:last-child {
+    margin-bottom: 0;
   }
 
-  .device-item.is-current-device {
-    background: #F8FAFC;
-    border-left: 4px solid #10B981;
-  }
-
-  .device-left {
+  .integration-lead {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
   }
 
-  .device-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: #F1F5F9;
-    color: #334155;
+  .integration-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
-  .device-meta h4 {
-    margin: 0 0 3px 0;
-    font-size: 14px;
+  /* Device item */
+  .device-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #FFFFFF;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .device-row.is-current {
+    background: #F8FAFC;
+    border-left: 3px solid #10B981;
+  }
+
+  .badge-verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
     font-weight: 700;
-    color: #0F172A;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .device-meta p {
-    margin: 0;
-    font-size: 12px;
-    color: #64748B;
-  }
-
-  .current-badge {
-    background: #DCFCE7;
-    color: #15803D;
-    font-size: 10px;
-    font-weight: 800;
     padding: 2px 7px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid #86EFAC;
-  }
-
-  .settings-alert {
-    padding: 12px 18px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .settings-alert-success {
+    border-radius: 4px;
     background: #ECFDF5;
     color: #065F46;
     border: 1px solid #A7F3D0;
   }
-  .settings-alert-error {
-    background: #FEF2F2;
-    color: #991B1B;
-    border: 1px solid #FECACA;
+
+  .badge-unverified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+
+  /* Clean alerts */
+  .alert-clean {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .alert-clean-success {
+    background: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+  }
+
+  /* Simple Modal */
+  .clean-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .clean-modal {
+    background: #FFFFFF;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   }
 </style>
 
@@ -585,400 +451,250 @@ require_once __DIR__ . '/includes/sidebar.php';
     <div class="content-body">
       <!-- Register view-panel active so script.js view-switcher never redirects back -->
       <section class="view-panel active" id="view-settings">
-        <div class="settings-container">
+        <div class="settings-wrapper">
 
-          <!-- Top Status Alerts -->
-          <?php if ($msg === 'google_linked'): ?>
-            <div class="settings-alert settings-alert-success">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Google Account successfully connected! You can now use Google SSO for instant login.</span>
-            </div>
-          <?php elseif ($msg === 'google_unlinked'): ?>
-            <div class="settings-alert settings-alert-success">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Google Account has been unlinked. You may continue logging in with your password.</span>
-            </div>
-          <?php endif; ?>
-
-          <!-- PRIMARY TOP-LEVEL TABS (User Account Settings vs System Configuration) -->
-          <div class="settings-top-tabs">
-            <button type="button" class="settings-top-tab-btn <?= ($activeTopTab === 'account') ? 'active' : '' ?>" id="topTabAccount" data-top-target="panel-account">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              <span>User Account Settings</span>
+          <!-- Minimalist Primary Tab Strip -->
+          <div class="settings-tab-strip">
+            <button type="button" class="settings-tab-link <?= ($activeTopTab === 'account') ? 'active' : '' ?>" data-tab-btn="account">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span>Account & Security</span>
             </button>
             <?php if ($canAccessSystemSettings): ?>
-            <button type="button" class="settings-top-tab-btn <?= ($activeTopTab === 'system') ? 'active' : '' ?>" id="topTabSystem" data-top-target="panel-system">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <button type="button" class="settings-tab-link <?= ($activeTopTab === 'system') ? 'active' : '' ?>" data-tab-btn="system">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               <span>System Configuration</span>
             </button>
             <?php endif; ?>
           </div>
 
           <!-- =================================================================== -->
-          <!-- PANEL 1: USER ACCOUNT SETTINGS                                     -->
+          <!-- TAB 1: ACCOUNT & SECURITY                                          -->
           <!-- =================================================================== -->
-          <div class="top-tab-panel" id="panel-account" style="display: <?= ($activeTopTab === 'account') ? 'block' : 'none' ?>;">
+          <div class="settings-content-pane" id="pane-account" style="display: <?= ($activeTopTab === 'account') ? 'block' : 'none' ?>;">
             
-            <!-- User Profile Banner -->
-            <div class="settings-header-banner">
-              <div class="user-header-left">
-                <div class="header-avatar-wrap" id="headerAvatarBox">
-                  <?php if (!empty($user['avatar_url'])): ?>
-                    <img src="<?= htmlspecialchars($user['avatar_url']) ?>" alt="Avatar" class="header-avatar-img" id="headerAvatarImg">
-                  <?php else: ?>
-                    <span id="headerAvatarInitials"><?= strtoupper(substr($user['full_name'] ?: $user['username'], 0, 2)) ?></span>
-                  <?php endif; ?>
-                </div>
-                <div class="user-header-details">
-                  <h2 id="headerUserNameDisplay"><?= htmlspecialchars($user['full_name'] ?: $user['username']) ?></h2>
-                  <p>
-                    <span id="headerUserEmailDisplay"><?= htmlspecialchars($user['email']) ?></span>
-                    <span>&bull;</span>
-                    <span class="role-tag"><?= htmlspecialchars(str_replace('_', ' ', $user['role'])) ?></span>
-                  </p>
-                </div>
-              </div>
-              <div style="font-size: 12px; color: #94A3B8; text-align: right;">
-                <div>Account ID: #<?= (int)$user['id'] ?></div>
-                <div style="margin-top: 4px; color: #10B981; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
-                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10B981;"></span>
-                  Active Session
-                </div>
-              </div>
-            </div>
-
-            <!-- Account Sub-Tabs -->
-            <div class="account-subnav-tabs">
-              <button type="button" class="account-subtab-btn active" data-sub-target="subtab-profile">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>Profile & Avatar</span>
+            <!-- Compact Subtab Pill Bar -->
+            <div class="account-subtabs-bar">
+              <button type="button" class="account-subtab-btn active" data-subtab="profile">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>Profile & Identity</span>
               </button>
-              <button type="button" class="account-subtab-btn" data-sub-target="subtab-password">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <button type="button" class="account-subtab-btn" data-subtab="password">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 <span>Change Password</span>
               </button>
-              <button type="button" class="account-subtab-btn" data-sub-target="subtab-google">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                <span>Google Authentication & 2FA</span>
+              <button type="button" class="account-subtab-btn" data-subtab="auth">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Two-Factor Auth (2FA)</span>
               </button>
-              <button type="button" class="account-subtab-btn" data-sub-target="subtab-devices">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                <span>Device Login Management</span>
+              <button type="button" class="account-subtab-btn" data-subtab="devices">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span>Active Sessions</span>
               </button>
             </div>
 
-            <!-- SUB-TAB 1: PROFILE & AVATAR -->
-            <div class="account-subtab-pane active" id="subtab-profile">
-              <div class="settings-card">
-                <div class="settings-card-header">
+            <!-- SUBTAB 1: Profile & Identity -->
+            <div class="account-subtab-pane" id="subpane-profile">
+              <div class="section-card">
+                <div class="section-card-header">
                   <div>
-                    <h3 class="settings-card-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                      Profile Picture & Avatar
-                    </h3>
-                    <p class="settings-card-subtitle">Personalize your identity across the PMS portal, top navigation bar, and tracker comments.</p>
+                    <h3>Profile & Identity</h3>
+                    <p>Update your photo and account display details</p>
+                  </div>
+                  <div>
+                    <span class="role-pill"><?= htmlspecialchars(str_replace('_', ' ', $user['role'])) ?></span>
                   </div>
                 </div>
 
-                <div class="avatar-management-grid">
-                  <div class="avatar-preview-box">
-                    <div class="avatar-large-preview" id="mainAvatarPreview">
-                      <?php if (!empty($user['avatar_url'])): ?>
-                        <img src="<?= htmlspecialchars($user['avatar_url']) ?>" alt="Avatar" id="mainAvatarImg">
-                      <?php else: ?>
-                        <span id="mainAvatarInitials"><?= strtoupper(substr($user['full_name'] ?: $user['username'], 0, 2)) ?></span>
-                      <?php endif; ?>
-                    </div>
-                    <div style="font-size: 11px; color: #64748B; font-weight: 600;">Current Avatar</div>
+                <!-- Hidden sync targets for JS backward-compatibility -->
+                <span id="heroName" style="display:none;"><?= htmlspecialchars($user['full_name'] ?: $user['username']) ?></span>
+                <span id="heroEmail" style="display:none;"><?= htmlspecialchars($user['email']) ?></span>
+                <div id="heroAvatar" style="display:none;"></div>
+
+                <!-- Avatar row -->
+                <div class="avatar-row">
+                  <div class="avatar-circle-sm" id="editorAvatarPreview">
+                    <?php if (!empty($user['avatar_url'])): ?>
+                      <img src="<?= htmlspecialchars($user['avatar_url']) ?>" alt="Avatar">
+                    <?php else: ?>
+                      <span><?= strtoupper(substr($user['full_name'] ?: $user['username'], 0, 2)) ?></span>
+                    <?php endif; ?>
                   </div>
 
-                  <div style="flex: 1; min-width: 280px;">
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Upload Custom Photo</label>
-                      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <label class="btn btn-secondary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                          <span>Choose Image File</span>
-                          <input type="file" id="avatarFileInput" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;">
-                        </label>
-                        <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemoveAvatar" style="display: <?= !empty($user['avatar_url']) ? 'inline-flex' : 'none' ?>; align-items: center; gap: 6px;">
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                          <span>Remove Photo</span>
+                  <div style="flex: 1;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px;">
+                      <label class="btn btn-secondary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; padding: 5px 11px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>Upload Photo</span>
+                        <input type="file" id="avatarFileInput" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;">
+                      </label>
+                      <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemoveAvatar" style="font-size: 11.5px; padding: 5px 11px; display: <?= !empty($user['avatar_url']) ? 'inline-flex' : 'none' ?>;">
+                        Remove Photo
+                      </button>
+                    </div>
+                    <!-- Quick Preset Icons -->
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Presets:</span>
+                      <?php
+                      $presets = [
+                        'https://api.dicebear.com/7.x/bottts/svg?seed=Felix&backgroundColor=b6e3f4',
+                        'https://api.dicebear.com/7.x/bottts/svg?seed=Bandit&backgroundColor=d1d4f9',
+                        'https://api.dicebear.com/7.x/avataaars/svg?seed=Dorothy&backgroundColor=ffd5dc',
+                        'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ffdfbf',
+                        'https://api.dicebear.com/7.x/identicon/svg?seed=SignDepot1',
+                        'https://api.dicebear.com/7.x/identicon/svg?seed=SignDepot2'
+                      ];
+                      foreach ($presets as $p): ?>
+                        <button type="button" class="preset-avatar-chip" data-preset="<?= htmlspecialchars($p) ?>" title="Select Preset">
+                          <img src="<?= htmlspecialchars($p) ?>" alt="Avatar">
                         </button>
-                      </div>
-                      <span style="font-size: 11px; color: #64748B; margin-top: 6px; display: block;">Supports JPG, PNG, WEBP or GIF (Max file size: 5MB).</span>
-                    </div>
-
-                    <div style="margin-top: 18px;">
-                      <div class="preset-avatars-title">Or Choose a Curated Avatar Preset:</div>
-                      <div class="preset-avatars-row">
-                        <?php
-                        $presets = [
-                          'https://api.dicebear.com/7.x/bottts/svg?seed=Felix&backgroundColor=b6e3f4',
-                          'https://api.dicebear.com/7.x/bottts/svg?seed=Shadow&backgroundColor=c0aede',
-                          'https://api.dicebear.com/7.x/bottts/svg?seed=Bandit&backgroundColor=d1d4f9',
-                          'https://api.dicebear.com/7.x/avataaars/svg?seed=Dorothy&backgroundColor=ffd5dc',
-                          'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ffdfbf',
-                          'https://api.dicebear.com/7.x/avataaars/svg?seed=Jasper&backgroundColor=c0aede',
-                          'https://api.dicebear.com/7.x/identicon/svg?seed=SignDepot1',
-                          'https://api.dicebear.com/7.x/identicon/svg?seed=SignDepot2'
-                        ];
-                        foreach ($presets as $idx => $pUrl):
-                        ?>
-                          <button type="button" class="preset-avatar-btn" data-preset-url="<?= htmlspecialchars($pUrl) ?>" title="Select Preset #<?= $idx + 1 ?>">
-                            <img src="<?= htmlspecialchars($pUrl) ?>" alt="Preset">
-                          </button>
-                        <?php endforeach; ?>
-                      </div>
+                      <?php endforeach; ?>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Basic Personal Info -->
-              <div class="settings-card">
-                <div class="settings-card-header">
-                  <div>
-                    <h3 class="settings-card-title">Personal Details</h3>
-                    <p class="settings-card-subtitle">Keep your name and notification email up to date.</p>
+                <!-- Profile Details Form -->
+                <form id="profileForm" onsubmit="return false;">
+                  <div class="settings-grid-2">
+                    <div class="field-group">
+                      <label class="field-label" for="profileFullName">Full Name</label>
+                      <input type="text" class="field-input" id="profileFullName" value="<?= htmlspecialchars($user['full_name'] ?: '') ?>" required>
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label" for="profileEmail">Email Address</label>
+                      <input type="email" class="field-input" id="profileEmail" value="<?= htmlspecialchars($user['email'] ?: '') ?>" required>
+                    </div>
                   </div>
-                </div>
 
-                <form id="profileInfoForm" onsubmit="return false;">
-                  <div class="form-row-2">
-                    <div class="form-group-custom">
-                      <label class="form-label-custom" for="profileFullName">Full Name</label>
-                      <input type="text" class="form-input-custom" id="profileFullName" value="<?= htmlspecialchars($user['full_name'] ?: '') ?>" placeholder="e.g. Dorothy Diaz" required>
+                  <div class="settings-grid-2">
+                    <div class="field-group">
+                      <label class="field-label">Username</label>
+                      <input type="text" class="field-input" value="<?= htmlspecialchars($user['username']) ?>" disabled>
                     </div>
-                    <div class="form-group-custom">
-                      <label class="form-label-custom" for="profileEmail">Email Address</label>
-                      <input type="email" class="form-input-custom" id="profileEmail" value="<?= htmlspecialchars($user['email'] ?: '') ?>" placeholder="e.g. dorothy@signdepot.com" required>
-                    </div>
-                  </div>
-                  <div class="form-row-2">
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">System Username (Fixed)</label>
-                      <input type="text" class="form-input-custom" value="<?= htmlspecialchars($user['username']) ?>" disabled style="background: #F1F5F9; color: #64748B; cursor: not-allowed;">
-                    </div>
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Assigned Role</label>
-                      <input type="text" class="form-input-custom" value="<?= htmlspecialchars(strtoupper($user['role'])) ?>" disabled style="background: #F1F5F9; color: #64748B; cursor: not-allowed;">
+                    <div class="field-group">
+                      <label class="field-label">System Role</label>
+                      <input type="text" class="field-input" value="<?= htmlspecialchars(strtoupper($user['role'])) ?>" disabled>
                     </div>
                   </div>
-                  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                    <button type="submit" class="btn btn-primary" id="btnSaveProfileInfo" style="display: inline-flex; align-items: center; gap: 8px;">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                      <span>Save Profile Changes</span>
-                    </button>
+
+                  <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                    <button type="submit" class="btn btn-primary btn-sm" id="btnSaveProfile">Save Changes</button>
                   </div>
                 </form>
               </div>
             </div>
 
-            <!-- SUB-TAB 2: CHANGE PASSWORD -->
-            <div class="account-subtab-pane" id="subtab-password" style="display: none;">
-              <div class="settings-card">
-                <div class="settings-card-header">
+            <!-- SUBTAB 2: Password & Security -->
+            <div class="account-subtab-pane" id="subpane-password" style="display: none;">
+              <div class="section-card">
+                <div class="section-card-header">
                   <div>
-                    <h3 class="settings-card-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                      Change Account Password
-                    </h3>
-                    <p class="settings-card-subtitle">Ensure your account is protected with a strong, distinct password.</p>
+                    <h3>Change Password</h3>
+                    <p>Update your credentials with a secure password</p>
                   </div>
                 </div>
 
-                <form id="changePasswordForm" onsubmit="return false;" style="max-width: 540px;">
-                  <div class="form-group-custom">
-                    <label class="form-label-custom" for="pwdCurrent">Current Password</label>
-                    <div class="input-password-wrap">
-                      <input type="password" class="form-input-custom" id="pwdCurrent" placeholder="Enter current password..." autocomplete="current-password" required>
-                      <button type="button" class="btn-pwd-eye" data-toggle-for="pwdCurrent">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <form id="passwordForm" onsubmit="return false;" style="max-width: 440px;">
+                  <div class="field-group">
+                    <label class="field-label" for="pwdCurrent">Current Password</label>
+                    <div class="field-password-wrap">
+                      <input type="password" class="field-input" id="pwdCurrent" placeholder="••••••••••••" autocomplete="current-password" required>
+                      <button type="button" class="eye-toggle-btn" data-target="pwdCurrent">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       </button>
                     </div>
                   </div>
 
-                  <div class="form-group-custom">
-                    <label class="form-label-custom" for="pwdNew">New Password</label>
-                    <div class="input-password-wrap">
-                      <input type="password" class="form-input-custom" id="pwdNew" placeholder="Minimum 6 characters..." autocomplete="new-password" required>
-                      <button type="button" class="btn-pwd-eye" data-toggle-for="pwdNew">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <div class="field-group">
+                    <label class="field-label" for="pwdNew">New Password</label>
+                    <div class="field-password-wrap">
+                      <input type="password" class="field-input" id="pwdNew" placeholder="Minimum 6 characters" autocomplete="new-password" required>
+                      <button type="button" class="eye-toggle-btn" data-target="pwdNew">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       </button>
                     </div>
-                    <div class="pwd-strength-container">
-                      <div class="pwd-strength-bar">
-                        <div class="pwd-strength-fill" id="pwdStrengthFill"></div>
-                      </div>
-                      <div class="pwd-strength-text" id="pwdStrengthText">Strength: Enter a password</div>
+                    <div class="meter-bar">
+                      <div class="meter-fill" id="pwdMeterFill"></div>
                     </div>
+                    <div class="meter-text" id="pwdMeterText">Strength: Enter a password</div>
                   </div>
 
-                  <div class="form-group-custom">
-                    <label class="form-label-custom" for="pwdConfirm">Confirm New Password</label>
-                    <div class="input-password-wrap">
-                      <input type="password" class="form-input-custom" id="pwdConfirm" placeholder="Re-enter new password..." autocomplete="new-password" required>
-                      <button type="button" class="btn-pwd-eye" data-toggle-for="pwdConfirm">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <div class="field-group">
+                    <label class="field-label" for="pwdConfirm">Confirm New Password</label>
+                    <div class="field-password-wrap">
+                      <input type="password" class="field-input" id="pwdConfirm" placeholder="Re-type new password" autocomplete="new-password" required>
+                      <button type="button" class="eye-toggle-btn" data-target="pwdConfirm">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       </button>
                     </div>
                   </div>
 
-                  <div style="margin-top: 24px;">
-                    <button type="submit" class="btn btn-primary" id="btnSubmitChangePassword" style="display: inline-flex; align-items: center; gap: 8px;">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      <span>Update Password</span>
-                    </button>
-                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btnUpdatePassword">Update Password</button>
                 </form>
               </div>
             </div>
 
-            <!-- SUB-TAB 3: GOOGLE AUTHENTICATION & 2FA -->
-            <div class="account-subtab-pane" id="subtab-google" style="display: none;">
-              <!-- Google SSO -->
-              <div class="settings-card">
-                <div class="settings-card-header">
+            <!-- SUBTAB 3: Two-Factor Authentication (2FA) -->
+            <div class="account-subtab-pane" id="subpane-auth" style="display: none;">
+              <div class="section-card">
+                <div class="section-card-header">
                   <div>
-                    <h3 class="settings-card-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
-                      Google Single Sign-On (SSO) Account Linking
-                    </h3>
-                    <p class="settings-card-subtitle">Connect your Google Workspace or Gmail account for one-click authentication.</p>
+                    <h3>Two-Factor Authentication (2FA)</h3>
+                    <p>Protect your account with Google Authenticator or any standard TOTP app</p>
                   </div>
                 </div>
 
-                <div class="auth-integration-box">
-                  <div class="integration-left">
-                    <div class="integration-icon-wrap">
-                      <svg width="24" height="24" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
-                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.43 7.34 24 12 24z"/>
-                        <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.57H1.24C.45 8.14 0 9.99 0 12s.45 3.86 1.24 5.43l4.04-3.14z"/>
-                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.57 1.24 6.57l4.04 3.14c.95-2.83 3.6-4.96 6.72-4.96z"/>
-                      </svg>
+                <!-- Google Authenticator 2FA -->
+                <div class="integration-item">
+                  <div class="integration-lead">
+                    <div class="integration-logo" style="color: #DC2626;">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                     </div>
                     <div>
-                      <div style="font-weight: 700; font-size: 14px; color: #0F172A;">Google Workspace Account</div>
-                      <div style="font-size: 12px; color: #64748B;" id="googleLinkStatusText">Checking link status...</div>
+                      <div style="font-size: 13.5px; font-weight: 700; color: #0F172A;">Two-Factor Authentication (TOTP 2FA)</div>
+                      <div style="font-size: 12px; color: #64748B;" id="totpStatusLine">Requires a 6-digit code on login</div>
                     </div>
                   </div>
-
-                  <div id="googleActionBtnContainer">
-                    <button type="button" class="btn btn-primary btn-sm" id="btnConnectGoogle">
-                      Connect Google Account
-                    </button>
-                  </div>
-                </div>
-                <p style="font-size: 12px; color: #64748B; margin: 0;">
-                  Linking your Google account allows seamless single-click sign in directly from the login page without typing your password each time.
-                </p>
-              </div>
-
-              <!-- Google Authenticator 2FA -->
-              <div class="settings-card">
-                <div class="settings-card-header">
-                  <div>
-                    <h3 class="settings-card-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                      Google Authenticator (2FA Two-Factor Authentication)
-                    </h3>
-                    <p class="settings-card-subtitle">Add an extra layer of protection to your account with time-based 6-digit one-time passcodes.</p>
-                  </div>
-                  <div id="twoFactorBadgeWrap">
-                    <span class="badge" style="background:#F1F5F9; color:#64748B;">Checking...</span>
+                  <div id="totpBtnSlot">
+                    <!-- Enable / Disable injected via JS -->
                   </div>
                 </div>
 
-                <div id="totpDisabledView" style="display: none;">
-                  <p style="font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
-                    Two-Factor Authentication is currently <strong>disabled</strong> on your account. When enabled, signing in will require both your password and a dynamic verification code generated by the Google Authenticator app on your smartphone.
-                  </p>
-                  <button type="button" class="btn btn-primary" id="btnStart2faSetup" style="display: inline-flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    <span>Enable Google Authenticator 2FA</span>
-                  </button>
-
-                  <div class="totp-setup-card" id="totpSetupWizard" style="display: none;">
-                    <h4 style="font-size: 14px; font-weight: 800; color: #0F172A; margin: 0 0 16px 0;">3-Step Setup for Google Authenticator</h4>
-                    <div class="totp-steps-grid">
-                      <div style="text-align: center;">
-                        <div class="totp-qr-wrapper">
-                          <img id="totpQrImage" src="" alt="Google Authenticator QR Code">
-                        </div>
-                        <div style="font-size: 11px; color: #64748B; margin-top: 6px;">Scan with Google Authenticator</div>
-                      </div>
-
-                      <div>
-                        <div style="font-size: 13px; color: #334155; margin-bottom: 10px;">
-                          <strong>Step 1:</strong> Open <strong>Google Authenticator</strong> on your phone (or 1Password, Authy).
-                        </div>
-                        <div style="font-size: 13px; color: #334155; margin-bottom: 8px;">
-                          <strong>Step 2:</strong> Tap <strong>+</strong> and choose <strong>Scan a QR code</strong>, or enter this secret key manually:
-                        </div>
-                        <div class="totp-manual-box">
-                          <span id="totpManualKeyText">••••••••••••••••</span>
-                          <button type="button" class="btn btn-sm btn-secondary" id="btnCopyTotpKey" style="padding: 3px 8px; font-size: 11px;">Copy</button>
-                        </div>
-
-                        <div style="font-size: 13px; color: #334155; margin-bottom: 8px;">
-                          <strong>Step 3:</strong> Enter the 6-digit confirmation code generated by your app:
-                        </div>
-                        <div style="display: flex; gap: 8px; max-width: 300px;">
-                          <input type="text" class="form-input-custom" id="totpVerifyInput" placeholder="123456" maxlength="6" pattern="[0-9]{6}" style="font-size: 18px; font-weight: 800; letter-spacing: 4px; text-align: center;">
-                          <button type="button" class="btn btn-primary" id="btnVerifyAndActivate2fa" style="white-space: nowrap;">
-                            Verify & Activate
-                          </button>
-                        </div>
+                <!-- 2FA Setup Panel (Revealed when configuring) -->
+                <div id="totpSetupBox" style="display: none; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; margin-top: 12px; background: #F8FAFC;">
+                  <div style="font-weight: 700; font-size: 13px; color: #0F172A; margin-bottom: 10px;">Scan with Google Authenticator</div>
+                  <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap;">
+                    <div style="background: #FFFFFF; padding: 8px; border-radius: 8px; border: 1px solid #E2E8F0; display: inline-block;">
+                      <img id="totpQr" src="" alt="QR Code" style="width: 130px; height: 130px; display: block;">
+                    </div>
+                    <div style="flex: 1; min-width: 230px;">
+                      <div style="font-size: 12px; color: #475569; margin-bottom: 5px;">Or enter code manually:</div>
+                      <div style="font-family: monospace; font-size: 13px; font-weight: 700; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 10px; letter-spacing: 2px; margin-bottom: 10px;" id="totpSecretText"></div>
+                      <div style="font-size: 12px; color: #475569; margin-bottom: 5px;">Enter the 6-digit verification code from your app:</div>
+                      <div style="display: flex; gap: 8px; max-width: 250px;">
+                        <input type="text" class="field-input" id="totpCodeInput" placeholder="123456" maxlength="6" style="text-align: center; letter-spacing: 3px; font-weight: 700; font-size: 14px;">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnConfirm2fa">Verify</button>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <div id="totpEnabledView" style="display: none;">
-                  <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                      <div style="width: 44px; height: 44px; border-radius: 50%; background: #DCFCE7; color: #16A34A; display: flex; align-items: center; justify-content: center;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                      </div>
-                      <div>
-                        <div style="font-weight: 800; font-size: 15px; color: #166534;">Two-Factor Authentication is Active</div>
-                        <div style="font-size: 12px; color: #15803D;">Your account is strictly protected with time-based OTP verification.</div>
-                      </div>
-                    </div>
-                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnDisable2fa">
-                      Disable 2FA
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- SUB-TAB 4: DEVICE LOGIN MANAGEMENT -->
-            <div class="account-subtab-pane" id="subtab-devices" style="display: none;">
-              <div class="settings-card">
-                <div class="settings-card-header">
+            <!-- SUBTAB 4: Active Device Sessions -->
+            <div class="account-subtab-pane" id="subpane-devices" style="display: none;">
+              <div class="section-card">
+                <div class="section-card-header">
                   <div>
-                    <h3 class="settings-card-title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                      Active Device Sessions
-                    </h3>
-                    <p class="settings-card-subtitle">Manage where you are currently signed in and terminate suspicious or unused sessions.</p>
+                    <h3>Device Login Management</h3>
+                    <p>Active browser sessions and device authorizations</p>
                   </div>
-                  <button type="button" class="btn btn-outline-danger btn-sm" id="btnRevokeAllOtherDevices" style="display: inline-flex; align-items: center; gap: 6px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>Log Out All Other Devices</span>
+                  <button type="button" class="btn btn-outline-danger btn-sm" id="btnRevokeAllOther" style="font-size: 11.5px;">
+                    Log Out All Other Devices
                   </button>
                 </div>
 
-                <div id="deviceSessionsList">
-                  <div style="text-align: center; padding: 40px; color: #94A3B8;">Loading active devices...</div>
-                </div>
-
-                <div style="margin-top: 18px; padding: 14px 18px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 10px;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                  <span>If you notice any unfamiliar device or location, revoke it immediately and change your account password.</span>
+                <div id="deviceListContainer">
+                  <div style="text-align: center; padding: 20px; color: #94A3B8; font-size: 13px;">Loading active sessions...</div>
                 </div>
               </div>
             </div>
@@ -986,20 +702,15 @@ require_once __DIR__ . '/includes/sidebar.php';
           </div>
 
           <!-- =================================================================== -->
-          <!-- PANEL 2: SYSTEM CONFIGURATION                                      -->
+          <!-- TAB 2: SYSTEM CONFIGURATION (FOR ADMINS)                           -->
           <!-- =================================================================== -->
           <?php if ($canAccessSystemSettings): ?>
-          <div class="top-tab-panel" id="panel-system" style="display: <?= ($activeTopTab === 'system') ? 'block' : 'none' ?>;">
-            <div class="section-header-row" style="margin-bottom: 20px;">
-              <div class="section-title-wrap">
-                <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0;">System Settings & Configuration</h2>
-                <p style="font-size: 13px; color: #64748B; margin: 0;">Manage roster of artists, sales reps, workload thresholds, and local test data storage</p>
-              </div>
-            </div>
-
+          <div class="settings-content-pane" id="pane-system" style="display: <?= ($activeTopTab === 'system') ? 'block' : 'none' ?>;">
+            
             <div class="form-grid-2">
+              <!-- Artist Roster -->
               <div class="studio-card">
-                <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px;">Artist Roster & Capacity Limits</h3>
+                <h3 style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 12px;">Artist Roster & Capacity Limits</h3>
                 <div style="display: flex; gap: 8px; margin-bottom: 14px;">
                   <input type="text" class="form-control" id="settingsNewArtistInput" placeholder="New artist name...">
                   <button class="btn btn-primary btn-sm" id="btnSettingsAddArtist">Add Artist</button>
@@ -1007,8 +718,9 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <div id="settingsArtistList" style="display: flex; flex-direction: column; gap: 6px;"></div>
               </div>
 
+              <!-- Sales Reps -->
               <div class="studio-card">
-                <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px;">Sales Representatives</h3>
+                <h3 style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 12px;">Sales Representatives</h3>
                 <div style="display: flex; gap: 8px; margin-bottom: 14px;">
                   <input type="text" class="form-control" id="settingsNewSalesInput" placeholder="New sales rep name...">
                   <button class="btn btn-primary btn-sm" id="btnSettingsAddSales">Add Sales</button>
@@ -1016,69 +728,67 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <div id="settingsSalesList" style="display: flex; flex-direction: column; gap: 6px;"></div>
               </div>
 
+              <!-- Super Admin Passcode -->
               <?php if (isSuperAdmin()): ?>
-              <div class="studio-card col-span-2" id="settingsPasscodeCard" style="background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 12px; padding: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <div class="studio-card col-span-2" id="settingsPasscodeCard" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
                   <div>
-                    <h3 style="font-size: 16px; font-weight: 700; color: #09090B; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: #09090B;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #09090B; margin: 0 0 2px 0;">
                       Super Admin Deletion Security Passcode
                     </h3>
-                    <p style="font-size: 13px; color: #71717A; margin: 0;">
-                      Configure the authorization passcode required whenever a Super Admin permanently deletes records from any table.
+                    <p style="font-size: 12px; color: #71717A; margin: 0;">
+                      Authorization passcode required whenever a Super Admin permanently deletes records.
                     </p>
                   </div>
-                  <span class="badge" style="background: #F4F4F5; color: #18181B; border: 1px solid #E4E4E7; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Super Admin Protected</span>
+                  <span class="badge" style="background: #F4F4F5; color: #18181B; border: 1px solid #E4E4E7; font-weight: 700; font-size: 10.5px;">Super Admin Only</span>
                 </div>
 
-                <div style="background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 10px; padding: 20px; max-width: 520px;">
-                  <div class="form-group" style="margin-bottom: 16px;">
-                    <label class="form-label" style="font-weight: 600; font-size: 12px; color: #52525B;">Security Passcode Status</label>
-                    <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 8px; padding: 10px 14px;">
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #09090B;"></span>
-                        <span style="font-size: 13px; font-weight: 600; color: #09090B;">Active & Protected</span>
-                      </div>
-                      <span style="font-family: monospace; font-size: 14px; color: #71717A; letter-spacing: 2.5px;">••••••••</span>
+                <div style="background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 8px; padding: 16px; max-width: 480px;">
+                  <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label" style="font-weight: 600; font-size: 11.5px; color: #52525B;">Status</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 6px; padding: 8px 12px;">
+                      <span style="font-size: 12.5px; font-weight: 600; color: #09090B;">● Active & Protected</span>
+                      <span style="font-family: monospace; font-size: 13px; color: #71717A; letter-spacing: 2px;">••••••••</span>
                     </div>
-                    <span style="font-size: 11px; color: #71717A; margin-top: 4px; display: block;">Confidential: The active passcode is hashed and cannot be viewed on screen.</span>
                   </div>
 
                   <form autocomplete="off" onsubmit="return false;" style="margin: 0; padding: 0;">
                     <input type="text" name="fake_user" style="display:none;" aria-hidden="true" tabindex="-1">
                     <input type="password" name="fake_pass" style="display:none;" aria-hidden="true" tabindex="-1">
 
-                    <div class="form-group" style="margin-bottom: 14px;">
-                      <label class="form-label required" style="font-weight: 600; font-size: 12px; color: #52525B;">Current Login Password</label>
-                      <input type="password" class="form-control" id="settingsLoginPasswordInput" placeholder="Enter your current login password..." autocomplete="new-password" data-lpignore="true" data-form-type="other" value="" style="background: #FFFFFF; border: 1px solid #D4D4D8; font-size: 13px;">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                      <label class="form-label required" style="font-weight: 600; font-size: 11.5px; color: #52525B;">Current Login Password</label>
+                      <input type="password" class="form-control" id="settingsLoginPasswordInput" placeholder="Enter current login password..." autocomplete="new-password">
                     </div>
 
                     <div class="form-group" style="margin-bottom: 8px;">
-                      <label class="form-label required" style="font-weight: 600; font-size: 12px; color: #52525B;">New Permission Passcode</label>
+                      <label class="form-label required" style="font-weight: 600; font-size: 11.5px; color: #52525B;">New Deletion Passcode</label>
                       <div style="display: flex; gap: 8px;">
-                        <input type="password" class="form-control" id="settingsNewPasscodeInput" placeholder="Enter new passcode (e.g. 1234)..." autocomplete="new-password" data-lpignore="true" data-form-type="other" value="" style="background: #FFFFFF; border: 1px solid #D4D4D8; font-size: 13px;">
-                        <button type="button" class="btn btn-sm" id="btnSettingsSavePasscode" style="background: #09090B; border: 1px solid #09090B; color: #FFFFFF; font-weight: 600; padding: 0 18px; border-radius: 8px; white-space: nowrap; cursor: pointer;">Save Passcode</button>
+                        <input type="password" class="form-control" id="settingsNewPasscodeInput" placeholder="Enter new passcode..." autocomplete="new-password">
+                        <button type="button" class="btn btn-sm btn-primary" id="btnSettingsSavePasscode">Save</button>
                       </div>
                     </div>
-                    <div id="settingsPasscodeFeedback" style="font-size: 12px; margin-top: 8px; font-weight: 600; display: none;"></div>
+                    <div id="settingsPasscodeFeedback" style="font-size: 12px; margin-top: 6px; font-weight: 600; display: none;"></div>
                   </form>
                 </div>
               </div>
               <?php endif; ?>
 
+              <!-- Browser LocalStorage -->
               <div class="studio-card col-span-2">
-                <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 14px;">Browser LocalStorage Data Management</h3>
-                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
-                  All inline edits, new directives, drafts, and tasks are automatically persisted in your browser's local storage.
+                <h3 style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 8px;">Local Storage & Backup</h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 14px;">
+                  Export or restore client-side draft configurations and local offline cache.
                 </p>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                  <button class="btn btn-secondary btn-sm" id="btnSettingsExportJson">Export Data JSON</button>
-                  <button class="btn btn-secondary btn-sm" id="btnSettingsImportJson">Import Data JSON</button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <button class="btn btn-secondary btn-sm" id="btnSettingsExportJson">Export JSON</button>
+                  <button class="btn btn-secondary btn-sm" id="btnSettingsImportJson">Import JSON</button>
                   <input type="file" id="importJsonFileInput" accept=".json" style="display: none;">
-                  <button class="btn btn-danger btn-sm" id="btnSettingsResetDefaults">Reset to Factory Defaults</button>
+                  <button class="btn btn-danger btn-sm" id="btnSettingsResetDefaults">Reset Defaults</button>
                 </div>
               </div>
             </div>
+
           </div>
           <?php endif; ?>
 
@@ -1088,51 +798,54 @@ require_once __DIR__ . '/includes/sidebar.php';
   </main>
 </div>
 
-<!-- Unified Settings Script -->
 <script>
 (function() {
   'use strict';
 
-  // 1. Primary Top-Level Tabs (Account vs System)
-  const topTabBtns = document.querySelectorAll('.settings-top-tab-btn');
-  const topTabPanels = document.querySelectorAll('.top-tab-panel');
+  // 1. Primary Underline Tab Switcher
+  const tabLinks = document.querySelectorAll('.settings-tab-link');
+  const contentPanes = document.querySelectorAll('.settings-content-pane');
 
-  topTabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      topTabBtns.forEach(b => b.classList.remove('active'));
-      topTabPanels.forEach(p => p.style.display = 'none');
+  tabLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      tabLinks.forEach(l => l.classList.remove('active'));
+      contentPanes.forEach(p => p.style.display = 'none');
 
-      btn.classList.add('active');
-      const targetId = btn.getAttribute('data-top-target');
-      const targetPanel = document.getElementById(targetId);
-      if (targetPanel) {
-        targetPanel.style.display = 'block';
-      }
+      link.classList.add('active');
+      const tabKey = link.getAttribute('data-tab-btn');
+      const pane = document.getElementById('pane-' + tabKey);
+      if (pane) pane.style.display = 'block';
     });
   });
 
-  // 2. Account Sub-Tabs
-  const subTabBtns = document.querySelectorAll('.account-subtab-btn');
-  const subTabPanes = document.querySelectorAll('.account-subtab-pane');
+  // 1b. Account Subtabs Switcher
+  const subtabBtns = document.querySelectorAll('.account-subtab-btn');
+  const subtabPanes = document.querySelectorAll('.account-subtab-pane');
 
-  subTabBtns.forEach(btn => {
+  subtabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      subTabBtns.forEach(b => b.classList.remove('active'));
-      subTabPanes.forEach(p => p.style.display = 'none');
+      subtabBtns.forEach(b => b.classList.remove('active'));
+      subtabPanes.forEach(p => p.style.display = 'none');
 
       btn.classList.add('active');
-      const targetId = btn.getAttribute('data-sub-target');
-      const targetPane = document.getElementById(targetId);
-      if (targetPane) {
-        targetPane.style.display = 'block';
-      }
+      const targetSubtab = btn.getAttribute('data-subtab');
+      const targetPane = document.getElementById('subpane-' + targetSubtab);
+      if (targetPane) targetPane.style.display = 'block';
     });
   });
 
-  // 3. Password Visibility Toggle
-  document.querySelectorAll('.btn-pwd-eye').forEach(eye => {
-    eye.addEventListener('click', () => {
-      const targetId = eye.getAttribute('data-toggle-for');
+  // Activate subtab if specified in URL query
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestedSub = urlParams.get('sub') || '';
+  if (requestedSub) {
+    const targetBtn = document.querySelector(`.account-subtab-btn[data-subtab="${requestedSub}"]`);
+    if (targetBtn) targetBtn.click();
+  }
+
+  // 2. Password Visibility Toggles
+  document.querySelectorAll('.eye-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
       const input = document.getElementById(targetId);
       if (input) {
         input.type = input.type === 'password' ? 'text' : 'password';
@@ -1140,14 +853,14 @@ require_once __DIR__ . '/includes/sidebar.php';
     });
   });
 
-  // 4. Password Strength Indicator
-  const pwdNewInput = document.getElementById('pwdNew');
-  const pwdStrengthFill = document.getElementById('pwdStrengthFill');
-  const pwdStrengthText = document.getElementById('pwdStrengthText');
+  // 3. Password Strength Meter
+  const pwdNew = document.getElementById('pwdNew');
+  const pwdMeterFill = document.getElementById('pwdMeterFill');
+  const pwdMeterText = document.getElementById('pwdMeterText');
 
-  if (pwdNewInput) {
-    pwdNewInput.addEventListener('input', () => {
-      const val = pwdNewInput.value;
+  if (pwdNew && pwdMeterFill && pwdMeterText) {
+    pwdNew.addEventListener('input', () => {
+      const val = pwdNew.value;
       let score = 0;
       if (val.length >= 6) score += 25;
       if (val.length >= 10) score += 25;
@@ -1155,38 +868,38 @@ require_once __DIR__ . '/includes/sidebar.php';
       if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
 
       if (val.length === 0) {
-        pwdStrengthFill.style.width = '0%';
-        pwdStrengthFill.style.background = '#E2E8F0';
-        pwdStrengthText.textContent = 'Strength: Enter a password';
-        pwdStrengthText.style.color = '#64748B';
+        pwdMeterFill.style.width = '0%';
+        pwdMeterFill.style.background = '#E2E8F0';
+        pwdMeterText.textContent = 'Strength: Enter a password';
+        pwdMeterText.style.color = '#64748B';
       } else if (score <= 25) {
-        pwdStrengthFill.style.width = '25%';
-        pwdStrengthFill.style.background = '#EF4444';
-        pwdStrengthText.textContent = 'Strength: Weak (Too short)';
-        pwdStrengthText.style.color = '#EF4444';
+        pwdMeterFill.style.width = '25%';
+        pwdMeterFill.style.background = '#EF4444';
+        pwdMeterText.textContent = 'Strength: Weak';
+        pwdMeterText.style.color = '#EF4444';
       } else if (score <= 50) {
-        pwdStrengthFill.style.width = '50%';
-        pwdStrengthFill.style.background = '#F59E0B';
-        pwdStrengthText.textContent = 'Strength: Moderate';
-        pwdStrengthText.style.color = '#F59E0B';
+        pwdMeterFill.style.width = '50%';
+        pwdMeterFill.style.background = '#F59E0B';
+        pwdMeterText.textContent = 'Strength: Moderate';
+        pwdMeterText.style.color = '#F59E0B';
       } else if (score <= 75) {
-        pwdStrengthFill.style.width = '75%';
-        pwdStrengthFill.style.background = '#3B82F6';
-        pwdStrengthText.textContent = 'Strength: Good';
-        pwdStrengthText.style.color = '#3B82F6';
+        pwdMeterFill.style.width = '75%';
+        pwdMeterFill.style.background = '#3B82F6';
+        pwdMeterText.textContent = 'Strength: Good';
+        pwdMeterText.style.color = '#3B82F6';
       } else {
-        pwdStrengthFill.style.width = '100%';
-        pwdStrengthFill.style.background = '#10B981';
-        pwdStrengthText.textContent = 'Strength: Strong & Secure';
-        pwdStrengthText.style.color = '#10B981';
+        pwdMeterFill.style.width = '100%';
+        pwdMeterFill.style.background = '#10B981';
+        pwdMeterText.textContent = 'Strength: Strong';
+        pwdMeterText.style.color = '#10B981';
       }
     });
   }
 
-  // 5. Change Password Submission
-  const changePasswordForm = document.getElementById('changePasswordForm');
-  if (changePasswordForm) {
-    changePasswordForm.addEventListener('submit', async (e) => {
+  // 4. Change Password Handler
+  const passwordForm = document.getElementById('passwordForm');
+  if (passwordForm) {
+    passwordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const currentPassword = document.getElementById('pwdCurrent').value;
       const newPassword = document.getElementById('pwdNew').value;
@@ -1197,11 +910,11 @@ require_once __DIR__ . '/includes/sidebar.php';
         return;
       }
       if (newPassword !== confirmPassword) {
-        alert('New passwords do not match. Please verify.');
+        alert('New passwords do not match. Please re-enter.');
         return;
       }
 
-      const btn = document.getElementById('btnSubmitChangePassword');
+      const btn = document.getElementById('btnUpdatePassword');
       btn.disabled = true;
       btn.textContent = 'Updating...';
 
@@ -1218,15 +931,15 @@ require_once __DIR__ . '/includes/sidebar.php';
         });
         const data = await res.json();
         if (data.success) {
-          alert('Success! Your password has been changed successfully.');
-          changePasswordForm.reset();
-          pwdStrengthFill.style.width = '0%';
-          pwdStrengthText.textContent = 'Strength: Enter a password';
+          alert('Password successfully updated!');
+          passwordForm.reset();
+          pwdMeterFill.style.width = '0%';
+          pwdMeterText.textContent = 'Strength: Enter a password';
         } else {
           alert('Error: ' + (data.error || 'Failed to update password.'));
         }
       } catch (err) {
-        alert('Network error while updating password.');
+        alert('Network error updating password.');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Update Password';
@@ -1234,18 +947,16 @@ require_once __DIR__ . '/includes/sidebar.php';
     });
   }
 
-  // 6. Profile Picture Upload & Presets
+  // 5. Avatar Management
   const avatarFileInput = document.getElementById('avatarFileInput');
-  const mainAvatarPreview = document.getElementById('mainAvatarPreview');
   const btnRemoveAvatar = document.getElementById('btnRemoveAvatar');
 
   if (avatarFileInput) {
     avatarFileInput.addEventListener('change', async () => {
       if (!avatarFileInput.files || !avatarFileInput.files[0]) return;
       const file = avatarFileInput.files[0];
-
       if (file.size > 5 * 1024 * 1024) {
-        alert('Selected file is too large. Maximum size is 5MB.');
+        alert('File size exceeds 5MB limit.');
         return;
       }
 
@@ -1254,55 +965,47 @@ require_once __DIR__ . '/includes/sidebar.php';
       formData.append('avatar', file);
 
       try {
-        const res = await fetch('../api.php', {
-          method: 'POST',
-          body: formData
-        });
+        const res = await fetch('../api.php', { method: 'POST', body: formData });
         const data = await res.json();
         if (data.success) {
-          updateAvatarDisplays(data.avatar_url);
-          if (btnRemoveAvatar) btnRemoveAvatar.style.display = 'inline-flex';
+          syncAvatars(data.avatar_url);
+          btnRemoveAvatar.style.display = 'inline-flex';
         } else {
           alert('Upload failed: ' + (data.error || 'Unknown error'));
         }
       } catch (err) {
-        alert('Network error while uploading avatar.');
+        alert('Network error uploading avatar.');
       }
     });
   }
 
-  // Preset avatar click
-  document.querySelectorAll('.preset-avatar-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const presetUrl = btn.getAttribute('data-preset-url');
+  document.querySelectorAll('.preset-avatar-chip').forEach(chip => {
+    chip.addEventListener('click', async () => {
+      const presetUrl = chip.getAttribute('data-preset');
       if (!presetUrl) return;
 
       try {
         const res = await fetch('../api.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'account_upload_avatar',
-            preset_url: presetUrl
-          })
+          body: JSON.stringify({ action: 'account_upload_avatar', preset_url: presetUrl })
         });
         const data = await res.json();
         if (data.success) {
-          updateAvatarDisplays(data.avatar_url);
-          if (btnRemoveAvatar) btnRemoveAvatar.style.display = 'inline-flex';
+          syncAvatars(data.avatar_url);
+          btnRemoveAvatar.style.display = 'inline-flex';
         } else {
-          alert('Failed to set avatar preset: ' + (data.error || 'Unknown error'));
+          alert('Failed to set avatar preset.');
         }
       } catch (err) {
-        alert('Network error while saving avatar preset.');
+        alert('Network error saving avatar preset.');
       }
     });
   });
 
-  // Remove Avatar
   if (btnRemoveAvatar) {
     btnRemoveAvatar.addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to remove your profile picture?')) return;
+      if (!confirm('Remove profile photo?')) return;
       try {
         const res = await fetch('../api.php', {
           method: 'POST',
@@ -1311,57 +1014,43 @@ require_once __DIR__ . '/includes/sidebar.php';
         });
         const data = await res.json();
         if (data.success) {
-          updateAvatarDisplays(null);
+          syncAvatars(null);
           btnRemoveAvatar.style.display = 'none';
         } else {
-          alert('Error: ' + (data.error || 'Failed to remove avatar.'));
+          alert('Error removing avatar.');
         }
       } catch (err) {
-        alert('Network error while removing avatar.');
+        alert('Network error removing avatar.');
       }
     });
   }
 
-  function updateAvatarDisplays(url) {
+  function syncAvatars(url) {
     const fullName = document.getElementById('profileFullName') ? document.getElementById('profileFullName').value : 'User';
     const initials = (fullName.trim().substring(0, 2) || 'SD').toUpperCase();
 
-    if (mainAvatarPreview) {
-      if (url) {
-        mainAvatarPreview.innerHTML = `<img src="${url}" alt="Avatar">`;
-      } else {
-        mainAvatarPreview.innerHTML = `<span>${initials}</span>`;
-      }
-    }
-
-    const headerBox = document.getElementById('headerAvatarBox');
-    if (headerBox) {
-      if (url) {
-        headerBox.innerHTML = `<img src="${url}" alt="Avatar" class="header-avatar-img">`;
-      } else {
-        headerBox.innerHTML = `<span>${initials}</span>`;
-      }
-    }
-
+    const hero = document.getElementById('heroAvatar');
+    const editor = document.getElementById('editorAvatarPreview');
     const navAvatar = document.querySelector('.user-profile-btn .user-avatar');
+
+    const content = url ? `<img src="${url}" alt="Avatar">` : `<span>${initials}</span>`;
+
+    if (hero) hero.innerHTML = content;
+    if (editor) editor.innerHTML = content;
     if (navAvatar) {
-      if (url) {
-        navAvatar.innerHTML = `<img src="${url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-      } else {
-        navAvatar.textContent = initials;
-      }
+      navAvatar.innerHTML = url ? `<img src="${url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : initials;
     }
   }
 
-  // 7. Profile Info Update
-  const profileInfoForm = document.getElementById('profileInfoForm');
-  if (profileInfoForm) {
-    profileInfoForm.addEventListener('submit', async (e) => {
+  // 6. Profile Info Update
+  const profileForm = document.getElementById('profileForm');
+  if (profileForm) {
+    profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fullName = document.getElementById('profileFullName').value.trim();
       const email = document.getElementById('profileEmail').value.trim();
 
-      const btn = document.getElementById('btnSaveProfileInfo');
+      const btn = document.getElementById('btnSaveProfile');
       btn.disabled = true;
       btn.textContent = 'Saving...';
 
@@ -1377,24 +1066,25 @@ require_once __DIR__ . '/includes/sidebar.php';
         });
         const data = await res.json();
         if (data.success) {
-          document.getElementById('headerUserNameDisplay').textContent = fullName;
-          document.getElementById('headerUserEmailDisplay').textContent = email;
+          document.getElementById('heroName').textContent = fullName;
+          document.getElementById('heroEmail').textContent = email;
           const navName = document.querySelector('.user-profile-btn .user-name');
           if (navName) navName.textContent = fullName;
-          alert('Profile information updated successfully!');
+          alert('Profile details saved!');
+          loadAccountSecurityInfo();
         } else {
-          alert('Error: ' + (data.error || 'Failed to update profile.'));
+          alert('Error: ' + (data.error || 'Failed to save profile.'));
         }
       } catch (err) {
-        alert('Network error while saving profile.');
+        alert('Network error saving profile.');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span>Save Profile Changes</span>`;
+        btn.textContent = 'Save Changes';
       }
     });
   }
 
-  // 8. Load Account Security Info (Google status & 2FA)
+  // 7. Load 2FA Security Status
   async function loadAccountSecurityInfo() {
     try {
       const res = await fetch('../api.php?action=account_get_info');
@@ -1403,42 +1093,23 @@ require_once __DIR__ . '/includes/sidebar.php';
 
       const u = data.user;
 
-      const googleStatusText = document.getElementById('googleLinkStatusText');
-      const googleActionBtnContainer = document.getElementById('googleActionBtnContainer');
+      // TOTP status
+      const totpStatusLine = document.getElementById('totpStatusLine');
+      const totpBtnSlot = document.getElementById('totpBtnSlot');
+      const totpSetupBox = document.getElementById('totpSetupBox');
 
-      if (googleStatusText && googleActionBtnContainer) {
-        if (u.is_google_linked) {
-          googleStatusText.innerHTML = `<span style="color:#10B981; font-weight:700;">● Connected</span> &bull; ${u.google_email || u.email}`;
-          googleActionBtnContainer.innerHTML = `
-            <button type="button" class="btn btn-outline-danger btn-sm" id="btnDisconnectGoogle">
-              Disconnect Google Account
-            </button>
-          `;
-          document.getElementById('btnDisconnectGoogle').addEventListener('click', handleDisconnectGoogle);
-        } else {
-          googleStatusText.innerHTML = `<span style="color:#64748B;">Not connected</span> &bull; Click to connect for single-click sign in`;
-          googleActionBtnContainer.innerHTML = `
-            <button type="button" class="btn btn-primary btn-sm" id="btnConnectGoogle">
-              Connect Google Account
-            </button>
-          `;
-          document.getElementById('btnConnectGoogle').addEventListener('click', handleConnectGoogle);
+      if (u.two_factor_enabled) {
+        if (totpStatusLine) totpStatusLine.innerHTML = `<span style="color:#059669; font-weight:700;">● Active</span> &bull; 6-digit TOTP verification active`;
+        if (totpBtnSlot) {
+          totpBtnSlot.innerHTML = `<button type="button" class="btn btn-outline-danger btn-sm" id="btnDisable2fa">Disable 2FA</button>`;
+          document.getElementById('btnDisable2fa').addEventListener('click', handleDisable2fa);
         }
-      }
-
-      const badgeWrap = document.getElementById('twoFactorBadgeWrap');
-      const totpDisabledView = document.getElementById('totpDisabledView');
-      const totpEnabledView = document.getElementById('totpEnabledView');
-
-      if (badgeWrap && totpDisabledView && totpEnabledView) {
-        if (u.two_factor_enabled) {
-          badgeWrap.innerHTML = `<span class="badge" style="background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; font-weight:800;">2FA ACTIVE</span>`;
-          totpDisabledView.style.display = 'none';
-          totpEnabledView.style.display = 'block';
-        } else {
-          badgeWrap.innerHTML = `<span class="badge" style="background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; font-weight:800;">DISABLED</span>`;
-          totpDisabledView.style.display = 'block';
-          totpEnabledView.style.display = 'none';
+        if (totpSetupBox) totpSetupBox.style.display = 'none';
+      } else {
+        if (totpStatusLine) totpStatusLine.innerHTML = `<span style="color:#64748B;">Disabled</span> &bull; Protect your account with standard TOTP 2FA`;
+        if (totpBtnSlot) {
+          totpBtnSlot.innerHTML = `<button type="button" class="btn btn-secondary btn-sm" id="btnStart2fa">Configure 2FA</button>`;
+          document.getElementById('btnStart2fa').addEventListener('click', handleStart2fa);
         }
       }
     } catch (err) {
@@ -1446,179 +1117,118 @@ require_once __DIR__ . '/includes/sidebar.php';
     }
   }
 
-  function handleConnectGoogle() {
-    window.location.href = '../oauth.php?action=link&provider=google';
+  // 10. 2FA Setup
+  async function handleStart2fa() {
+    try {
+      const res = await fetch('../api.php?action=account_2fa_setup');
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('totpQr').src = data.qr_url;
+        document.getElementById('totpSecretText').textContent = data.manual_entry_key || data.secret;
+        document.getElementById('totpSetupBox').style.display = 'block';
+      } else {
+        alert('Error initiating 2FA: ' + data.error);
+      }
+    } catch (err) {
+      alert('Network error initiating 2FA.');
+    }
   }
 
-  async function handleDisconnectGoogle() {
-    if (!confirm('Are you sure you want to disconnect your Google account?')) return;
+  const btnConfirm2fa = document.getElementById('btnConfirm2fa');
+  if (btnConfirm2fa) {
+    btnConfirm2fa.addEventListener('click', async () => {
+      const code = document.getElementById('totpCodeInput').value.trim();
+      if (!code || code.length !== 6) {
+        alert('Enter the 6-digit code from Google Authenticator.');
+        return;
+      }
+      btnConfirm2fa.disabled = true;
+      btnConfirm2fa.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch('../api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'account_2fa_verify', code: code })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Success! Google Authenticator 2FA is now active.');
+          document.getElementById('totpSetupBox').style.display = 'none';
+          loadAccountSecurityInfo();
+        } else {
+          alert('Verification failed: ' + (data.error || 'Invalid code.'));
+        }
+      } catch (err) {
+        alert('Network error verifying 2FA.');
+      } finally {
+        btnConfirm2fa.disabled = false;
+        btnConfirm2fa.textContent = 'Verify';
+      }
+    });
+  }
+
+  async function handleDisable2fa() {
+    if (!confirm('Disable Two-Factor Authentication?')) return;
     try {
       const res = await fetch('../api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'account_google_unlink' })
+        body: JSON.stringify({ action: 'account_2fa_disable' })
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message || 'Google account disconnected.');
         loadAccountSecurityInfo();
       } else {
-        alert('Error: ' + (data.error || 'Failed to disconnect Google account.'));
+        alert('Error: ' + data.error);
       }
     } catch (err) {
-      alert('Network error disconnecting Google account.');
+      alert('Network error disabling 2FA.');
     }
   }
 
-  // 9. 2FA Setup Flow
-  const btnStart2faSetup = document.getElementById('btnStart2faSetup');
-  const totpSetupWizard = document.getElementById('totpSetupWizard');
-  const btnVerifyAndActivate2fa = document.getElementById('btnVerifyAndActivate2fa');
-  const btnDisable2fa = document.getElementById('btnDisable2fa');
-
-  if (btnStart2faSetup) {
-    btnStart2faSetup.addEventListener('click', async () => {
-      btnStart2faSetup.disabled = true;
-      btnStart2faSetup.textContent = 'Generating QR Code...';
-
-      try {
-        const res = await fetch('../api.php?action=account_2fa_setup');
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('totpQrImage').src = data.qr_url;
-          document.getElementById('totpManualKeyText').textContent = data.manual_entry_key || data.secret;
-          totpSetupWizard.style.display = 'block';
-        } else {
-          alert('Error initiating 2FA: ' + (data.error || 'Unknown error'));
-        }
-      } catch (err) {
-        alert('Network error initiating 2FA.');
-      } finally {
-        btnStart2faSetup.disabled = false;
-        btnStart2faSetup.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg><span>Enable Google Authenticator 2FA</span>`;
-      }
-    });
-  }
-
-  const btnCopyTotpKey = document.getElementById('btnCopyTotpKey');
-  if (btnCopyTotpKey) {
-    btnCopyTotpKey.addEventListener('click', () => {
-      const key = document.getElementById('totpManualKeyText').textContent.replace(/\s+/g, '');
-      navigator.clipboard.writeText(key).then(() => {
-        btnCopyTotpKey.textContent = 'Copied!';
-        setTimeout(() => { btnCopyTotpKey.textContent = 'Copy'; }, 2000);
-      });
-    });
-  }
-
-  if (btnVerifyAndActivate2fa) {
-    btnVerifyAndActivate2fa.addEventListener('click', async () => {
-      const code = document.getElementById('totpVerifyInput').value.trim();
-      if (!code || code.length !== 6) {
-        alert('Please enter the 6-digit code from Google Authenticator.');
-        return;
-      }
-
-      btnVerifyAndActivate2fa.disabled = true;
-      btnVerifyAndActivate2fa.textContent = 'Verifying...';
-
-      try {
-        const res = await fetch('../api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'account_2fa_verify',
-            code: code
-          })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert('Success! ' + data.message);
-          totpSetupWizard.style.display = 'none';
-          loadAccountSecurityInfo();
-        } else {
-          alert('Verification Failed: ' + (data.error || 'Invalid code'));
-        }
-      } catch (err) {
-        alert('Network error verifying 2FA code.');
-      } finally {
-        btnVerifyAndActivate2fa.disabled = false;
-        btnVerifyAndActivate2fa.textContent = 'Verify & Activate';
-      }
-    });
-  }
-
-  if (btnDisable2fa) {
-    btnDisable2fa.addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to disable Two-Factor Authentication? Your account will only be protected by your password.')) return;
-
-      try {
-        const res = await fetch('../api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'account_2fa_disable' })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(data.message || '2FA disabled.');
-          loadAccountSecurityInfo();
-        } else {
-          alert('Error: ' + (data.error || 'Failed to disable 2FA.'));
-        }
-      } catch (err) {
-        alert('Network error disabling 2FA.');
-      }
-    });
-  }
-
-  // 10. Device Login Management
+  // 11. Devices Management
   async function loadDevices() {
-    const container = document.getElementById('deviceSessionsList');
+    const container = document.getElementById('deviceListContainer');
     if (!container) return;
 
     try {
       const res = await fetch('../api.php?action=account_get_devices');
       const data = await res.json();
       if (!data.success) {
-        container.innerHTML = `<div style="color:#EF4444; padding:20px;">Failed to load devices: ${data.error}</div>`;
+        container.innerHTML = `<div style="color:#EF4444; padding:10px;">Failed to load sessions.</div>`;
         return;
       }
 
       const devices = data.devices || [];
       if (devices.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#64748B;">No active device sessions found.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:16px; color:#64748B;">No active device sessions.</div>`;
         return;
       }
 
       let html = '';
       devices.forEach(d => {
-        const isCurrent = d.is_current;
-        const iconSvg = d.user_agent && /mobile|android|iphone/i.test(d.user_agent)
-          ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`
-          : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+        const isCur = d.is_current;
+        const icon = d.user_agent && /mobile|android|iphone/i.test(d.user_agent)
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
 
         html += `
-          <div class="device-item ${isCurrent ? 'is-current-device' : ''}" data-session-id="${d.id}">
-            <div class="device-left">
-              <div class="device-icon-box">
-                ${iconSvg}
-              </div>
-              <div class="device-meta">
-                <h4>
-                  <span>${escapeHtml(d.device_name || 'Unknown Device')}</span>
-                  ${isCurrent ? `<span class="current-badge">This Device</span>` : ''}
-                </h4>
-                <p>
-                  <span>IP: ${escapeHtml(d.ip_address || '127.0.0.1')}</span>
-                  <span>&bull;</span>
-                  <span>Last active: ${escapeHtml(d.last_active || 'Recently')}</span>
-                </p>
+          <div class="device-row ${isCur ? 'is-current' : ''}">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="color: #64748B;">${icon}</div>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 6px;">
+                  <span>${escapeHtml(d.device_name || 'Browser Device')}</span>
+                  ${isCur ? `<span style="font-size: 10px; background: #DCFCE7; color: #166534; padding: 1px 6px; border-radius: 4px; font-weight: 800;">CURRENT</span>` : ''}
+                </div>
+                <div style="font-size: 11.5px; color: #64748B;">IP: ${escapeHtml(d.ip_address || '127.0.0.1')} &bull; Last active: ${escapeHtml(d.last_active || 'Recently')}</div>
               </div>
             </div>
             <div>
-              ${isCurrent 
-                ? `<span style="font-size:12px; font-weight:700; color:#10B981;">Active Now</span>` 
-                : `<button type="button" class="btn btn-outline-danger btn-sm btn-revoke-session" data-id="${d.id}">Log Out Device</button>`
+              ${isCur 
+                ? `<span style="font-size: 11px; font-weight: 700; color: #10B981;">Online Now</span>` 
+                : `<button type="button" class="btn btn-outline-danger btn-sm btn-revoke" data-id="${d.id}" style="font-size: 11px; padding: 3px 8px;">Log Out</button>`
               }
             </div>
           </div>
@@ -1627,10 +1237,10 @@ require_once __DIR__ . '/includes/sidebar.php';
 
       container.innerHTML = html;
 
-      container.querySelectorAll('.btn-revoke-session').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const sId = btn.getAttribute('data-id');
-          if (!confirm('Log out this remote device session?')) return;
+      container.querySelectorAll('.btn-revoke').forEach(b => {
+        b.addEventListener('click', async () => {
+          const sId = b.getAttribute('data-id');
+          if (!confirm('Log out this remote session?')) return;
           try {
             const r = await fetch('../api.php', {
               method: 'POST',
@@ -1638,25 +1248,21 @@ require_once __DIR__ . '/includes/sidebar.php';
               body: JSON.stringify({ action: 'account_revoke_device', session_id: sId })
             });
             const d = await r.json();
-            if (d.success) {
-              loadDevices();
-            } else {
-              alert('Error: ' + (d.error || 'Failed to revoke device.'));
-            }
+            if (d.success) loadDevices();
           } catch (e) {
-            alert('Network error revoking device session.');
+            alert('Failed to revoke session.');
           }
         });
       });
     } catch (err) {
-      container.innerHTML = `<div style="color:#EF4444; padding:20px;">Network error loading devices.</div>`;
+      container.innerHTML = `<div style="color:#EF4444; padding:10px;">Network error loading sessions.</div>`;
     }
   }
 
-  const btnRevokeAll = document.getElementById('btnRevokeAllOtherDevices');
-  if (btnRevokeAll) {
-    btnRevokeAll.addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to log out all other devices? All other active sessions will be terminated immediately.')) return;
+  const btnRevokeAllOther = document.getElementById('btnRevokeAllOther');
+  if (btnRevokeAllOther) {
+    btnRevokeAllOther.addEventListener('click', async () => {
+      if (!confirm('Log out all other active sessions?')) return;
       try {
         const res = await fetch('../api.php', {
           method: 'POST',
@@ -1667,11 +1273,9 @@ require_once __DIR__ . '/includes/sidebar.php';
         if (data.success) {
           alert('All other devices have been logged out.');
           loadDevices();
-        } else {
-          alert('Error: ' + (data.error || 'Failed to revoke other devices.'));
         }
       } catch (err) {
-        alert('Network error logging out other devices.');
+        alert('Network error.');
       }
     });
   }
@@ -1683,7 +1287,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     });
   }
 
-  // Initialize
+  // Initial load
   loadAccountSecurityInfo();
   loadDevices();
 

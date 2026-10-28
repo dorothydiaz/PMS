@@ -24,12 +24,12 @@ if ($action === 'link') {
     $pdo = getDbConnection();
     if ($pdo) {
         ensureSecurityTables();
-        $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'google', oauth_id = :oid, google_email = :ge WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE users SET oauth_provider = 'google', oauth_id = :oid, google_email = :ge, email_verified = 1, email_verified_at = COALESCE(email_verified_at, NOW()) WHERE id = :id");
         $stmt->execute([':oid' => $mockId, ':ge' => $mockEmail, ':id' => (int)$currUser['id']]);
         $_SESSION['pms_user']['oauth_provider'] = 'google';
         logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Connected Google account: ' . $mockEmail, null, 'Success');
     }
-    header('Location: pages/account-settings.php?msg=google_linked');
+    header('Location: pages/settings.php?tab=account&msg=google_linked');
     exit;
 }
 
@@ -47,7 +47,7 @@ if ($action === 'unlink') {
         $_SESSION['pms_user']['oauth_provider'] = 'credentials';
         logAuditEvent($currUser['username'], $currUser['role'], 'AUTH', 'Account Settings', 'Disconnected Google account', null, 'Success');
     }
-    header('Location: pages/account-settings.php?msg=google_unlinked');
+    header('Location: pages/settings.php?tab=account&msg=google_unlinked');
     exit;
 }
 
