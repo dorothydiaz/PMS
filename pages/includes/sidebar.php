@@ -168,9 +168,11 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
       <span class="nav-label">Audit Trail</span>
     </a>
     <?php endif; ?>
+    <?php endif; ?>
 
-    <?php if (hasPermission('settings', 'r')): ?>
-    <a class="nav-item <?= ($cur === 'settings') ? 'active' : '' ?>" href="<?= $pagesBase ?>settings.php" data-view="view-settings" data-page="view-settings" title="Settings">
+    <!-- 6. SETTINGS & ACCOUNT -->
+    <div class="nav-section-label">SETTINGS</div>
+    <a class="nav-item <?= ($cur === 'settings' || $cur === 'account-settings') ? 'active' : '' ?>" href="<?= $pagesBase ?>settings.php" data-view="view-settings" data-page="view-settings" title="Settings & Account">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -178,20 +180,6 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
         </svg>
       </span>
       <span class="nav-label">Settings</span>
-    </a>
-    <?php endif; ?>
-    <?php endif; ?>
-
-    <!-- 6. ACCOUNT -->
-    <div class="nav-section-label">ACCOUNT</div>
-    <a class="nav-item <?= ($cur === 'account-settings') ? 'active' : '' ?>" href="<?= $pagesBase ?>account-settings.php" data-view="view-account-settings" data-page="view-account-settings" title="Account Settings">
-      <span class="nav-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      </span>
-      <span class="nav-label">Account Settings</span>
     </a>
   </nav>
 </aside>
