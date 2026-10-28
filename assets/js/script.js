@@ -6937,7 +6937,7 @@
       }
     }
     const activeApprovalTab = state.salesFilter.approvalTab || '';
-    document.querySelectorAll('.sales-approval-tab').forEach(tabBtn => {
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(tabBtn => {
       const tabVal = tabBtn.getAttribute('data-tab-approval') || '';
       const isAct = tabVal === activeApprovalTab;
       tabBtn.classList.toggle('active', isAct);
@@ -7168,7 +7168,7 @@
     });
 
     // Reset approval tab buttons to All
-    document.querySelectorAll('.sales-approval-tab').forEach(tab => {
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(tab => {
       const isAll = !tab.getAttribute('data-tab-approval');
       tab.classList.toggle('active', isAll);
       tab.setAttribute('aria-selected', isAll ? 'true' : 'false');
@@ -7295,7 +7295,7 @@
 
     // Sync active acceptance tab styling
     const curAcceptanceTab = state.trackerAcceptanceTab || 'accepted';
-    document.querySelectorAll('.tracker-acceptance-tabs .sales-approval-tab').forEach(btn => {
+    document.querySelectorAll('.tracker-acceptance-tabs .tracker-acceptance-tab').forEach(btn => {
       const tabKey = btn.getAttribute('data-tracker-tab');
       const isAct = (tabKey === curAcceptanceTab);
       btn.classList.toggle('active', isAct);
@@ -13499,7 +13499,7 @@
     });
 
     // Client Approval Status Tabs listener
-    document.querySelectorAll('.sales-approval-tab').forEach(btn => {
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(btn => {
       btn.addEventListener('click', () => {
         const tabVal = btn.getAttribute('data-tab-approval') || '';
         state.salesFilter.approvalTab = tabVal;
