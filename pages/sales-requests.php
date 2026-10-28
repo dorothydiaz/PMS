@@ -134,27 +134,27 @@ require_once __DIR__ . '/includes/sidebar.php';
 
           <!-- Directly Inline Editable Sales Table -->
           <div class="table-studio-wrap">
-            <table class="data-table">
+            <table class="data-table" id="salesRequestsTable">
               <thead>
                 <tr>
-                  <th data-sort="requestId" title="Request ID">Request ID</th>
-                  <th data-sort="joNumber" title="Job Order Number">JO Number</th>
-                  <th data-sort="orderDate" title="Timestamp (Date Encoded)">Timestamp (Date Encoded)</th>
-                  <th data-sort="salesRep" title="Sales Representative">Sales Rep</th>
-                  <th data-sort="client" title="Client / Company">Client</th>
-                  <th data-sort="projectName" title="Project Name">Project Name</th>
-                  <th data-sort="artist" title="Assigned Artist">Artist</th>
-                  <th data-sort="designDeadline" title="Design Deadline">Design Deadline</th>
-                  <th data-sort="releasingDate" title="Production Due Date">Prod Due</th>
-                  <th data-sort="fileSent" title="File Status">File Status</th>
-                  <th data-sort="completeAddress" title="Delivery or Installation Address">Address</th>
-                  <th data-sort="location" title="Placement">Placement</th>
-                  <th data-sort="releasingMode" title="Mode of Releasing">Mode of Releasing</th>
-                  <th data-sort="contactPerson" title="Client Contact Person">Contact Person</th>
-                  <th data-sort="contactNumber" title="Contact Number">Contact Number</th>
-                  <th data-sort="clientApproval" title="Client Approval State">Client Approval</th>
-                  <th data-sort="priority" title="Priority Level">Priority Level</th>
-                  <th class="no-sort">Actions</th>
+                  <th class="col-req-id" data-sort="requestId" title="Request ID">Request ID</th>
+                  <th class="col-jo-number" data-sort="joNumber" title="Job Order Number">JO Number</th>
+                  <th class="col-order-date" data-sort="orderDate" title="Timestamp (Date Encoded)">Timestamp (Date Encoded)</th>
+                  <th class="col-sales-rep" data-sort="salesRep" title="Sales Representative">Sales Rep</th>
+                  <th class="col-client" data-sort="client" title="Client / Company">Client</th>
+                  <th class="col-project-name" data-sort="projectName" title="Project Name">Project Name</th>
+                  <th class="col-artist" data-sort="artist" title="Assigned Artist">Artist</th>
+                  <th class="col-design-deadline" data-sort="designDeadline" title="Design Deadline">Design Deadline</th>
+                  <th class="col-releasing-date" data-sort="releasingDate" title="Production Due Date">Prod Due</th>
+                  <th class="col-file-sent" data-sort="fileSent" title="File Status">File Status</th>
+                  <th class="col-address" data-sort="completeAddress" title="Delivery or Installation Address">Address</th>
+                  <th class="col-location" data-sort="location" title="Placement">Placement</th>
+                  <th class="col-releasing-mode" data-sort="releasingMode" title="Mode of Releasing">Mode of Releasing</th>
+                  <th class="col-contact-person" data-sort="contactPerson" title="Client Contact Person">Contact Person</th>
+                  <th class="col-contact-number" data-sort="contactNumber" title="Contact Number">Contact Number</th>
+                  <th class="col-client-approval" data-sort="clientApproval" title="Client Approval State">Client Approval</th>
+                  <th class="col-priority" data-sort="priority" title="Priority Level">Priority Level</th>
+                  <th class="col-actions no-sort">Actions</th>
                 </tr>
               </thead>
               <tbody id="salesRequestsTableBody">

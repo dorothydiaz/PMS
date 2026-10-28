@@ -191,7 +191,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
           <!-- Directly Inline Editable Creatives Tracker Table -->
           <div class="table-studio-wrap">
-            <table class="data-table">
+            <table class="data-table" id="creativesProductionTable">
               <thead>
                 <tr>
                   <th data-sort="requestId" title="Click to sort: Latest to Old / Old to Latest">Request ID</th>

@@ -1681,6 +1681,198 @@ body.sidebar-open {
   vertical-align: middle;
 }
 
+/* ==========================================================================
+   FIXED-WIDTH DATA TABLES & COLUMN LOCKS
+   Ensures table columns maintain strictly fixed widths when filtering
+   ========================================================================== */
+
+#salesRequestsTable,
+#view-sales-requests .data-table {
+  table-layout: fixed !important;
+  width: 2620px !important;
+  min-width: 2620px !important;
+}
+
+#salesRequestsTable th,
+#salesRequestsTable td,
+#view-sales-requests .data-table th,
+#view-sales-requests .data-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+/* Sales Requests Table Fixed Columns */
+#salesRequestsTable th:nth-child(1), #salesRequestsTable td:nth-child(1),
+#salesRequestsTable th.col-req-id { width: 110px !important; min-width: 110px !important; max-width: 110px !important; }
+
+#salesRequestsTable th:nth-child(2), #salesRequestsTable td:nth-child(2),
+#salesRequestsTable th.col-jo-number { width: 115px !important; min-width: 115px !important; max-width: 115px !important; }
+
+#salesRequestsTable th:nth-child(3), #salesRequestsTable td:nth-child(3),
+#salesRequestsTable th.col-order-date { width: 170px !important; min-width: 170px !important; max-width: 170px !important; }
+
+#salesRequestsTable th:nth-child(4), #salesRequestsTable td:nth-child(4),
+#salesRequestsTable th.col-sales-rep { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#salesRequestsTable th:nth-child(5), #salesRequestsTable td:nth-child(5),
+#salesRequestsTable th.col-client { width: 190px !important; min-width: 190px !important; max-width: 190px !important; }
+
+#salesRequestsTable th:nth-child(6), #salesRequestsTable td:nth-child(6),
+#salesRequestsTable th.col-project-name { width: 220px !important; min-width: 220px !important; max-width: 220px !important; }
+
+#salesRequestsTable th:nth-child(7), #salesRequestsTable td:nth-child(7),
+#salesRequestsTable th.col-artist { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#salesRequestsTable th:nth-child(8), #salesRequestsTable td:nth-child(8),
+#salesRequestsTable th.col-design-deadline { width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+
+#salesRequestsTable th:nth-child(9), #salesRequestsTable td:nth-child(9),
+#salesRequestsTable th.col-releasing-date { width: 135px !important; min-width: 135px !important; max-width: 135px !important; }
+
+#salesRequestsTable th:nth-child(10), #salesRequestsTable td:nth-child(10),
+#salesRequestsTable th.col-file-sent { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#salesRequestsTable th:nth-child(11), #salesRequestsTable td:nth-child(11),
+#salesRequestsTable th.col-address { width: 240px !important; min-width: 240px !important; max-width: 240px !important; }
+
+#salesRequestsTable th:nth-child(12), #salesRequestsTable td:nth-child(12),
+#salesRequestsTable th.col-location { width: 145px !important; min-width: 145px !important; max-width: 145px !important; }
+
+#salesRequestsTable th:nth-child(13), #salesRequestsTable td:nth-child(13),
+#salesRequestsTable th.col-releasing-mode { width: 155px !important; min-width: 155px !important; max-width: 155px !important; }
+
+#salesRequestsTable th:nth-child(14), #salesRequestsTable td:nth-child(14),
+#salesRequestsTable th.col-contact-person { width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+
+#salesRequestsTable th:nth-child(15), #salesRequestsTable td:nth-child(15),
+#salesRequestsTable th.col-contact-number { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#salesRequestsTable th:nth-child(16), #salesRequestsTable td:nth-child(16),
+#salesRequestsTable th.col-client-approval { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+
+#salesRequestsTable th:nth-child(17), #salesRequestsTable td:nth-child(17),
+#salesRequestsTable th.col-priority { width: 135px !important; min-width: 135px !important; max-width: 135px !important; }
+
+#salesRequestsTable th:nth-child(18), #salesRequestsTable td:nth-child(18),
+#salesRequestsTable th.col-actions { width: 125px !important; min-width: 125px !important; max-width: 125px !important; text-align: center !important; }
+
+/* Creatives Tracker & Production Fixed Tables */
+#creativesTrackerTable,
+#creativesProductionTable,
+#view-creatives-tracker .data-table,
+#view-creatives-production .data-table {
+  table-layout: fixed !important;
+  width: 2260px !important;
+  min-width: 2260px !important;
+}
+
+#creativesTrackerTable th,
+#creativesTrackerTable td,
+#creativesProductionTable th,
+#creativesProductionTable td,
+#view-creatives-tracker .data-table th,
+#view-creatives-tracker .data-table td,
+#view-creatives-production .data-table th,
+#view-creatives-production .data-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+#creativesTrackerTable th:nth-child(1), #creativesTrackerTable td:nth-child(1),
+#creativesProductionTable th:nth-child(1), #creativesProductionTable td:nth-child(1) { width: 110px !important; min-width: 110px !important; max-width: 110px !important; }
+
+#creativesTrackerTable th:nth-child(2), #creativesTrackerTable td:nth-child(2),
+#creativesProductionTable th:nth-child(2), #creativesProductionTable td:nth-child(2) { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#creativesTrackerTable th:nth-child(3), #creativesTrackerTable td:nth-child(3),
+#creativesProductionTable th:nth-child(3), #creativesProductionTable td:nth-child(3) { width: 220px !important; min-width: 220px !important; max-width: 220px !important; }
+
+#creativesTrackerTable th:nth-child(4), #creativesTrackerTable td:nth-child(4),
+#creativesProductionTable th:nth-child(4), #creativesProductionTable td:nth-child(4) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+
+#creativesTrackerTable th:nth-child(5), #creativesTrackerTable td:nth-child(5),
+#creativesProductionTable th:nth-child(5), #creativesProductionTable td:nth-child(5) { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#creativesTrackerTable th:nth-child(6), #creativesTrackerTable td:nth-child(6),
+#creativesProductionTable th:nth-child(6), #creativesProductionTable td:nth-child(6) { width: 95px !important; min-width: 95px !important; max-width: 95px !important; text-align: center !important; }
+
+#creativesTrackerTable th:nth-child(7), #creativesTrackerTable td:nth-child(7),
+#creativesProductionTable th:nth-child(7), #creativesProductionTable td:nth-child(7) { width: 95px !important; min-width: 95px !important; max-width: 95px !important; text-align: center !important; }
+
+#creativesTrackerTable th:nth-child(8), #creativesTrackerTable td:nth-child(8),
+#creativesProductionTable th:nth-child(8), #creativesProductionTable td:nth-child(8) { width: 95px !important; min-width: 95px !important; max-width: 95px !important; text-align: center !important; }
+
+#creativesTrackerTable th:nth-child(9), #creativesTrackerTable td:nth-child(9),
+#creativesProductionTable th:nth-child(9), #creativesProductionTable td:nth-child(9) { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#creativesTrackerTable th:nth-child(10), #creativesTrackerTable td:nth-child(10),
+#creativesProductionTable th:nth-child(10), #creativesProductionTable td:nth-child(10) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+
+#creativesTrackerTable th:nth-child(11), #creativesTrackerTable td:nth-child(11),
+#creativesProductionTable th:nth-child(11), #creativesProductionTable td:nth-child(11) { width: 145px !important; min-width: 145px !important; max-width: 145px !important; }
+
+#creativesTrackerTable th:nth-child(12), #creativesTrackerTable td:nth-child(12),
+#creativesProductionTable th:nth-child(12), #creativesProductionTable td:nth-child(12) { width: 115px !important; min-width: 115px !important; max-width: 115px !important; text-align: center !important; }
+
+#creativesTrackerTable th:nth-child(13), #creativesTrackerTable td:nth-child(13),
+#creativesProductionTable th:nth-child(13), #creativesProductionTable td:nth-child(13) { width: 190px !important; min-width: 190px !important; max-width: 190px !important; }
+
+#creativesTrackerTable th:nth-child(14), #creativesTrackerTable td:nth-child(14),
+#creativesProductionTable th:nth-child(14), #creativesProductionTable td:nth-child(14) { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+
+#creativesTrackerTable th:nth-child(15), #creativesTrackerTable td:nth-child(15),
+#creativesProductionTable th:nth-child(15), #creativesProductionTable td:nth-child(15) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+
+#creativesTrackerTable th:nth-child(16), #creativesTrackerTable td:nth-child(16),
+#creativesProductionTable th:nth-child(16), #creativesProductionTable td:nth-child(16) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+
+#creativesTrackerTable th:nth-child(17), #creativesTrackerTable td:nth-child(17),
+#creativesProductionTable th:nth-child(17), #creativesProductionTable td:nth-child(17) { width: 125px !important; min-width: 125px !important; max-width: 125px !important; text-align: center !important; }
+
+/* In-cell elements lock to cell widths */
+.data-table .editable-cell,
+.data-table .read-only-cell {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table .editable-cell:focus {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
+}
+
+.data-table .custom-select-btn {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.data-table .inline-date-cell-wrap {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.data-table .inline-date-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.table-draft-row td .draft-cell-input,
+.table-draft-row td .draft-custom-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 .data-table tbody tr:hover {
   background: #F9FAFB;
 }
@@ -1957,12 +2149,28 @@ body.sidebar-open {
   color: var(--text-main);
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.07);
   outline: none;
   font-family: inherit;
+  box-sizing: border-box;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.custom-filter-dropdown-btn .custom-select-label {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-filter-dropdown-btn .custom-select-arrow {
+  flex-shrink: 0;
 }
 
 .custom-filter-dropdown-btn:hover {
@@ -1979,6 +2187,118 @@ body.sidebar-open {
 .custom-filter-dropdown-btn.has-value {
   background: #F0FDF4;
   color: #166534;
+}
+
+/* Individual Filter Controls Fixed Widths (Prevents resizing when selecting options) */
+#salesFilterPriority,
+#salesFilterPriority + .custom-filter-dropdown-btn,
+.filter-btn-salesFilterPriority {
+  width: 130px !important;
+  min-width: 130px !important;
+  max-width: 130px !important;
+}
+
+#salesFilterApproval,
+#salesFilterApproval + .custom-filter-dropdown-btn,
+.filter-btn-salesFilterApproval {
+  width: 160px !important;
+  min-width: 160px !important;
+  max-width: 160px !important;
+}
+
+#salesFilterLocation,
+#salesFilterLocation + .custom-filter-dropdown-btn,
+.filter-btn-salesFilterLocation {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+}
+
+#salesFilterFileSent,
+#salesFilterFileSent + .custom-filter-dropdown-btn,
+.filter-btn-salesFilterFileSent {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+}
+
+#salesFilterSalesRep,
+#salesFilterSalesRep + .custom-filter-dropdown-btn,
+.filter-btn-salesFilterSalesRep {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+}
+
+#salesFilterDeadline,
+#salesFilterDeadline + .custom-filter-dropdown-btn,
+.filter-btn-salesFilterDeadline {
+  width: 140px !important;
+  min-width: 140px !important;
+  max-width: 140px !important;
+}
+
+#salesFilterPerPage,
+#salesPaginationPerPage {
+  width: 95px !important;
+  min-width: 95px !important;
+}
+
+/* Creatives Tracker Filter Bar Dropdowns Fixed Widths */
+#trackerFilterDateColumn,
+#trackerFilterDateColumn + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterDateColumn {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+}
+
+#trackerFilterDatePreset,
+#trackerFilterDatePreset + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterDatePreset {
+  width: 130px !important;
+  min-width: 130px !important;
+  max-width: 130px !important;
+}
+
+#trackerFilterProjectStatus,
+#trackerFilterProjectStatus + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterProjectStatus {
+  width: 155px !important;
+  min-width: 155px !important;
+  max-width: 155px !important;
+}
+
+#trackerFilterDesignStatus,
+#trackerFilterDesignStatus + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterDesignStatus {
+  width: 165px !important;
+  min-width: 165px !important;
+  max-width: 165px !important;
+}
+
+#trackerFilterArtist,
+#trackerFilterArtist + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterArtist {
+  width: 140px !important;
+  min-width: 140px !important;
+  max-width: 140px !important;
+}
+
+#trackerFilterOverdue,
+#trackerFilterOverdue + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterOverdue {
+  width: 140px !important;
+  min-width: 140px !important;
+  max-width: 140px !important;
+}
+
+#trackerSortDropdown,
+#trackerSortDropdown + .custom-filter-dropdown-btn,
+.filter-btn-trackerSortDropdown {
+  width: 180px !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
 }
 
 /* Floating Custom Dropdown Popover (Pure White, Studio Drop Shadow, No Outlines) */
@@ -2401,6 +2721,12 @@ body.sidebar-open {
   color: var(--text-main);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
   transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+select.filter-input {
+  box-sizing: border-box;
+  min-width: 130px;
 }
 
 .filter-input:focus {

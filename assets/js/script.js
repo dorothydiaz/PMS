@@ -5477,6 +5477,10 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'custom-filter-dropdown-btn';
+      if (sel.id) {
+        btn.classList.add(`filter-btn-${sel.id}`);
+        btn.id = `${sel.id}_customBtn`;
+      }
       if (sel.value) btn.classList.add('has-value');
 
       const currentText = sel.options[sel.selectedIndex]?.text || 'Filter';
@@ -5519,9 +5523,9 @@
   // Synchronizes the custom filter dropdown button UI with its underlying native select element
   function syncFilterSelectUI(selectEl) {
     if (!selectEl) return;
-    const btn = selectEl.nextElementSibling && selectEl.nextElementSibling.classList.contains('custom-filter-dropdown-btn')
+    const btn = (selectEl.nextElementSibling && selectEl.nextElementSibling.classList.contains('custom-filter-dropdown-btn'))
       ? selectEl.nextElementSibling
-      : null;
+      : (selectEl.id ? document.getElementById(`${selectEl.id}_customBtn`) : null);
     if (btn) {
       const txt = selectEl.options[selectEl.selectedIndex]?.text || 'Filter';
       const lbl = btn.querySelector('.custom-select-label');
