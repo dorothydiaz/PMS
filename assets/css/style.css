@@ -5615,5 +5615,183 @@ input[type="password"]::-ms-clear {
   display: none !important;
 }
 
+/* ==========================================================================
+   VIEWPORT-FIT TABLE LAYOUT (No Page/Window Scrolling, Scroll Table Only)
+   Specifically tailored for Sales Requests and Creatives Tracker
+   ========================================================================== */
+
+@media (min-width: 992px) and (min-height: 550px) {
+  /* 1. Prevent vertical scroll on the browser window/body */
+  html:has(.layout-table-fit),
+  body:has(.layout-table-fit),
+  body.layout-table-fit,
+  body[data-page="view-sales-requests"],
+  body[data-page="view-creatives-tracker"] {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  /* 2. Main wrapper fills exact 100vh and doesn't overflow */
+  .layout-table-fit,
+  body[data-page="view-sales-requests"] .main-wrapper,
+  body[data-page="view-creatives-tracker"] .main-wrapper {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .layout-table-fit .topbar,
+  body[data-page="view-sales-requests"] .topbar,
+  body[data-page="view-creatives-tracker"] .topbar {
+    flex-shrink: 0 !important;
+  }
+
+  /* 3. Main content fills remaining height below topbar */
+  .layout-table-fit .main-content,
+  body[data-page="view-sales-requests"] .main-content,
+  body[data-page="view-creatives-tracker"] .main-content {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 14px 28px 12px !important;
+    max-width: 100% !important;
+  }
+
+  /* 4. Content body and view panel take full flex height */
+  .layout-table-fit .content-body,
+  body[data-page="view-sales-requests"] .content-body,
+  body[data-page="view-creatives-tracker"] .content-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .layout-table-fit .view-panel.active,
+  body[data-page="view-sales-requests"] #view-sales-requests,
+  body[data-page="view-creatives-tracker"] #view-creatives-tracker {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* 5. Fixed top controls (headers, tabs, filters) - do not scroll or shrink */
+  .layout-table-fit .section-header-row,
+  body[data-page="view-sales-requests"] .section-header-row,
+  body[data-page="view-creatives-tracker"] .section-header-row {
+    flex-shrink: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .layout-table-fit .section-header-row h2,
+  body[data-page="view-sales-requests"] .section-header-row h2,
+  body[data-page="view-creatives-tracker"] .section-header-row h2 {
+    font-size: 18px !important;
+  }
+
+  .layout-table-fit .section-header-row p,
+  body[data-page="view-sales-requests"] .section-header-row p,
+  body[data-page="view-creatives-tracker"] .section-header-row p {
+    font-size: 11.5px !important;
+  }
+
+  .layout-table-fit .sales-tabs-container,
+  body[data-page="view-sales-requests"] .sales-tabs-container,
+  body[data-page="view-creatives-tracker"] .sales-tabs-container {
+    flex-shrink: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Compact KPI metrics on Creatives Tracker */
+  .layout-table-fit .kpi-grid,
+  body[data-page="view-creatives-tracker"] .kpi-grid {
+    flex-shrink: 0 !important;
+    margin-bottom: 8px !important;
+    gap: 8px !important;
+  }
+
+  .layout-table-fit .kpi-card,
+  body[data-page="view-creatives-tracker"] .kpi-card {
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+  }
+
+  .layout-table-fit .kpi-card .kpi-header,
+  body[data-page="view-creatives-tracker"] .kpi-card .kpi-header {
+    font-size: 10.5px !important;
+  }
+
+  .layout-table-fit .kpi-card .kpi-value,
+  body[data-page="view-creatives-tracker"] .kpi-card .kpi-value {
+    font-size: 18px !important;
+    margin: 1px 0 !important;
+    font-weight: 800 !important;
+  }
+
+  .layout-table-fit .kpi-card .kpi-footer-row,
+  body[data-page="view-creatives-tracker"] .kpi-card .kpi-footer-row {
+    display: none !important;
+  }
+
+  .layout-table-fit .filter-bar,
+  body[data-page="view-sales-requests"] .filter-bar,
+  body[data-page="view-creatives-tracker"] .filter-bar {
+    flex-shrink: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* 6. Table Studio Wrap: Expands to fill 100% of available screen height */
+  .layout-table-fit .table-studio-wrap,
+  body[data-page="view-sales-requests"] .table-studio-wrap,
+  body[data-page="view-creatives-tracker"] .table-studio-wrap {
+    flex: 1 1 auto !important;
+    min-height: 180px !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    margin-bottom: 8px !important;
+    background: #FFFFFF !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    position: relative !important;
+  }
+
+  /* 7. Sticky Header: Sticks to top inside the scrollable table wrap */
+  .layout-table-fit .table-studio-wrap .data-table,
+  body[data-page="view-sales-requests"] .table-studio-wrap .data-table,
+  body[data-page="view-creatives-tracker"] .table-studio-wrap .data-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+
+  .layout-table-fit .table-studio-wrap .data-table thead th,
+  body[data-page="view-sales-requests"] .table-studio-wrap .data-table thead th,
+  body[data-page="view-creatives-tracker"] .table-studio-wrap .data-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 25 !important;
+    background: #F8FAFC !important;
+    box-shadow: inset 0 -1px 0 #E2E8F0 !important;
+    border-bottom: none !important;
+  }
+
+  /* 8. Pagination Container: Remains pinned at the bottom */
+  .layout-table-fit .pagination-container,
+  body[data-page="view-sales-requests"] .pagination-container,
+  body[data-page="view-creatives-tracker"] .pagination-container {
+    flex-shrink: 0 !important;
+    margin-top: 0 !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+  }
+}
+
 
 

@@ -6108,6 +6108,13 @@
     const sidebar = document.getElementById('appSidebar');
     if (sidebar) sidebar.classList.remove('mobile-open');
 
+    const isTableFitView = (viewId === 'view-sales-requests' || viewId === 'view-creatives-tracker');
+    const mainWrapper = document.querySelector('.main-wrapper');
+    if (mainWrapper) {
+      mainWrapper.classList.toggle('layout-table-fit', isTableFitView);
+    }
+    document.body.classList.toggle('layout-table-fit', isTableFitView);
+
     renderCurrentView(viewId);
   }
 

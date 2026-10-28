@@ -16,7 +16,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
 ?>
 
-<div class="main-wrapper">
+<div class="main-wrapper layout-table-fit">
   <?php require_once __DIR__ . '/includes/navbar.php'; ?>
 
   <main class="main-content">
