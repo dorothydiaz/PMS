@@ -68,6 +68,79 @@ function setSystemSetting($key, $value) {
     }
 }
 
+function getDefaultPermissionPresets() {
+    $modules = ['dashboard', 'sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'monthly-output', 'reports', 'access-control', 'audit-trail', 'settings'];
+    
+    $allPerms = [];
+    $roPerms = [];
+    $artistPerms = [];
+    $salesPerms = [];
+    $nonePerms = [];
+
+    foreach ($modules as $m) {
+        $allPerms[$m] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
+        $roPerms[$m] = ['c' => false, 'r' => true, 'u' => false, 'd' => false];
+        $nonePerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
+        
+        if (in_array($m, ['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'])) {
+            $artistPerms[$m] = [
+                'c' => ($m === 'creatives-tracker'),
+                'r' => true,
+                'u' => true,
+                'd' => false
+            ];
+        } else {
+            $artistPerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
+        }
+
+        if (in_array($m, ['dashboard', 'sales-requests'])) {
+            $salesPerms[$m] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
+        } elseif (in_array($m, ['creatives-tracker', 'directives-details', 'artist-workload'])) {
+            $salesPerms[$m] = ['c' => false, 'r' => true, 'u' => false, 'd' => false];
+        } else {
+            $salesPerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
+        }
+    }
+
+    return [
+        [
+            'id' => 'all',
+            'name' => 'Full Access (All)',
+            'description' => 'Grants full CRUD privileges on all modules',
+            'is_default' => true,
+            'permissions' => $allPerms
+        ],
+        [
+            'id' => 'readonly',
+            'name' => 'Read Only (All)',
+            'description' => 'Grants view-only access across all modules',
+            'is_default' => true,
+            'permissions' => $roPerms
+        ],
+        [
+            'id' => 'artist',
+            'name' => 'Creative Artist',
+            'description' => 'Access to tracker, artist workload, directives and monthly output',
+            'is_default' => true,
+            'permissions' => $artistPerms
+        ],
+        [
+            'id' => 'sales',
+            'name' => 'Sales Rep',
+            'description' => 'Access to sales requests and view-only creatives tracker',
+            'is_default' => true,
+            'permissions' => $salesPerms
+        ],
+        [
+            'id' => 'none',
+            'name' => 'Revoke All',
+            'description' => 'Revokes all privileges across all modules',
+            'is_default' => true,
+            'permissions' => $nonePerms
+        ]
+    ];
+}
+
 // If raw JSON body was sent
 $inputJson = file_get_contents('php://input');
 $bodyData = [];
@@ -1434,6 +1507,50 @@ switch ($action) {
             }
 
             sendJsonResponse(['success' => true]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'get_perm_presets':
+        try {
+            $stored = getSystemSetting('permission_presets', '');
+            if (!empty($stored)) {
+                $decoded = json_decode($stored, true);
+                if (is_array($decoded) && count($decoded) > 0) {
+                    sendJsonResponse(['success' => true, 'presets' => $decoded]);
+                }
+            }
+            sendJsonResponse(['success' => true, 'presets' => getDefaultPermissionPresets()]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'save_perm_presets':
+        if (!isSuperAdmin() && !hasPermission('access-control', 'u')) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin or Access Control update privileges required.'], 403);
+        }
+        try {
+            $presets = $bodyData['presets'] ?? null;
+            if (!is_array($presets)) {
+                sendJsonResponse(['success' => false, 'error' => 'Invalid presets format.'], 400);
+            }
+            setSystemSetting('permission_presets', json_encode($presets));
+            sendJsonResponse(['success' => true, 'presets' => $presets]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'reset_perm_presets':
+        if (!isSuperAdmin() && !hasPermission('access-control', 'u')) {
+            sendJsonResponse(['success' => false, 'error' => 'Super Admin or Access Control update privileges required.'], 403);
+        }
+        try {
+            $defaults = getDefaultPermissionPresets();
+            setSystemSetting('permission_presets', json_encode($defaults));
+            sendJsonResponse(['success' => true, 'presets' => $defaults]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }

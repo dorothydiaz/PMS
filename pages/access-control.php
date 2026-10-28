@@ -154,14 +154,29 @@ require_once __DIR__ . '/includes/sidebar.php';
       <!-- TAB 1: MODULES & CRUD PERMISSIONS -->
       <div id="permPanelModules">
         <!-- Quick Role Presets -->
-        <div style="background: #F8FAFC; padding: 12px 24px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <span style="font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Quick Presets:</span>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('all')">Full Access (All)</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('readonly')">Read Only (All)</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('artist')">Creative Artist</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('sales')">Sales Rep</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('none')">Revoke All</button>
+        <div style="background: #F8FAFC; padding: 10px 24px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1;">
+            <span style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              Quick Presets:
+            </span>
+            <div id="permPresetsContainer" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('all')">Full Access (All)</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('readonly')">Read Only (All)</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('artist')">Creative Artist</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('sales')">Sales Rep</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('none')">Revoke All</button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openSavePresetModal()" title="Save current matrix configuration as a new preset" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 4px 10px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Save as Preset
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openManagePresetsModal()" title="Manage, edit or delete presets" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 4px 10px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Customize
+            </button>
           </div>
         </div>
 
@@ -344,6 +359,121 @@ require_once __DIR__ . '/includes/sidebar.php';
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-close-modal="userFormModal">Cancel</button>
         <button type="submit" class="btn btn-primary" id="btnSaveUser">Save User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODAL: SAVE AS PRESET
+     ========================================================================== -->
+<div class="modal-backdrop" id="savePresetModal" style="z-index: 1060;">
+  <div class="modal-container" style="max-width: 480px; width: 92%;">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 34px; height: 34px; background: #EEF2FF; color: #4F46E5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
+        <div>
+          <h3 class="modal-title" style="font-size: 15px; margin: 0; font-weight: 800;">Save Quick Preset</h3>
+          <div style="font-size: 11.5px; color: #64748B;">Capture current matrix checkboxes as a one-click preset</div>
+        </div>
+      </div>
+      <button class="modal-close-btn" data-close-modal="savePresetModal">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <form id="savePresetForm" onsubmit="handleSavePresetSubmit(event)">
+      <div class="modal-body" style="padding: 18px 22px;">
+        <p style="font-size: 12.5px; color: #475569; margin-top: 0; margin-bottom: 14px;">
+          This will save whatever permissions are currently checked in Tab 1 as a reusable preset button in the <strong>Quick Presets</strong> bar.
+        </p>
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label required" style="font-size: 12px; font-weight: 700;">Preset Name</label>
+          <input type="text" class="form-control" id="savePresetName" required placeholder="e.g. Production Lead, QA Inspector..." style="font-size: 13px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 700;">Description (Optional)</label>
+          <input type="text" class="form-control" id="savePresetDesc" placeholder="e.g. Full access except access control and delete rights" style="font-size: 13px;">
+        </div>
+        <div id="savePresetSummary" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #334155;">
+          <!-- Active modules count -->
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 22px; display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-secondary" data-close-modal="savePresetModal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="btnConfirmSavePreset">Save Preset</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODAL: CUSTOMIZE / MANAGE PRESETS
+     ========================================================================== -->
+<div class="modal-backdrop" id="managePresetsModal" style="z-index: 1060;">
+  <div class="modal-container" style="max-width: 680px; width: 92%;">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 34px; height: 34px; background: #F0FDF4; color: #16A34A; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <div>
+          <h3 class="modal-title" style="font-size: 15px; margin: 0; font-weight: 800;">Customize Permission Presets</h3>
+          <div style="font-size: 11.5px; color: #64748B;">Manage quick role shortcuts, update definitions, or restore system defaults</div>
+        </div>
+      </div>
+      <button class="modal-close-btn" data-close-modal="managePresetsModal">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding: 16px 22px; max-height: 52vh; overflow-y: auto;">
+      <div id="managePresetsList" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Dynamic Preset Items -->
+      </div>
+    </div>
+    <div class="modal-footer" style="padding: 12px 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="resetPresetsToDefaults()" style="color: #DC2626; border-color: #FECACA; display: inline-flex; align-items: center; gap: 4px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        Reset to Defaults
+      </button>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="openSavePresetModal()" style="display: inline-flex; align-items: center; gap: 4px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Preset from Current Matrix
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" data-close-modal="managePresetsModal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODAL: EDIT PRESET NAME/DESC
+     ========================================================================== -->
+<div class="modal-backdrop" id="editPresetModal" style="z-index: 1070;">
+  <div class="modal-container" style="max-width: 440px; width: 90%;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="font-size: 15px; margin: 0; font-weight: 800;">Edit Preset Details</h3>
+      <button class="modal-close-btn" data-close-modal="editPresetModal">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <form id="editPresetForm" onsubmit="handleEditPresetSubmit(event)">
+      <input type="hidden" id="editPresetId">
+      <div class="modal-body" style="padding: 16px 20px;">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label required" style="font-size: 12px; font-weight: 700;">Preset Name</label>
+          <input type="text" class="form-control" id="editPresetName" required style="font-size: 13px;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size: 12px; font-weight: 700;">Description</label>
+          <input type="text" class="form-control" id="editPresetDesc" style="font-size: 13px;">
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 10px 20px; display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-secondary" data-close-modal="editPresetModal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
       </div>
     </form>
   </div>
@@ -788,6 +918,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     const select = document.getElementById('permTableSelect');
     if (select) select.value = currentPermTable;
 
+    renderPermPresetsBar();
     openModal('permissionsModal');
   }
   window.openPermissionsModal = openPermissionsModal;
@@ -914,35 +1045,315 @@ require_once __DIR__ . '/includes/sidebar.php';
   }
   window.toggleRowPerms = toggleRowPerms;
 
-  function applyPermPreset(type) {
+  // --- Dynamic Customizable Permission Presets ---
+  let cachedPermPresets = [];
+
+  function getDefaultPermPresets() {
+    const modules = ['dashboard', 'sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'monthly-output', 'reports', 'access-control', 'audit-trail', 'settings'];
+    const allP = {}, roP = {}, artP = {}, salP = {}, nonP = {};
+    modules.forEach(m => {
+      allP[m] = { c: true, r: true, u: true, d: true };
+      roP[m] = { c: false, r: true, u: false, d: false };
+      nonP[m] = { c: false, r: false, u: false, d: false };
+
+      if (['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'].includes(m)) {
+        artP[m] = { c: (m === 'creatives-tracker'), r: true, u: true, d: false };
+      } else {
+        artP[m] = { c: false, r: false, u: false, d: false };
+      }
+
+      if (['dashboard', 'sales-requests'].includes(m)) {
+        salP[m] = { c: true, r: true, u: true, d: true };
+      } else if (['creatives-tracker', 'directives-details', 'artist-workload'].includes(m)) {
+        salP[m] = { c: false, r: true, u: false, d: false };
+      } else {
+        salP[m] = { c: false, r: false, u: false, d: false };
+      }
+    });
+
+    return [
+      { id: 'all', name: 'Full Access (All)', description: 'Grants full CRUD privileges on all modules', is_default: true, permissions: allP },
+      { id: 'readonly', name: 'Read Only (All)', description: 'Grants view-only access across all modules', is_default: true, permissions: roP },
+      { id: 'artist', name: 'Creative Artist', description: 'Access to tracker, artist workload, directives and monthly output', is_default: true, permissions: artP },
+      { id: 'sales', name: 'Sales Rep', description: 'Access to sales requests and view-only creatives tracker', is_default: true, permissions: salP },
+      { id: 'none', name: 'Revoke All', description: 'Revokes all privileges across all modules', is_default: true, permissions: nonP }
+    ];
+  }
+
+  async function loadPermPresets() {
+    try {
+      const res = await fetch(`${window.PMS_API_URL}?action=get_perm_presets`);
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.presets) && data.presets.length > 0) {
+        cachedPermPresets = data.presets;
+      } else {
+        const local = localStorage.getItem('pms_perm_presets');
+        cachedPermPresets = local ? JSON.parse(local) : getDefaultPermPresets();
+      }
+    } catch (e) {
+      const local = localStorage.getItem('pms_perm_presets');
+      cachedPermPresets = local ? JSON.parse(local) : getDefaultPermPresets();
+    }
+    renderPermPresetsBar();
+  }
+
+  function renderPermPresetsBar() {
+    const container = document.getElementById('permPresetsContainer');
+    if (!container) return;
+
+    if (!cachedPermPresets || cachedPermPresets.length === 0) {
+      cachedPermPresets = getDefaultPermPresets();
+    }
+
+    container.innerHTML = cachedPermPresets.map(preset => {
+      const titleAttr = preset.description ? escapeHtml(preset.description) : escapeHtml(preset.name);
+      return `<button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('${preset.id}')" title="${titleAttr}">${escapeHtml(preset.name)}</button>`;
+    }).join('');
+  }
+
+  function getCurrentMatrixPermissions() {
+    const perms = {};
     document.querySelectorAll('.perm-check').forEach(chk => {
       const mod = chk.getAttribute('data-mod');
       const act = chk.getAttribute('data-act');
-
-      if (type === 'all') {
-        chk.checked = true;
-      } else if (type === 'none') {
-        chk.checked = false;
-      } else if (type === 'readonly') {
-        chk.checked = (act === 'r');
-      } else if (type === 'artist') {
-        if (['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'].includes(mod)) {
-          chk.checked = (act === 'r' || act === 'u' || (act === 'c' && mod === 'creatives-tracker'));
-        } else {
-          chk.checked = false;
-        }
-      } else if (type === 'sales') {
-        if (['dashboard', 'sales-requests'].includes(mod)) {
-          chk.checked = true;
-        } else if (['creatives-tracker', 'directives-details', 'artist-workload'].includes(mod)) {
-          chk.checked = (act === 'r');
-        } else {
-          chk.checked = false;
-        }
+      if (!perms[mod]) {
+        perms[mod] = { c: false, r: false, u: false, d: false };
       }
+      perms[mod][act] = chk.checked;
     });
+    return perms;
+  }
+
+  function applyPermPreset(type) {
+    const preset = cachedPermPresets.find(p => p.id === type);
+    if (!preset) {
+      // Fallback
+      document.querySelectorAll('.perm-check').forEach(chk => {
+        const act = chk.getAttribute('data-act');
+        if (type === 'all') chk.checked = true;
+        else if (type === 'none') chk.checked = false;
+        else if (type === 'readonly') chk.checked = (act === 'r');
+      });
+      return;
+    }
+
+    const perms = preset.permissions || {};
+    document.querySelectorAll('.perm-check').forEach(chk => {
+      const mod = chk.getAttribute('data-mod');
+      const act = chk.getAttribute('data-act');
+      chk.checked = Boolean(perms[mod] && perms[mod][act]);
+    });
+
+    notify(`Applied preset: ${preset.name}`, 'info');
   }
   window.applyPermPreset = applyPermPreset;
+
+  function openSavePresetModal() {
+    const perms = getCurrentMatrixPermissions();
+    let enabledMods = 0;
+    let totalChecks = 0;
+    Object.keys(perms).forEach(k => {
+      const p = perms[k];
+      const cnt = (p.c ? 1 : 0) + (p.r ? 1 : 0) + (p.u ? 1 : 0) + (p.d ? 1 : 0);
+      if (cnt > 0) enabledMods++;
+      totalChecks += cnt;
+    });
+
+    const summaryEl = document.getElementById('savePresetSummary');
+    if (summaryEl) {
+      summaryEl.innerHTML = `<strong>Current Matrix State:</strong> ${enabledMods} module(s) enabled with ${totalChecks} total CRUD privileges.`;
+    }
+    document.getElementById('savePresetName').value = '';
+    document.getElementById('savePresetDesc').value = '';
+    openModal('savePresetModal');
+    setTimeout(() => {
+      const input = document.getElementById('savePresetName');
+      if (input) input.focus();
+    }, 100);
+  }
+  window.openSavePresetModal = openSavePresetModal;
+
+  async function handleSavePresetSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('savePresetName').value.trim();
+    const desc = document.getElementById('savePresetDesc').value.trim();
+    if (!name) return;
+
+    const currentPerms = getCurrentMatrixPermissions();
+    const newPreset = {
+      id: 'preset_' + Date.now(),
+      name: name,
+      description: desc,
+      is_default: false,
+      permissions: currentPerms
+    };
+
+    cachedPermPresets.push(newPreset);
+    await savePermPresetsToServer();
+    closeModal('savePresetModal');
+    renderPermPresetsBar();
+    notify(`Preset "${name}" saved and added to Quick Presets!`);
+  }
+  window.handleSavePresetSubmit = handleSavePresetSubmit;
+
+  function openManagePresetsModal() {
+    renderManagePresetsList();
+    openModal('managePresetsModal');
+  }
+  window.openManagePresetsModal = openManagePresetsModal;
+
+  function renderManagePresetsList() {
+    const container = document.getElementById('managePresetsList');
+    if (!container) return;
+
+    if (!cachedPermPresets || cachedPermPresets.length === 0) {
+      cachedPermPresets = getDefaultPermPresets();
+    }
+
+    container.innerHTML = cachedPermPresets.map(preset => {
+      const perms = preset.permissions || {};
+      let modCount = 0;
+      Object.keys(perms).forEach(k => {
+        const p = perms[k];
+        if (p && (p.c || p.r || p.u || p.d)) modCount++;
+      });
+      const isSystem = Boolean(preset.is_default);
+
+      return `
+        <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 700; font-size: 13px; color: #0F172A;">${escapeHtml(preset.name)}</span>
+              ${isSystem ? `<span class="badge" style="background: #F1F5F9; color: #475569; font-size: 10px; padding: 2px 6px; border-radius: 4px;">Default</span>` : `<span class="badge" style="background: #EFF6FF; color: #2563EB; font-size: 10px; padding: 2px 6px; border-radius: 4px;">Custom</span>`}
+              <span style="font-size: 11px; color: #64748B;">(${modCount} active modules)</span>
+            </div>
+            ${preset.description ? `<div style="font-size: 11.5px; color: #64748B; margin-top: 3px;">${escapeHtml(preset.description)}</div>` : ''}
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="applyPermPreset('${preset.id}'); closeModal('managePresetsModal');" title="Apply to permissions form" style="font-size: 11px; padding: 3px 9px;">
+              Apply
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="updatePresetWithCurrentMatrix('${preset.id}')" title="Overwrite preset with current matrix checkboxes" style="font-size: 11px; padding: 3px 9px;">
+              Update with Matrix
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openEditPresetModal('${preset.id}')" title="Edit name & description" style="font-size: 11px; padding: 3px 9px;">
+              Edit
+            </button>
+            ${!isSystem ? `
+              <button type="button" class="btn btn-secondary btn-sm" onclick="deletePreset('${preset.id}')" title="Delete preset" style="font-size: 11px; padding: 3px 8px; color: #DC2626;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function updatePresetWithCurrentMatrix(presetId) {
+    const preset = cachedPermPresets.find(p => p.id === presetId);
+    if (!preset) return;
+    if (!confirm(`Overwrite preset "${preset.name}" with the currently checked permissions in the matrix?`)) {
+      return;
+    }
+    preset.permissions = getCurrentMatrixPermissions();
+    await savePermPresetsToServer();
+    renderManagePresetsList();
+    renderPermPresetsBar();
+    notify(`Preset "${preset.name}" updated with current matrix configuration!`);
+  }
+  window.updatePresetWithCurrentMatrix = updatePresetWithCurrentMatrix;
+
+  function openEditPresetModal(presetId) {
+    const preset = cachedPermPresets.find(p => p.id === presetId);
+    if (!preset) return;
+    document.getElementById('editPresetId').value = preset.id;
+    document.getElementById('editPresetName').value = preset.name;
+    document.getElementById('editPresetDesc').value = preset.description || '';
+    openModal('editPresetModal');
+    setTimeout(() => {
+      const input = document.getElementById('editPresetName');
+      if (input) input.focus();
+    }, 100);
+  }
+  window.openEditPresetModal = openEditPresetModal;
+
+  async function handleEditPresetSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('editPresetId').value;
+    const name = document.getElementById('editPresetName').value.trim();
+    const desc = document.getElementById('editPresetDesc').value.trim();
+    const preset = cachedPermPresets.find(p => p.id === id);
+    if (!preset || !name) return;
+
+    preset.name = name;
+    preset.description = desc;
+    await savePermPresetsToServer();
+    closeModal('editPresetModal');
+    renderManagePresetsList();
+    renderPermPresetsBar();
+    notify(`Preset updated successfully!`);
+  }
+  window.handleEditPresetSubmit = handleEditPresetSubmit;
+
+  async function deletePreset(presetId) {
+    const preset = cachedPermPresets.find(p => p.id === presetId);
+    if (!preset) return;
+    if (!confirm(`Are you sure you want to delete preset "${preset.name}"?`)) return;
+
+    cachedPermPresets = cachedPermPresets.filter(p => p.id !== presetId);
+    await savePermPresetsToServer();
+    renderManagePresetsList();
+    renderPermPresetsBar();
+    notify(`Preset "${preset.name}" deleted.`);
+  }
+  window.deletePreset = deletePreset;
+
+  async function resetPresetsToDefaults() {
+    if (!confirm('Are you sure you want to reset all Quick Presets back to system defaults? Any custom presets will be restored to defaults.')) {
+      return;
+    }
+    try {
+      const res = await fetch(window.PMS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset_perm_presets' })
+      });
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.presets)) {
+        cachedPermPresets = data.presets;
+      } else {
+        cachedPermPresets = getDefaultPermPresets();
+      }
+    } catch (e) {
+      cachedPermPresets = getDefaultPermPresets();
+    }
+    localStorage.setItem('pms_perm_presets', JSON.stringify(cachedPermPresets));
+    renderManagePresetsList();
+    renderPermPresetsBar();
+    notify('Quick Presets restored to system defaults!');
+  }
+  window.resetPresetsToDefaults = resetPresetsToDefaults;
+
+  async function savePermPresetsToServer() {
+    try {
+      localStorage.setItem('pms_perm_presets', JSON.stringify(cachedPermPresets));
+      const res = await fetch(window.PMS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_perm_presets',
+          presets: cachedPermPresets
+        })
+      });
+      const data = await res.json();
+      if (!data || !data.success) {
+        console.warn('API save presets response:', data);
+      }
+    } catch (err) {
+      console.warn('Failed to persist presets to API, saved locally', err);
+    }
+  }
 
   // Save Permissions Matrix & Column Restrictions
   document.getElementById('permissionsForm').addEventListener('submit', async (e) => {
@@ -1007,6 +1418,9 @@ require_once __DIR__ . '/includes/sidebar.php';
     if (e.key === 'Escape') {
       closeModal('userFormModal');
       closeModal('permissionsModal');
+      closeModal('savePresetModal');
+      closeModal('managePresetsModal');
+      closeModal('editPresetModal');
     }
   });
 
@@ -1023,7 +1437,13 @@ require_once __DIR__ . '/includes/sidebar.php';
     });
   }
 
-  // Load initial list
-  document.addEventListener('DOMContentLoaded', loadUsersList);
-  if (document.readyState !== 'loading') loadUsersList();
+  // Load initial list & presets
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUsersList();
+    loadPermPresets();
+  });
+  if (document.readyState !== 'loading') {
+    loadUsersList();
+    loadPermPresets();
+  }
 </script>
