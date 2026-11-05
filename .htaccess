@@ -5,25 +5,21 @@
     RewriteRule ^pages/?$ index.php [R=301,L]
     RewriteRule ^pages/index\.php$ index.php [R=301,L]
 
-    # If requested URI exists as a real file or directory, serve it directly (assets, uploads, css, js, images)
+    # If requested URI exists as a real file or directory, serve it directly
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # 1. Direct root .php file match (e.g. login -> login.php, api -> api.php)
+    # Allow accessing root scripts without .php extension (e.g. /login -> /login.php)
     RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L]
 
-    # 2. Direct pages/ .php file match (e.g. pages/settings -> pages/settings.php)
+    # Allow accessing pages without .php extension (e.g. /pages/creatives-tracker -> /pages/creatives-tracker.php)
     RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^pages/([a-zA-Z0-9_-]+)$ pages/$1.php [L]
 
-    # 3. Clean root alias for pages (e.g. /settings -> pages/settings.php, /creatives-tracker -> pages/creatives-tracker.php)
-    # Works dynamically on BOTH localhost (/PMS/PMS/) AND webhosting (root / or subfolder)
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond pages/$1.php -f [OR]
+    # Friendly root alias for pages (e.g. /creatives-tracker -> pages/creatives-tracker.php)
     RewriteCond %{DOCUMENT_ROOT}/pages/$1.php -f [OR]
-    RewriteCond %{DOCUMENT_ROOT}/PMS/PMS/pages/$1.php -f
-    RewriteRule ^([a-zA-Z0-9_-]+)(?:\.php)?$ pages/$1.php [L]
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([a-zA-Z0-9_-]+)$ pages/$1.php [L]
 </IfModule>
