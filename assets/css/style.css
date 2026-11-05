@@ -6423,36 +6423,24 @@ input[type="password"]::-ms-clear {
    ========================================================================== */
 .directive-exact-header-wrap {
   position: relative;
-  width: 100%;
-  aspect-ratio: 904 / 96;
+  width: 904px;
+  height: 96px;
+  max-width: 100%;
+  margin: 0 auto 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
   background-color: #FFFFFF;
-  border: 2px solid #000000;
   box-sizing: border-box;
-  overflow: hidden;
-  user-select: text;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
 }
 
 .directive-exact-header-wrap svg {
   display: block;
-  width: 100%;
-  height: auto;
-}
-
-.directive-exact-header-wrap text.interactive-field {
-  cursor: pointer;
-  user-select: none;
-  transition: opacity 0.15s, fill 0.15s;
-}
-
-.directive-exact-header-wrap text.interactive-field:hover {
-  fill: #E10600 !important;
-}
-
-.directive-exact-header-wrap text#docFieldJoNumber.interactive-field:hover,
-.directive-exact-header-wrap text#docFieldDueDate.interactive-field:hover {
-  fill: #FCA5A5 !important;
+  width: 904px !important;
+  height: 96px !important;
+  flex-shrink: 0;
 }
 
 .directive-exact-bg {
