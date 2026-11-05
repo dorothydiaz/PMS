@@ -8080,22 +8080,42 @@
       if (el) el.textContent = (val !== undefined && val !== null && String(val).trim() !== '') ? val : '—';
     };
 
+    const toDotDate = (val) => {
+      if (!val || val === '—' || val === '-' || val === '0000-00-00') return '00.00.0000';
+      if (/^\d{2}\.\d{2}\.\d{4}$/.test(val)) return val;
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return val;
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${mm}.${dd}.${yyyy}`;
+    };
+
     setTxt('docFieldRequestId', rec.requestId || '—');
     setTxt('docFieldJoNumber', rec.joNumber || rec.requestId || '—');
-    setTxt('docFieldDueDate', formatReadableDate(rec.designDeadline || rec.releasingDate) || '—');
+    setTxt('docFieldDueDate', toDotDate(rec.designDeadline || rec.releasingDate));
     setTxt('docFieldLocation', rec.location || '—');
     setTxt('docFieldProjectName', rec.projectName || '—');
     setTxt('docFieldClientName', rec.client || '—');
     setTxt('docFieldInCharge', (rec.inCharge || rec.salesRep || '—').toUpperCase());
     setTxt('docFieldDrawnBy', (rec.drawnBy || rec.artist || '—').toUpperCase());
-    setTxt('docFieldContactPerson', rec.contactPerson || '—');
-    setTxt('docFieldContactNumber', rec.contactNumber || '—');
-    setTxt('docFieldOrderDate', formatDate(rec.orderDate) || '—');
-    setTxt('docFieldReleasingDate', formatReadableDate(rec.releasingDate) || '—');
+    setTxt('docFieldContactPerson', (rec.contactPerson && rec.contactPerson !== 'N/A') ? rec.contactPerson : '-');
+    setTxt('docFieldContactNumber', (rec.contactNumber && rec.contactNumber !== 'N/A') ? rec.contactNumber : '-');
+    setTxt('docFieldOrderDate', toDotDate(rec.orderDate));
+    setTxt('docFieldReleasingDate', toDotDate(rec.releasingDate));
     setTxt('docFieldReleasingMode', normalizeReleasingMode(rec.releasingMode));
-    setTxt('docFieldAddress', rec.completeAddress || rec.location || '—');
-    setTxt('docFieldInstallers', rec.installers || '—');
-    setTxt('docFieldDuration', rec.duration || '—');
+    setTxt('docFieldAddress', (rec.completeAddress && rec.completeAddress !== 'N/A') ? rec.completeAddress : ((rec.location && rec.location !== 'N/A') ? rec.location : '-'));
+    setTxt('docFieldInstallers', rec.installers || '2 Installers');
+    setTxt('docFieldDuration', rec.duration || '1 Day (4 Hours)');
+
+    // Sync Checkboxes (Install / Deliver / Pick up)
+    const mode = (rec.releasingMode || 'Pickup').toLowerCase();
+    const chkInstall = document.querySelector('#dfCheckInstall .deh-check-mark');
+    const chkDeliver = document.querySelector('#dfCheckDeliver .deh-check-mark');
+    const chkPickup = document.querySelector('#dfCheckPickup .deh-check-mark');
+    if (chkInstall) chkInstall.textContent = mode === 'install' ? '✓' : '';
+    if (chkDeliver) chkDeliver.textContent = mode === 'deliver' ? '✓' : '';
+    if (chkPickup) chkPickup.textContent = (mode === 'pickup' || !mode) ? '✓' : '';
 
     const priorityEl = document.getElementById('docFieldPriorityStatus');
     if (priorityEl) {
@@ -8265,224 +8285,149 @@
   // VECTOR SVG GENERATOR (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity)
   // ==========================================================================
 
-  function generateDirectiveSVG(rec) {
+    function generateDirectiveSVG(rec) {
     if (!rec) rec = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
 
-    const joLabelVal = document.getElementById('docFieldJoLabel')?.textContent?.trim() || 'JO#:';
-    const joNumberVal = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec.joNumber || 'P261001348';
-    const dueDateFormatted = document.getElementById('docFieldDueDate')?.textContent?.trim() || formatReadableDate(rec.designDeadline || rec.releasingDate);
-    const releasingDateFormatted = document.getElementById('docFieldReleasingDate')?.textContent?.trim() || formatReadableDate(rec.releasingDate);
-    const inChargeVal = (document.getElementById('docFieldInCharge')?.textContent?.trim() || rec.inCharge || rec.salesRep || 'DONA').toUpperCase();
-    const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'GLEN').toUpperCase();
-    const releasingModeVal = normalizeReleasingMode(document.getElementById('docFieldReleasingMode')?.textContent?.trim() || rec.releasingMode || 'PICKUP');
-    const locationVal = document.getElementById('docFieldLocation')?.textContent?.trim() || rec.location || 'Manila Branch';
-    const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '2 Installers';
-    const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '1 Day (4 Hours)';
-    const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || rec.location || 'Manila Branch';
-    const projectNameVal = document.getElementById('docFieldProjectName')?.textContent?.trim() || rec.projectName || 'LACOST & SMH & MK';
-    const clientVal = document.getElementById('docFieldClientName')?.textContent?.trim() || rec.client || 'DECALPRO PRINTING SERVICES';
-    const contactPersonVal = document.getElementById('docFieldContactPerson')?.textContent?.trim() || rec.contactPerson || '-';
-    const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '639178805364';
-    const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || formatDate(rec.orderDate);
-
-    // Font sizing for SVG: Uses customized per-cell font sizes if manually set or computed from live DOM table
-    const getSvgSize = (str, maxChars, base, min, elementId) => {
-      if (elementId) {
-        const el = document.getElementById(elementId);
-        if (el) {
-          const custom = el.getAttribute('data-custom-size');
-          if (custom && parseFloat(custom) > 0) return parseFloat(custom);
-          const inline = el.style.fontSize;
-          if (inline && parseFloat(inline) > 0) return parseFloat(inline);
-          const computed = window.getComputedStyle(el).fontSize;
-          if (computed && parseFloat(computed) > 0) return parseFloat(computed);
-        }
-      }
-      if (state.customCellFonts && state.customCellFonts[elementId] && state.customCellFonts[elementId] > 0) {
-        return state.customCellFonts[elementId];
-      }
-      const len = (str || '').length;
-      if (len <= maxChars) return base;
-      return Math.max(min, Math.round((base * (maxChars / len)) * 10) / 10);
+    const toDot = (v) => {
+      if (!v || v === '—' || v === '-' || v === '0000-00-00') return '00.00.0000';
+      if (/^\d{2}\.\d{2}\.\d{4}$/.test(v)) return v;
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return v;
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${mm}.${dd}.${d.getFullYear()}`;
     };
 
-    const joLblSize = getSvgSize(joLabelVal, 6, 20, 12, 'docFieldJoLabel');
-    const joSize = getSvgSize(joNumberVal, 10, 30, 16, 'docFieldJoNumber');
-    const projSize = getSvgSize(projectNameVal, 12, 30, 15, 'docFieldProjectName');
-    const clientSize = getSvgSize(clientVal, 14, 26, 14, 'docFieldClientName');
-    const addressSize = getSvgSize(addressVal, 22, 13, 8.5, 'docFieldAddress');
-    const personSize = getSvgSize(contactPersonVal, 20, 13, 9, 'docFieldContactPerson');
-    const phoneSize = getSvgSize(contactNumberVal, 18, 13, 9, 'docFieldContactNumber');
-    const inChargeSize = getSvgSize(inChargeVal, 14, 13, 9, 'docFieldInCharge');
-    const drawnBySize = getSvgSize(drawnByVal, 14, 13, 9, 'docFieldDrawnBy');
-    const installersSize = getSvgSize(installersVal, 14, 13, 9, 'docFieldInstallers');
-    const durationSize = getSvgSize(durationVal, 14, 13, 9, 'docFieldDuration');
-    const dueSize = getSvgSize(dueDateFormatted, 16, 14.5, 9, 'docFieldDueDate');
-    const locationSize = getSvgSize(locationVal, 18, 13, 8.5, 'docFieldLocation');
-    const orderDateSize = getSvgSize(orderDateVal, 16, 13, 8.5, 'docFieldOrderDate');
-    const releasingDateSize = getSvgSize(releasingDateFormatted, 16, 13, 8.5, 'docFieldReleasingDate');
-    const releasingModeSize = getSvgSize(releasingModeVal, 16, 13, 8.5, 'docFieldReleasingMode');
+    const joNumberVal = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec.joNumber || rec.requestId || 'SD261104-019';
+    const dueDateFormatted = document.getElementById('docFieldDueDate')?.textContent?.trim() || toDot(rec.designDeadline || rec.releasingDate);
+    const releasingDateFormatted = document.getElementById('docFieldReleasingDate')?.textContent?.trim() || toDot(rec.releasingDate);
+    const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || toDot(rec.orderDate);
+    const inChargeVal = (document.getElementById('docFieldInCharge')?.textContent?.trim() || rec.inCharge || rec.salesRep || 'SOL').toUpperCase();
+    const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'DOROTHY').toUpperCase();
+    const releasingModeVal = (document.getElementById('ctrlReleasingMode')?.value || rec.releasingMode || 'Pickup').toLowerCase();
+    const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '2 Installers';
+    const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '1 Day (4 Hours)';
+    const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || rec.location || '-';
+    const projectNameVal = document.getElementById('docFieldProjectName')?.textContent?.trim() || rec.projectName || 'DTF FABRIC';
+    const clientVal = document.getElementById('docFieldClientName')?.textContent?.trim() || rec.client || 'DANIELA TAYANGONA';
+    const contactPersonVal = document.getElementById('docFieldContactPerson')?.textContent?.trim() || rec.contactPerson || '-';
+    const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '-';
 
-    // Dynamic vertical baseline calculations based on actual font size and cell height
-    const joLblY = Math.round(0 + (54 + joLblSize * 0.72) / 2);
-    const joY = Math.round(0 + (54 + joSize * 0.72) / 2);
-    const projY = Math.round(0 + (54 + projSize * 0.72) / 2);
-    const clientY = Math.round(54 + (54 + clientSize * 0.72) / 2);
-    const dueY = Math.round(54 + (27 + dueSize * 0.72) / 2);
-    const installersY = Math.round(27 + (54 + installersSize * 0.72) / 2);
-    const durationY = Math.round(108 + (54 + durationSize * 0.72) / 2);
-    const inChargeY = Math.round(135 + (27 + inChargeSize * 0.72) / 2);
-    const drawnByY = Math.round(135 + (27 + drawnBySize * 0.72) / 2);
-    const addressY = Math.round(135 + (27 + addressSize * 0.72) / 2);
-    const personY = Math.round(0 + (27 + personSize * 0.72) / 2);
-    const phoneY = Math.round(27 + (27 + phoneSize * 0.72) / 2);
-    const locationY = Math.round(81 + (27 + locationSize * 0.72) / 2);
-    const orderDateY = Math.round(54 + (27 + orderDateSize * 0.72) / 2);
-    const releasingDateY = Math.round(81 + (27 + releasingDateSize * 0.72) / 2);
-    const releasingModeY = Math.round(108 + (27 + releasingModeSize * 0.72) / 2);
+    const checkInstall = releasingModeVal === 'install' ? '✓' : '';
+    const checkDeliver = releasingModeVal === 'deliver' ? '✓' : '';
+    const checkPickup = (releasingModeVal === 'pickup' || !releasingModeVal) ? '✓' : '';
 
-    // Pure Vector Sign Depot Logo
-    const logoSVG = `
-      <g>
-        <rect x="0" y="0" width="76" height="24" rx="3" fill="#E53935" transform="rotate(-4 38 12)" />
-        <text x="38" y="16" fill="#FFFFFF" font-family="'Roboto Condensed', Arial, sans-serif" font-weight="900" font-size="11" text-anchor="middle" transform="rotate(-4 38 12)">Sign Depot</text>
-        <text x="79" y="8" fill="#000000" font-family="Arial, sans-serif" font-weight="bold" font-size="7">TM</text>
-      </g>
-    `;
-
-    // 6-Row Fixed CAD Table: Exact Widths (10.44% | 16.61% | 33.31% | 8.72% | 16.61% | 14.31%) & Colors (#434343 & #FF0000)
-    return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1216 162" width="1216" height="162">
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="3616" height="384" style="background:#FFFFFF;">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700;800;900&amp;display=swap');
-      .cad-lbl-box { fill: #434343; stroke: #000000; stroke-width: 1.5px; }
-      .cad-lbl-txt { fill: #FFFFFF; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
-      .cad-val-box { fill: #FFFFFF; stroke: #000000; stroke-width: 1.5px; }
-      .cad-val-txt { fill: #434343; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 700; text-transform: uppercase; }
-      .cad-red-txt { fill: #FF0000; font-family: 'Roboto Condensed', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif; font-weight: 900; }
+      .cond-black { font-family:'Archivo','Oswald','Roboto Condensed','Arial Narrow',sans-serif; font-weight:900; }
+      .cond-bold { font-family:'Archivo','Oswald','Roboto Condensed','Arial Narrow',sans-serif; font-weight:800; }
+      .cond-semi { font-family:'Archivo','Roboto Condensed','Arial Narrow',sans-serif; font-weight:700; }
+      .chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
       .center-txt { text-anchor: middle; }
     </style>
   </defs>
 
-  <!-- Sheet White Background & Outer Frame -->
-  <rect width="1216" height="162" fill="#FFFFFF" />
-  <rect x="0" y="0" width="1216" height="162" fill="none" stroke="#000000" stroke-width="2" />
+  <rect x="0" y="0" width="904" height="96" fill="#FFFFFF"/>
 
-  <!-- ==================== ROWS 1 & 2 ==================== -->
-  <!-- Col 1: JO#: (Rows 1-2, x=0, y=0, w=127, h=54) -->
-  <rect x="0" y="0" width="127" height="54" class="cad-lbl-box" />
-  <text x="63.5" y="${joLblY}" class="cad-lbl-txt center-txt" style="font-size: ${joLblSize}px !important; font-weight: 900;" font-size="${joLblSize}" font-weight="900">${escapeHTML(joLabelVal)}</text>
+  <!-- Col 1 (x: 0 to 225) -->
+  <rect x="0" y="0" width="225" height="33" fill="#000000"/>
+  <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
+  <text x="56" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">${escapeHTML(joNumberVal)}</text>
 
-  <!-- Col 2: JO Value (Rows 1-2, x=127, y=0, w=202, h=54) -->
-  <rect x="127" y="0" width="202" height="54" class="cad-val-box" />
-  <text x="228" y="${joY}" class="cad-red-txt center-txt" style="font-size: ${joSize}px !important; font-weight: 900;" font-size="${joSize}" font-weight="900">${escapeHTML(joNumberVal)}</text>
+  <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
+  <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
+  <text x="218" y="47" fill="#000000" font-size="11.5" class="cond-bold" text-anchor="end">${escapeHTML(inChargeVal)}</text>
 
-  <!-- Col 3: URAL Project (Rows 1-2, x=329, y=0, w=405, h=54) -->
-  <rect x="329" y="0" width="405" height="54" class="cad-val-box" />
-  <text x="531.5" y="${projY}" class="cad-val-txt center-txt" style="font-size: ${projSize}px !important; font-weight: 900; letter-spacing: 1.5px;" font-size="${projSize}" font-weight="900" letter-spacing="1.5">${escapeHTML(projectNameVal)}</text>
+  <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
+  <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
+  <text x="218" y="68" fill="#000000" font-size="11.5" class="cond-bold" text-anchor="end">${escapeHTML(drawnByVal)}</text>
 
-  <!-- Col 4 (Row 1): CONTACT PERSON: (x=734, y=0, w=106, h=27) -->
-  <rect x="734" y="0" width="106" height="27" class="cad-lbl-box" />
-  <text x="740" y="18" class="cad-lbl-txt">CONTACT PERSON:</text>
+  <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
+  <g transform="translate(7, 80) scale(0.65)">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
+  </g>
+  <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
+  <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
+  <text x="160" y="89.5" fill="#000000" font-size="9.5" class="cond-semi" text-anchor="middle">${escapeHTML(addressVal)}</text>
 
-  <!-- Col 5 (Row 1): Contact Person Value (x=840, y=0, w=202, h=27) -->
-  <rect x="840" y="0" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="${personY}" class="cad-val-txt" style="font-size: ${personSize}px !important;" font-size="${personSize}">${escapeHTML(contactPersonVal)}</text>
+  <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
 
-  <!-- Col 6 (Row 1): NUMBER OF INSTALLERS Header (x=1042, y=0, w=174, h=27) -->
-  <rect x="1042" y="0" width="174" height="27" class="cad-lbl-box" />
-  <text x="1129" y="18" class="cad-lbl-txt center-txt" font-size="11" font-weight="900">NUMBER OF INSTALLERS</text>
+  <!-- Col 2 (x: 225 to 340) -->
+  <text x="282.5" y="14" fill="#000000" font-size="10" class="cond-bold center-txt">ORDER DATE <tspan font-size="9" class="chinese">订购日期</tspan></text>
+  <text x="282.5" y="27" fill="#000000" font-size="12" class="cond-bold center-txt">${escapeHTML(orderDateVal)}</text>
 
-  <!-- Col 4 (Row 2): CONTACT NUMBER: (x=734, y=27, w=106, h=27) -->
-  <rect x="734" y="27" width="106" height="27" class="cad-lbl-box" />
-  <text x="740" y="45" class="cad-lbl-txt">CONTACT NUMBER:</text>
+  <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
+  <rect x="225" y="33" width="115" height="32" fill="#000000"/>
+  <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
+  <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold center-txt">${escapeHTML(dueDateFormatted)}</text>
 
-  <!-- Col 5 (Row 2): Contact Number Value (x=840, y=27, w=202, h=27) -->
-  <rect x="840" y="27" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="${phoneY}" class="cad-val-txt" style="font-size: ${phoneSize}px !important;" font-size="${phoneSize}">${escapeHTML(contactNumberVal)}</text>
+  <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
+  <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
+  <text x="282.5" y="89.5" fill="#000000" font-size="11.5" class="cond-bold center-txt">${escapeHTML(releasingDateFormatted)}</text>
 
-  <!-- Col 6 (Rows 2-3): NUMBER OF INSTALLERS Value Box (x=1042, y=27, w=174, h=54) -->
-  <rect x="1042" y="27" width="174" height="54" class="cad-val-box" />
-  <text x="1129" y="${installersY}" class="cad-val-txt center-txt" style="font-size: ${installersSize}px !important; font-weight: 800;" font-size="${installersSize}" font-weight="800">${escapeHTML(installersVal)}</text>
+  <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
 
-  <!-- ==================== ROWS 3 & 4 ==================== -->
-  <!-- Col 1 (Row 3): DUE DATE: (x=0, y=54, w=127, h=27) -->
-  <rect x="0" y="54" width="127" height="27" class="cad-lbl-box" />
-  <text x="63.5" y="72" class="cad-lbl-txt center-txt" font-size="12" font-weight="900">DUE DATE:</text>
+  <!-- Col 3 (x: 340 to 564) -->
+  <rect x="340" y="0" width="224" height="18" fill="#E10600"/>
+  <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
+  <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
+  <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
 
-  <!-- Col 2 (Row 3): Due Date Value (x=127, y=54, w=202, h=27) -->
-  <rect x="127" y="54" width="202" height="27" class="cad-val-box" />
-  <text x="228" y="${dueY}" class="cad-red-txt center-txt" style="font-size: ${dueSize}px !important; font-weight: 800;" font-size="${dueSize}" font-weight="800">${escapeHTML(dueDateFormatted)}</text>
+  <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
+  <text x="452" y="45" fill="#000000" font-size="20" class="cond-black center-txt" text-decoration="underline">${escapeHTML(projectNameVal)}</text>
+  <text x="452" y="60" fill="#1F2937" font-size="11" class="cond-bold center-txt">${escapeHTML(clientVal)}</text>
+  <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
-  <!-- Col 3: PAU ACILAC Client (Rows 3-4, x=329, y=54, w=405, h=54) -->
-  <rect x="329" y="54" width="405" height="54" class="cad-val-box" />
-  <text x="531.5" y="${clientY}" class="cad-val-txt center-txt" style="font-size: ${clientSize}px !important; font-weight: 900; letter-spacing: 1.5px;" font-size="${clientSize}" font-weight="900" letter-spacing="1.5">${escapeHTML(clientVal)}</text>
+  <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+  <text x="352" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt">${checkInstall}</text>
+  <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
 
-  <!-- Col 4 (Row 3): ORDER DATE: (x=734, y=54, w=106, h=27) -->
-  <rect x="734" y="54" width="106" height="27" class="cad-lbl-box" />
-  <text x="740" y="72" class="cad-lbl-txt">ORDER DATE:</text>
+  <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+  <text x="429" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt">${checkDeliver}</text>
+  <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
 
-  <!-- Col 5 (Row 3): Order Date Value (x=840, y=54, w=202, h=27) -->
-  <rect x="840" y="54" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="${orderDateY}" class="cad-val-txt" style="font-size: ${orderDateSize}px !important;" font-size="${orderDateSize}">${escapeHTML(orderDateVal)}</text>
+  <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+  <text x="503" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt">${checkPickup}</text>
+  <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
 
-  <!-- Col 1 (Row 4): LOCATION: (x=0, y=81, w=127, h=27) -->
-  <rect x="0" y="81" width="127" height="27" class="cad-lbl-box" />
-  <text x="63.5" y="99" class="cad-lbl-txt center-txt" font-size="12" font-weight="900">LOCATION:</text>
+  <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
 
-  <!-- Col 2 (Row 4): Location Value (x=127, y=81, w=202, h=27) -->
-  <rect x="127" y="81" width="202" height="27" class="cad-val-box" />
-  <text x="228" y="${locationY}" class="cad-val-txt center-txt" style="font-size: ${locationSize}px !important;" font-size="${locationSize}">${escapeHTML(locationVal)}</text>
+  <!-- Col 4 (x: 564 to 822) -->
+  <rect x="564" y="0" width="97" height="43" fill="#000000"/>
+  <text x="612.5" y="12" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
+  <text x="612.5" y="22" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
+  <text x="612.5" y="35" fill="#FFFFFF" font-size="8.5" class="chinese center-txt">现场安装环境选项</text>
 
-  <!-- Col 4 (Row 4): RELEASING DATE: (x=734, y=81, w=106, h=27) -->
-  <rect x="734" y="81" width="106" height="27" class="cad-lbl-box" />
-  <text x="740" y="99" class="cad-lbl-txt">RELEASING DATE:</text>
+  <rect x="674" y="10" width="4.5" height="23" fill="#E10600"/>
+  <text x="684" y="21" fill="#000000" font-size="11.5" class="cond-bold" letter-spacing="0.3">CONCRETE WALL</text>
+  <text x="684" y="32.5" fill="#000000" font-size="9.5" class="chinese">水泥墙</text>
 
-  <!-- Col 5 (Row 4): Releasing Date Value (x=840, y=81, w=202, h=27) -->
-  <rect x="840" y="81" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="${releasingDateY}" class="cad-val-txt" style="font-size: ${releasingDateSize}px !important;" font-size="${releasingDateSize}">${escapeHTML(releasingDateFormatted)}</text>
+  <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
+  <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
+  <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+  <text x="765" y="59" fill="#000000" font-size="10" class="cond-semi center-txt">${escapeHTML(contactPersonVal)}</text>
 
-  <!-- Col 6 (Row 4): INSTALLATION DURATION Header (x=1042, y=81, w=174, h=27) -->
-  <rect x="1042" y="81" width="174" height="27" class="cad-lbl-box" />
-  <text x="1129" y="99" class="cad-lbl-txt center-txt" font-size="11" font-weight="900">INSTALLATION DURATION</text>
+  <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
+  <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
+  <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+  <text x="765" y="86" fill="#000000" font-size="10" class="cond-semi center-txt">${escapeHTML(contactNumberVal)}</text>
 
-  <!-- ==================== ROWS 5 & 6 ==================== -->
-  <!-- Cols 1 & 2: 3 Sign Depot Logos (Rows 5-6, x=0, y=108, w=329, h=54) -->
-  <rect x="0" y="108" width="329" height="54" class="cad-val-box" />
-  <g transform="translate(18, 122) scale(0.85)">${logoSVG}</g>
-  <g transform="translate(125, 122) scale(0.85)">${logoSVG}</g>
-  <g transform="translate(232, 122) scale(0.85)">${logoSVG}</g>
+  <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
 
-  <!-- Col 3: Subtable IN-CHARGE & DRAWN BY (Rows 5-6, x=329, y=108, w=405, h=54) -->
-  <rect x="329" y="108" width="202.5" height="27" class="cad-lbl-box" />
-  <text x="430.25" y="126" class="cad-lbl-txt center-txt" font-size="12" font-weight="900">IN-CHARGE</text>
-  <rect x="531.5" y="108" width="202.5" height="27" class="cad-lbl-box" />
-  <text x="632.75" y="126" class="cad-lbl-txt center-txt" font-size="12" font-weight="900">DRAWN BY:</text>
+  <!-- Col 5 (x: 822 to 904) -->
+  <rect x="822" y="0" width="82" height="22" fill="#000000"/>
+  <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
+  <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
+  <text x="863" y="38" fill="#000000" font-size="11.5" class="cond-bold center-txt">${escapeHTML(installersVal)}</text>
 
-  <rect x="329" y="135" width="202.5" height="27" class="cad-val-box" />
-  <text x="430.25" y="${inChargeY}" class="cad-val-txt center-txt" style="font-size: ${inChargeSize}px !important; font-weight: 800;" font-size="${inChargeSize}" font-weight="800">${escapeHTML(inChargeVal)}</text>
-  <rect x="531.5" y="135" width="202.5" height="27" class="cad-val-box" />
-  <text x="632.75" y="${drawnByY}" class="cad-val-txt center-txt" style="font-size: ${drawnBySize}px !important; font-weight: 800;" font-size="${drawnBySize}" font-weight="800">${escapeHTML(drawnByVal)}</text>
+  <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
+  <rect x="822" y="48" width="82" height="22" fill="#000000"/>
+  <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
+  <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
+  <text x="863" y="86" fill="#000000" font-size="11.5" class="cond-bold center-txt">${escapeHTML(durationVal)}</text>
 
-  <!-- Col 4 (Row 5): RELEASING MODE: (x=734, y=108, w=106, h=27) -->
-  <rect x="734" y="108" width="106" height="27" class="cad-lbl-box" />
-  <text x="740" y="126" class="cad-lbl-txt">RELEASING MODE:</text>
-
-  <!-- Col 5 (Row 5): Releasing Mode Value (x=840, y=108, w=202, h=27) -->
-  <rect x="840" y="108" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="${releasingModeY}" class="cad-val-txt" style="font-size: ${releasingModeSize}px !important; font-weight: 900;" font-size="${releasingModeSize}" font-weight="900">${escapeHTML(releasingModeVal)}</text>
-
-  <!-- Col 6 (Rows 5-6): INSTALLATION DURATION Value Box (x=1042, y=108, w=174, h=54) -->
-  <rect x="1042" y="108" width="174" height="54" class="cad-val-box" />
-  <text x="1129" y="${durationY}" class="cad-val-txt center-txt" style="font-size: ${durationSize}px !important; font-weight: 800;" font-size="${durationSize}" font-weight="800">${escapeHTML(durationVal)}</text>
-
-  <!-- Col 4 (Row 6): ADDRESS: (x=734, y=135, w=106, h=27) -->
-  <rect x="734" y="135" width="106" height="27" class="cad-lbl-box" />
-  <text x="740" y="153" class="cad-lbl-txt">ADDRESS:</text>
-
-  <!-- Col 5 (Row 6): Address Value (x=840, y=135, w=202, h=27) -->
-  <rect x="840" y="135" width="202" height="27" class="cad-val-box" />
-  <text x="848" y="${addressY}" class="cad-val-txt" style="font-size: ${addressSize}px !important;" font-size="${addressSize}">${escapeHTML(addressVal)}</text>
+  <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
 </svg>`;
   }
 
@@ -8700,6 +8645,51 @@
     if (btnPrint) {
       btnPrint.addEventListener('click', () => window.print());
     }
+
+        // Background Clarity Switcher (Vector 4K vs Original Image)
+    const btnBgVec = document.getElementById('btnBgVector');
+    const btnBgOrig = document.getElementById('btnBgOriginal');
+    const headerBgImg = document.getElementById('directiveHeaderBg');
+
+    if (btnBgVec && btnBgOrig && headerBgImg) {
+      btnBgVec.onclick = () => {
+        headerBgImg.src = '../assets/img/directive-header-clear.svg?v=' + Date.now();
+        btnBgVec.style.background = '#0F172A';
+        btnBgVec.style.color = '#FFFFFF';
+        btnBgOrig.style.background = '#FFFFFF';
+        btnBgOrig.style.color = '#64748B';
+        showToast('Switched to Razor-Sharp Vector Background (4K)');
+      };
+
+      btnBgOrig.onclick = () => {
+        headerBgImg.src = '../assets/img/directive-header-template.png?v=' + Date.now();
+        btnBgOrig.style.background = '#0F172A';
+        btnBgOrig.style.color = '#FFFFFF';
+        btnBgVec.style.background = '#FFFFFF';
+        btnBgVec.style.color = '#64748B';
+        showToast('Switched to Original Template Image');
+      };
+    }
+
+    // Interactive Checkboxes for Releasing Mode (Install, Deliver, Pick up)
+    const setMode = (modeStr) => {
+      const ctrl = document.getElementById('ctrlReleasingMode');
+      if (ctrl) ctrl.value = modeStr;
+      const chkI = document.querySelector('#dfCheckInstall .deh-check-mark');
+      const chkD = document.querySelector('#dfCheckDeliver .deh-check-mark');
+      const chkP = document.querySelector('#dfCheckPickup .deh-check-mark');
+      if (chkI) chkI.textContent = modeStr === 'Install' ? '✓' : '';
+      if (chkD) chkD.textContent = modeStr === 'Deliver' ? '✓' : '';
+      if (chkP) chkP.textContent = modeStr === 'Pickup' ? '✓' : '';
+      showToast('Releasing Mode: ' + modeStr);
+    };
+
+    const elChkI = document.getElementById('dfCheckInstall');
+    const elChkD = document.getElementById('dfCheckDeliver');
+    const elChkP = document.getElementById('dfCheckPickup');
+    if (elChkI) elChkI.onclick = () => setMode('Install');
+    if (elChkD) elChkD.onclick = () => setMode('Deliver');
+    if (elChkP) elChkP.onclick = () => setMode('Pickup');
 
     const btnReset = document.getElementById('btnDirectiveReset');
     if (btnReset) {

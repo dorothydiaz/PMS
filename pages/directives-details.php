@@ -32,19 +32,25 @@ try {
     }
 } catch (Exception $e) {}
 
+function formatDotDate($dateStr) {
+    if (empty($dateStr) || $dateStr === '0000-00-00' || $dateStr === '—' || $dateStr === '-') return '00.00.0000';
+    $t = strtotime($dateStr);
+    return $t ? date('m.d.Y', $t) : '00.00.0000';
+}
+
 $docJo = $targetRecord ? ($targetRecord['jo_number'] ?: $targetRecord['request_id'] ?: '—') : '—';
 $docProj = $targetRecord ? ($targetRecord['project_name'] ?: '—') : '—';
-$docContact = $targetRecord ? ($targetRecord['contact_person'] ?: '—') : '—';
-$docPhone = $targetRecord ? ($targetRecord['contact_number'] ?: '—') : '—';
-$docDueDate = ($targetRecord && !empty($targetRecord['design_deadline'])) ? date('F j, Y', strtotime($targetRecord['design_deadline'])) : '—';
+$docContact = ($targetRecord && !empty($targetRecord['contact_person']) && $targetRecord['contact_person'] !== 'N/A') ? $targetRecord['contact_person'] : '-';
+$docPhone = ($targetRecord && !empty($targetRecord['contact_number']) && $targetRecord['contact_number'] !== 'N/A') ? $targetRecord['contact_number'] : '-';
+$docDueDate = ($targetRecord && !empty($targetRecord['design_deadline'])) ? formatDotDate($targetRecord['design_deadline']) : '00.00.0000';
 $docClient = $targetRecord ? ($targetRecord['client'] ?: '—') : '—';
-$docOrderDate = ($targetRecord && !empty($targetRecord['order_date'])) ? date('d/m/Y', strtotime($targetRecord['order_date'])) : '—';
+$docOrderDate = ($targetRecord && !empty($targetRecord['order_date'])) ? formatDotDate($targetRecord['order_date']) : '00.00.0000';
 $docLocation = $targetRecord ? ($targetRecord['location'] ?: '—') : '—';
-$docReleasingDate = ($targetRecord && !empty($targetRecord['releasing_date'])) ? date('F j, Y', strtotime($targetRecord['releasing_date'])) : '—';
+$docReleasingDate = ($targetRecord && !empty($targetRecord['releasing_date'])) ? formatDotDate($targetRecord['releasing_date']) : '00.00.0000';
 $docInCharge = $targetRecord ? strtoupper($targetRecord['sales_rep'] ?: '—') : '—';
 $docDrawnBy = $targetRecord ? strtoupper($targetRecord['artist'] ?: '—') : '—';
 $docReleasingMode = $targetRecord ? ($targetRecord['releasing_mode'] ?: 'Pickup') : 'Pickup';
-$docAddress = $targetRecord ? ($targetRecord['complete_address'] ?: $targetRecord['location'] ?: '—') : '—';
+$docAddress = ($targetRecord && !empty($targetRecord['complete_address']) && $targetRecord['complete_address'] !== 'N/A') ? $targetRecord['complete_address'] : (($targetRecord && !empty($targetRecord['location']) && $targetRecord['location'] !== 'N/A') ? $targetRecord['location'] : '-');
 $docLookupVal = $targetRecord ? ($targetRecord['jo_number'] ?: $targetRecord['request_id'] ?: $targetRecord['project_name'] ?: '') : '';
 $initialDirectiveKey = $targetRecord ? ($targetRecord['request_id'] ?: $targetRecord['jo_number'] ?: $targetRecord['id'] ?: '') : '';
 
@@ -86,20 +92,16 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div class="directive-canvas-wrap">
               <!-- Master Directive Landscape Letter Sheet (11in x 8.5in Ratio) -->
               <div class="directive-sheet-landscape" id="printableDirectiveDocument">
-                <!-- Directive Top Quick Bar (Vector Ready & Text Controls) -->
+                <!-- Directive Top Quick Bar (Vector Ready & Background Clarity Toggle) -->
                 <div class="doc-top-bar no-print">
-                  <div class="doc-top-quick-actions" style="display: flex; gap: 12px; align-items: center;">
-                    <!-- Customized Per-Cell Font Size Controls -->
-                    <div class="doc-font-controls" id="cellFontControls" title="Customize font size for the selected cell">
-                      <span class="font-ctrl-cell-badge" id="selectedCellBadge" title="Click any cell in the table below to customize its font size">Select Any Cell</span>
-                      <button type="button" class="btn-font-scale" id="btnCellFontDec" title="Decrease font size of selected cell (Ctrl+[)">A-</button>
-                      <input type="number" id="cellFontSizeInput" class="cell-font-size-input" value="30" min="6" max="72" step="1" title="Type exact font size in px">
-                      <span class="font-ctrl-unit">px</span>
-                      <button type="button" class="btn-font-scale" id="btnCellFontInc" title="Increase font size of selected cell (Ctrl+])">A+</button>
-                      <button type="button" class="btn-font-scale" id="btnCellFontReset" title="Reset this cell to default font size">Reset</button>
+                  <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <!-- Background Clarity Toggle: Vector Clear vs Original Image -->
+                    <div style="display: inline-flex; border: 1px solid #CBD5E1; border-radius: 6px; overflow: hidden; background: #FFFFFF;" title="Toggle background template clarity">
+                      <button type="button" id="btnBgVector" class="btn-sm" style="padding: 5px 12px; font-size: 11px; font-weight: 700; background: #0F172A; color: #FFFFFF; border: none; cursor: pointer;">✨ Clear Vector (4K)</button>
+                      <button type="button" id="btnBgOriginal" class="btn-sm" style="padding: 5px 12px; font-size: 11px; font-weight: 700; background: #FFFFFF; color: #64748B; border: none; cursor: pointer;">Original Image</button>
                     </div>
 
-                    <button class="btn btn-green btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (4864 × 648 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator. (Hold Shift to download .png file)">
+                    <button class="btn btn-green btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (3616 × 384 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator. (Hold Shift to download .png file)">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                       Copy Image 4K (Ctrl+V)
                     </button>
@@ -107,91 +109,62 @@ require_once __DIR__ . '/includes/sidebar.php';
                   </div>
                 </div>
 
-                <!-- Main Directive Grid Table (Exact Pixel Match to Photos: 10.44% | 16.61% | 33.31% | 8.72% | 16.61% | 14.31%) -->
-                <table class="doc-grid-table" id="directiveGridTable">
-                  <colgroup>
-                    <col style="width: 10.44%;"> <!-- Col 1: JO#, DUE DATE, LOCATION labels -->
-                    <col style="width: 16.61%;"> <!-- Col 2: P260701373, JULY 30, 2026, Location values -->
-                    <col style="width: 33.31%;"> <!-- Col 3: URAL, PAU ACILAC, IN-CHARGE/DRAWN BY -->
-                    <col style="width: 8.72%;">  <!-- Col 4: CONTACT PERSON, CONTACT NUMBER, etc. -->
-                    <col style="width: 16.61%;"> <!-- Col 5: Contact, Phone, Dates, Mode, Address values -->
-                    <col style="width: 14.31%;"> <!-- Col 6: NUMBER OF INSTALLERS / INSTALLATION DURATION -->
-                  </colgroup>
-                  <tbody>
-                    <!-- ROW 1 -->
-                    <tr>
-                      <td rowspan="2" class="doc-label-cell doc-cell-center doc-jo-lbl" id="docFieldJoLabel" contenteditable="true" title="Click to edit JO# Label">JO#:</td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-jo-val" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number"><?= htmlspecialchars($docJo) ?></td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-proj-cell" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name"><?= htmlspecialchars($docProj) ?></td>
-                      <td class="doc-label-cell" id="docFieldContactPersonLabel" contenteditable="true" title="Click to edit Label">CONTACT PERSON:</td>
-                      <td class="doc-value-cell" id="docFieldContactPerson" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docContact) ?></td>
-                      <td class="doc-label-cell doc-cell-center" id="docFieldInstallersLabel" contenteditable="true" title="Click to edit Label">NUMBER OF INSTALLERS</td>
-                    </tr>
+                <!-- Exact 1:1 Production Directive Header Template with Crisp Background & Dynamic Overlay -->
+                <div class="directive-exact-header-wrap" id="directiveGridTable">
+                  <img src="../assets/img/directive-header-clear.svg?v=1" alt="Production Directive Header" class="directive-exact-bg" id="directiveHeaderBg">
 
-                    <!-- ROW 2 -->
-                    <tr>
-                      <td class="doc-label-cell" id="docFieldContactNumberLabel" contenteditable="true" title="Click to edit Label">CONTACT NUMBER:</td>
-                      <td class="doc-value-cell" id="docFieldContactNumber" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docPhone) ?></td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-box-val" id="docFieldInstallers" contenteditable="true" title="Click to edit Installers">2 Installers</td>
-                    </tr>
+                  <div class="directive-exact-overlay">
+                    <!-- 1. JO Number (Top Left Black Box) -->
+                    <div class="deh-field deh-jo-number" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number"><?= htmlspecialchars($docJo) ?></div>
 
-                    <!-- ROW 3 -->
-                    <tr>
-                      <td class="doc-label-cell doc-cell-center" id="docFieldDueDateLabel" contenteditable="true" title="Click to edit Label">DUE DATE:</td>
-                      <td class="doc-value-cell doc-cell-center doc-date-val" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date"><?= htmlspecialchars($docDueDate) ?></td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-client-cell" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name"><?= htmlspecialchars($docClient) ?></td>
-                      <td class="doc-label-cell" id="docFieldOrderDateLabel" contenteditable="true" title="Click to edit Label">ORDER DATE:</td>
-                      <td class="doc-value-cell" id="docFieldOrderDate" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docOrderDate) ?></td>
-                    </tr>
+                    <!-- 2. In Charge (Column 1, Row 2) -->
+                    <div class="deh-field deh-in-charge" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge"><?= htmlspecialchars($docInCharge) ?></div>
 
-                    <!-- ROW 4 -->
-                    <tr>
-                      <td class="doc-label-cell doc-cell-center" id="docFieldLocationLabel" contenteditable="true" title="Click to edit Label">LOCATION:</td>
-                      <td class="doc-value-cell doc-cell-center" id="docFieldLocation" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docLocation) ?></td>
-                      <td class="doc-label-cell" id="docFieldReleasingDateLabel" contenteditable="true" title="Click to edit Label">RELEASING DATE:</td>
-                      <td class="doc-value-cell" id="docFieldReleasingDate" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docReleasingDate) ?></td>
-                      <td class="doc-label-cell doc-cell-center" id="docFieldDurationLabel" contenteditable="true" title="Click to edit Label">INSTALLATION DURATION</td>
-                    </tr>
+                    <!-- 3. Drawn By (Column 1, Row 3) -->
+                    <div class="deh-field deh-drawn-by" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By"><?= htmlspecialchars($docDrawnBy) ?></div>
 
-                    <!-- ROW 5 -->
-                    <tr>
-                      <td colspan="2" rowspan="2" class="doc-value-cell doc-logo-cell">
-                        <div class="doc-triple-logos">
-                          <img src="../assets/img/sign-depot-logo.png" alt="Sign Depot Logo">
-                          <img src="../assets/img/sign-depot-logo.png" alt="Sign Depot Logo">
-                          <img src="../assets/img/sign-depot-logo.png" alt="Sign Depot Logo">
-                        </div>
-                      </td>
-                      <td rowspan="2" style="padding: 0; vertical-align: stretch;">
-                        <table class="doc-personnel-table">
-                          <colgroup>
-                            <col style="width: 50%;">
-                            <col style="width: 50%;">
-                          </colgroup>
-                          <tbody>
-                            <tr>
-                              <td class="doc-label-cell doc-cell-center" id="docFieldInChargeLabel" contenteditable="true" title="Click to edit Label" style="border-bottom: 1.5px solid #000000; border-right: 1.5px solid #000000; height: 26px;">IN-CHARGE</td>
-                              <td class="doc-label-cell doc-cell-center" id="docFieldDrawnByLabel" contenteditable="true" title="Click to edit Label" style="border-bottom: 1.5px solid #000000; height: 26px;">DRAWN BY:</td>
-                            </tr>
-                            <tr>
-                              <td class="doc-value-cell doc-cell-center doc-person-val" style="border-right: 1.5px solid #000000; height: 26px;" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge"><?= htmlspecialchars($docInCharge) ?></td>
-                              <td class="doc-value-cell doc-cell-center doc-person-val" style="height: 26px;" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By"><?= htmlspecialchars($docDrawnBy) ?></td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </td>
-                      <td class="doc-label-cell" id="docFieldReleasingModeLabel" contenteditable="true" title="Click to edit Label">RELEASING MODE:</td>
-                      <td class="doc-value-cell" id="docFieldReleasingMode" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docReleasingMode) ?></td>
-                      <td rowspan="2" class="doc-value-cell doc-cell-center doc-box-val" id="docFieldDuration" contenteditable="true" title="Click to edit Duration">1 Day (4 Hours)</td>
-                    </tr>
+                    <!-- 4. Address (Column 1, Row 4 inside Gray Pill) -->
+                    <div class="deh-field deh-address" id="docFieldAddress" contenteditable="true" title="Click to edit Address"><?= htmlspecialchars($docAddress) ?></div>
 
-                    <!-- ROW 6 -->
-                    <tr>
-                      <td class="doc-label-cell" id="docFieldAddressLabel" contenteditable="true" title="Click to edit Label">ADDRESS:</td>
-                      <td class="doc-value-cell" id="docFieldAddress" contenteditable="true" title="Click to edit"><?= htmlspecialchars($docAddress) ?></td>
-                    </tr>
-                  </tbody>
-                </table>
+                    <!-- 5. Order Date (Column 2, Top) -->
+                    <div class="deh-field deh-order-date" id="docFieldOrderDate" contenteditable="true" title="Click to edit Order Date"><?= htmlspecialchars($docOrderDate) ?></div>
+
+                    <!-- 6. Due Date (Column 2, Middle Black Box) -->
+                    <div class="deh-field deh-due-date" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date"><?= htmlspecialchars($docDueDate) ?></div>
+
+                    <!-- 7. Release Date (Column 2, Bottom) -->
+                    <div class="deh-field deh-release-date" id="docFieldReleasingDate" contenteditable="true" title="Click to edit Release Date"><?= htmlspecialchars($docReleasingDate) ?></div>
+
+                    <!-- 8. Center Project Area (Column 3) -->
+                    <div class="deh-center-project">
+                      <div class="deh-project-name" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name"><?= htmlspecialchars($docProj) ?></div>
+                      <div class="deh-client-name" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name"><?= htmlspecialchars($docClient) ?></div>
+                    </div>
+
+                    <!-- Checkboxes (Install / Deliver / Pick up) -->
+                    <div class="deh-check-wrap deh-check-install" id="dfCheckInstall" title="Click to toggle Install">
+                      <span class="deh-check-mark"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></span>
+                    </div>
+                    <div class="deh-check-wrap deh-check-deliver" id="dfCheckDeliver" title="Click to toggle Deliver">
+                      <span class="deh-check-mark"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></span>
+                    </div>
+                    <div class="deh-check-wrap deh-check-pickup" id="dfCheckPickup" title="Click to toggle Pick Up">
+                      <span class="deh-check-mark"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></span>
+                    </div>
+
+                    <!-- 9. Contact Person (Column 4, Row 2 inside Gray Pill) -->
+                    <div class="deh-field deh-contact-person" id="docFieldContactPerson" contenteditable="true" title="Click to edit Contact Person"><?= htmlspecialchars($docContact) ?></div>
+
+                    <!-- 10. Contact Number (Column 4, Row 3 inside Gray Pill) -->
+                    <div class="deh-field deh-contact-number" id="docFieldContactNumber" contenteditable="true" title="Click to edit Contact Number"><?= htmlspecialchars($docPhone) ?></div>
+
+                    <!-- 11. Number of Installers (Column 5, Top) -->
+                    <div class="deh-field deh-installers" id="docFieldInstallers" contenteditable="true" title="Click to edit Installers"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></div>
+
+                    <!-- 12. Installation Duration (Column 5, Bottom) -->
+                    <div class="deh-field deh-duration" id="docFieldDuration" contenteditable="true" title="Click to edit Duration"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></div>
+                  </div>
+                </div>
               </div>
             </div>
 
