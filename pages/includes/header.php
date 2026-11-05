@@ -28,8 +28,8 @@ if ($currentPage !== 'login') {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="<?= $base ?>assets/css/style.css?v=<?= time() ?>">
-  <link rel="icon" type="image/svg+xml" href="<?= $base ?>assets/img/favicon.svg">
-  <link rel="icon" type="image/png" href="<?= $base ?>assets/img/sign-depot-dark-bg.png">
+  <link rel="icon" type="image/svg+xml" href="<?= $base ?>assets/img/favicon.svg?v=2">
+  <link rel="shortcut icon" href="<?= $base ?>assets/img/favicon.svg?v=2">
 </head>
 <body data-page="view-<?= htmlspecialchars($currentPage) ?>" class="<?= in_array($currentPage, ['sales-requests', 'creatives-tracker', 'creatives-production']) ? 'layout-table-fit' : '' ?>">
   <div class="app-container">

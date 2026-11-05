@@ -97,6 +97,8 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
   <meta charset="UTF-8">
   <title>PMS Database Manager — Sign Depot</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg?v=2">
+  <link rel="shortcut icon" href="../assets/img/favicon.svg?v=2">
   <style>
     body { background: #0b1120; color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
     .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 32px; max-width: 680px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
