@@ -18,3 +18,4 @@ Options -Indexes
     AddType image/gif .gif
     AddType image/svg+xml .svg
 </IfModule>
+
