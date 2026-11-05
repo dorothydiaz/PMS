@@ -505,6 +505,10 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                 <span>Active Sessions</span>
               </button>
+              <button type="button" class="account-subtab-btn" data-subtab="cache">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0-1.5 19.88"></path></svg>
+                <span>Cookies & Cache</span>
+              </button>
             </div>
 
             <!-- SUBTAB 1: Profile & Identity -->
@@ -714,6 +718,65 @@ require_once __DIR__ . '/includes/sidebar.php';
               </div>
             </div>
 
+            <!-- SUBTAB 5: Cookies & Cache Preferences -->
+            <div class="account-subtab-pane" id="subpane-cache" style="display: none;">
+              <div class="section-card">
+                <div class="section-card-header">
+                  <div>
+                    <h3>Cookie & Local Cache Permissions</h3>
+                    <p>Manage browser caching, session persistence, and privacy options</p>
+                  </div>
+                  <div>
+                    <span class="role-pill" id="cacheStatusPill" style="background:#F0FDF4; color:#166534; border:1px solid #86EFAC;">Cache Active</span>
+                  </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                  <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <strong style="font-size:13px; color:#0F172A;">Browser Cache Usage</strong>
+                      <span id="cacheSizeDisplay" style="font-size:12px; font-weight:700; color:#E60000; font-family:monospace;">Calculating...</span>
+                    </div>
+                    <p style="font-size:12px; color:#64748B; margin:0 0 12px 0; line-height:1.45;">
+                      Fast offline data hydration stores order datasets and filter choices in LocalStorage and SessionStorage so navigation between Creatives Tracker and Sales Requests is instant.
+                    </p>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-secondary btn-sm" id="btnSettingsClearCache" onclick="clearPmsCache()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Clear Local Cache
+                      </button>
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="window.SignDepotConsent && window.SignDepotConsent.showBanner(true)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0-1.5 19.88"></path></svg>
+                        Change Cookie Consent
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style="border-top:1px solid #F1F5F9; padding-top:14px;">
+                    <h4 style="font-size:13px; font-weight:700; color:#0F172A; margin:0 0 8px 0;">Active Cookie Specifications</h4>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                      <div style="padding:10px 12px; background:#FAFAFA; border:1px solid #E2E8F0; border-radius:8px;">
+                        <strong style="font-size:12px; color:#0F172A; display:block;">PHPSESSID</strong>
+                        <span style="font-size:11px; color:#64748B;">Essential session authentication cookie (HttpOnly, SameSite=Lax)</span>
+                      </div>
+                      <div style="padding:10px 12px; background:#FAFAFA; border:1px solid #E2E8F0; border-radius:8px;">
+                        <strong style="font-size:12px; color:#0F172A; display:block;">pms_cookie_consent</strong>
+                        <span style="font-size:11px; color:#64748B;">Records user permission preference (all vs essential)</span>
+                      </div>
+                      <div style="padding:10px 12px; background:#FAFAFA; border:1px solid #E2E8F0; border-radius:8px;">
+                        <strong style="font-size:12px; color:#0F172A; display:block;">pms_cache_enabled</strong>
+                        <span style="font-size:11px; color:#64748B;">Controls high-speed browser cache engine status</span>
+                      </div>
+                      <div style="padding:10px 12px; background:#FAFAFA; border:1px solid #E2E8F0; border-radius:8px;">
+                        <strong style="font-size:12px; color:#0F172A; display:block;">pms_sidebar_collapsed</strong>
+                        <span style="font-size:11px; color:#64748B;">Remembers sidebar toggle state across page reloads</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
           <?php endif; ?>
 
@@ -857,6 +920,36 @@ require_once __DIR__ . '/includes/sidebar.php';
     const targetBtn = document.querySelector(`.account-subtab-btn[data-subtab="${requestedSub}"]`);
     if (targetBtn) targetBtn.click();
   }
+
+  // Cache & Cookie Stats in Settings
+  function updateSettingsCacheInfo() {
+    const sizeEl = document.getElementById('cacheSizeDisplay');
+    const pillEl = document.getElementById('cacheStatusPill');
+    if (window.PmsCache) {
+      if (sizeEl) sizeEl.textContent = window.PmsCache.getCacheSizeKb() + ' KB stored';
+      if (pillEl) {
+        const isPermitted = window.PmsCache.isCachePermitted();
+        pillEl.textContent = isPermitted ? 'Cache Active' : 'Essential Only';
+        pillEl.style.background = isPermitted ? '#F0FDF4' : '#FEF2F2';
+        pillEl.style.color = isPermitted ? '#166534' : '#991B1B';
+        pillEl.style.borderColor = isPermitted ? '#86EFAC' : '#FCA5A5';
+      }
+    }
+  }
+
+  window.clearPmsCache = function() {
+    if (window.PmsCache) {
+      window.PmsCache.clearDataCache();
+      updateSettingsCacheInfo();
+      if (typeof window.showToast === 'function') {
+        window.showToast('✓ Local browser cache cleared successfully.');
+      } else {
+        alert('Local browser cache cleared successfully.');
+      }
+    }
+  };
+
+  updateSettingsCacheInfo();
 
   // 2. Password Visibility Toggles
   document.querySelectorAll('.eye-toggle-btn').forEach(btn => {

@@ -12,8 +12,8 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
 ?>
 <aside class="sidebar" id="appSidebar">
   <div class="sidebar-brand">
-    <a href="<?= $base ?>index.php" class="brand-link" id="brandHomeLink" title="Sign Depot">
-      <img src="<?= $base ?>assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="brand-logo-img">
+    <a href="https://www.signdepot.ph/" class="brand-link" id="brandHomeLink" title="Sign Depot — Official Website">
+      <img src="<?= $base ?>assets/img/sign-depot-dark-bg.png" alt="Sign Depot Logo" class="brand-logo-img">
     </a>
     <div class="sidebar-header-actions">
       <!-- Desktop Collapse Button -->

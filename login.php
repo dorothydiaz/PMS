@@ -48,8 +48,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In — <?= htmlspecialchars(APP_NAME) ?></title>
   <meta name="description" content="Sign Depot Operations PMS Authentication Portal">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="icon" type="image/png" href="assets/img/sign-depot-logo.png">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="icon" type="image/png" href="assets/img/sign-depot-dark-bg.png">
   <style>
     :root {
     :root {
@@ -67,10 +71,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #020000;
-      background: linear-gradient(135deg, #020000 0%, #130005 25%, #2B010C 50%, #3D0212 75%, #540318 100%);
+      background: #0D0D0F;
+      background: radial-gradient(circle at 50% 0%, rgba(225, 6, 0, 0.16) 0%, rgba(13, 13, 15, 0.98) 60%, #0D0D0F 100%);
       background-attachment: fixed;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
       position: relative;
       overflow-x: hidden;
     }
@@ -91,10 +95,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     .login-card {
       position: relative;
       background: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 20px;
+      border: 1px solid #E1E1DD;
+      border-radius: 16px;
       padding: 40px 36px 36px;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
       overflow: hidden;
     }
 
@@ -107,10 +111,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #FFFFFF;
-      padding: 10px 20px;
+      background: #0D0D0F;
+      padding: 12px 24px;
       border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       margin-bottom: 18px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -126,11 +131,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 
     .login-title {
-      font-size: 22px;
+      font-family: "Archivo", system-ui, sans-serif;
+      font-size: 24px;
       font-weight: 800;
-      color: #0F172A;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      color: #0D0D0F;
       margin: 0 0 6px;
-      letter-spacing: -0.3px;
     }
 
     .login-subtitle {
@@ -238,10 +245,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     .btn-submit-login {
       width: 100%;
       padding: 13px 18px;
+      font-family: "Archivo", system-ui, sans-serif;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
       color: #FFFFFF;
-      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+      background: #E10600;
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -250,7 +260,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+      box-shadow: 0 4px 14px rgba(225, 6, 0, 0.35);
       margin-top: 24px;
     }
     .btn-submit-login:hover {
@@ -327,8 +337,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   <div class="login-container">
     <div class="login-card">
       <div class="login-brand-header">
-        <div class="login-logo-wrap">
-          <img src="assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="login-logo-img">
+        <a href="https://www.signdepot.ph/" class="login-logo-wrap" title="Sign Depot — Official Website" style="text-decoration:none;">
+          <img src="assets/img/sign-depot-dark-bg.png" alt="Sign Depot Logo" class="login-logo-img">
         </div>
         <h1 class="login-title">Operations Portal</h1>
         <p class="login-subtitle">Sign Depot Sales & Creative Production PMS</p>
@@ -458,5 +468,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       sessionStorage.removeItem('PMS_SESSION_INITIALIZED');
     } catch (e) {}
   </script>
+  <script src="assets/js/cookie-cache.js?v=<?= time() ?>"></script>
 </body>
 </html>

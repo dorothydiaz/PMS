@@ -422,15 +422,24 @@
     const isCollapsed = sidebar.classList.contains('collapsed');
     const newState = !isCollapsed;
     sidebar.classList.toggle('collapsed', newState);
+    const activeTip = document.getElementById('sdGlobalTooltip');
+    if (activeTip) activeTip.classList.remove('show');
     try {
       localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', newState ? '1' : '0');
+      if (typeof window.setPmsCookie === 'function') {
+        window.setPmsCookie('pms_sidebar_collapsed', newState ? '1' : '0', 365);
+      }
     } catch (e) {}
   }
 
   function applyDesktopCollapseState() {
     if (window.innerWidth > 992) {
       try {
-        if (localStorage.getItem('SIGN_DEPOT_SIDEBAR_COLLAPSED') === '1') {
+        let isCol = localStorage.getItem('SIGN_DEPOT_SIDEBAR_COLLAPSED') === '1';
+        if (!isCol && typeof window.getPmsCookie === 'function') {
+          isCol = window.getPmsCookie('pms_sidebar_collapsed') === '1';
+        }
+        if (isCol) {
           const sidebar = document.getElementById('appSidebar');
           if (sidebar) sidebar.classList.add('collapsed');
         }

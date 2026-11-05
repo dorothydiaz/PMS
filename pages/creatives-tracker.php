@@ -180,6 +180,8 @@ require_once __DIR__ . '/includes/sidebar.php';
               <select class="filter-input" id="trackerSortDropdown" title="Sort Table Rows">
                 <option value="requestId_desc" selected>Sort: Request ID (Latest to Old)</option>
                 <option value="requestId_asc">Sort: Request ID (Old to Latest)</option>
+                <option value="joNumber_asc">Sort: JO Number (A → Z)</option>
+                <option value="joNumber_desc">Sort: JO Number (Z → A)</option>
                 <option value="projectName_asc">Sort: Project Name (A → Z)</option>
                 <option value="projectName_desc">Sort: Project Name (Z → A)</option>
                 <option value="artist_asc">Sort: Artist (A → Z)</option>
@@ -205,6 +207,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <thead>
                 <tr>
                   <th data-sort="requestId" title="Click to sort: Latest to Old / Old to Latest">Request ID</th>
+                  <th data-sort="joNumber" title="Click to sort by Job Order Number">JO Number</th>
                   <th data-sort="artist" title="Click to sort alphabetically (A-Z / Z-A)">Artist</th>
                   <th data-sort="projectName" title="Click to sort alphabetically (A-Z / Z-A)">Project Name</th>
                   <th data-sort="designDeadline" title="Click to sort by Deadline Date">Design Deadline</th>

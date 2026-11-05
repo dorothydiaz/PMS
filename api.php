@@ -623,6 +623,31 @@ switch ($action) {
                 $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
             }
 
+            // Audit Trail Log
+            $modName = 'Creatives Tracker';
+            if (!empty($module)) {
+                if (stripos($module, 'sales') !== false) {
+                    $modName = 'Sales Requests';
+                } elseif (stripos($module, 'directive') !== false) {
+                    $modName = 'Directives Details';
+                } elseif (stripos($module, 'workload') !== false) {
+                    $modName = 'Artist Workload';
+                } elseif (stripos($module, 'tracker') !== false) {
+                    $modName = 'Creatives Tracker';
+                }
+            }
+            $userStr = $currentUser['username'] ?? 'User';
+            $roleStr = $currentUser['role'] ?? 'Staff';
+            logAuditEvent(
+                $userStr,
+                $roleStr,
+                'UPDATE',
+                $modName,
+                "Updated '{$field}' on request {$id} to '{$value}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'message' => "Field $field updated successfully"]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -789,6 +814,20 @@ switch ($action) {
                 ':art_acc' => $artistAccepted,
                 ':art_acc_date' => $artistAcceptedDate
             ]);
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            $userStr = $currUser['username'] ?? 'superadmin';
+            $roleStr = $currUser['role'] ?? 'Sales';
+            logAuditEvent(
+                $userStr,
+                $roleStr,
+                'CREATE',
+                'Sales Requests',
+                "Created new sales order {$reqId} ({$proj}) for client '{$client}'",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
 
             sendJsonResponse(['success' => true, 'id' => $id, 'requestId' => $reqId, 'message' => 'Request created']);
         } catch (Exception $e) {
@@ -1023,6 +1062,19 @@ switch ($action) {
             $stmtList = $pdo->query("SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
             $reps = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
             sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Admin',
+                'CREATE',
+                'Sales Requests',
+                "Added sales representative: {$name}",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'message' => 'Sales representative added', 'data' => $reps]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1048,6 +1100,19 @@ switch ($action) {
             $stmtList = $pdo->query("SELECT name FROM sales_reps WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
             $reps = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
             sort($reps, SORT_NATURAL | SORT_FLAG_CASE);
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Admin',
+                'DELETE',
+                'Sales Requests',
+                "Removed sales representative: {$name}",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'message' => 'Sales representative removed', 'data' => $reps]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1068,6 +1133,19 @@ switch ($action) {
             $stmtList = $pdo->query("SELECT name FROM artists WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
             $artists = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
             sort($artists, SORT_NATURAL | SORT_FLAG_CASE);
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Admin',
+                'CREATE',
+                'Creatives Tracker',
+                "Added artist to team: {$name}",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'message' => 'Artist added', 'data' => $artists]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1089,6 +1167,19 @@ switch ($action) {
             $stmtList = $pdo->query("SELECT name FROM artists WHERE name IS NOT NULL AND TRIM(name) != '' ORDER BY name ASC");
             $artists = array_values(array_unique(array_filter(array_map('trim', $stmtList->fetchAll(PDO::FETCH_COLUMN)))));
             sort($artists, SORT_NATURAL | SORT_FLAG_CASE);
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Admin',
+                'DELETE',
+                'Creatives Tracker',
+                "Removed artist from team: {$name}",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'message' => 'Artist removed', 'data' => $artists]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1433,8 +1524,21 @@ switch ($action) {
                 ':status' => $status,
                 ':perms' => json_encode($defaultPerms)
             ]);
+            $newUserId = (int)$pdo->lastInsertId();
 
-            sendJsonResponse(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Super Admin',
+                'CREATE',
+                'Access Control',
+                "Created user account '{$username}' ({$fullName}, Role: {$role})",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
+            sendJsonResponse(['success' => true, 'id' => $newUserId]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
@@ -1500,6 +1604,18 @@ switch ($action) {
                 $_SESSION['pms_user']['assigned_artist'] = $assignedArtist ?: null;
             }
 
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Super Admin',
+                'UPDATE',
+                'Access Control',
+                "Updated user account '{$username}' (ID: {$id}, Role: {$role})",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1517,16 +1633,30 @@ switch ($action) {
                 sendJsonResponse(['success' => false, 'error' => 'You cannot delete your own account.'], 400);
             }
 
-            // Don't delete super_admin
-            $chk = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+            // Get target username before deleting
+            $chk = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
             $chk->execute([$id]);
-            $targetRole = $chk->fetchColumn();
+            $targetUser = $chk->fetch(PDO::FETCH_ASSOC);
+            $targetRole = $targetUser['role'] ?? '';
+            $targetName = $targetUser['username'] ?? "ID #{$id}";
             if ($targetRole === 'super_admin') {
                 sendJsonResponse(['success' => false, 'error' => 'The Super Admin account cannot be deleted.'], 400);
             }
 
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $stmt->execute([$id]);
+
+            // Audit Trail Log
+            logAuditEvent(
+                $current['username'] ?? 'superadmin',
+                $current['role'] ?? 'Super Admin',
+                'DELETE',
+                'Access Control',
+                "Deleted user account '{$targetName}' (ID: {$id})",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1554,6 +1684,18 @@ switch ($action) {
             if (!empty($_SESSION['pms_user']) && $_SESSION['pms_user']['id'] == $id) {
                 $_SESSION['pms_user']['permissions'] = $perms;
             }
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Super Admin',
+                'UPDATE',
+                'Access Control',
+                "Updated permission settings matrix for user ID: {$id}",
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
 
             sendJsonResponse(['success' => true]);
         } catch (Exception $e) {
@@ -1607,6 +1749,19 @@ switch ($action) {
                 sendJsonResponse(['success' => false, 'error' => 'Invalid presets format.'], 400);
             }
             setSystemSetting('permission_presets', json_encode($presets));
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Super Admin',
+                'CONFIG',
+                'Access Control',
+                'Updated permission role presets & editable columns matrix',
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'presets' => $presets]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -1620,7 +1775,41 @@ switch ($action) {
         try {
             $defaults = getDefaultPermissionPresets();
             setSystemSetting('permission_presets', json_encode($defaults));
+
+            // Audit Trail Log
+            $currUser = getCurrentUser();
+            logAuditEvent(
+                $currUser['username'] ?? 'superadmin',
+                $currUser['role'] ?? 'Super Admin',
+                'CONFIG',
+                'Access Control',
+                'Reset role permission presets to system defaults',
+                $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+                'Success'
+            );
+
             sendJsonResponse(['success' => true, 'presets' => $defaults]);
+        } catch (Exception $e) {
+            sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+        break;
+
+    case 'log_action':
+        try {
+            $currUser = getCurrentUser();
+            $data = !empty($bodyData) ? $bodyData : $_POST;
+            $user = $currUser['username'] ?? trim($data['user'] ?? 'superadmin');
+            $role = $currUser['role'] ?? trim($data['role'] ?? 'Staff');
+            $act = strtoupper(trim($data['action_type'] ?? $data['action'] ?? 'EVENT'));
+            $mod = trim($data['module'] ?? 'System');
+            $desc = trim($data['description'] ?? $data['desc'] ?? '');
+            $status = trim($data['status'] ?? 'Success');
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+
+            if (!empty($desc)) {
+                logAuditEvent($user, $role, $act, $mod, $desc, $ip, $status);
+            }
+            sendJsonResponse(['success' => true]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }

@@ -4858,9 +4858,21 @@
       console.warn('LocalStorage error:', e);
     }
 
-    // 2. Use genuine live spreadsheet default dataset
-    state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
-    state.requests.forEach(normalizeRequestItem);
+    // 2. Use high-speed cached requests if consent is granted, otherwise use default dataset
+    let hydratedFromCache = false;
+    if (window.PmsCache && window.PmsCache.isCachePermitted()) {
+      const cached = window.PmsCache.getCachedRequests();
+      if (cached && Array.isArray(cached) && cached.length > 0) {
+        cached.forEach(normalizeRequestItem);
+        state.requests = cached;
+        hydratedFromCache = true;
+      }
+    }
+
+    if (!hydratedFromCache) {
+      state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+      state.requests.forEach(normalizeRequestItem);
+    }
     state.artists = DEFAULT_ARTISTS.map(toTitleCase);
     state.salesReps = DEFAULT_SALES_REPS.map(toTitleCase);
     saveStateToStorage();
@@ -4911,6 +4923,9 @@
             res.data.forEach(normalizeRequestItem);
             state.requests = res.data;
             saveStateToStorage();
+            if (window.PmsCache && window.PmsCache.isCachePermitted()) {
+              window.PmsCache.setCachedRequests(res.data);
+            }
             if (state.activeView === 'view-dashboard') {
               renderDashboard();
             } else if (state.activeView === 'view-sales-requests') {
@@ -4929,6 +4944,10 @@
   }
 
   function saveStateToStorage() {
+    // Respect user privacy: only save cache/localStorage if permitted!
+    if (window.PmsCache && !window.PmsCache.isCachePermitted()) {
+      return;
+    }
     try {
       const dataToSave = {
         artists: state.artists,
@@ -4939,6 +4958,9 @@
         customCellFonts: state.customCellFonts || {}
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+      if (window.PmsCache) {
+        window.PmsCache.setCachedRequests(state.requests);
+      }
       pulseAutoSaveIndicator();
     } catch (e) {
       console.warn('Could not save to localStorage.', e);
@@ -5107,6 +5129,8 @@
       .then(res => {
         if (res && !res.success) {
           showToast(res.error || 'Server rejected update.', 'error');
+        } else if (res && res.success) {
+          if (window.PmsCache) window.PmsCache.invalidate();
         }
       })
       .catch(err => console.warn('MySQL update sync failed:', err));
@@ -5667,6 +5691,13 @@
 
       const target = e.target.closest('[data-tooltip]');
       if (!target) {
+        tooltip.classList.remove('show');
+        return;
+      }
+
+      // Suppress/hide tooltips when the sidebar is toggled open (expanded)
+      const sidebarEl = target.closest('#appSidebar, .sidebar');
+      if (sidebarEl && !sidebarEl.classList.contains('collapsed')) {
         tooltip.classList.remove('show');
         return;
       }
@@ -6829,8 +6860,8 @@
     const isSuper = isCurrentUserSuperAdmin();
     tbody.innerHTML = pagedList.map(r => `
       <tr data-req-id="${r.id}">
-        <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700;')}</td>
-        <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700;')}</td>
+        <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700; white-space:nowrap;')}</td>
+        <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700; white-space:nowrap;')}</td>
         <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
         <td>${renderEditableCell(r.id, 'client', r.client)}</td>
         <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
@@ -7497,7 +7528,7 @@
     const tbody = document.getElementById('creativesTrackerTableBody');
     if (tbody) {
       if (pagedList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding:30px; color:var(--text-muted);">No tasks match the filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:30px; color:var(--text-muted);">No tasks match the filters.</td></tr>`;
       } else {
         tbody.innerHTML = pagedList.map(r => {
           const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate);
@@ -7516,7 +7547,8 @@
           const isAccepted = isProjectArtistAccepted(r);
           return `
             <tr data-req-id="${r.id}">
-              <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700;')}</td>
+              <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700; white-space:nowrap;')}</td>
+              <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700; white-space:nowrap;')}</td>
               <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
               <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
               <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
@@ -7815,7 +7847,7 @@
 
           return `
             <tr>
-              <td><strong style="color:var(--primary-green); font-family:var(--font-mono, monospace);">${escapeHTML(r.requestId)}</strong></td>
+              <td><strong style="color:var(--primary-green); font-weight:700;">${escapeHTML(r.requestId)}</strong></td>
               <td><span class="badge badge-artist" style="font-weight:700;">${escapeHTML(r.artist || '-')}</span></td>
               <td><span style="font-weight:600; color:var(--text-main);">${escapeHTML(r.projectName || '-')}</span></td>
               <td>${categoryBadge}</td>
@@ -8645,7 +8677,19 @@
           cur.inCharge = document.getElementById('ctrlInCharge').value;
           cur.drawnBy = document.getElementById('ctrlDrawnBy').value;
           saveStateToStorage();
-          showToast(`Draft for ${cur.joNumber} saved.`);
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=update_field', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: cur.id, field: 'releasingMode', value: cur.releasingMode, module: 'directives-details' })
+            }).catch(() => {});
+            fetch(window.PMS_API_URL + '?action=update_field', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: cur.id, field: 'remarks', value: cur.notes, module: 'directives-details' })
+            }).catch(() => {});
+          }
+          showToast(`Draft for ${cur.joNumber} saved to database.`);
         }
       });
     }
@@ -9842,8 +9886,8 @@
                                (r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-completed">Standard</span>');
               return `
                 <tr>
-                  <td><strong style="color:var(--primary-green); font-family:monospace;">${escapeHTML(r.requestId)}</strong></td>
-                  <td><strong style="color:var(--accent-red); font-family:monospace;">${escapeHTML(r.joNumber)}</strong></td>
+                  <td><strong style="color:var(--primary-green); font-weight:700;">${escapeHTML(r.requestId)}</strong></td>
+                  <td><strong style="color:var(--accent-red); font-weight:700;">${escapeHTML(r.joNumber)}</strong></td>
                   <td><strong>${escapeHTML(r.projectName)}</strong></td>
                   <td>${escapeHTML(r.client)}</td>
                   <td><span class="badge badge-artist">${escapeHTML(r.artist)}</span></td>
@@ -10277,6 +10321,17 @@
       a.click();
       URL.revokeObjectURL(url);
       showToast(`Exported ${mode.toUpperCase()} output report to CSV.`);
+      try {
+        fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action_type: 'EXPORT',
+            module: 'Reports',
+            description: `Exported ${mode.toUpperCase()} output report to CSV`
+          })
+        }).catch(() => {});
+      } catch (e) {}
     };
   }
 
@@ -11672,6 +11727,7 @@
     .then(res => res.json())
     .then(res => {
       if (res && res.success) {
+        if (window.PmsCache) window.PmsCache.invalidate();
         if (res.id) newRecord.id = res.id;
         if (res.requestId && res.requestId !== newRecord.requestId) {
           newRecord.requestId = res.requestId;
@@ -11920,6 +11976,7 @@
             }).then(r => r.json());
 
             if (res && res.success) {
+              if (window.PmsCache) window.PmsCache.invalidate();
               state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
               saveStateToStorage();
               renderCurrentView(state.activeView);
@@ -12623,7 +12680,9 @@
         })
         .then(r => r.json())
         .then(res => {
-          if (!res || !res.success) {
+          if (res && res.success) {
+            if (window.PmsCache) window.PmsCache.invalidate();
+          } else if (!res || !res.success) {
             console.warn('Backend sync response:', res);
           }
         })
@@ -13286,6 +13345,8 @@
       if (!appSidebar) return;
       const isCollapsed = appSidebar.classList.contains('collapsed');
       appSidebar.classList.toggle('collapsed', !isCollapsed);
+      const activeTip = document.getElementById('sdGlobalTooltip');
+      if (activeTip) activeTip.classList.remove('show');
       try {
         localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', !isCollapsed ? '1' : '0');
       } catch (err) {}
@@ -13383,7 +13444,7 @@
     });
 
     const brandHomeLink = document.getElementById('brandHomeLink');
-    if (brandHomeLink) {
+    if (brandHomeLink && !brandHomeLink.getAttribute('href')?.includes('signdepot.ph')) {
       brandHomeLink.addEventListener('click', (e) => {
         if (document.getElementById('view-dashboard')) {
           e.preventDefault();
@@ -13846,10 +13907,11 @@
 
   function exportTrackerCsv() {
     const myArtist = getLoggedInArtist();
-    const headers = ['Request ID', 'Artist', 'Project Name', 'Design Deadline', 'Head Approval', 'Standard', 'Printing', 'Special', 'Project Status', 'Design Status', 'Revisions', 'Remarks', 'Date', 'Sales', 'Month'];
+    const headers = ['Request ID', 'JO Number', 'Artist', 'Project Name', 'Design Deadline', 'Head Approval', 'Standard', 'Printing', 'Special', 'Project Status', 'Design Status', 'Revisions', 'Remarks', 'Date', 'Sales', 'Month'];
     const reqList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
     const rows = reqList.map(r => [
       r.requestId,
+      r.joNumber || '',
       r.artist,
       `"${(r.projectName || '').replace(/"/g, '""')}"`,
       r.designDeadline,
@@ -13868,6 +13930,17 @@
 
     const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     downloadCsv(csvContent, `Sign_Depot_Creatives_Tracker_${myArtist ? myArtist + '_' : ''}${Date.now()}.csv`);
+    try {
+      fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action_type: 'EXPORT',
+          module: 'Creatives Tracker',
+          description: `Exported Creatives Tracker records to CSV (${reqList.length} rows)`
+        })
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   function exportMonthlyReportCsv() {
@@ -13901,6 +13974,17 @@
 
     const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     downloadCsv(csvContent, `Sign_Depot_Monthly_Production_2026_${Date.now()}.csv`);
+    try {
+      fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action_type: 'EXPORT',
+          module: 'Monthly Output',
+          description: 'Exported Annual Production report to CSV'
+        })
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   function downloadCsv(content, filename) {

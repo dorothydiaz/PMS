@@ -70,7 +70,9 @@ if (empty($auditLogs)) {
               <option value="">All Action Types</option>
               <option value="CREATE">CREATE</option>
               <option value="UPDATE">UPDATE</option>
+              <option value="DELETE">DELETE</option>
               <option value="APPROVE">APPROVE</option>
+              <option value="ACCEPT">ACCEPT</option>
               <option value="AUTH">AUTH</option>
               <option value="CONFIG">CONFIG</option>
               <option value="EXPORT">EXPORT</option>
@@ -99,9 +101,11 @@ if (empty($auditLogs)) {
                 foreach ($initialLogs as $log): 
                   $badgeColor = match($log['action']) {
                     'CREATE' => 'background:#F0FDF4; color:#166534; border:1px solid #86EFAC;',
-                    'UPDATE' => 'background:#EFF6FF; color:#1E40AF; border:1px solid #93C5FD;',
+                    'UPDATE', 'USER_UPDATE' => 'background:#EFF6FF; color:#1E40AF; border:1px solid #93C5FD;',
+                    'DELETE' => 'background:#FEF2F2; color:#991B1B; border:1px solid #FCA5A5;',
                     'APPROVE' => 'background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7;',
-                    'AUTH' => 'background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD;',
+                    'ACCEPT' => 'background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7;',
+                    'AUTH', 'AUTH_2FA', 'PASSWORD_CHANGE' => 'background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD;',
                     'CONFIG' => 'background:#FFFBEB; color:#92400E; border:1px solid #FCD34D;',
                     'EXPORT' => 'background:#F5F3FF; color:#4F46E5; border:1px solid #C7D2FE;',
                     default => 'background:#F8FAFC; color:#334155; border:1px solid #CBD5E1;'
@@ -169,9 +173,14 @@ let auditActionFilterVal = '';
 function getAuditBadgeStyle(action) {
   switch (action) {
     case 'CREATE': return 'background:#F0FDF4; color:#166534; border:1px solid #86EFAC;';
-    case 'UPDATE': return 'background:#EFF6FF; color:#1E40AF; border:1px solid #93C5FD;';
-    case 'APPROVE': return 'background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7;';
-    case 'AUTH': return 'background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD;';
+    case 'UPDATE':
+    case 'USER_UPDATE': return 'background:#EFF6FF; color:#1E40AF; border:1px solid #93C5FD;';
+    case 'DELETE': return 'background:#FEF2F2; color:#991B1B; border:1px solid #FCA5A5;';
+    case 'APPROVE':
+    case 'ACCEPT': return 'background:#ECFDF5; color:#065F46; border:1px solid #6EE7B7;';
+    case 'AUTH':
+    case 'AUTH_2FA':
+    case 'PASSWORD_CHANGE': return 'background:#F5F3FF; color:#5B21B6; border:1px solid #C4B5FD;';
     case 'CONFIG': return 'background:#FFFBEB; color:#92400E; border:1px solid #FCD34D;';
     case 'EXPORT': return 'background:#F5F3FF; color:#4F46E5; border:1px solid #C7D2FE;';
     default: return 'background:#F8FAFC; color:#334155; border:1px solid #CBD5E1;';
