@@ -536,7 +536,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                     $editorInitials = strtoupper(substr(trim($user['full_name'] ?: $user['username'] ?: 'SD'), 0, 2));
                     $editorAvatarSrc = !empty($user['avatar_url']) ? (function_exists('getAvatarUrl') ? getAvatarUrl($user['avatar_url']) : '../' . ltrim($user['avatar_url'], './\\')) : '';
                     if (!empty($editorAvatarSrc)): ?>
-                      <img src="<?= htmlspecialchars($editorAvatarSrc) ?>" alt="Avatar" onerror="this.onerror=null; this.parentElement.innerHTML='<span>' + <?= json_encode($editorInitials) ?> + '</span>';">
+                      <img src="<?= htmlspecialchars($editorAvatarSrc) ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                      <span style="display:none;"><?= htmlspecialchars($editorInitials) ?></span>
                     <?php else: ?>
                       <span><?= $editorInitials ?></span>
                     <?php endif; ?>
@@ -1198,14 +1199,14 @@ require_once __DIR__ . '/includes/sidebar.php';
 
     const resolved = resolveAvatarUrl(url);
     const content = resolved
-      ? `<img src="${resolved}" alt="Avatar" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${initials}</span>';">`
+      ? `<img src="${resolved}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">${initials}</span>`
       : `<span>${initials}</span>`;
 
     if (hero) hero.innerHTML = content;
     if (editor) editor.innerHTML = content;
     if (navAvatar) {
       navAvatar.innerHTML = resolved
-        ? `<img src="${resolved}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerText='${initials}';">`
+        ? `<img src="${resolved}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span style="display:none;">${initials}</span>`
         : initials;
     }
   }

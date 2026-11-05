@@ -88,7 +88,7 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
     $userInitials = strtoupper(substr(trim($userName) ?: 'SD', 0, 2));
     $avatarSrc = ($u && !empty($u['avatar_url'])) ? (function_exists('getAvatarUrl') ? getAvatarUrl($u['avatar_url']) : $u['avatar_url']) : '';
     $userAvatar = !empty($avatarSrc) 
-        ? '<img src="' . htmlspecialchars($avatarSrc) . '" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerText=\'' . addslashes($userInitials) . '\';">' 
+        ? '<img src="' . htmlspecialchars($avatarSrc) . '" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';"><span style="display:none;">' . htmlspecialchars($userInitials) . '</span>' 
         : $userInitials;
     ?>
     <div class="user-profile-menu">
