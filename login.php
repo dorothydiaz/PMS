@@ -49,7 +49,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In — <?= htmlspecialchars(APP_NAME) ?></title>
   <meta name="description" content="Sign Depot Operations PMS Authentication Portal">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=2">
   <link rel="shortcut icon" href="assets/img/favicon.svg?v=2">
   <style>
@@ -477,6 +477,5 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       sessionStorage.removeItem('PMS_SESSION_INITIALIZED');
     } catch (e) {}
   </script>
-  <script src="assets/js/cookie-cache.js?v=<?= time() ?>"></script>
 </body>
 </html>

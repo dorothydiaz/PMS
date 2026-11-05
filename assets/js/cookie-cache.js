@@ -154,6 +154,17 @@
   // --- UI Banner & Modal Manager ---
   const ConsentUI = {
     init() {
+      // Never render cookie consent banner on login or auth screens
+      const loc = (window.location.pathname || '').toLowerCase();
+      if (
+        loc.endsWith('login.php') ||
+        loc.endsWith('/login') ||
+        document.body.classList.contains('login-body') ||
+        document.querySelector('.login-container')
+      ) {
+        return;
+      }
+
       // Don't duplicate if already injected
       if (document.getElementById('pmsCookieConsentContainer')) return;
 
