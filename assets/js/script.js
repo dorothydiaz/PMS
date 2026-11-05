@@ -9103,23 +9103,51 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
+        const handleAddAttachment = (name, type, sizeBytes, url) => {
           const newAtt = {
             id: `att-${Date.now()}`,
-            name: file.name,
-            type: file.type || 'Image File',
-            size: `${(file.size / 1024).toFixed(1)} KB`,
-            dateAdded: '2026-10-23',
+            name: name,
+            type: type || 'Image File',
+            size: `${(sizeBytes / 1024).toFixed(1)} KB`,
+            dateAdded: new Date().toISOString().split('T')[0],
             storageType: 'Local Browser',
-            url: event.target.result
+            url: url
           };
           state.attachments.unshift(newAtt);
           saveStateToStorage();
           renderAttachmentsList();
-          showToast(`Attached ${file.name} successfully.`);
+          showToast(`Attached ${name} successfully.`);
+          fileInput.value = '';
         };
-        reader.readAsDataURL(file);
+
+        if (file.type && file.type.startsWith('image/') && window.SignDepotCropper) {
+          window.SignDepotCropper.open({
+            file: file,
+            title: 'Crop & Adjust Proof Artwork',
+            circular: false,
+            allowSkip: true,
+            outputSize: 1200,
+            onCrop: (croppedBlob, croppedDataUrl, croppedFile) => {
+              handleAddAttachment(croppedFile.name, 'image/jpeg', croppedBlob.size, croppedDataUrl);
+            },
+            onSkip: () => {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                handleAddAttachment(file.name, file.type, file.size, event.target.result);
+              };
+              reader.readAsDataURL(file);
+            },
+            onCancel: () => {
+              fileInput.value = '';
+            }
+          });
+        } else {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            handleAddAttachment(file.name, file.type, file.size, event.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
       };
     }
   }

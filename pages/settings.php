@@ -1061,29 +1061,65 @@ require_once __DIR__ . '/includes/sidebar.php';
   const btnRemoveAvatar = document.getElementById('btnRemoveAvatar');
 
   if (avatarFileInput) {
-    avatarFileInput.addEventListener('change', async () => {
+    avatarFileInput.addEventListener('change', () => {
       if (!avatarFileInput.files || !avatarFileInput.files[0]) return;
       const file = avatarFileInput.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size exceeds 5MB limit.');
+      if (file.size > 15 * 1024 * 1024) {
+        alert('File size exceeds 15MB limit.');
+        avatarFileInput.value = '';
         return;
       }
 
-      const formData = new FormData();
-      formData.append('action', 'account_upload_avatar');
-      formData.append('avatar', file);
+      if (window.SignDepotCropper) {
+        window.SignDepotCropper.open({
+          file: file,
+          title: 'Crop Profile Picture',
+          circular: true,
+          outputSize: 512,
+          onCrop: async (croppedBlob, croppedDataUrl, croppedFile) => {
+            const formData = new FormData();
+            formData.append('action', 'account_upload_avatar');
+            formData.append('avatar', croppedFile);
 
-      try {
-        const res = await fetch('../api.php', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-          syncAvatars(data.avatar_url);
-          btnRemoveAvatar.style.display = 'inline-flex';
-        } else {
-          alert('Upload failed: ' + (data.error || 'Unknown error'));
-        }
-      } catch (err) {
-        alert('Network error uploading avatar.');
+            try {
+              const res = await fetch('../api.php', { method: 'POST', body: formData });
+              const data = await res.json();
+              if (data.success) {
+                syncAvatars(data.avatar_url);
+                btnRemoveAvatar.style.display = 'inline-flex';
+                if (window.SignDepotApp && window.SignDepotApp.showToast) {
+                  window.SignDepotApp.showToast('Profile photo cropped and saved successfully!');
+                }
+              } else {
+                alert('Upload failed: ' + (data.error || 'Unknown error'));
+              }
+            } catch (err) {
+              alert('Network error uploading avatar.');
+            } finally {
+              avatarFileInput.value = '';
+            }
+          },
+          onCancel: () => {
+            avatarFileInput.value = '';
+          }
+        });
+      } else {
+        const formData = new FormData();
+        formData.append('action', 'account_upload_avatar');
+        formData.append('avatar', file);
+
+        fetch('../api.php', { method: 'POST', body: formData })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              syncAvatars(data.avatar_url);
+              btnRemoveAvatar.style.display = 'inline-flex';
+            } else {
+              alert('Upload failed: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(() => alert('Network error uploading avatar.'))
+          .finally(() => { avatarFileInput.value = ''; });
       }
     });
   }

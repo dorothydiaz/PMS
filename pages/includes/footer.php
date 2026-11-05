@@ -30,6 +30,7 @@ if ($justLoggedIn) {
 
   <!-- Modular Component Loader, Cookie/Cache Manager & Core Application Scripts -->
   <script src="<?= $base ?>assets/js/cookie-cache.js?v=<?= time() ?>"></script>
+  <script src="<?= $base ?>assets/js/image-cropper.js?v=<?= time() ?>"></script>
   <script src="<?= $base ?>pages/includes/components.js?v=<?= time() ?>"></script>
   <script src="<?= $base ?>assets/js/script.js?v=<?= time() ?>"></script>
 </body>
