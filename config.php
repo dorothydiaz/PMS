@@ -44,7 +44,26 @@ function getDbConnection() {
 
     try {
         $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+
+        // Auto-initialize database tables if connected but tables don't exist yet
+        static $tablesChecked = false;
+        if (!$tablesChecked) {
+            $tablesChecked = true;
+            try {
+                $checkStmt = $pdo->query("SHOW TABLES LIKE 'sales_requests'");
+                if (!$checkStmt->fetch()) {
+                    $schemaFile = APP_ROOT . '/database/schema.sql';
+                    if (file_exists($schemaFile)) {
+                        $sql = file_get_contents($schemaFile);
+                        $pdo->exec($sql);
+                    }
+                }
+            } catch (Exception $eTable) {
+                error_log("PMS Auto-Schema Error: " . $eTable->getMessage());
+            }
+        }
     } catch (PDOException $e) {
+        $GLOBALS['PMS_DB_ERROR'] = $e->getMessage();
         // If database doesn't exist yet, attempt auto-create and import schema
         if (strpos($e->getMessage(), 'Unknown database') !== false || $e->getCode() == 1049) {
             try {
@@ -62,6 +81,7 @@ function getDbConnection() {
                 $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
                 return $pdo;
             } catch (Exception $ex) {
+                $GLOBALS['PMS_DB_ERROR'] = $ex->getMessage();
                 error_log("PMS Database Initialization Error: " . $ex->getMessage());
                 die(json_encode(['success' => false, 'error' => 'Database connection failed: ' . $ex->getMessage()]));
             }

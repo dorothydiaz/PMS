@@ -17,7 +17,12 @@ require_once __DIR__ . '/includes/auth.php';
 
 $pdo = getDbConnection();
 if (!$pdo) {
-    sendJsonResponse(['success' => false, 'error' => 'Database connection failed'], 500);
+    $err = $GLOBALS['PMS_DB_ERROR'] ?? 'Database connection failed';
+    sendJsonResponse([
+        'success' => false,
+        'error' => "Database connection failed: {$err}",
+        'hint' => 'Please verify your database hostname, username, password, and database name in config.php. You can test your connection at /db_status.php'
+    ], 500);
 }
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';

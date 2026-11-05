@@ -4926,20 +4926,19 @@
             if (window.PmsCache && window.PmsCache.isCachePermitted()) {
               window.PmsCache.setCachedRequests(res.data);
             }
-            if (state.activeView === 'view-dashboard') {
-              renderDashboard();
-            } else if (state.activeView === 'view-sales-requests') {
-              renderSalesRequests();
-            } else if (state.activeView === 'view-creatives-tracker') {
-              renderCreativesTracker();
-            } else if (state.activeView === 'view-artist-workload') {
-              renderArtistWorkload();
-            } else if (state.activeView === 'view-directives-details') {
-              renderDirectivePreview(state.currentDirectiveJo);
-            }
+            renderCurrentView(state.activeView);
+          } else if (res && !res.success) {
+            console.error('MySQL live requests fetch failed:', res.error);
+            showToast('⚠️ Database Notice: ' + (res.error || 'Could not connect to database. Check config.php.'), 'error');
+            // Gracefully render default dataset so page is never empty
+            renderCurrentView(state.activeView);
           }
         })
-        .catch(e => console.warn('MySQL live requests fetch:', e));
+        .catch(e => {
+          console.warn('MySQL live requests fetch error:', e);
+          // Gracefully render default dataset so page is never empty
+          renderCurrentView(state.activeView);
+        });
     }
   }
 
