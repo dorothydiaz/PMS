@@ -1099,8 +1099,9 @@ require_once __DIR__ . '/includes/sidebar.php';
       });
     } else {
       // Dynamically load image-cropper.js if not yet cached or loaded
+      const appBase = window.PMS_APP_BASE || (window.location.pathname.includes('/PMS/PMS/') ? '/PMS/PMS/' : '/');
       const script = document.createElement('script');
-      script.src = '../assets/js/image-cropper.js?v=' + Date.now();
+      script.src = appBase + 'assets/js/image-cropper.js?v=' + Date.now();
       script.onload = () => {
         if (window.SignDepotCropper) {
           openAvatarCropper(file);
@@ -1176,11 +1177,15 @@ require_once __DIR__ . '/includes/sidebar.php';
 
   function resolveAvatarUrl(url) {
     if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('/')) {
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    if (url.startsWith('/')) {
       return url;
     }
     const clean = url.replace(/^(\.\.\/|\.\/|\/)+/, '');
-    return '../' + clean;
+    const appBase = window.PMS_APP_BASE || (window.location.pathname.includes('/PMS/PMS/') ? '/PMS/PMS/' : '/');
+    return appBase + clean;
   }
 
   function syncAvatars(url) {

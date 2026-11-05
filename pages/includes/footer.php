@@ -24,6 +24,7 @@ if ($justLoggedIn) {
   <script>
     window.PMS_API_URL = '<?= $base ?>api.php';
     window.PMS_BASE_URL = '<?= $base ?>';
+    window.PMS_APP_BASE = '<?= function_exists('getAppBaseUrl') ? getAppBaseUrl() : '/' ?>';
     window.PMS_CURRENT_USER = <?= json_encode(function_exists('getCurrentUser') ? getCurrentUser() : null) ?>;
     window.PMS_JUST_LOGGED_IN = <?= $justLoggedIn ? 'true' : 'false' ?>;
   </script>

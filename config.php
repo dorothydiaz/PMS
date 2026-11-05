@@ -117,11 +117,26 @@ function sendJsonResponse($data, $statusCode = 200) {
  * Get active relative base URL depending on script depth
  */
 function getBasePath() {
-    $script = $_SERVER['SCRIPT_NAME'] ?? '';
-    if (strpos($script, '/pages/') !== false) {
+    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+    if (strpos($uri, '/pages/') !== false) {
         return '../';
     }
     return './';
+}
+
+/**
+ * Get absolute web application base path (e.g. /PMS/PMS/ or /)
+ */
+function getAppBaseUrl() {
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    $pos = strpos($script, '/pages/');
+    if ($pos !== false) {
+        $root = substr($script, 0, $pos);
+    } else {
+        $root = dirname($script);
+    }
+    $root = rtrim(str_replace('\\', '/', $root), '/');
+    return $root ? ($root . '/') : '/';
 }
 
 /**
@@ -142,12 +157,12 @@ function getAvatarUrl($url) {
     if (empty($url)) {
         return '';
     }
-    // External URL, data URI, or absolute path
+    // External URL, data URI, or already absolute path
     if (preg_match('#^(https?://|data:|/)#i', $url)) {
         return $url;
     }
     // Clean any leading slashes or relative dots
     $cleanPath = ltrim($url, './\\');
-    $base = function_exists('getBasePath') ? getBasePath() : './';
-    return $base . $cleanPath;
+    $appBase = function_exists('getAppBaseUrl') ? getAppBaseUrl() : '/';
+    return $appBase . $cleanPath;
 }
