@@ -48,14 +48,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In — <?= htmlspecialchars(APP_NAME) ?></title>
   <meta name="description" content="Sign Depot Operations PMS Authentication Portal">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
-  <link rel="icon" type="image/png" href="assets/img/sign-depot-dark-bg.png">
+  <link rel="icon" type="image/png" href="assets/img/sign-depot-logo.png">
   <style>
-    :root {
     :root {
       --login-primary: #DC2626;
       --login-primary-hover: #B91C1C;
@@ -71,10 +66,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0D0D0F;
-      background: radial-gradient(circle at 50% 0%, rgba(225, 6, 0, 0.16) 0%, rgba(13, 13, 15, 0.98) 60%, #0D0D0F 100%);
+      background: #020000;
+      background: linear-gradient(135deg, #020000 0%, #130005 25%, #2B010C 50%, #3D0212 75%, #540318 100%);
       background-attachment: fixed;
-      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       position: relative;
       overflow-x: hidden;
     }
@@ -95,10 +90,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     .login-card {
       position: relative;
       background: #FFFFFF;
-      border: 1px solid #E1E1DD;
-      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
       padding: 40px 36px 36px;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
       overflow: hidden;
     }
 
@@ -111,33 +106,31 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #0D0D0F;
-      padding: 12px 24px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-      margin-bottom: 18px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: transparent;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      margin-bottom: 20px;
+      transition: transform 0.2s ease;
+      cursor: pointer;
     }
     .login-logo-wrap:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.12), 0 0 0 1px rgba(220, 38, 38, 0.15);
+      transform: scale(1.05);
+      box-shadow: none;
     }
 
     .login-logo-img {
-      height: 38px;
+      height: 58px;
       width: auto;
       object-fit: contain;
     }
 
     .login-title {
-      font-family: "Archivo", system-ui, sans-serif;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
-      color: #0D0D0F;
+      color: #0F172A;
       margin: 0 0 6px;
+      letter-spacing: -0.3px;
     }
 
     .login-subtitle {
@@ -158,17 +151,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       gap: 10px;
     }
     .alert-error {
-      background: #FEF2F2;
-      color: #991B1B;
-      border: 1px solid #FCA5A5;
+      background: #000000;
+      color: #FFFFFF;
+      border: 1px solid #DC2626;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+    .alert-error svg {
+      stroke: #EF4444;
+      flex-shrink: 0;
     }
     .alert-info {
-      background: #0F172A;
-      color: #F8FAFC;
-      border: 1px solid #1E293B;
+      background: #000000;
+      color: #FFFFFF;
+      border: 1px solid #334155;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
     .alert-info svg {
-      stroke: #DC2626;
+      stroke: #10B981;
+      flex-shrink: 0;
     }
 
     .form-group-login {
@@ -245,13 +245,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     .btn-submit-login {
       width: 100%;
       padding: 13px 18px;
-      font-family: "Archivo", system-ui, sans-serif;
       font-size: 15px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      font-weight: 700;
       color: #FFFFFF;
-      background: #E10600;
+      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -260,7 +257,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 14px rgba(225, 6, 0, 0.35);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
       margin-top: 24px;
     }
     .btn-submit-login:hover {
@@ -338,8 +335,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <div class="login-card">
       <div class="login-brand-header">
         <a href="https://www.signdepot.ph/" class="login-logo-wrap" title="Sign Depot — Official Website" style="text-decoration:none;">
-          <img src="assets/img/sign-depot-dark-bg.png" alt="Sign Depot Logo" class="login-logo-img">
-        </div>
+          <img src="assets/img/sign-depot-logo.png" alt="Sign Depot Logo" class="login-logo-img">
+        </a>
         <h1 class="login-title">Operations Portal</h1>
         <p class="login-subtitle">Sign Depot Sales & Creative Production PMS</p>
       </div>
@@ -417,7 +414,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             </span>
             <span class="quick-cred-meta">superadmin / Full CRUD</span>
           </div>
-          <div class="quick-cred-chip" onclick="fillCreds('artist_dorothy', 'sample123')">
+          <div class="quick-cred-chip" onclick="fillCreds('artist_dorothy', 'Password123!')">
             <span class="quick-cred-role">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
               Artist Account
