@@ -158,5 +158,11 @@ require_once __DIR__ . '/includes/sidebar.php';
   </div>
   <script>
     window.__INITIAL_DIRECTIVE_KEY = <?= json_encode($initialDirectiveKey) ?>;
+    <?php
+      $fontFile = dirname(__DIR__) . '/assets/fonts/BebasKai.otf';
+      if (file_exists($fontFile)) {
+        echo 'window.__BEBAS_KAI_B64 = ' . json_encode(base64_encode(file_get_contents($fontFile))) . ';';
+      }
+    ?>
   </script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

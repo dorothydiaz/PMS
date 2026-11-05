@@ -1,5 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700;800;900&display=swap');
 
+@font-face {
+  font-family: 'Bebas Kai';
+  src: url('../fonts/BebasKai.otf') format('opentype'),
+       url('../fonts/BebasKai.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BebasKai';
+  src: url('../fonts/BebasKai.otf') format('opentype'),
+       url('../fonts/BebasKai.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ==========================================================================
    Sign Depot Creative Operations — Stylesheet
    Pure Clean, Minimalist Studio Theme with Realistic Drop Shadows
@@ -3221,7 +3239,7 @@ select.filter-input {
   box-shadow: var(--shadow-sheet);
   border: none;
   border-radius: 6px;
-  font-family: 'Oswald', 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  font-family: 'Bebas Kai', 'BebasKai', 'Oswald', 'Roboto Condensed', 'Arial Narrow', sans-serif;
   color: #111827;
   display: flex;
   flex-direction: column;
@@ -3252,7 +3270,7 @@ select.filter-input {
 .doc-request-badge-title {
   background: #434343;
   color: #FFFFFF;
-  font-family: 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif;
+  font-family: 'Bebas Kai', 'BebasKai', 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -3263,7 +3281,7 @@ select.filter-input {
 
 .doc-request-badge-val {
   color: #FF0000;
-  font-family: 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif;
+  font-family: 'Bebas Kai', 'BebasKai', 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif;
   font-size: 16px;
   font-weight: 900;
   text-align: center;
@@ -3364,7 +3382,7 @@ select.filter-input {
   background: #FFFFFF !important;
   margin: 0 !important;
   box-sizing: border-box !important;
-  font-family: 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif !important;
+  font-family: 'Bebas Kai', 'BebasKai', 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif !important;
 }
 
 .doc-grid-table td, 
@@ -3385,7 +3403,7 @@ select.filter-input {
 .doc-label-cell {
   background-color: #434343 !important;
   color: #FFFFFF !important;
-  font-family: 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif !important;
+  font-family: 'Bebas Kai', 'BebasKai', 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif !important;
   font-size: 11.5px;
   font-weight: 800 !important;
   text-transform: uppercase !important;
@@ -3412,7 +3430,7 @@ select.filter-input {
 .doc-value-cell {
   background-color: #FFFFFF !important;
   color: #434343 !important;
-  font-family: 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif !important;
+  font-family: 'Bebas Kai', 'BebasKai', 'Roboto Condensed', 'Oswald', 'Arial Narrow', sans-serif !important;
   font-size: 13px;
   font-weight: 700 !important;
   padding: 3px 8px !important;
@@ -6434,6 +6452,7 @@ input[type="password"]::-ms-clear {
   background-color: #FFFFFF;
   box-sizing: border-box;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif;
 }
 
 .directive-exact-header-wrap svg {
@@ -6441,6 +6460,16 @@ input[type="password"]::-ms-clear {
   width: 904px !important;
   height: 96px !important;
   flex-shrink: 0;
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif;
+}
+
+.directive-exact-header-wrap svg text {
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
+}
+
+.directive-exact-header-wrap svg .chinese,
+.directive-exact-header-wrap svg tspan.chinese {
+  font-family: 'Bebas Kai', 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif !important;
 }
 
 .directive-exact-bg {
@@ -6474,6 +6503,7 @@ input[type="password"]::-ms-clear {
   border-radius: 2px;
   cursor: text;
   transition: background-color 0.15s, box-shadow 0.15s;
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
 }
 
 .deh-field:hover, .deh-field:focus {

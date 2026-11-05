@@ -8320,10 +8320,20 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="3616" height="384" style="background:#FFFFFF;">
   <defs>
     <style>
-      .cond-black { font-family:'Archivo','Oswald','Roboto Condensed','Arial Narrow',sans-serif; font-weight:900; }
-      .cond-bold { font-family:'Archivo','Oswald','Roboto Condensed','Arial Narrow',sans-serif; font-weight:800; }
-      .cond-semi { font-family:'Archivo','Roboto Condensed','Arial Narrow',sans-serif; font-weight:700; }
+      @font-face {
+        font-family: 'Bebas Kai';
+        src: url('data:font/otf;charset=utf-8;base64,` + (window.__BEBAS_KAI_B64 || '') + `') format('opentype'),
+             url('../fonts/BebasKai.otf') format('opentype'),
+             url('../fonts/BebasKai.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      text { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; }
+      .cond-black { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight:900; }
+      .cond-bold { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight:800; }
+      .cond-semi { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight:700; }
       .chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
+      tspan.chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
       .center-txt { text-anchor: middle; }
     </style>
   </defs>
