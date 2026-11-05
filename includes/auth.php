@@ -18,52 +18,80 @@ function getSystemModules() {
         'dashboard' => [
             'label' => 'Project Dashboard',
             'icon' => 'grid',
-            'desc' => 'Live operations KPIs, overview charts, producer leaderboard'
+            'desc' => 'Live operations KPIs, overview charts, producer leaderboard',
+            'category' => 'Home'
         ],
         'sales-requests' => [
             'label' => 'Sales Requests',
             'icon' => 'file-text',
-            'desc' => 'Order intake, multi-field filters, and manual JO number entry'
+            'desc' => 'Order intake, multi-field filters, and manual JO number entry',
+            'category' => 'Sales'
         ],
         'creatives-tracker' => [
             'label' => 'Creatives Tracker',
             'icon' => 'table',
-            'desc' => 'Google Sheets replica with inline status editing and Std/Prt/Spc'
+            'desc' => 'Google Sheets replica with inline status editing and Std/Prt/Spc',
+            'category' => 'Design & Production'
         ],
         'artist-workload' => [
             'label' => 'Artist Workload',
             'icon' => 'users',
-            'desc' => 'Capacity balancing thresholds and active artist task assignments'
+            'desc' => 'Capacity balancing thresholds and active artist task assignments',
+            'category' => 'Design & Production'
         ],
         'directives-details' => [
-            'label' => 'Directives Details',
+            'label' => 'Directive Details',
             'icon' => 'printer',
-            'desc' => 'Job order spec sheet with 4K image export & template designer'
+            'desc' => 'Job order spec sheet with 4K image export & document layout',
+            'category' => 'Design & Production'
+        ],
+        'directives-editor' => [
+            'label' => 'Directives: Template Editor (Tab)',
+            'icon' => 'layout',
+            'desc' => 'Directive document template designer, custom font size & print layout controls',
+            'category' => 'Design & Production'
+        ],
+        'directives-attachments' => [
+            'label' => 'Directives: Attachments (Tab)',
+            'icon' => 'paperclip',
+            'desc' => 'Attached reference artwork, vector proofs, photos, and job files',
+            'category' => 'Design & Production'
         ],
         'monthly-output' => [
             'label' => 'Monthly Output',
             'icon' => 'bar-chart-2',
-            'desc' => 'Completed artist assignment counting matrix and annual metrics'
+            'desc' => 'Completed artist assignment counting matrix and annual metrics',
+            'category' => 'Analytics & Reports'
         ],
         'reports' => [
             'label' => 'Reports & Analytics',
             'icon' => 'file-text',
-            'desc' => 'Production summary reports, turnaround metrics, and operational performance'
+            'desc' => 'Production summary reports, turnaround metrics, and operational performance',
+            'category' => 'Analytics & Reports'
         ],
         'access-control' => [
-            'label' => 'Access Control (Users)',
+            'label' => 'Access Control (RBAC)',
             'icon' => 'shield',
-            'desc' => 'Super Admin module access and granular CRUD permissions control'
+            'desc' => 'Super Admin module access and granular CRUD permissions control',
+            'category' => 'Administration'
         ],
         'audit-trail' => [
             'label' => 'Audit Trail',
             'icon' => 'activity',
-            'desc' => 'Security audit log, user activity history, and system modification tracking'
+            'desc' => 'Security audit log, user activity history, and system modification tracking',
+            'category' => 'Administration'
+        ],
+        'account-settings' => [
+            'label' => 'Account Settings (Tab)',
+            'icon' => 'user-check',
+            'desc' => 'Personal profile identity, password changes, Google auth, and active sessions',
+            'category' => 'Settings'
         ],
         'settings' => [
-            'label' => 'System Settings',
+            'label' => 'System Settings (Tab)',
             'icon' => 'settings',
-            'desc' => 'Rosters management, JSON backups, and system reset tools'
+            'desc' => 'Artist & sales rosters, deletion security passcode, and local backups',
+            'category' => 'Settings'
         ]
     ];
 }
@@ -164,11 +192,44 @@ function hasPermission($module, $action = 'r') {
         $perms = json_decode($perms, true) ?: [];
     }
 
+    $action = strtolower($action);
+
+    // Support alias and fallback for system-settings / settings
+    if ($module === 'system-settings' || $module === 'settings') {
+        if (isset($perms['system-settings'][$action])) {
+            return !empty($perms['system-settings'][$action]);
+        }
+        if (isset($perms['settings'][$action])) {
+            return !empty($perms['settings'][$action]);
+        }
+        return false;
+    }
+
+    // Support alias for creatives-production / creatives-tracker
+    if ($module === 'creatives-production') {
+        $module = 'creatives-tracker';
+    }
+
+    // Account Settings fallback: allow view/edit profile if not explicitly configured
+    if ($module === 'account-settings') {
+        if (isset($perms['account-settings'][$action])) {
+            return !empty($perms['account-settings'][$action]);
+        }
+        return ($action === 'r' || $action === 'u');
+    }
+
+    // Directives subtabs fallback to parent directives-details if not explicitly configured
+    if ($module === 'directives-editor' || $module === 'directives-attachments') {
+        if (isset($perms[$module][$action])) {
+            return !empty($perms[$module][$action]);
+        }
+        return !empty($perms['directives-details'][$action]);
+    }
+
     if (!isset($perms[$module])) {
         return false;
     }
 
-    $action = strtolower($action);
     return !empty($perms[$module][$action]);
 }
 
@@ -184,9 +245,32 @@ function hasTabPermission($module, $tab) {
     if (is_string($perms)) $perms = json_decode($perms, true) ?: [];
 
     // Check if module read permission is granted
-    if (empty($perms[$module]['r'])) return false;
+    if (!hasPermission($module, 'r')) return false;
 
-    // Check tab permission if defined
+    // Directives specific tab mappings
+    if ($module === 'directives-details') {
+        if ($tab === 'editor' || $tab === 'tab-template-editor') {
+            return hasPermission('directives-editor', 'r');
+        }
+        if ($tab === 'attachments' || $tab === 'tab-attachments') {
+            return hasPermission('directives-attachments', 'r');
+        }
+        if ($tab === 'preview' || $tab === 'tab-directive-preview') {
+            return hasPermission('directives-details', 'r');
+        }
+    }
+
+    // Settings specific tab mappings
+    if ($module === 'settings') {
+        if ($tab === 'account') {
+            return hasPermission('account-settings', 'r');
+        }
+        if ($tab === 'system') {
+            return hasPermission('settings', 'r');
+        }
+    }
+
+    // Check tab permission if defined directly in perms[$module]['tabs'][$tab]
     if (isset($perms[$module]['tabs'][$tab])) {
         return !empty($perms[$module]['tabs'][$tab]);
     }
@@ -504,10 +588,13 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
             'creatives-tracker' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'artist-workload' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'directives-details' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+            'directives-editor' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+            'directives-attachments' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'monthly-output' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'reports' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'access-control' => ['c' => false, 'r' => false, 'u' => false, 'd' => false],
             'audit-trail' => ['c' => false, 'r' => false, 'u' => false, 'd' => false],
+            'account-settings' => ['c' => false, 'r' => true, 'u' => true, 'd' => false],
             'settings' => ['c' => false, 'r' => false, 'u' => false, 'd' => false],
         ];
 

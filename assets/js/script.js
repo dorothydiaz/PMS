@@ -6844,7 +6844,7 @@
               Directive
             </button>
             ${isSuper ? `
-              <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Project (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+              <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Project (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             ` : ''}
@@ -7065,7 +7065,7 @@
             <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || 'Pending Approval', APPROVAL_LEVELS)}</td>
             <td>${renderInlineSelect(r.id, 'priority', r.priority || 'Normal', PRIORITY_LEVELS)}</td>
             <td>
-              <div style="display:flex; gap:4px; align-items:center;">
+              <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
                   Directive
                 </button>
@@ -7073,7 +7073,7 @@
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
                 ${isSuper ? `
-                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Request (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Request (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
                 ` : ''}
@@ -7535,7 +7535,7 @@
               <td style="font-size:12px; color:var(--text-secondary); white-space:nowrap;">${escapeHTML(r.orderDate || r.timestamp || 'N/A')}</td>
               <td style="font-size:12px; color:var(--text-secondary); white-space:nowrap;">${escapeHTML(r.dateUpdated || r.orderDate || 'N/A')}</td>
               <td>
-                <div style="display:flex; gap:4px; align-items:center;">
+                <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
                   ${!isAccepted ? `
                     <button class="btn btn-primary btn-sm" onclick="window.SignDepotApp.acceptArtistProject('${r.id}')" title="Accept project and start drafting" style="font-weight:700; background:var(--primary-green); border-color:var(--primary-green); color:#fff; display:inline-flex; align-items:center; gap:4px; padding:3px 9px; font-size:11.5px; border-radius:6px; cursor:pointer;">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -7544,7 +7544,7 @@
                   ` : ''}
                   <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
                   ${isSuper ? `
-                    <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                    <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                   ` : ''}
@@ -9148,10 +9148,10 @@
             <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
             <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
             <td>
-              <div style="display:flex; gap:4px; align-items:center;">
+              <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
                 ${isCurrentUserSuperAdmin() ? `
-                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
                 ` : ''}
@@ -9231,11 +9231,11 @@
             <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
             <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
             <td>
-              <div style="display:flex; gap:4px; align-items:center;">
+              <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.quickSalesApprove('${r.id}')">Approve</button>
                 <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
                 ${isCurrentUserSuperAdmin() ? `
-                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Order (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA;">
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Order (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
                 ` : ''}

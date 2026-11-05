@@ -196,8 +196,13 @@ require_once __DIR__ . '/includes/sidebar.php';
               <?php foreach ($modules as $modKey => $modInfo): ?>
                 <tr data-module="<?= htmlspecialchars($modKey) ?>">
                   <td style="padding-left: 24px;">
-                    <div style="font-weight: 700; color: #0F172A;"><?= htmlspecialchars($modInfo['label']) ?></div>
-                    <div style="font-size: 11px; color: #64748B;"><?= htmlspecialchars($modInfo['desc']) ?></div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-weight: 700; color: #0F172A; font-size: 13.5px;"><?= htmlspecialchars($modInfo['label']) ?></span>
+                      <?php if (!empty($modInfo['category'])): ?>
+                        <span class="badge" style="background: #F1F5F9; color: #475569; font-size: 10px; font-weight: 700; border: 1px solid #E2E8F0; padding: 2px 6px; border-radius: 4px;"><?= htmlspecialchars($modInfo['category']) ?></span>
+                      <?php endif; ?>
+                    </div>
+                    <div style="font-size: 11px; color: #64748B; margin-top: 2px;"><?= htmlspecialchars($modInfo['desc']) ?></div>
                   </td>
                   <td style="text-align: center;">
                     <input type="checkbox" class="perm-check" data-mod="<?= $modKey ?>" data-act="c">
@@ -231,6 +236,8 @@ require_once __DIR__ . '/includes/sidebar.php';
               <option value="creatives-tracker">Creatives Tracker Table</option>
               <option value="artist-workload">Artist Workload Table</option>
               <option value="directives-details">Directive Details Spec Sheet</option>
+              <option value="account-settings">Account Settings (Tab)</option>
+              <option value="settings">System Settings (Tab)</option>
             </select>
           </div>
         </div>
@@ -488,6 +495,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="creatives-tracker">Creatives Tracker Table</option>
                 <option value="artist-workload">Artist Workload Table</option>
                 <option value="directives-details">Directive Details Spec Sheet</option>
+                <option value="account-settings">Account Settings (Tab)</option>
+                <option value="settings">System Settings (Tab)</option>
               </select>
             </div>
           </div>
@@ -606,12 +615,13 @@ require_once __DIR__ . '/includes/sidebar.php';
 
         // Summary of readable modules
         let permsSummary = '';
+        const totalModCount = <?= count($modules) ?>;
         if (isSuper) {
-          permsSummary = '<span style="color: #176B55; font-weight: 700;">★ Full Master CRUD (All 10 Modules)</span>';
+          permsSummary = `<span style="color: #176B55; font-weight: 700;">★ Full Master CRUD (All ${totalModCount} Modules & Tabs)</span>`;
         } else {
           const perms = u.permissions || {};
           const readableMods = Object.keys(perms).filter(k => perms[k] && perms[k].r);
-          permsSummary = `<span style="font-weight: 600; color: #475569;">${readableMods.length} of 10 Modules</span> <span style="color: #94A3B8; font-size: 11px;">(${readableMods.slice(0, 3).join(', ')}${readableMods.length > 3 ? '...' : ''})</span>`;
+          permsSummary = `<span style="font-weight: 600; color: #475569;">${readableMods.length} of ${totalModCount} Modules & Tabs</span> <span style="color: #94A3B8; font-size: 11px;">(${readableMods.slice(0, 3).join(', ')}${readableMods.length > 3 ? '...' : ''})</span>`;
         }
 
         let roleLabel = escapeHtml(u.role.replace('_', ' ').toUpperCase());
@@ -915,6 +925,29 @@ require_once __DIR__ . '/includes/sidebar.php';
         { key: 'releasingDate', label: 'Release Date', desc: 'Target release date', type: 'Date' },
         { key: 'reference', label: 'Reference / Sent Status', desc: 'File sent reference', type: 'Dropdown' }
       ]
+    },
+    'account-settings': {
+      label: 'Account Settings (Tab)',
+      subtitle: 'User personal profile, credentials, Google OAuth integration, and active device sessions.',
+      columns: [
+        { key: 'fullName', label: 'Full Name', desc: 'Display name across the application', type: 'Text' },
+        { key: 'username', label: 'Username', desc: 'Unique account login identifier', type: 'Text' },
+        { key: 'email', label: 'Email Address', desc: 'Notification and communication email', type: 'Email' },
+        { key: 'password', label: 'Account Password', desc: 'Change or update account login password', type: 'Password' },
+        { key: 'avatar', label: 'Profile Picture / Avatar', desc: 'Custom profile image upload or URL', type: 'Image' },
+        { key: 'googleAuth', label: 'Google Account Linking', desc: 'Link or disconnect Google Workspace SSO', type: 'OAuth' },
+        { key: 'sessionRevoke', label: 'Active Sessions Control', desc: 'Revoke and terminate sessions on other devices', type: 'Security' }
+      ]
+    },
+    'settings': {
+      label: 'System Settings (Tab)',
+      subtitle: 'Artist rosters, capacity limits, sales reps, deletion passcode, and client cache backups.',
+      columns: [
+        { key: 'artistRoster', label: 'Artist Roster & Limits', desc: 'Add/remove artists and set workload capacity thresholds', type: 'Roster' },
+        { key: 'salesRoster', label: 'Sales Reps Roster', desc: 'Add/remove sales agents and order allocation', type: 'Roster' },
+        { key: 'deletionPasscode', label: 'Deletion Passcode', desc: 'Super admin authorization passcode for permanent deletes', type: 'Security' },
+        { key: 'localStorageBackup', label: 'Local Backup & Cache', desc: 'Export, import, or reset offline JSON configuration data', type: 'Backup' }
+      ]
     }
   };
 
@@ -1098,22 +1131,40 @@ require_once __DIR__ . '/includes/sidebar.php';
   let editingPresetActiveTable = 'sales-requests';
 
   function getDefaultPermPresets() {
-    const modules = ['dashboard', 'sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'monthly-output', 'reports', 'access-control', 'audit-trail', 'settings'];
-    const tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details'];
+    const modules = [
+      'dashboard',
+      'sales-requests',
+      'creatives-tracker',
+      'artist-workload',
+      'directives-details',
+      'directives-editor',
+      'directives-attachments',
+      'monthly-output',
+      'reports',
+      'access-control',
+      'audit-trail',
+      'account-settings',
+      'settings'
+    ];
+    const tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
     const allP = {}, roP = {}, artP = {}, salP = {}, nonP = {};
 
     const artistCols = {
       'creatives-tracker': ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
       'sales-requests': ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
       'artist-workload': ['designDeadline', 'projectStatus'],
-      'directives-details': ['projectName', 'reference']
+      'directives-details': ['projectName', 'reference'],
+      'account-settings': ['fullName', 'password', 'avatar'],
+      'settings': []
     };
 
     const salesCols = {
       'sales-requests': ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
       'creatives-tracker': ['clientApproval', 'remarks'],
       'artist-workload': [],
-      'directives-details': ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference']
+      'directives-details': ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference'],
+      'account-settings': ['fullName', 'password', 'avatar'],
+      'settings': []
     };
 
     modules.forEach(m => {
@@ -1127,8 +1178,10 @@ require_once __DIR__ . '/includes/sidebar.php';
         nonP[m].editable_columns = [];
       }
 
-      if (['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'].includes(m)) {
-        artP[m] = { c: (m === 'creatives-tracker'), r: true, u: true, d: false };
+      if (['dashboard', 'creatives-tracker', 'directives-details', 'directives-editor', 'directives-attachments', 'monthly-output', 'artist-workload'].includes(m)) {
+        artP[m] = { c: ['creatives-tracker', 'directives-editor', 'directives-attachments'].includes(m), r: true, u: true, d: false };
+      } else if (m === 'account-settings') {
+        artP[m] = { c: false, r: true, u: true, d: false };
       } else {
         artP[m] = { c: false, r: false, u: false, d: false };
       }
@@ -1138,8 +1191,10 @@ require_once __DIR__ . '/includes/sidebar.php';
 
       if (['dashboard', 'sales-requests'].includes(m)) {
         salP[m] = { c: true, r: true, u: true, d: true };
-      } else if (['creatives-tracker', 'directives-details', 'artist-workload'].includes(m)) {
+      } else if (['creatives-tracker', 'directives-details', 'directives-attachments', 'artist-workload'].includes(m)) {
         salP[m] = { c: false, r: true, u: false, d: false };
+      } else if (m === 'account-settings') {
+        salP[m] = { c: false, r: true, u: true, d: false };
       } else {
         salP[m] = { c: false, r: false, u: false, d: false };
       }

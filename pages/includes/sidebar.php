@@ -171,8 +171,9 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
     <?php endif; ?>
 
     <!-- 6. SETTINGS & ACCOUNT -->
+    <?php if (hasPermission('account-settings', 'r') || hasPermission('settings', 'r')): ?>
     <div class="nav-section-label">SETTINGS</div>
-    <a class="nav-item <?= ($cur === 'settings' || $cur === 'account-settings') ? 'active' : '' ?>" href="<?= $pagesBase ?>settings.php" data-view="view-settings" data-page="view-settings" title="Settings & Account">
+    <a class="nav-item <?= ($cur === 'settings' || $cur === 'account-settings') ? 'active' : '' ?>" href="<?= $pagesBase ?>settings.php<?= (!hasPermission('account-settings', 'r') && hasPermission('settings', 'r')) ? '?tab=system' : '' ?>" data-view="view-settings" data-page="view-settings" title="Settings & Account">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -181,5 +182,6 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
       </span>
       <span class="nav-label">Settings</span>
     </a>
+    <?php endif; ?>
   </nav>
 </aside>

@@ -69,8 +69,22 @@ function setSystemSetting($key, $value) {
 }
 
 function getDefaultPermissionPresets() {
-    $modules = ['dashboard', 'sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'monthly-output', 'reports', 'access-control', 'audit-trail', 'settings'];
-    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details'];
+    $modules = [
+        'dashboard',
+        'sales-requests',
+        'creatives-tracker',
+        'artist-workload',
+        'directives-details',
+        'directives-editor',
+        'directives-attachments',
+        'monthly-output',
+        'reports',
+        'access-control',
+        'audit-trail',
+        'account-settings',
+        'settings'
+    ];
+    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
     
     $allPerms = [];
     $roPerms = [];
@@ -82,14 +96,18 @@ function getDefaultPermissionPresets() {
         'creatives-tracker' => ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
         'sales-requests' => ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
         'artist-workload' => ['designDeadline', 'projectStatus'],
-        'directives-details' => ['projectName', 'reference']
+        'directives-details' => ['projectName', 'reference'],
+        'account-settings' => ['fullName', 'password', 'avatar'],
+        'settings' => []
     ];
 
     $salesCols = [
         'sales-requests' => ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
         'creatives-tracker' => ['clientApproval', 'remarks'],
         'artist-workload' => [],
-        'directives-details' => ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference']
+        'directives-details' => ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference'],
+        'account-settings' => ['fullName', 'password', 'avatar'],
+        'settings' => []
     ];
 
     foreach ($modules as $m) {
@@ -103,13 +121,15 @@ function getDefaultPermissionPresets() {
             $nonePerms[$m]['editable_columns'] = [];
         }
         
-        if (in_array($m, ['dashboard', 'creatives-tracker', 'directives-details', 'monthly-output', 'artist-workload'])) {
+        if (in_array($m, ['dashboard', 'creatives-tracker', 'directives-details', 'directives-editor', 'directives-attachments', 'monthly-output', 'artist-workload'])) {
             $artistPerms[$m] = [
-                'c' => ($m === 'creatives-tracker'),
+                'c' => in_array($m, ['creatives-tracker', 'directives-editor', 'directives-attachments']),
                 'r' => true,
                 'u' => true,
                 'd' => false
             ];
+        } elseif ($m === 'account-settings') {
+            $artistPerms[$m] = ['c' => false, 'r' => true, 'u' => true, 'd' => false];
         } else {
             $artistPerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
         }
@@ -119,8 +139,10 @@ function getDefaultPermissionPresets() {
 
         if (in_array($m, ['dashboard', 'sales-requests'])) {
             $salesPerms[$m] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
-        } elseif (in_array($m, ['creatives-tracker', 'directives-details', 'artist-workload'])) {
+        } elseif (in_array($m, ['creatives-tracker', 'directives-details', 'directives-attachments', 'artist-workload'])) {
             $salesPerms[$m] = ['c' => false, 'r' => true, 'u' => false, 'd' => false];
+        } elseif ($m === 'account-settings') {
+            $salesPerms[$m] = ['c' => false, 'r' => true, 'u' => true, 'd' => false];
         } else {
             $salesPerms[$m] = ['c' => false, 'r' => false, 'u' => false, 'd' => false];
         }
@@ -1550,7 +1572,7 @@ switch ($action) {
                     foreach ($defaults as $d) {
                         $defMap[$d['id']] = $d;
                     }
-                    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details'];
+                    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
                     foreach ($decoded as &$p) {
                         $pId = $p['id'] ?? '';
                         $defP = $defMap[$pId] ?? null;

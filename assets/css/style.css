@@ -1689,8 +1689,8 @@ body.sidebar-open {
 #salesRequestsTable,
 #view-sales-requests .data-table {
   table-layout: fixed !important;
-  width: 2620px !important;
-  min-width: 2620px !important;
+  width: 2830px !important;
+  min-width: 2830px !important;
 }
 
 #salesRequestsTable th,
@@ -1756,7 +1756,7 @@ body.sidebar-open {
 #salesRequestsTable th.col-priority { width: 135px !important; min-width: 135px !important; max-width: 135px !important; }
 
 #salesRequestsTable th:nth-child(18), #salesRequestsTable td:nth-child(18),
-#salesRequestsTable th.col-actions { width: 125px !important; min-width: 125px !important; max-width: 125px !important; text-align: center !important; }
+#salesRequestsTable th.col-actions, #salesRequestsTable td.col-actions { width: 195px !important; min-width: 195px !important; max-width: 195px !important; text-align: center !important; padding: 8px 10px !important; overflow: visible !important; }
 
 /* Creatives Tracker & Production Fixed Tables */
 #creativesTrackerTable,
@@ -1764,8 +1764,8 @@ body.sidebar-open {
 #view-creatives-tracker .data-table,
 #view-creatives-production .data-table {
   table-layout: fixed !important;
-  width: 2260px !important;
-  min-width: 2260px !important;
+  width: 2435px !important;
+  min-width: 2435px !important;
 }
 
 #creativesTrackerTable th,
@@ -1831,7 +1831,7 @@ body.sidebar-open {
 #creativesProductionTable th:nth-child(16), #creativesProductionTable td:nth-child(16) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
 
 #creativesTrackerTable th:nth-child(17), #creativesTrackerTable td:nth-child(17),
-#creativesProductionTable th:nth-child(17), #creativesProductionTable td:nth-child(17) { width: 125px !important; min-width: 125px !important; max-width: 125px !important; text-align: center !important; }
+#creativesProductionTable th:nth-child(17), #creativesProductionTable td:nth-child(17) { width: 180px !important; min-width: 180px !important; max-width: 180px !important; text-align: center !important; padding: 8px 10px !important; overflow: visible !important; }
 
 /* In-cell elements lock to cell widths */
 .data-table .editable-cell,

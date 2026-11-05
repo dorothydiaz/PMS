@@ -84,8 +84,12 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="directive-toolbar no-print">
             <div class="directive-tabs">
               <button class="tab-btn active" data-subtab="tab-directive-preview" id="btnTabPreview">Directive Document</button>
+              <?php if (hasPermission('directives-editor', 'r')): ?>
               <button class="tab-btn" data-subtab="tab-template-editor" id="btnTabEditor">Template Editor</button>
+              <?php endif; ?>
+              <?php if (hasPermission('directives-attachments', 'r')): ?>
               <button class="tab-btn" data-subtab="tab-attachments" id="btnTabAttachments">Attachments (<span id="attachmentsCountBadge">3</span>)</button>
+              <?php endif; ?>
             </div>
           </div>
 
@@ -237,6 +241,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             </div>
           </div>
 
+          <?php if (hasPermission('directives-editor', 'r')): ?>
           <!-- SUBTAB 2: TEMPLATE EDITOR -->
           <div class="directive-subtab-content template-editor-wrap" id="tab-template-editor" style="display: none;">
             <div class="template-editor-toolbar">
@@ -265,7 +270,9 @@ require_once __DIR__ . '/includes/sidebar.php';
               <div class="interactive-template-canvas" id="interactiveTemplateCanvas"></div>
             </div>
           </div>
+          <?php endif; ?>
 
+          <?php if (hasPermission('directives-attachments', 'r')): ?>
           <!-- SUBTAB 3: ATTACHMENTS PANEL -->
           <div class="directive-subtab-content" id="tab-attachments" style="display: none;">
             <div class="studio-card">
@@ -282,6 +289,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               <div class="attachments-grid" id="attachmentsGridContainer"></div>
             </div>
           </div>
+          <?php endif; ?>
         </section>
   </div>
   </main>
