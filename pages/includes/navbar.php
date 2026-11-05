@@ -85,9 +85,11 @@ $pageBadge = $pageBadge ?? 'MySQL Live';
     $u = function_exists('getCurrentUser') ? getCurrentUser() : null;
     $userName = $u['full_name'] ?? 'User';
     $userRole = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
-    $userAvatar = $u && !empty($u['avatar_url']) 
-        ? '<img src="' . htmlspecialchars($u['avatar_url']) . '" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">' 
-        : strtoupper(substr($userName, 0, 2));
+    $userInitials = strtoupper(substr(trim($userName) ?: 'SD', 0, 2));
+    $avatarSrc = ($u && !empty($u['avatar_url'])) ? (function_exists('getAvatarUrl') ? getAvatarUrl($u['avatar_url']) : $u['avatar_url']) : '';
+    $userAvatar = !empty($avatarSrc) 
+        ? '<img src="' . htmlspecialchars($avatarSrc) . '" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerText=\'' . addslashes($userInitials) . '\';">' 
+        : $userInitials;
     ?>
     <div class="user-profile-menu">
       <button class="user-profile-btn" id="userProfileBtn" aria-label="User Profile Menu">

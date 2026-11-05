@@ -30,6 +30,7 @@ if ($currentPage !== 'login') {
   <link rel="stylesheet" href="<?= $base ?>assets/css/style.css?v=<?= time() ?>">
   <link rel="icon" type="image/svg+xml" href="<?= $base ?>assets/img/favicon.svg?v=2">
   <link rel="shortcut icon" href="<?= $base ?>assets/img/favicon.svg?v=2">
+  <script src="<?= $base ?>assets/js/image-cropper.js?v=<?= time() ?>"></script>
 </head>
 <body data-page="view-<?= htmlspecialchars($currentPage) ?>" class="<?= in_array($currentPage, ['sales-requests', 'creatives-tracker', 'creatives-production']) ? 'layout-table-fit' : '' ?>">
   <div class="app-container">

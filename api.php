@@ -2060,7 +2060,12 @@ switch ($action) {
 
             logAuditEvent($currUser['username'], $currUser['role'], 'USER_UPDATE', 'Account Settings', 'Updated profile picture / avatar', null, 'Success');
 
-            sendJsonResponse(['success' => true, 'avatar_url' => $avatarUrl, 'message' => 'Profile picture updated successfully!']);
+            sendJsonResponse([
+                'success' => true,
+                'avatar_url' => $avatarUrl,
+                'display_url' => '../' . $avatarUrl,
+                'message' => 'Profile picture updated successfully!'
+            ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }

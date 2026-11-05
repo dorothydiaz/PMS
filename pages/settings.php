@@ -532,10 +532,13 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <!-- Avatar row -->
                 <div class="avatar-row">
                   <div class="avatar-circle-sm" id="editorAvatarPreview">
-                    <?php if (!empty($user['avatar_url'])): ?>
-                      <img src="<?= htmlspecialchars($user['avatar_url']) ?>" alt="Avatar">
+                    <?php
+                    $editorInitials = strtoupper(substr(trim($user['full_name'] ?: $user['username'] ?: 'SD'), 0, 2));
+                    $editorAvatarSrc = !empty($user['avatar_url']) ? (function_exists('getAvatarUrl') ? getAvatarUrl($user['avatar_url']) : '../' . ltrim($user['avatar_url'], './\\')) : '';
+                    if (!empty($editorAvatarSrc)): ?>
+                      <img src="<?= htmlspecialchars($editorAvatarSrc) ?>" alt="Avatar" onerror="this.onerror=null; this.parentElement.innerHTML='<span>' + <?= json_encode($editorInitials) ?> + '</span>';">
                     <?php else: ?>
-                      <span><?= strtoupper(substr($user['full_name'] ?: $user['username'], 0, 2)) ?></span>
+                      <span><?= $editorInitials ?></span>
                     <?php endif; ?>
                   </div>
 
@@ -1060,6 +1063,58 @@ require_once __DIR__ . '/includes/sidebar.php';
   const avatarFileInput = document.getElementById('avatarFileInput');
   const btnRemoveAvatar = document.getElementById('btnRemoveAvatar');
 
+  function openAvatarCropper(file) {
+    if (window.SignDepotCropper) {
+      window.SignDepotCropper.open({
+        file: file,
+        title: 'Crop Profile Picture',
+        circular: true,
+        outputSize: 512,
+        onCrop: async (croppedBlob, croppedDataUrl, croppedFile) => {
+          const formData = new FormData();
+          formData.append('action', 'account_upload_avatar');
+          formData.append('avatar', croppedFile);
+
+          try {
+            const res = await fetch('../api.php', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+              syncAvatars(data.display_url || data.avatar_url);
+              btnRemoveAvatar.style.display = 'inline-flex';
+              if (window.SignDepotApp && window.SignDepotApp.showToast) {
+                window.SignDepotApp.showToast('Profile photo cropped and saved successfully!');
+              }
+            } else {
+              alert('Upload failed: ' + (data.error || 'Unknown error'));
+            }
+          } catch (err) {
+            alert('Network error uploading avatar.');
+          } finally {
+            if (avatarFileInput) avatarFileInput.value = '';
+          }
+        },
+        onCancel: () => {
+          if (avatarFileInput) avatarFileInput.value = '';
+        }
+      });
+    } else {
+      // Dynamically load image-cropper.js if not yet cached or loaded
+      const script = document.createElement('script');
+      script.src = '../assets/js/image-cropper.js?v=' + Date.now();
+      script.onload = () => {
+        if (window.SignDepotCropper) {
+          openAvatarCropper(file);
+        } else {
+          alert('Could not initialize image cropper. Please ensure assets/js/image-cropper.js is uploaded to your web hosting.');
+        }
+      };
+      script.onerror = () => {
+        alert('Could not load assets/js/image-cropper.js from your web hosting. Please ensure you have uploaded the assets/js/image-cropper.js file to your server.');
+      };
+      document.head.appendChild(script);
+    }
+  }
+
   if (avatarFileInput) {
     avatarFileInput.addEventListener('change', () => {
       if (!avatarFileInput.files || !avatarFileInput.files[0]) return;
@@ -1069,58 +1124,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         avatarFileInput.value = '';
         return;
       }
-
-      if (window.SignDepotCropper) {
-        window.SignDepotCropper.open({
-          file: file,
-          title: 'Crop Profile Picture',
-          circular: true,
-          outputSize: 512,
-          onCrop: async (croppedBlob, croppedDataUrl, croppedFile) => {
-            const formData = new FormData();
-            formData.append('action', 'account_upload_avatar');
-            formData.append('avatar', croppedFile);
-
-            try {
-              const res = await fetch('../api.php', { method: 'POST', body: formData });
-              const data = await res.json();
-              if (data.success) {
-                syncAvatars(data.avatar_url);
-                btnRemoveAvatar.style.display = 'inline-flex';
-                if (window.SignDepotApp && window.SignDepotApp.showToast) {
-                  window.SignDepotApp.showToast('Profile photo cropped and saved successfully!');
-                }
-              } else {
-                alert('Upload failed: ' + (data.error || 'Unknown error'));
-              }
-            } catch (err) {
-              alert('Network error uploading avatar.');
-            } finally {
-              avatarFileInput.value = '';
-            }
-          },
-          onCancel: () => {
-            avatarFileInput.value = '';
-          }
-        });
-      } else {
-        const formData = new FormData();
-        formData.append('action', 'account_upload_avatar');
-        formData.append('avatar', file);
-
-        fetch('../api.php', { method: 'POST', body: formData })
-          .then(r => r.json())
-          .then(data => {
-            if (data.success) {
-              syncAvatars(data.avatar_url);
-              btnRemoveAvatar.style.display = 'inline-flex';
-            } else {
-              alert('Upload failed: ' + (data.error || 'Unknown error'));
-            }
-          })
-          .catch(() => alert('Network error uploading avatar.'))
-          .finally(() => { avatarFileInput.value = ''; });
-      }
+      openAvatarCropper(file);
     });
   }
 
@@ -1170,6 +1174,15 @@ require_once __DIR__ . '/includes/sidebar.php';
     });
   }
 
+  function resolveAvatarUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('/')) {
+      return url;
+    }
+    const clean = url.replace(/^(\.\.\/|\.\/|\/)+/, '');
+    return '../' + clean;
+  }
+
   function syncAvatars(url) {
     const fullName = document.getElementById('profileFullName') ? document.getElementById('profileFullName').value : 'User';
     const initials = (fullName.trim().substring(0, 2) || 'SD').toUpperCase();
@@ -1178,12 +1191,17 @@ require_once __DIR__ . '/includes/sidebar.php';
     const editor = document.getElementById('editorAvatarPreview');
     const navAvatar = document.querySelector('.user-profile-btn .user-avatar');
 
-    const content = url ? `<img src="${url}" alt="Avatar">` : `<span>${initials}</span>`;
+    const resolved = resolveAvatarUrl(url);
+    const content = resolved
+      ? `<img src="${resolved}" alt="Avatar" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${initials}</span>';">`
+      : `<span>${initials}</span>`;
 
     if (hero) hero.innerHTML = content;
     if (editor) editor.innerHTML = content;
     if (navAvatar) {
-      navAvatar.innerHTML = url ? `<img src="${url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : initials;
+      navAvatar.innerHTML = resolved
+        ? `<img src="${resolved}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerText='${initials}';">`
+        : initials;
     }
   }
 

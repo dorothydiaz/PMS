@@ -134,3 +134,20 @@ function getPagesPath() {
     }
     return './pages/';
 }
+
+/**
+ * Format and resolve avatar URL with proper depth prefix for current view
+ */
+function getAvatarUrl($url) {
+    if (empty($url)) {
+        return '';
+    }
+    // External URL, data URI, or absolute path
+    if (preg_match('#^(https?://|data:|/)#i', $url)) {
+        return $url;
+    }
+    // Clean any leading slashes or relative dots
+    $cleanPath = ltrim($url, './\\');
+    $base = function_exists('getBasePath') ? getBasePath() : './';
+    return $base . $cleanPath;
+}
