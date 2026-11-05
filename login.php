@@ -7,11 +7,12 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/auth.php';
 
-// If already logged in, redirect to dashboard
-if (isLoggedIn()) {
-    header('Location: index.php');
-    exit;
+// Support force logout via query parameter (e.g. login.php?logout=1)
+if (isset($_GET['logout']) || isset($_GET['force'])) {
+    logoutUser();
 }
+
+$activeUser = isLoggedIn() ? getCurrentUser() : null;
 
 $error = '';
 $msg = $_GET['msg'] ?? '';
@@ -341,6 +342,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         <h1 class="login-title">Operations Portal</h1>
         <p class="login-subtitle">Sign Depot Sales & Creative Production PMS</p>
       </div>
+
+      <?php if (!empty($activeUser)): ?>
+        <div class="login-alert alert-info" style="background: #0F172A; border: 1px solid #334155; color: #F8FAFC; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <span>Signed in as <strong><?= htmlspecialchars($activeUser['full_name'] ?? $activeUser['username']) ?></strong></span>
+          <div style="display: flex; gap: 10px;">
+            <a href="index.php" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Dashboard &rarr;</a>
+            <a href="logout.php" style="color: #F87171; font-weight: 700; text-decoration: none;">Sign Out</a>
+          </div>
+        </div>
+      <?php endif; ?>
 
       <?php if (!empty($error)): ?>
         <div class="login-alert alert-error">
