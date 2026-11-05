@@ -154,21 +154,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     .alert-error {
       background: #000000;
       color: #FFFFFF;
-      border: 1px solid #DC2626;
+      border: none;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
     .alert-error svg {
-      stroke: #EF4444;
+      stroke: #FFFFFF;
       flex-shrink: 0;
     }
     .alert-info {
       background: #000000;
       color: #FFFFFF;
-      border: 1px solid #334155;
+      border: none;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
     .alert-info svg {
-      stroke: #10B981;
+      stroke: #FFFFFF;
       flex-shrink: 0;
     }
 
