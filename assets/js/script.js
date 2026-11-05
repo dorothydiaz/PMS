@@ -4586,11 +4586,11 @@
     {
       id: 'att-1',
       name: 'Sign_Depot_Vector_Spec_URAL.png',
-      type: 'PNG Image',
+      type: 'Vector Blueprint',
       size: '1.4 MB',
       dateAdded: '2026-10-23',
-      storageType: 'Local Mock',
-      url: 'assets/img/sign-depot-logo.png'
+      storageType: 'Local Spec',
+      url: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20240%22%20width%3D%22400%22%20height%3D%22240%22%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22%230B132B%22%2F%3E%3Cdefs%3E%3Cpattern%20id%3D%22grid%22%20width%3D%2220%22%20height%3D%2220%22%20patternUnits%3D%22userSpaceOnUse%22%3E%3Cpath%20d%3D%22M%2020%200%20L%200%200%200%2020%22%20fill%3D%22none%22%20stroke%3D%22%231C2541%22%20stroke-width%3D%220.8%22%2F%3E%3C%2Fpattern%3E%3C%2Fdefs%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22url%28%23grid%29%22%2F%3E%3Crect%20x%3D%2225%22%20y%3D%2225%22%20width%3D%22350%22%20height%3D%22190%22%20fill%3D%22none%22%20stroke%3D%22%233A86FF%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%224%2C2%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2245%22%20width%3D%22320%22%20height%3D%2290%22%20rx%3D%228%22%20fill%3D%22%231C2541%22%20stroke%3D%22%2348CAE4%22%20stroke-width%3D%221.5%22%2F%3E%3Cpolygon%20points%3D%2260%2C60%20180%2C60%20160%2C115%2040%2C115%22%20fill%3D%22%23DC2626%22%2F%3E%3Ctext%20x%3D%2270%22%20y%3D%2298%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2222%22%20fill%3D%22%23FFFFFF%22%20font-style%3D%22italic%22%3ESIGN%20DEPOT%3C%2Ftext%3E%3Ctext%20x%3D%22195%22%20y%3D%2280%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2213%22%20fill%3D%22%23FFFFFF%22%3E3D%20ACRYLIC%20CHANNEL%3C%2Ftext%3E%3Ctext%20x%3D%22195%22%20y%3D%22100%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22500%22%20font-size%3D%2210.5%22%20fill%3D%22%2348CAE4%22%3ELED%20BACKLIT%20%E2%80%A2%203000K%20WARM%3C%2Ftext%3E%3Ctext%20x%3D%22195%22%20y%3D%22118%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22500%22%20font-size%3D%229.5%22%20fill%3D%22%2394A3B8%22%3ESCALE%201%3A20%20%E2%80%A2%203400%20x%20950%20MM%3C%2Ftext%3E%3Cline%20x1%3D%2240%22%20y1%3D%22150%22%20x2%3D%22360%22%20y2%3D%22150%22%20stroke%3D%22%2300B4D8%22%20stroke-width%3D%221.2%22%2F%3E%3Cpolygon%20points%3D%2240%2C150%2048%2C147%2048%2C153%22%20fill%3D%22%2300B4D8%22%2F%3E%3Cpolygon%20points%3D%22360%2C150%20352%2C147%20352%2C153%22%20fill%3D%22%2300B4D8%22%2F%3E%3Ctext%20x%3D%22200%22%20y%3D%22146%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2211%22%20fill%3D%22%2300B4D8%22%20text-anchor%3D%22middle%22%3EW%3A%203400%20mm%3C%2Ftext%3E%3Crect%20x%3D%2225%22%20y%3D%22185%22%20width%3D%22350%22%20height%3D%2230%22%20fill%3D%22%230D1B2A%22%2F%3E%3Ctext%20x%3D%2235%22%20y%3D%22204%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2210%22%20fill%3D%22%23FFFFFF%22%3ESIGN%20DEPOT%20VECTOR%20SPEC%20%E2%80%94%20URAL%3C%2Ftext%3E%3Ctext%20x%3D%22365%22%20y%3D%22204%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229%22%20fill%3D%22%2306D6A0%22%20text-anchor%3D%22end%22%3EAPPROVED%20FOR%20PRODUCTION%3C%2Ftext%3E%3C%2Fsvg%3E'
     },
     {
       id: 'att-2',
@@ -4598,8 +4598,8 @@
       type: 'Proof Render',
       size: '2.8 MB',
       dateAdded: '2026-10-23',
-      storageType: 'Local Mock',
-      url: 'assets/img/sign-depot-logo.png'
+      storageType: 'Local Render',
+      url: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20240%22%20width%3D%22400%22%20height%3D%22240%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%220%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F172A%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231E293B%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22glow%22%20cx%3D%2250%25%22%20cy%3D%2250%25%22%20r%3D%2250%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23EF4444%22%20stop-opacity%3D%220.45%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23EF4444%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22url%28%23sky%29%22%2F%3E%3Crect%20x%3D%2230%22%20y%3D%2230%22%20width%3D%22340%22%20height%3D%22210%22%20fill%3D%22%23334155%22%20stroke%3D%22%23475569%22%20stroke-width%3D%221.5%22%2F%3E%3Crect%20x%3D%2250%22%20y%3D%22110%22%20width%3D%22300%22%20height%3D%22120%22%20fill%3D%22%231E293B%22%20opacity%3D%220.9%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22150%22%20y1%3D%22110%22%20x2%3D%22150%22%20y2%3D%22230%22%20stroke%3D%22%23475569%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22250%22%20y1%3D%22110%22%20x2%3D%22250%22%20y2%3D%22230%22%20stroke%3D%22%23475569%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2245%22%20width%3D%22320%22%20height%3D%2260%22%20rx%3D%224%22%20fill%3D%22%2309090B%22%20stroke%3D%22%23DC2626%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2245%22%20width%3D%22320%22%20height%3D%2260%22%20fill%3D%22url%28%23glow%29%22%2F%3E%3Cpolygon%20points%3D%2265%2C58%20175%2C58%20155%2C95%2045%2C95%22%20fill%3D%22%23DC2626%22%2F%3E%3Ctext%20x%3D%2275%22%20y%3D%2284%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2218%22%20fill%3D%22%23FFFFFF%22%20font-style%3D%22italic%22%3ESIGN%20DEPOT%3C%2Ftext%3E%3Ctext%20x%3D%22185%22%20y%3D%2276%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22800%22%20font-size%3D%2213%22%20fill%3D%22%23FFFFFF%22%3EPAU%20ACILAC%20STORE%3C%2Ftext%3E%3Ctext%20x%3D%22185%22%20y%3D%2293%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229.5%22%20fill%3D%22%23FCA5A5%22%3EFACADE%20NIGHT%20RENDER%203D%3C%2Ftext%3E%3Crect%20x%3D%22250%22%20y%3D%22195%22%20width%3D%22110%22%20height%3D%2226%22%20rx%3D%224%22%20fill%3D%22%23065F46%22%20opacity%3D%220.9%22%2F%3E%3Ctext%20x%3D%22305%22%20y%3D%22212%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%229.5%22%20fill%3D%22%23A7F3D0%22%20text-anchor%3D%22middle%22%3E%E2%9C%93%20CLIENT%20APPROVED%3C%2Ftext%3E%3C%2Fsvg%3E'
     },
     {
       id: 'att-3',
@@ -4607,8 +4607,8 @@
       type: 'Technical Drawing',
       size: '890 KB',
       dateAdded: '2026-10-23',
-      storageType: 'Local Mock',
-      url: 'assets/img/sign-depot-logo.png'
+      storageType: 'Local Schematic',
+      url: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20240%22%20width%3D%22400%22%20height%3D%22240%22%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22%230B131E%22%2F%3E%3Cdefs%3E%3Cpattern%20id%3D%22elecGrid%22%20width%3D%2216%22%20height%3D%2216%22%20patternUnits%3D%22userSpaceOnUse%22%3E%3Cpath%20d%3D%22M%2016%200%20L%200%200%200%2016%22%20fill%3D%22none%22%20stroke%3D%22%23152238%22%20stroke-width%3D%220.7%22%2F%3E%3C%2Fpattern%3E%3C%2Fdefs%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22url%28%23elecGrid%29%22%2F%3E%3Crect%20x%3D%2220%22%20y%3D%2215%22%20width%3D%22360%22%20height%3D%2230%22%20fill%3D%22%23132338%22%20stroke%3D%22%231E3A5F%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2234%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2210.5%22%20fill%3D%22%2338BDF8%22%3EELECTRICAL%20%26%20LED%20WIRING%20SCHEMATIC%20%E2%80%94%20220V%20AC%20%2F%2012V%20DC%3C%2Ftext%3E%3Crect%20x%3D%2235%22%20y%3D%2270%22%20width%3D%2290%22%20height%3D%2280%22%20rx%3D%224%22%20fill%3D%22%231E293B%22%20stroke%3D%22%23F59E0B%22%20stroke-width%3D%221.5%22%2F%3E%3Ctext%20x%3D%2280%22%20y%3D%22100%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2210%22%20fill%3D%22%23FBBF24%22%20text-anchor%3D%22middle%22%3EMEANWELL%3C%2Ftext%3E%3Ctext%20x%3D%2280%22%20y%3D%22115%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229%22%20fill%3D%22%23E2E8F0%22%20text-anchor%3D%22middle%22%3ELRS-350-12%3C%2Ftext%3E%3Ctext%20x%3D%2280%22%20y%3D%22130%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22500%22%20font-size%3D%228%22%20fill%3D%22%2394A3B8%22%20text-anchor%3D%22middle%22%3E29A%20%E2%80%A2%2012V%20350W%3C%2Ftext%3E%3Cline%20x1%3D%2215%22%20y1%3D%2295%22%20x2%3D%2235%22%20y2%3D%2295%22%20stroke%3D%22%23EF4444%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%2215%22%20y1%3D%22125%22%20x2%3D%2235%22%20y2%3D%22125%22%20stroke%3D%22%233B82F6%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%2218%22%20y%3D%2290%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%23EF4444%22%3EL%20%28220V%29%3C%2Ftext%3E%3Cline%20x1%3D%22125%22%20y1%3D%22100%22%20x2%3D%22180%22%20y2%3D%22100%22%20stroke%3D%22%23DC2626%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20x1%3D%22125%22%20y1%3D%22120%22%20x2%3D%22180%22%20y2%3D%22120%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%222.5%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%2294%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%23DC2626%22%3E%2B12V%3C%2Ftext%3E%3Crect%20x%3D%22180%22%20y%3D%2265%22%20width%3D%22185%22%20height%3D%2242%22%20rx%3D%224%22%20fill%3D%22%231E293B%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%221.2%22%2F%3E%3Ctext%20x%3D%22272%22%20y%3D%2285%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%229%22%20fill%3D%22%2334D399%22%20text-anchor%3D%22middle%22%3ELED%20STRING%20A%20%2818%20pcs%20x%201.5W%29%3C%2Ftext%3E%3Ctext%20x%3D%22272%22%20y%3D%2298%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%2394A3B8%22%20text-anchor%3D%22middle%22%3ESAMSUNG%20CHIP%20%E2%80%A2%20IP67%3C%2Ftext%3E%3Crect%20x%3D%22180%22%20y%3D%22120%22%20width%3D%22185%22%20height%3D%2242%22%20rx%3D%224%22%20fill%3D%22%231E293B%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%221.2%22%2F%3E%3Ctext%20x%3D%22272%22%20y%3D%22140%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%229%22%20fill%3D%22%2334D399%22%20text-anchor%3D%22middle%22%3ELED%20STRING%20B%20%2818%20pcs%20x%201.5W%29%3C%2Ftext%3E%3Ctext%20x%3D%22272%22%20y%3D%22153%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%2394A3B8%22%20text-anchor%3D%22middle%22%3ESAMSUNG%20CHIP%20%E2%80%A2%20IP67%3C%2Ftext%3E%3Cline%20x1%3D%2280%22%20y1%3D%22150%22%20x2%3D%2280%22%20y2%3D%22190%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%223%2C2%22%2F%3E%3Ctext%20x%3D%2285%22%20y%3D%22185%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%2310B981%22%3EEARTH%20GROUND%3C%2Ftext%3E%3Crect%20x%3D%2220%22%20y%3D%22195%22%20width%3D%22360%22%20height%3D%2230%22%20fill%3D%22%230D1622%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%22214%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229%22%20fill%3D%22%2394A3B8%22%3EENGINEERING%20DWG%20REV%202.4%20%E2%80%A2%20APPROVED%20FOR%20INSTALLATION%3C%2Ftext%3E%3C%2Fsvg%3E'
     }
   ];
 
@@ -4841,6 +4841,9 @@
               });
             }
             if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
+            if (parsed.attachments && Array.isArray(parsed.attachments) && parsed.attachments.length > 0) {
+              state.attachments = parsed.attachments;
+            }
             
             const storedRows = getStoredRowsPerPage();
             if (state.salesFilter) state.salesFilter.perPage = storedRows;
@@ -9073,27 +9076,106 @@
   // ATTACHMENTS HANDLING
   // ==========================================================================
 
+  function resolveAttachmentUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
+      return url;
+    }
+    if (typeof isInsidePagesDir === 'function' && isInsidePagesDir() && !url.startsWith('../')) {
+      return '../' + url;
+    }
+    return url;
+  }
+
+  function sanitizeAttachmentUrls() {
+    if (!Array.isArray(state.attachments)) return;
+    state.attachments.forEach(att => {
+      if (att.url === 'assets/img/sign-depot-logo.png' || att.url === '../assets/img/sign-depot-logo.png' || !att.url) {
+        const match = DEFAULT_ATTACHMENTS.find(d => d.id === att.id || d.name === att.name);
+        if (match && match.url) {
+          att.url = match.url;
+          if (match.type) att.type = match.type;
+        }
+      }
+    });
+  }
+
   function renderAttachmentsList() {
     const grid = document.getElementById('attachmentsGridContainer');
     const badge = document.getElementById('attachmentsCountBadge');
+    sanitizeAttachmentUrls();
     if (badge) badge.textContent = state.attachments.length;
     if (!grid) return;
 
-    grid.innerHTML = state.attachments.map(att => `
-      <div class="attachment-card">
-        <div class="attachment-thumbnail" onclick="window.SignDepotApp.previewAttachment('${att.id}')" style="cursor:pointer;">
-          <img src="${att.url}" alt="${escapeHTML(att.name)}">
+    if (!state.attachments || state.attachments.length === 0) {
+      grid.innerHTML = `
+        <div class="attachment-empty-box">
+          <div class="attachment-empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <h4 style="font-size:15px; font-weight:700; color:#0F172A; margin:0 0 6px 0;">No Proofs Attached Yet</h4>
+          <p style="font-size:12.5px; color:#64748B; margin:0 0 16px 0;">Upload design renders, vector drawings, or site photos for this directive.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('localAttachmentUploadInput').click();">
+            Upload First Proof
+          </button>
         </div>
-        <div class="attachment-meta">
-          <span style="font-weight:700; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(att.name)}</span>
-          <span style="font-size:11px; color:var(--text-secondary);">${att.type} • ${att.size}</span>
-        </div>
-        <div style="display:flex; gap:6px; margin-top:4px;">
-          <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="window.SignDepotApp.previewAttachment('${att.id}')">View</button>
-          <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.deleteAttachment('${att.id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    } else {
+      grid.innerHTML = state.attachments.map(att => {
+        const resolvedUrl = resolveAttachmentUrl(att.url);
+        return `
+          <div class="attachment-card" data-att-id="${escapeHTML(att.id)}">
+            <div class="attachment-thumbnail" onclick="window.SignDepotApp.previewAttachment('${escapeHTML(att.id)}')">
+              <span class="attachment-type-badge">${escapeHTML(att.type || 'Proof')}</span>
+              <img src="${resolvedUrl}" alt="${escapeHTML(att.name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+              <div class="attachment-fallback-preview" style="display:none;">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="fallback-name">${escapeHTML(att.name)}</span>
+              </div>
+              <div class="attachment-thumb-overlay">
+                <span class="attachment-zoom-pill">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  Click to Inspect
+                </span>
+              </div>
+            </div>
+            <div class="attachment-meta">
+              <div class="attachment-title" title="${escapeHTML(att.name)}">${escapeHTML(att.name)}</div>
+              <div class="attachment-info-row">
+                <span class="attachment-size-pill">${escapeHTML(att.size || 'N/A')}</span>
+                <span class="attachment-date-pill">${escapeHTML(att.dateAdded || '')}</span>
+              </div>
+            </div>
+            <div class="attachment-footer-actions">
+              <button type="button" class="attachment-btn-view" onclick="window.SignDepotApp.previewAttachment('${escapeHTML(att.id)}')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                View Proof
+              </button>
+              <button type="button" class="attachment-btn-delete" title="Delete attachment" onclick="window.SignDepotApp.deleteAttachment('${escapeHTML(att.id)}')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     const uploadBtn = document.getElementById('btnUploadLocalAttachment');
     const fileInput = document.getElementById('localAttachmentUploadInput');
@@ -13247,7 +13329,7 @@
       const att = state.attachments.find(a => a.id === id);
       if (!att) return;
       document.getElementById('attachmentModalTitle').textContent = att.name;
-      const resolvedUrl = (isInsidePagesDir() && !att.url.startsWith('../') && !att.url.startsWith('http') && !att.url.startsWith('data:')) ? '../' + att.url : att.url;
+      const resolvedUrl = resolveAttachmentUrl(att.url);
       document.getElementById('attachmentModalImg').src = resolvedUrl;
       document.getElementById('attachmentPreviewModal').classList.add('show');
     },
