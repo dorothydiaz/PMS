@@ -247,6 +247,7 @@ require_once __DIR__ . '/includes/sidebar.php';
               </div>
             </div>
             <div class="pagination-controls" id="trackerPaginationControls"></div>
+          </div>
     </section>
   </div>
   </main>

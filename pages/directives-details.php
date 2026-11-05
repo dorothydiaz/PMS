@@ -291,8 +291,9 @@ require_once __DIR__ . '/includes/sidebar.php';
           </div>
           <?php endif; ?>
         </section>
+      </div>
+    </main>
   </div>
-  </main>
   <script>
     window.__INITIAL_DIRECTIVE_KEY = <?= json_encode($initialDirectiveKey) ?>;
   </script>
