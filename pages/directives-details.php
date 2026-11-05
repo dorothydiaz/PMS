@@ -61,7 +61,7 @@ require_once __DIR__ . '/includes/sidebar.php';
           <div class="section-header-row">
             <div class="section-title-wrap">
               <h2>Directives Details & Job Orders</h2>
-              <p>Printable Sign Depot production directive generator, template editor & attachments</p>
+              <p>Printable Sign Depot production directive generator & specifications</p>
             </div>
           </div>
 
@@ -81,20 +81,8 @@ require_once __DIR__ . '/includes/sidebar.php';
             </div>
           </div>
 
-          <div class="directive-toolbar no-print">
-            <div class="directive-tabs">
-              <button class="tab-btn active" data-subtab="tab-directive-preview" id="btnTabPreview">Directive Document</button>
-              <?php if (hasPermission('directives-editor', 'r')): ?>
-              <button class="tab-btn" data-subtab="tab-template-editor" id="btnTabEditor">Template Editor</button>
-              <?php endif; ?>
-              <?php if (hasPermission('directives-attachments', 'r')): ?>
-              <button class="tab-btn" data-subtab="tab-attachments" id="btnTabAttachments">Attachments (<span id="attachmentsCountBadge">3</span>)</button>
-              <?php endif; ?>
-            </div>
-          </div>
-
-          <!-- SUBTAB 1: DIRECTIVE PREVIEW (Exact Sign Depot Document Layout) -->
-          <div class="directive-subtab-content active" id="tab-directive-preview">
+          <!-- DIRECTIVE DOCUMENT PREVIEW (Exact Sign Depot Document Layout) -->
+          <div class="directive-subtab-content active" id="tab-directive-preview" style="display: block;">
             <div class="directive-canvas-wrap">
               <!-- Master Directive Landscape Letter Sheet (11in x 8.5in Ratio) -->
               <div class="directive-sheet-landscape" id="printableDirectiveDocument">
@@ -240,56 +228,6 @@ require_once __DIR__ . '/includes/sidebar.php';
               </div>
             </div>
           </div>
-
-          <?php if (hasPermission('directives-editor', 'r')): ?>
-          <!-- SUBTAB 2: TEMPLATE EDITOR -->
-          <div class="directive-subtab-content template-editor-wrap" id="tab-template-editor" style="display: none;">
-            <div class="template-editor-toolbar">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <button class="btn btn-primary btn-sm" id="btnTplAddElement">+ Add Text Element</button>
-                <button class="btn btn-secondary btn-sm" id="btnTplSaveTemplate">Save Layout</button>
-                <button class="btn btn-secondary btn-sm" id="btnTplResetDefault">Reset to Standard</button>
-              </div>
-              <span style="font-size: 12px; color: var(--text-secondary);">Click to select, drag to reposition, pull corner to resize</span>
-            </div>
-
-            <div class="template-properties-panel" id="templatePropsPanel">
-              <span style="font-size: 12px; font-weight: 800; color: #0F172A; white-space: nowrap;">Element Properties:</span>
-              <input type="text" class="template-prop-input" id="propElemLabel" placeholder="Label" style="width: 140px;">
-              <input type="text" class="template-prop-input" id="propElemContent" placeholder="Text Content" style="width: 180px;">
-              <input type="number" class="template-prop-input" id="propElemFontSize" placeholder="Font (px)" style="width: 105px;" min="8" max="48">
-              <select class="template-prop-input template-prop-select" id="propElemAlign">
-                <option value="left">Left Align</option>
-                <option value="center">Center Align</option>
-                <option value="right">Right Align</option>
-              </select>
-              <button class="btn btn-danger btn-sm" id="btnTplDeleteElement">Delete</button>
-            </div>
-
-            <div class="canvas-bounds-wrapper">
-              <div class="interactive-template-canvas" id="interactiveTemplateCanvas"></div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <?php if (hasPermission('directives-attachments', 'r')): ?>
-          <!-- SUBTAB 3: ATTACHMENTS PANEL -->
-          <div class="directive-subtab-content" id="tab-attachments" style="display: none;">
-            <div class="studio-card">
-              <div class="section-header-row">
-                <div>
-                  <h3 style="font-size: 16px; font-weight: 800;">Project Attachments & Proofs</h3>
-                  <p>Design renders and vector assets for current directive</p>
-                </div>
-                <div class="section-actions">
-                  <input type="file" id="localAttachmentUploadInput" accept="image/*,.pdf" style="display: none;">
-                  <button class="btn btn-primary btn-sm" id="btnUploadLocalAttachment">Upload Local Proof</button>
-                </div>
-              </div>
-              <div class="attachments-grid" id="attachmentsGridContainer"></div>
-            </div>
-          </div>
-          <?php endif; ?>
         </section>
       </div>
     </main>
