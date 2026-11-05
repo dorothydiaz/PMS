@@ -92,16 +92,14 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div class="directive-canvas-wrap">
               <!-- Master Directive Landscape Letter Sheet (11in x 8.5in Ratio) -->
               <div class="directive-sheet-landscape" id="printableDirectiveDocument">
-                <!-- Directive Top Quick Bar (Vector Ready & Background Clarity Toggle) -->
+                <!-- Directive Top Quick Bar (Vector Ready) -->
                 <div class="doc-top-bar no-print">
                   <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <!-- Background Clarity Toggle: Vector Clear vs Original Image -->
-                    <div style="display: inline-flex; border: 1px solid #CBD5E1; border-radius: 6px; overflow: hidden; background: #FFFFFF;" title="Toggle background template clarity">
-                      <button type="button" id="btnBgVector" class="btn-sm" style="padding: 5px 12px; font-size: 11px; font-weight: 700; background: #0F172A; color: #FFFFFF; border: none; cursor: pointer;">✨ Clear Vector (4K)</button>
-                      <button type="button" id="btnBgOriginal" class="btn-sm" style="padding: 5px 12px; font-size: 11px; font-weight: 700; background: #FFFFFF; color: #64748B; border: none; cursor: pointer;">Original Image</button>
-                    </div>
-
-                    <button class="btn btn-green btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (3616 × 384 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator. (Hold Shift to download .png file)">
+                    <button class="btn btn-primary btn-sm" id="btnDirectiveCopySVG" title="Copy exact vector SVG to clipboard for Illustrator, Figma, or CorelDRAW">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                      Copy Vector SVG
+                    </button>
+                    <button class="btn btn-green btn-sm" id="btnDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (3616 × 384 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                       Copy Image 4K (Ctrl+V)
                     </button>
@@ -109,61 +107,162 @@ require_once __DIR__ . '/includes/sidebar.php';
                   </div>
                 </div>
 
-                <!-- Exact 1:1 Production Directive Header Template with Crisp Background & Dynamic Overlay -->
+                <!-- Exact 1:1 Vector Production Directive Header (Pure SVG Format) -->
                 <div class="directive-exact-header-wrap" id="directiveGridTable">
-                  <img src="../assets/img/directive-header-clear.svg?v=1" alt="Production Directive Header" class="directive-exact-bg" id="directiveHeaderBg">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="100%" height="auto" id="directiveExactSvg" style="display:block; background:#FFFFFF;">
+                    <defs>
+                      <style>
+                        .cond-black { font-family:'Archivo','Oswald','Roboto Condensed','Arial Narrow',sans-serif; font-weight:900; }
+                        .cond-bold { font-family:'Archivo','Oswald','Roboto Condensed','Arial Narrow',sans-serif; font-weight:800; }
+                        .cond-semi { font-family:'Archivo','Roboto Condensed','Arial Narrow',sans-serif; font-weight:700; }
+                        .chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
+                        .center-txt { text-anchor: middle; }
+                        .interactive-field { cursor: pointer; transition: opacity 0.15s; }
+                        .interactive-field:hover { opacity: 0.7; }
+                      </style>
+                    </defs>
 
-                  <div class="directive-exact-overlay">
-                    <!-- 1. JO Number (Top Left Black Box) -->
-                    <div class="deh-field deh-jo-number" id="docFieldJoNumber" contenteditable="true" title="Click to edit JO Number"><?= htmlspecialchars($docJo) ?></div>
+                    <!-- Base White Canvas -->
+                    <rect x="0" y="0" width="904" height="96" fill="#FFFFFF"/>
 
-                    <!-- 2. In Charge (Column 1, Row 2) -->
-                    <div class="deh-field deh-in-charge" id="docFieldInCharge" contenteditable="true" title="Click to edit In-Charge"><?= htmlspecialchars($docInCharge) ?></div>
+                    <!-- ========================================== -->
+                    <!-- COLUMN 1: (0 to 225) -->
+                    <!-- ========================================== -->
+                    <!-- Top Black JO# Header -->
+                    <rect x="0" y="0" width="225" height="33" fill="#000000"/>
+                    <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
+                    <text x="56" y="24" fill="#FFFFFF" font-size="20" class="cond-black interactive-field" letter-spacing="0.5" id="docFieldJoNumber" title="Click to edit JO Number"><?= htmlspecialchars($docJo) ?></text>
 
-                    <!-- 3. Drawn By (Column 1, Row 3) -->
-                    <div class="deh-field deh-drawn-by" id="docFieldDrawnBy" contenteditable="true" title="Click to edit Drawn By"><?= htmlspecialchars($docDrawnBy) ?></div>
+                    <!-- Row 2: In Charge -->
+                    <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
+                    <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
+                    <text x="218" y="47" fill="#000000" font-size="11.5" class="cond-bold interactive-field" text-anchor="end" id="docFieldInCharge" title="Click to edit In-Charge"><?= htmlspecialchars($docInCharge) ?></text>
 
-                    <!-- 4. Address (Column 1, Row 4 inside Gray Pill) -->
-                    <div class="deh-field deh-address" id="docFieldAddress" contenteditable="true" title="Click to edit Address"><?= htmlspecialchars($docAddress) ?></div>
+                    <!-- Row 3: Drawn By -->
+                    <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
+                    <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
+                    <text x="218" y="68" fill="#000000" font-size="11.5" class="cond-bold interactive-field" text-anchor="end" id="docFieldDrawnBy" title="Click to edit Drawn By"><?= htmlspecialchars($docDrawnBy) ?></text>
 
-                    <!-- 5. Order Date (Column 2, Top) -->
-                    <div class="deh-field deh-order-date" id="docFieldOrderDate" contenteditable="true" title="Click to edit Order Date"><?= htmlspecialchars($docOrderDate) ?></div>
+                    <!-- Row 4: Address -->
+                    <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
+                    <g transform="translate(7, 80) scale(0.65)">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
+                    </g>
+                    <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
+                    <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
+                    <text x="160" y="89.5" fill="#000000" font-size="9.5" class="cond-semi center-txt interactive-field" id="docFieldAddress" title="Click to edit Address"><?= htmlspecialchars($docAddress) ?></text>
 
-                    <!-- 6. Due Date (Column 2, Middle Black Box) -->
-                    <div class="deh-field deh-due-date" id="docFieldDueDate" contenteditable="true" title="Click to edit Due Date"><?= htmlspecialchars($docDueDate) ?></div>
+                    <!-- Vertical Divider 1 -->
+                    <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
 
-                    <!-- 7. Release Date (Column 2, Bottom) -->
-                    <div class="deh-field deh-release-date" id="docFieldReleasingDate" contenteditable="true" title="Click to edit Release Date"><?= htmlspecialchars($docReleasingDate) ?></div>
+                    <!-- ========================================== -->
+                    <!-- COLUMN 2: (225 to 340) -->
+                    <!-- ========================================== -->
+                    <!-- Row 1: Order Date -->
+                    <text x="282.5" y="14" fill="#000000" font-size="10" class="cond-bold center-txt">ORDER DATE <tspan font-size="9" class="chinese">订购日期</tspan></text>
+                    <text x="282.5" y="27" fill="#000000" font-size="12" class="cond-bold center-txt interactive-field" id="docFieldOrderDate" title="Click to edit Order Date"><?= htmlspecialchars($docOrderDate) ?></text>
 
-                    <!-- 8. Center Project Area (Column 3) -->
-                    <div class="deh-center-project">
-                      <div class="deh-project-name" id="docFieldProjectName" contenteditable="true" title="Click to edit Project Name"><?= htmlspecialchars($docProj) ?></div>
-                      <div class="deh-client-name" id="docFieldClientName" contenteditable="true" title="Click to edit Client Name"><?= htmlspecialchars($docClient) ?></div>
-                    </div>
+                    <!-- Row 2: Due Date (Solid Black) -->
+                    <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
+                    <rect x="225" y="33" width="115" height="32" fill="#000000"/>
+                    <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
+                    <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold center-txt interactive-field" id="docFieldDueDate" title="Click to edit Due Date"><?= htmlspecialchars($docDueDate) ?></text>
+
+                    <!-- Row 3: Date to be Release -->
+                    <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
+                    <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
+                    <text x="282.5" y="89.5" fill="#000000" font-size="11.5" class="cond-bold center-txt interactive-field" id="docFieldReleasingDate" title="Click to edit Releasing Date"><?= htmlspecialchars($docReleasingDate) ?></text>
+
+                    <!-- Vertical Divider 2 -->
+                    <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 3: (340 to 564) -->
+                    <!-- ========================================== -->
+                    <!-- Top Red Header: INDOOR / OUTDOOR -->
+                    <rect x="340" y="0" width="224" height="18" fill="#E10600"/>
+                    <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
+                    <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
+                    <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
+
+                    <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
+                    <text x="452" y="45" fill="#000000" font-size="20" class="cond-black center-txt interactive-field" text-decoration="underline" id="docFieldProjectName" title="Click to edit Project Name"><?= htmlspecialchars($docProj) ?></text>
+                    <text x="452" y="60" fill="#1F2937" font-size="11" class="cond-bold center-txt interactive-field" id="docFieldClientName" title="Click to edit Client Name"><?= htmlspecialchars($docClient) ?></text>
+                    <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
                     <!-- Checkboxes (Install / Deliver / Pick up) -->
-                    <div class="deh-check-wrap deh-check-install" id="dfCheckInstall" title="Click to toggle Install">
-                      <span class="deh-check-mark"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></span>
-                    </div>
-                    <div class="deh-check-wrap deh-check-deliver" id="dfCheckDeliver" title="Click to toggle Deliver">
-                      <span class="deh-check-mark"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></span>
-                    </div>
-                    <div class="deh-check-wrap deh-check-pickup" id="dfCheckPickup" title="Click to toggle Pick Up">
-                      <span class="deh-check-mark"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></span>
-                    </div>
+                    <g id="dfCheckInstall" style="cursor: pointer;">
+                      <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                      <text x="352" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt deh-check-mark"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></text>
+                      <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
+                    </g>
 
-                    <!-- 9. Contact Person (Column 4, Row 2 inside Gray Pill) -->
-                    <div class="deh-field deh-contact-person" id="docFieldContactPerson" contenteditable="true" title="Click to edit Contact Person"><?= htmlspecialchars($docContact) ?></div>
+                    <g id="dfCheckDeliver" style="cursor: pointer;">
+                      <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                      <text x="429" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt deh-check-mark"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></text>
+                      <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
+                    </g>
 
-                    <!-- 10. Contact Number (Column 4, Row 3 inside Gray Pill) -->
-                    <div class="deh-field deh-contact-number" id="docFieldContactNumber" contenteditable="true" title="Click to edit Contact Number"><?= htmlspecialchars($docPhone) ?></div>
+                    <g id="dfCheckPickup" style="cursor: pointer;">
+                      <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                      <text x="503" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt deh-check-mark"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></text>
+                      <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
+                    </g>
 
-                    <!-- 11. Number of Installers (Column 5, Top) -->
-                    <div class="deh-field deh-installers" id="docFieldInstallers" contenteditable="true" title="Click to edit Installers"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></div>
+                    <!-- Vertical Divider 3 -->
+                    <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
 
-                    <!-- 12. Installation Duration (Column 5, Bottom) -->
-                    <div class="deh-field deh-duration" id="docFieldDuration" contenteditable="true" title="Click to edit Duration"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></div>
-                  </div>
+                    <!-- ========================================== -->
+                    <!-- COLUMN 4: (564 to 822) -->
+                    <!-- ========================================== -->
+                    <!-- Top Left Black Sub-box -->
+                    <rect x="564" y="0" width="97" height="43" fill="#000000"/>
+                    <text x="612.5" y="12" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
+                    <text x="612.5" y="22" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
+                    <text x="612.5" y="35" fill="#FFFFFF" font-size="8.5" class="chinese center-txt">现场安装环境选项</text>
+
+                    <!-- Top Right White Sub-box (Concrete Wall) -->
+                    <rect x="674" y="10" width="4.5" height="23" fill="#E10600"/>
+                    <text x="684" y="21" fill="#000000" font-size="11.5" class="cond-bold" letter-spacing="0.3">CONCRETE WALL</text>
+                    <text x="684" y="32.5" fill="#000000" font-size="9.5" class="chinese">水泥墙</text>
+
+                    <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Row 2: Contact Person -->
+                    <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
+                    <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+                    <text x="765" y="59" fill="#000000" font-size="10" class="cond-semi center-txt interactive-field" id="docFieldContactPerson" title="Click to edit Contact Person"><?= htmlspecialchars($docContact) ?></text>
+
+                    <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Row 3: Contact Number -->
+                    <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
+                    <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+                    <text x="765" y="86" fill="#000000" font-size="10" class="cond-semi center-txt interactive-field" id="docFieldContactNumber" title="Click to edit Contact Number"><?= htmlspecialchars($docPhone) ?></text>
+
+                    <!-- Vertical Divider 4 -->
+                    <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 5: (822 to 904) -->
+                    <!-- ========================================== -->
+                    <!-- Top Header: Number of Installers -->
+                    <rect x="822" y="0" width="82" height="22" fill="#000000"/>
+                    <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
+                    <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
+                    <text x="863" y="38" fill="#000000" font-size="11.5" class="cond-bold center-txt interactive-field" id="docFieldInstallers" title="Click to edit Installers"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></text>
+
+                    <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Bottom Header: Installation Duration -->
+                    <rect x="822" y="48" width="82" height="22" fill="#000000"/>
+                    <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
+                    <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
+                    <text x="863" y="86" fill="#000000" font-size="11.5" class="cond-bold center-txt interactive-field" id="docFieldDuration" title="Click to edit Duration"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></text>
+
+                    <!-- Outer Border Outline -->
+                    <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
+                  </svg>
                 </div>
               </div>
             </div>

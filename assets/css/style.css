@@ -6434,6 +6434,27 @@ input[type="password"]::-ms-clear {
   margin-bottom: 24px;
 }
 
+.directive-exact-header-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.directive-exact-header-wrap text.interactive-field {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s, fill 0.15s;
+}
+
+.directive-exact-header-wrap text.interactive-field:hover {
+  fill: #E10600 !important;
+}
+
+.directive-exact-header-wrap text#docFieldJoNumber.interactive-field:hover,
+.directive-exact-header-wrap text#docFieldDueDate.interactive-field:hover {
+  fill: #FCA5A5 !important;
+}
+
 .directive-exact-bg {
   position: absolute;
   top: 0;

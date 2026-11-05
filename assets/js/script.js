@@ -8002,7 +8002,7 @@
   }
 
   function autoFitCellText(cell) {
-    if (!cell) return;
+    if (!cell || (window.SVGElement && cell instanceof SVGElement)) return;
     const baseSizeAttr = cell.getAttribute('data-base-size');
     let baseSize = baseSizeAttr ? parseFloat(baseSizeAttr) : null;
     if (!baseSize) {
@@ -8506,6 +8506,36 @@
     if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
     if (btnQuickCopy) btnQuickCopy.addEventListener('click', handleCopyVector);
 
+    const svgEl = document.getElementById('directiveExactSvg');
+    if (svgEl) {
+      svgEl.addEventListener('click', (e) => {
+        const textNode = e.target.closest('text.interactive-field');
+        if (!textNode) return;
+        const titleAttr = textNode.getAttribute('title') || '';
+        const fieldName = titleAttr.replace('Click to edit ', '') || textNode.id.replace('docField', '');
+        const currentVal = textNode.textContent.trim();
+        const newVal = prompt(`Edit ${fieldName}:`, (currentVal === '—' || currentVal === '-') ? '' : currentVal);
+        if (newVal !== null) {
+          const finalVal = newVal.trim() !== '' ? newVal.trim() : '—';
+          textNode.textContent = finalVal;
+          if (textNode.id === 'docFieldInstallers') {
+            const ctrl = document.getElementById('ctrlInstallers');
+            if (ctrl) ctrl.value = finalVal;
+          } else if (textNode.id === 'docFieldDuration') {
+            const ctrl = document.getElementById('ctrlDuration');
+            if (ctrl) ctrl.value = finalVal;
+          } else if (textNode.id === 'docFieldInCharge') {
+            const ctrl = document.getElementById('ctrlInCharge');
+            if (ctrl) ctrl.value = finalVal;
+          } else if (textNode.id === 'docFieldDrawnBy') {
+            const ctrl = document.getElementById('ctrlDrawnBy');
+            if (ctrl) ctrl.value = finalVal;
+          }
+          showToast(`Updated ${fieldName}`);
+        }
+      });
+    }
+
     // COPY ULTRA-HD 4K IMAGE (Instant Ctrl+V for CorelDRAW, Photoshop, Affinity, Illustrator, Chat)
     const btnCopyPNG = document.getElementById('btnDirectiveCopyPNG');
     if (btnCopyPNG) {
@@ -8513,15 +8543,15 @@
         const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
         const svgString = generateDirectiveSVG(cur);
         
-        // 4K Ultra-High Definition resolution: 4864 × 648 px (scale = 4, over 4K UHD 3840px width)
+        // 4K Ultra-High Definition resolution: 3616 × 384 px (scale = 4 of 904 × 96)
         const scale = 4;
-        const targetWidth = 1216 * scale;  // 4864px
-        const targetHeight = 162 * scale;  // 648px
+        const targetWidth = 904 * scale;  // 3616px
+        const targetHeight = 96 * scale;  // 384px
         
         // Ensure the root SVG attributes specify the target 4K dimensions so the browser natively rasterizes vector geometry at 4K
         const svg4K = svgString
-          .replace(/width="1216"/, `width="${targetWidth}"`)
-          .replace(/height="162"/, `height="${targetHeight}"`);
+          .replace(/width="[0-9]+"/, `width="${targetWidth}"`)
+          .replace(/height="[0-9]+"/, `height="${targetHeight}"`);
 
         const img = new Image();
         const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
