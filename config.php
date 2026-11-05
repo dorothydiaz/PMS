@@ -117,8 +117,8 @@ function sendJsonResponse($data, $statusCode = 200) {
  * Get active relative base URL depending on script depth
  */
 function getBasePath() {
-    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
-    if (strpos($uri, '/pages/') !== false) {
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    if (strpos($script, '/pages/') !== false) {
         return '../';
     }
     return './';
@@ -163,6 +163,6 @@ function getAvatarUrl($url) {
     }
     // Clean any leading slashes or relative dots
     $cleanPath = ltrim($url, './\\');
-    $appBase = function_exists('getAppBaseUrl') ? getAppBaseUrl() : '/';
-    return $appBase . $cleanPath;
+    $base = function_exists('getBasePath') ? getBasePath() : '../';
+    return $base . $cleanPath;
 }
