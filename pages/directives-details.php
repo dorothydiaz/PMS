@@ -476,10 +476,6 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <option value="acp" <?= $docEnvType === 'acp' ? 'selected' : '' ?>>ACP Wall (铝塑板墙)</option>
                   </select>
                 </div>
-                <div class="form-group col-span-2">
-                  <label class="form-label">Installation / Fabrication Notes</label>
-                  <textarea class="form-control" id="ctrlNotes" placeholder="Special fabrication requirements, acrylic thickness..."><?= htmlspecialchars($targetRecord['remarks'] ?? '') ?></textarea>
-                </div>
                 <div class="form-group">
                   <label class="form-label">Assigned In-Charge</label>
                   <input type="text" class="form-control" id="ctrlInCharge" value="<?= htmlspecialchars($docInCharge) ?>">

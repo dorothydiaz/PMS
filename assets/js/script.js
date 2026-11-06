@@ -9624,7 +9624,7 @@
           cur.installers = document.getElementById('ctrlInstallers').value;
           cur.duration = document.getElementById('ctrlDuration').value;
           cur.releasingMode = normalizeReleasingMode(document.getElementById('ctrlReleasingMode').value);
-          cur.notes = document.getElementById('ctrlNotes').value;
+          cur.notes = document.getElementById('ctrlNotes') ? document.getElementById('ctrlNotes').value : (cur.notes || '');
           cur.inCharge = document.getElementById('ctrlInCharge').value;
           cur.drawnBy = document.getElementById('ctrlDrawnBy').value;
           saveStateToStorage();
