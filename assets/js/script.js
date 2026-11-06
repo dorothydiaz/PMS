@@ -8515,21 +8515,32 @@
     const isOutdoor = (loc !== '—' && loc !== '-' && loc !== '') && (loc.includes('outdoor') || loc.includes('both'));
     setDirectiveLocation(isIndoor, isOutdoor);
 
-    // Sync Checkboxes (Install / Deliver / Pick up)
+    // Sync Checkboxes (Install / Deliver / Pick up) - Filled with red when selected
     const mode = (rec.releasingMode || 'Pickup').toLowerCase();
-    const chkInstall = document.querySelector('#dfCheckInstall .deh-check-mark');
-    const chkDeliver = document.querySelector('#dfCheckDeliver .deh-check-mark');
-    const chkPickup = document.querySelector('#dfCheckPickup .deh-check-mark');
-    if (chkInstall) chkInstall.textContent = mode === 'install' ? '✓' : '';
-    if (chkDeliver) chkDeliver.textContent = mode === 'deliver' ? '✓' : '';
-    if (chkPickup) chkPickup.textContent = (mode === 'pickup' || !mode) ? '✓' : '';
+    const isInstall = mode === 'install';
+    const isDeliver = mode === 'deliver';
+    const isPickup = mode === 'pickup' || !mode;
+
+    const boxI = document.getElementById('boxCheckInstall') || document.querySelector('#grpCheckInstall rect');
+    const boxD = document.getElementById('boxCheckDeliver') || document.querySelector('#grpCheckDeliver rect');
+    const boxP = document.getElementById('boxCheckPickup') || document.querySelector('#grpCheckPickup rect');
+    if (boxI) boxI.setAttribute('fill', isInstall ? '#E10600' : '#FFFFFF');
+    if (boxD) boxD.setAttribute('fill', isDeliver ? '#E10600' : '#FFFFFF');
+    if (boxP) boxP.setAttribute('fill', isPickup ? '#E10600' : '#FFFFFF');
 
     const svgChkInstall = document.getElementById('docFieldCheckInstall');
     const svgChkDeliver = document.getElementById('docFieldCheckDeliver');
     const svgChkPickup = document.getElementById('docFieldCheckPickup');
-    if (svgChkInstall) svgChkInstall.textContent = mode === 'install' ? '✓' : '';
-    if (svgChkDeliver) svgChkDeliver.textContent = mode === 'deliver' ? '✓' : '';
-    if (svgChkPickup) svgChkPickup.textContent = (mode === 'pickup' || !mode) ? '✓' : '';
+    if (svgChkInstall) svgChkInstall.textContent = '';
+    if (svgChkDeliver) svgChkDeliver.textContent = '';
+    if (svgChkPickup) svgChkPickup.textContent = '';
+
+    const chkInstall = document.querySelector('#dfCheckInstall .deh-check-mark');
+    const chkDeliver = document.querySelector('#dfCheckDeliver .deh-check-mark');
+    const chkPickup = document.querySelector('#dfCheckPickup .deh-check-mark');
+    if (chkInstall) { chkInstall.style.backgroundColor = isInstall ? '#E10600' : 'transparent'; chkInstall.textContent = ''; }
+    if (chkDeliver) { chkDeliver.style.backgroundColor = isDeliver ? '#E10600' : 'transparent'; chkDeliver.textContent = ''; }
+    if (chkPickup) { chkPickup.style.backgroundColor = isPickup ? '#E10600' : 'transparent'; chkPickup.textContent = ''; }
 
     const priorityEl = document.getElementById('docFieldPriorityStatus');
     if (priorityEl) {
@@ -8663,6 +8674,7 @@
     const ctrlMode = document.getElementById('ctrlReleasingMode');
     if (ctrlMode) {
       ctrlMode.addEventListener('change', () => {
+        setMode(ctrlMode.value);
         const target = document.getElementById('docFieldReleasingMode');
         if (target) {
           target.textContent = normalizeReleasingMode(ctrlMode.value);
@@ -8989,16 +9001,13 @@
   ${makeSvgField('docFieldProjectName', 452, projDefY, 12, 'cond-bold center-txt', 'middle', '0.5')}
   <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
-  <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-  <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt">${checkInstall}</text>
+  <rect x="347" y="78.5" width="10" height="10" fill="${releasingModeVal === 'install' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
   <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
 
-  <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-  <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt">${checkDeliver}</text>
+  <rect x="424" y="78.5" width="10" height="10" fill="${releasingModeVal === 'deliver' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckDeliver"/>
   <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
 
-  <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-  <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt">${checkPickup}</text>
+  <rect x="498" y="78.5" width="10" height="10" fill="${(releasingModeVal === 'pickup' || !releasingModeVal) ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckPickup"/>
   <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
 
   <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
@@ -9319,19 +9328,31 @@
     const setMode = (modeStr) => {
       const ctrl = document.getElementById('ctrlReleasingMode');
       if (ctrl) ctrl.value = modeStr;
-      const chkI = document.querySelector('#dfCheckInstall .deh-check-mark');
-      const chkD = document.querySelector('#dfCheckDeliver .deh-check-mark');
-      const chkP = document.querySelector('#dfCheckPickup .deh-check-mark');
-      if (chkI) chkI.textContent = modeStr === 'Install' ? '✓' : '';
-      if (chkD) chkD.textContent = modeStr === 'Deliver' ? '✓' : '';
-      if (chkP) chkP.textContent = modeStr === 'Pickup' ? '✓' : '';
+      const m = (modeStr || 'Pickup').toLowerCase();
+      const isInstall = m === 'install';
+      const isDeliver = m === 'deliver';
+      const isPickup = m === 'pickup' || !m;
+
+      const boxI = document.getElementById('boxCheckInstall') || document.querySelector('#grpCheckInstall rect');
+      const boxD = document.getElementById('boxCheckDeliver') || document.querySelector('#grpCheckDeliver rect');
+      const boxP = document.getElementById('boxCheckPickup') || document.querySelector('#grpCheckPickup rect');
+      if (boxI) boxI.setAttribute('fill', isInstall ? '#E10600' : '#FFFFFF');
+      if (boxD) boxD.setAttribute('fill', isDeliver ? '#E10600' : '#FFFFFF');
+      if (boxP) boxP.setAttribute('fill', isPickup ? '#E10600' : '#FFFFFF');
 
       const svgChkInstall = document.getElementById('docFieldCheckInstall');
       const svgChkDeliver = document.getElementById('docFieldCheckDeliver');
       const svgChkPickup = document.getElementById('docFieldCheckPickup');
-      if (svgChkInstall) svgChkInstall.textContent = modeStr === 'Install' ? '✓' : '';
-      if (svgChkDeliver) svgChkDeliver.textContent = modeStr === 'Deliver' ? '✓' : '';
-      if (svgChkPickup) svgChkPickup.textContent = modeStr === 'Pickup' ? '✓' : '';
+      if (svgChkInstall) svgChkInstall.textContent = '';
+      if (svgChkDeliver) svgChkDeliver.textContent = '';
+      if (svgChkPickup) svgChkPickup.textContent = '';
+
+      const chkI = document.querySelector('#dfCheckInstall .deh-check-mark');
+      const chkD = document.querySelector('#dfCheckDeliver .deh-check-mark');
+      const chkP = document.querySelector('#dfCheckPickup .deh-check-mark');
+      if (chkI) { chkI.style.backgroundColor = isInstall ? '#E10600' : 'transparent'; chkI.textContent = ''; }
+      if (chkD) { chkD.style.backgroundColor = isDeliver ? '#E10600' : 'transparent'; chkD.textContent = ''; }
+      if (chkP) { chkP.style.backgroundColor = isPickup ? '#E10600' : 'transparent'; chkP.textContent = ''; }
 
       showToast('Releasing Mode: ' + modeStr);
     };

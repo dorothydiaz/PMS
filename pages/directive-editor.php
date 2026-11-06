@@ -291,20 +291,20 @@ require_once __DIR__ . '/includes/sidebar.php';
             <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
             <g class="deh-check-grp" id="grpCheckInstall" style="cursor: pointer;" data-mode="Install">
-              <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-              <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckInstall"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></text>
+              <rect x="347" y="78.5" width="10" height="10" fill="<?= strtolower($docReleasingMode) === 'install' ? '#E10600' : '#FFFFFF' ?>" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
+              <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckInstall" style="display:none;"></text>
               <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
             </g>
 
             <g class="deh-check-grp" id="grpCheckDeliver" style="cursor: pointer;" data-mode="Deliver">
-              <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-              <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckDeliver"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></text>
+              <rect x="424" y="78.5" width="10" height="10" fill="<?= strtolower($docReleasingMode) === 'deliver' ? '#E10600' : '#FFFFFF' ?>" stroke="#000000" stroke-width="1.2" id="boxCheckDeliver"/>
+              <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckDeliver" style="display:none;"></text>
               <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
             </g>
 
             <g class="deh-check-grp" id="grpCheckPickup" style="cursor: pointer;" data-mode="Pickup">
-              <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-              <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckPickup"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></text>
+              <rect x="498" y="78.5" width="10" height="10" fill="<?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '#E10600' : '#FFFFFF' ?>" stroke="#000000" stroke-width="1.2" id="boxCheckPickup"/>
+              <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckPickup" style="display:none;"></text>
               <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
             </g>
 
