@@ -128,12 +128,6 @@ require_once __DIR__ . '/includes/sidebar.php';
                       Copy Image 4K (Ctrl+V)
                     </button>
                     <button class="btn btn-secondary btn-sm" id="btnDirectiveReset" title="Reset directive to default values">Reset</button>
-
-                    <!-- Open Full Separate Studio Editor Page (Corel/Illustrator Mode) -->
-                    <a href="directive-editor.php<?= !empty($targetIdentifier) ? '?id=' . urlencode($targetIdentifier) : '' ?>" class="btn btn-dark btn-sm" id="btnOpenFullEditor" target="_blank" title="Open full-pledge Corel/Illustrator style vector text editor in a separate dedicated page" style="background: #0F172A; color: #FFFFFF; display: inline-flex; align-items: center; gap: 6px;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                      Full Page Studio Editor
-                    </a>
                   </div>
                 </div>
 
