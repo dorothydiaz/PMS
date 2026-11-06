@@ -8079,6 +8079,41 @@
     return estimateBebasKaiWidth(text, fontSize, letterSpacing);
   }
 
+  function greedyWrapTwoLines(text, fontSize, maxW = 210, letterSpacing = 0.8) {
+    const wAll = getSvgTextWidth(text, fontSize, letterSpacing);
+    if (wAll <= maxW) {
+      return { fits: true, lines: [text], single: true };
+    }
+    const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+    if (words.length <= 1) {
+      return { fits: false, lines: [text], single: true };
+    }
+    let line1 = words[0];
+    if (getSvgTextWidth(line1, fontSize, letterSpacing) > maxW) {
+      return { fits: false, lines: [text], single: false };
+    }
+    let splitIdx = 1;
+    for (let i = 1; i < words.length; i++) {
+      const test = line1 + ' ' + words[i];
+      if (getSvgTextWidth(test, fontSize, letterSpacing) <= maxW) {
+        line1 = test;
+        splitIdx = i + 1;
+      } else {
+        break;
+      }
+    }
+    if (splitIdx >= words.length) {
+      return { fits: true, lines: [line1], single: true };
+    }
+    const line2 = words.slice(splitIdx).join(' ');
+    const w2 = getSvgTextWidth(line2, fontSize, letterSpacing);
+    return {
+      fits: w2 <= maxW,
+      lines: [line1, line2],
+      single: false
+    };
+  }
+
   function fitDirectiveClientName(rawText, userBaseSize) {
     const MAX_W = 210;
     const raw = String(rawText !== undefined && rawText !== null ? rawText : '').trim().replace(/\r\n/g, '\n');
@@ -8099,57 +8134,22 @@
 
     let lines = raw.split('\n');
 
-    // If text is a single line, check if it exceeds container width
-    if (lines.length === 1) {
-      const singleText = lines[0];
-      const wAt22 = getSvgTextWidth(singleText, 22, 0.8);
-      // If it exceeds the container at 22px and contains spaces, wrap into 2 lines
-      if (wAt22 > MAX_W && singleText.includes(' ')) {
-        const words = singleText.split(/\s+/).filter(Boolean);
-        if (words.length > 1) {
-          let bestIdx = 1;
-          let minDiff = Infinity;
-          for (let i = 1; i < words.length; i++) {
-            const l1 = words.slice(0, i).join(' ');
-            const l2 = words.slice(i).join(' ');
-            const diff = Math.abs(l1.length - l2.length);
-            if (diff < minDiff) {
-              minDiff = diff;
-              bestIdx = i;
-            }
-          }
-          lines = [
-            words.slice(0, bestIdx).join(' '),
-            words.slice(bestIdx).join(' ')
-          ];
-        }
-      }
-    }
-
-    // Determine target font size
-    let sz = userBaseSize ? parseFloat(userBaseSize) : (lines.length > 1 ? 18 : 22);
-    if (isNaN(sz) || sz <= 0) sz = (lines.length > 1 ? 18 : 22);
-    if (!userBaseSize && lines.length > 1) {
-      sz = Math.min(18, sz);
-    }
-
-    // Automatically adjust font size so that every line fits within MAX_W
-    const minSz = 11;
-    while (sz > minSz) {
-      const maxLineW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
-      if (maxLineW <= MAX_W) break;
-      sz = Math.round((sz - 0.5) * 10) / 10;
-    }
-
-    const maxLineW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
-
+    // If explicit newlines provided by user (>= 2 lines)
     if (lines.length > 1) {
-      const lh = Math.round(sz * 1.15 * 10) / 10;
-      const lastLineY = 48;
-      const startY = Math.round((lastLineY - (lines.length - 1) * lh) * 10) / 10;
-      const divY = 53;
-      const projY = 67;
-
+      let sz = userBaseSize ? parseFloat(userBaseSize) : 18;
+      if (isNaN(sz) || sz <= 0) sz = 18;
+      if (!userBaseSize) sz = Math.min(18, sz);
+      while (sz > 11) {
+        const maxW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+        if (maxW <= MAX_W) break;
+        sz = Math.round((sz - 0.5) * 10) / 10;
+      }
+      const maxW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+      const lh = Math.max(14, Math.round(sz * 0.95 * 10) / 10);
+      const startY = 32.5;
+      const lastLineY = Math.round((startY + (lines.length - 1) * lh) * 10) / 10;
+      const divY = Math.min(54, Math.round(lastLineY + 4));
+      const projY = Math.min(67, Math.round(divY + 13));
       return {
         lines,
         fontSize: sz,
@@ -8159,21 +8159,85 @@
         lineHeight: lh,
         divY,
         projY,
-        widestLineWidth: maxLineW
+        widestLineWidth: maxW
+      };
+    }
+
+    // Single line text: first test if it fits on 1 line at userBaseSize or 22px
+    let baseSz = userBaseSize ? parseFloat(userBaseSize) : 22;
+    if (isNaN(baseSz) || baseSz <= 0) baseSz = 22;
+
+    if (getSvgTextWidth(raw, baseSz, 0.8) <= MAX_W) {
+      return {
+        lines: [raw],
+        fontSize: baseSz,
+        isMultiline: false,
+        baseY: 44,
+        startY: 44,
+        lastLineY: 44,
+        lineHeight: Math.round(baseSz * 1.15 * 10) / 10,
+        divY: 50,
+        projY: 65,
+        widestLineWidth: getSvgTextWidth(raw, baseSz, 0.8)
+      };
+    }
+
+    // Does not fit on 1 line: greedy-wrap into 2 lines, filling the upper line first!
+    // Start at 18px (or userBaseSize if lower than 18) to ensure vertical clearance
+    let sz = userBaseSize ? Math.min(18, parseFloat(userBaseSize)) : 18;
+    if (isNaN(sz) || sz <= 0) sz = 18;
+    const minSz = 11;
+
+    let bestResult = null;
+    while (sz >= minSz) {
+      const wrapRes = greedyWrapTwoLines(raw, sz, MAX_W, 0.8);
+      if (wrapRes.fits) {
+        bestResult = { lines: wrapRes.lines, fontSize: sz };
+        break;
+      }
+      sz = Math.round((sz - 0.5) * 10) / 10;
+    }
+
+    if (!bestResult) {
+      const fallbackWrap = greedyWrapTwoLines(raw, minSz, MAX_W, 0.8);
+      bestResult = { lines: fallbackWrap.lines, fontSize: minSz };
+    }
+
+    const resLines = bestResult.lines;
+    const resSz = bestResult.fontSize;
+    const maxW = Math.max(...resLines.map(l => getSvgTextWidth(l, resSz, 0.8)));
+
+    if (resLines.length > 1) {
+      const lh = Math.max(14, Math.round(resSz * 0.95 * 10) / 10);
+      const startY = 32.5;
+      const lastLineY = Math.round((startY + lh) * 10) / 10;
+      const divY = Math.min(54, Math.round(lastLineY + 4));
+      const projY = Math.min(67, Math.round(divY + 13));
+
+      return {
+        lines: resLines,
+        fontSize: resSz,
+        isMultiline: true,
+        startY,
+        lastLineY,
+        lineHeight: lh,
+        divY,
+        projY,
+        widestLineWidth: maxW
       };
     }
 
     return {
-      lines,
-      fontSize: sz,
+      lines: resLines,
+      fontSize: resSz,
       isMultiline: false,
       baseY: 44,
       startY: 44,
       lastLineY: 44,
-      lineHeight: Math.round(sz * 1.15 * 10) / 10,
+      lineHeight: Math.round(resSz * 1.15 * 10) / 10,
       divY: 50,
       projY: 65,
-      widestLineWidth: maxLineW
+      widestLineWidth: maxW
     };
   }
 
@@ -8329,12 +8393,12 @@
     const tspans = clientEl.querySelectorAll('tspan');
     if (tspans && tspans.length > 1) {
       const lastTspan = tspans[tspans.length - 1];
-      const lastY = parseFloat(lastTspan.getAttribute('y') || 48);
-      const divY = Math.min(54, Math.round(lastY + 5));
+      const lastY = parseFloat(lastTspan.getAttribute('y') || 49.5);
+      const divY = Math.min(54, Math.round(lastY + 4));
       divider.setAttribute('y1', divY);
       divider.setAttribute('y2', divY);
       if (projEl && !projEl.hasAttribute('data-multiline')) {
-        const projY = Math.min(68, Math.round(divY + 14));
+        const projY = Math.min(67, Math.round(divY + 13));
         projEl.setAttribute('y', projY);
       }
     } else {

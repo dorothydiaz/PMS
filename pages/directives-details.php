@@ -273,40 +273,54 @@ require_once __DIR__ . '/includes/sidebar.php';
                         return $total;
                       };
 
-                      if ($calcEstW($docClientRaw, 22) > 210 && strpos($docClientRaw, ' ') !== false) {
-                        $words = preg_split('/\s+/', $docClientRaw);
-                        if (count($words) > 1) {
-                          $bestIdx = 1;
-                          $minDiff = 999999;
-                          for ($i = 1; $i < count($words); $i++) {
-                            $l1 = implode(' ', array_slice($words, 0, $i));
-                            $l2 = implode(' ', array_slice($words, $i));
-                            $diff = abs(strlen($l1) - strlen($l2));
-                            if ($diff < $minDiff) {
-                              $minDiff = $diff;
-                              $bestIdx = $i;
-                            }
+                      $greedyWrapPhp = function($text, $sz, $calcEstW) {
+                        if ($calcEstW($text, $sz) <= 210) return ['fits' => true, 'lines' => [$text], 'single' => true];
+                        $words = preg_split('/\s+/', trim($text));
+                        if (count($words) <= 1) return ['fits' => false, 'lines' => [$text], 'single' => true];
+                        $l1 = $words[0];
+                        if ($calcEstW($l1, $sz) > 210) return ['fits' => false, 'lines' => [$text], 'single' => false];
+                        $split = 1;
+                        for ($i = 1; $i < count($words); $i++) {
+                          $test = $l1 . ' ' . $words[$i];
+                          if ($calcEstW($test, $sz) <= 210) {
+                            $l1 = $test;
+                            $split = $i + 1;
+                          } else {
+                            break;
                           }
-                          $clientLines = [
-                            implode(' ', array_slice($words, 0, $bestIdx)),
-                            implode(' ', array_slice($words, $bestIdx))
-                          ];
-                          $clientSz = 18;
-                          while ($clientSz > 11) {
-                            $mW = max($calcEstW($clientLines[0], $clientSz), $calcEstW($clientLines[1], $clientSz));
-                            if ($mW <= 210) break;
-                            $clientSz -= 0.5;
-                          }
-                          $isClientMulti = true;
-                          $clientLh = round($clientSz * 1.15, 1);
-                          $clientLastY = 48;
-                          $clientStartY = round($clientLastY - $clientLh, 1);
-                          $clientDivY = 53;
-                          $projDefY = 67;
                         }
+                        if ($split >= count($words)) return ['fits' => true, 'lines' => [$l1], 'single' => true];
+                        $l2 = implode(' ', array_slice($words, $split));
+                        return ['fits' => ($calcEstW($l2, $sz) <= 210), 'lines' => [$l1, $l2], 'single' => false];
+                      };
+
+                      if ($calcEstW($docClientRaw, 22) <= 210) {
+                        $clientLines = [$docClientRaw];
+                        $clientSz = 22;
                       } else {
-                        while ($clientSz > 11 && $calcEstW($docClientRaw, $clientSz) > 210) {
-                          $clientSz -= 0.5;
+                        $sz = 18;
+                        $bestRes = null;
+                        while ($sz >= 11) {
+                          $res = $greedyWrapPhp($docClientRaw, $sz, $calcEstW);
+                          if ($res['fits']) {
+                            $bestRes = ['lines' => $res['lines'], 'sz' => $sz];
+                            break;
+                          }
+                          $sz -= 0.5;
+                        }
+                        if (!$bestRes) {
+                          $fallback = $greedyWrapPhp($docClientRaw, 11, $calcEstW);
+                          $bestRes = ['lines' => $fallback['lines'], 'sz' => 11];
+                        }
+                        $clientLines = $bestRes['lines'];
+                        $clientSz = $bestRes['sz'];
+                        if (count($clientLines) > 1) {
+                          $isClientMulti = true;
+                          $clientLh = max(14, round($clientSz * 0.95, 1));
+                          $clientStartY = 32.5;
+                          $clientLastY = round($clientStartY + $clientLh, 1);
+                          $clientDivY = min(54, round($clientLastY + 4));
+                          $projDefY = min(67, round($clientDivY + 13));
                         }
                       }
 
