@@ -9529,6 +9529,95 @@
     }
     window.downloadDirectiveEMF = downloadDirectiveEMF;
 
+    // Direct Copy Ultra-HD 4K Image (3616 × 384 px) for CorelDRAW, Photoshop, Affinity, Illustrator
+    function handleCopyImage4K(e, customRec) {
+      const cur = customRec || (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+      const svgString = generateDirectiveSVG(cur);
+      
+      const scale = 4;
+      const targetWidth = 904 * scale;  // 3616px
+      const targetHeight = 96 * scale;  // 384px
+
+      const svg4K = svgString
+        .replace(/width="[0-9]+"/, `width="${targetWidth}"`)
+        .replace(/height="[0-9]+"/, `height="${targetHeight}"`);
+
+      showToast('Rendering 4K ultra-sharp image for clipboard...', 'info');
+
+      const img = new Image();
+      const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d', { alpha: false });
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              showToast('Failed to generate 4K image data.', 'error');
+              return;
+            }
+
+            if (e && e.shiftKey) {
+              const dlUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(dlUrl);
+              showToast('4K Ultra-HD PNG downloaded (3616 × 384 px)!', 'success');
+              return;
+            }
+
+            try {
+              if (navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ 'image/png': blob })
+                ]);
+                showToast('Ultra-HD 4K image copied (3616 × 384 px)! Ready to paste (Ctrl+V) directly into CorelDRAW, PS, or Illustrator.', 'success');
+              } else {
+                throw new Error('Clipboard API unavailable');
+              }
+            } catch (err) {
+              const dlUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(dlUrl);
+              showToast('Clipboard access restricted. Downloaded 4K PNG file instead.', 'info');
+            }
+          }, 'image/png', 1.0);
+        } catch (renderErr) {
+          URL.revokeObjectURL(url);
+          console.error('Canvas render error:', renderErr);
+          showToast('Failed to render 4K graphic: ' + renderErr.message, 'error');
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        showToast('Failed to render 4K graphic for clipboard.', 'error');
+      };
+      img.src = url;
+    }
+    window.handleCopyImage4K = handleCopyImage4K;
+
     // Export Dropdown menu bindings (Directives Details page)
     const btnExpDropdown = document.getElementById('btnDirectiveExportDropdown');
     const expMenu = document.getElementById('directiveExportMenu');
@@ -9571,8 +9660,7 @@
     if (optCopyPNG) {
       optCopyPNG.addEventListener('click', (e) => {
         if (expMenu) expMenu.classList.remove('show');
-        const legacyBtn = document.getElementById('btnDirectiveCopyPNG');
-        if (legacyBtn) legacyBtn.click();
+        handleCopyImage4K(e);
       });
     }
 
@@ -9645,91 +9733,7 @@
     // COPY ULTRA-HD 4K IMAGE (Instant Ctrl+V for CorelDRAW, Photoshop, Affinity, Illustrator, Chat)
     const btnCopyPNG = document.getElementById('btnDirectiveCopyPNG');
     if (btnCopyPNG) {
-      btnCopyPNG.addEventListener('click', (e) => {
-        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
-                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
-        const svgString = generateDirectiveSVG(cur);
-        
-        // 4K Ultra-High Definition resolution: 3616 × 384 px (scale = 4 of 904 × 96)
-        const scale = 4;
-        const targetWidth = 904 * scale;  // 3616px
-        const targetHeight = 96 * scale;  // 384px
-        
-        // Ensure the root SVG attributes specify the target 4K dimensions so the browser natively rasterizes vector geometry at 4K
-        const svg4K = svgString
-          .replace(/width="[0-9]+"/, `width="${targetWidth}"`)
-          .replace(/height="[0-9]+"/, `height="${targetHeight}"`);
-
-        const img = new Image();
-        const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = targetWidth;
-          canvas.height = targetHeight;
-          const ctx = canvas.getContext('2d', { alpha: false });
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          
-          // Pure crisp white background fill
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, targetWidth, targetHeight);
-          
-          // Render native 4K vector graphics
-          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-          URL.revokeObjectURL(url);
-
-          canvas.toBlob(async (blob) => {
-            if (!blob) {
-              showToast('Failed to generate 4K image data.', 'error');
-              return;
-            }
-
-            // If Shift key is held, also trigger direct download of the 4K PNG file
-            if (e.shiftKey) {
-              const dlUrl = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = dlUrl;
-              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(dlUrl);
-              showToast('4K Ultra-HD PNG downloaded (4864 × 648 px)!');
-              return;
-            }
-
-            try {
-              if (navigator.clipboard && window.ClipboardItem) {
-                await navigator.clipboard.write([
-                  new ClipboardItem({ 'image/png': blob })
-                ]);
-                showToast('Ultra-HD 4K image copied (4864 × 648 px)! Ready to paste (Ctrl+V) directly in Corel, PS, Affinity, or Illustrator.');
-              } else {
-                throw new Error('Clipboard API unavailable');
-              }
-            } catch (err) {
-              // Automatic download fallback if clipboard access is blocked
-              const dlUrl = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = dlUrl;
-              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(dlUrl);
-              showToast('Clipboard access restricted. Downloaded 4K PNG file instead.', 'info');
-            }
-          }, 'image/png', 1.0);
-        };
-
-        img.onerror = () => {
-          URL.revokeObjectURL(url);
-          showToast('Failed to render 4K graphic for clipboard.', 'error');
-        };
-        img.src = url;
-      });
+      btnCopyPNG.addEventListener('click', (e) => handleCopyImage4K(e));
     }
 
     // DOWNLOAD VECTOR SVG FILE (Direct 1-click for CorelDRAW Drag & Drop or Import)
@@ -16143,7 +16147,7 @@
     if (optStudioCopyPNG) {
       optStudioCopyPNG.addEventListener('click', (e) => {
         if (studioExpMenu) studioExpMenu.classList.remove('show');
-        if (copyPngBtn) copyPngBtn.click();
+        handleCopyImage4K(e);
       });
     }
 
@@ -16151,7 +16155,7 @@
     if (optStudioCopySVG) {
       optStudioCopySVG.addEventListener('click', (e) => {
         if (studioExpMenu) studioExpMenu.classList.remove('show');
-        if (copySvgBtn) copySvgBtn.click();
+        handleCopyVector(e);
       });
     }
 
