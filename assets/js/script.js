@@ -7950,14 +7950,15 @@
 
   function getCellDefaultFontSize(cell) {
     if (!cell) return 13;
-    if (cell.id === 'docFieldJoLabel' || cell.classList.contains('doc-jo-lbl')) return 20;
-    if (cell.classList.contains('doc-jo-val')) return 30;
+    if (cell.id && DIRECTIVE_FIELD_BOXES[cell.id]) return DIRECTIVE_FIELD_BOXES[cell.id].defaultSz;
+    if (cell.id === 'docFieldJoLabel' || cell.classList.contains('doc-jo-lbl')) return 28;
+    if (cell.classList.contains('doc-jo-val')) return 28;
     if (cell.classList.contains('doc-proj-cell')) return 30;
     if (cell.classList.contains('doc-client-cell')) return 26;
     if (cell.classList.contains('doc-date-val')) return 14.5;
-    if (cell.classList.contains('doc-person-val')) return 13.5;
-    if (cell.classList.contains('doc-box-val')) return 13;
-    if (cell.classList.contains('doc-label-cell')) return 11.5;
+    if (cell.classList.contains('doc-person-val')) return 15;
+    if (cell.classList.contains('doc-box-val')) return 14;
+    if (cell.classList.contains('doc-label-cell')) return 13.5;
     return 13;
   }
 
@@ -7977,19 +7978,19 @@
 
   // DIRECTIVE EXACT CELL COORDINATES & PROPERTIES FOR IN-PLACE DIRECT EDITING (PURE REGULAR BEBAS KAI)
   const DIRECTIVE_FIELD_BOXES = {
-    docFieldJoNumber: { x: 54, y: 2, w: 168, h: 29, color: '#FFFFFF', bg: '#000000', align: 'left', defaultSz: 20, weight: 'normal', name: 'JO Number' },
-    docFieldInCharge: { x: 104, y: 35, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 'normal', name: 'In-Charge' },
-    docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 'normal', name: 'Drawn By' },
-    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'right', defaultSz: 10, weight: 'normal', name: 'Address' },
-    docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Order Date' },
-    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 12, weight: 'normal', name: 'Due Date' },
-    docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Release Date' },
+    docFieldJoNumber: { x: 58, y: 2, w: 164, h: 29, color: '#FFFFFF', bg: '#000000', align: 'left', defaultSz: 28, weight: 'normal', name: 'JO Number' },
+    docFieldInCharge: { x: 104, y: 35, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 15, weight: 'normal', name: 'In-Charge' },
+    docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 15, weight: 'normal', name: 'Drawn By' },
+    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'right', defaultSz: 12, weight: 'normal', name: 'Address' },
+    docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Order Date' },
+    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 14.5, weight: 'normal', name: 'Due Date' },
+    docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Release Date' },
     docFieldClientName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 'normal', name: 'Client Name' },
     docFieldProjectName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Project Name' },
-    docFieldContactPerson: { x: 715, y: 46, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 'normal', name: 'Contact Person' },
-    docFieldContactNumber: { x: 715, y: 73, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 'normal', name: 'Contact Number' },
-    docFieldInstallers: { x: 824, y: 24, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Installers' },
-    docFieldDuration: { x: 824, y: 72, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Duration' }
+    docFieldContactPerson: { x: 715, y: 46, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 13, weight: 'normal', name: 'Contact Person' },
+    docFieldContactNumber: { x: 715, y: 73, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 13, weight: 'normal', name: 'Contact Number' },
+    docFieldInstallers: { x: 824, y: 24, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Installers' },
+    docFieldDuration: { x: 824, y: 72, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Duration' }
   };
 
   let activeDirectEditor = null;
@@ -8245,6 +8246,21 @@
     if (!el) return;
     const raw = String(text !== undefined && text !== null ? text : '').replace(/\r\n/g, '\n');
     el.setAttribute('data-raw-text', raw);
+
+    if (el.id === 'docFieldJoNumber') {
+      const clean = raw.replace(/^JO#:\s*/i, '').trim();
+      let joSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : 28;
+      if (clean.length > 12 && !el.getAttribute('data-custom-size')) {
+        joSz = Math.max(18, Math.round(28 * (12 / clean.length) * 10) / 10);
+      }
+      const joNumX = Math.round(10 + joSz * 1.78);
+      el.setAttribute('font-size', joSz);
+      el.style.setProperty('font-size', joSz + 'px', 'important');
+      el.setAttribute('x', joNumX);
+      el.setAttribute('y', 26.5);
+      el.textContent = clean;
+      return;
+    }
 
     if (el.id === 'docFieldClientName') {
       const customSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : (state.customCellFonts?.['docFieldClientName'] || null);
@@ -9282,6 +9298,13 @@
       clientX2 = Math.round((452 + estW / 2) * 10) / 10;
     }
 
+    const joRawVal = (getFieldRawText('docFieldJoNumber') || rec.joNumber || rec.requestId || 'SD261104-019').replace(/^JO#:\s*/i, '').trim();
+    let joSz = getSz('docFieldJoNumber', 28);
+    if (joRawVal.length > 12 && !state.customCellFonts?.['docFieldJoNumber']) {
+      joSz = Math.max(18, Math.round(28 * (12 / joRawVal.length) * 10) / 10);
+    }
+    const joNumX = Math.round(10 + joSz * 1.78);
+
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="3616" height="384" style="background:#FFFFFF;">
   <defs>
     <style>
@@ -9306,37 +9329,37 @@
 
   <!-- Col 1 (x: 0 to 225) -->
   <rect x="0" y="0" width="225" height="33" fill="#000000"/>
-  <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
-  ${makeSvgField('docFieldJoNumber', 56, 24, 20, 'cond-black', 'start', '0.5', '#FFFFFF')}
+  <text x="10" y="26.5" fill="#FFFFFF" font-size="${joSz}" class="cond-black" letter-spacing="0.5">JO#:</text>
+  ${makeSvgField('docFieldJoNumber', joNumX, 26.5, joSz, 'cond-black', 'start', '0.5', '#FFFFFF')}
 
   <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
-  <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
-  ${makeSvgField('docFieldInCharge', 218, 47, 13, 'cond-bold', 'end')}
+  <text x="8" y="47" fill="#000000" font-size="13.5" class="cond-bold">IN CHARGE<tspan font-size="11.5" class="chinese">负责人</tspan>  :</text>
+  ${makeSvgField('docFieldInCharge', 218, 47, 15, 'cond-bold', 'end')}
 
-  <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
-  ${makeSvgField('docFieldDrawnBy', 218, 68, 13, 'cond-bold', 'end')}
+  <text x="8" y="68" fill="#000000" font-size="13.5" class="cond-bold">DRAWN BY <tspan font-size="11.5" class="chinese">通过绘制</tspan>  :</text>
+  ${makeSvgField('docFieldDrawnBy', 218, 68, 15, 'cond-bold', 'end')}
 
   <g transform="translate(6, 80.7) scale(0.39)">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
   </g>
-  <text x="16.5" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
+  <text x="16.5" y="89.5" fill="#000000" font-size="12" class="cond-bold">ADDRESS <tspan font-size="11" class="chinese">地址</tspan>  :</text>
   <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
-  ${makeSvgField('docFieldAddress', 216, 89.5, 10, 'cond-bold', 'end')}
+  ${makeSvgField('docFieldAddress', 216, 89.5, 12, 'cond-bold', 'end')}
 
   <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
 
   <!-- Col 2 (x: 225 to 340) -->
-  <text x="282.5" y="14" fill="#000000" font-size="10" class="cond-bold center-txt">ORDER DATE <tspan font-size="9" class="chinese">订购日期</tspan></text>
-  ${makeSvgField('docFieldOrderDate', 282.5, 27, 11.5, 'cond-bold center-txt', 'middle')}
+  <text x="282.5" y="13.5" fill="#000000" font-size="12" class="cond-bold center-txt">ORDER DATE <tspan font-size="10.5" class="chinese">订购日期</tspan></text>
+  ${makeSvgField('docFieldOrderDate', 282.5, 27.5, 14, 'cond-bold center-txt', 'middle')}
 
   <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
   <rect x="225" y="33" width="115" height="32" fill="#000000"/>
-  <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
-  ${makeSvgField('docFieldDueDate', 282.5, 59, 12, 'cond-bold center-txt', 'middle', '', '#FFFFFF')}
+  <text x="282.5" y="47" fill="#FFFFFF" font-size="13" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
+  ${makeSvgField('docFieldDueDate', 282.5, 60, 14.5, 'cond-bold center-txt', 'middle', '', '#FFFFFF')}
 
   <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
-  <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
-  ${makeSvgField('docFieldReleasingDate', 282.5, 89.5, 11.5, 'cond-bold center-txt', 'middle')}
+  <text x="282.5" y="77" fill="#000000" font-size="11.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
+  ${makeSvgField('docFieldReleasingDate', 282.5, 90, 14, 'cond-bold center-txt', 'middle')}
 
   <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
 
@@ -9344,8 +9367,8 @@
   <rect x="340" y="0" width="112" height="18" fill="${isIndoor ? '#E10600' : '#FFFFFF'}"/>
   <rect x="452" y="0" width="112" height="18" fill="${isOutdoor ? '#E10600' : '#FFFFFF'}"/>
   <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
-  <text x="396" y="13" fill="${isIndoor ? '#FFFFFF' : '#000000'}" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
-  <text x="508" y="13" fill="${isOutdoor ? '#FFFFFF' : '#000000'}" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
+  <text x="396" y="14" fill="${isIndoor ? '#FFFFFF' : '#000000'}" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
+  <text x="508" y="14" fill="${isOutdoor ? '#FFFFFF' : '#000000'}" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
 
   <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
   ${clientFit.lines.length <= 1 ?
@@ -9356,21 +9379,21 @@
   ${makeSvgField('docFieldProjectName', 452, clientFit.projY, projAutoSz, 'cond-bold center-txt', 'middle', '0.5')}
 
   <rect x="347" y="78.5" width="10" height="10" fill="${releasingModeVal === 'install' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
-  <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
+  <text x="361" y="87" fill="#000000" font-size="12" class="cond-bold">INSTALL <tspan font-size="10.5" class="chinese">安装</tspan></text>
 
   <rect x="424" y="78.5" width="10" height="10" fill="${releasingModeVal === 'deliver' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckDeliver"/>
-  <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
+  <text x="438" y="87" fill="#000000" font-size="12" class="cond-bold">DELIVER <tspan font-size="10.5" class="chinese">送货</tspan></text>
 
   <rect x="498" y="78.5" width="10" height="10" fill="${(releasingModeVal === 'pickup' || !releasingModeVal) ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckPickup"/>
-  <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
+  <text x="512" y="87" fill="#000000" font-size="12" class="cond-bold">PICK UP <tspan font-size="10.5" class="chinese">自取</tspan></text>
 
   <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
 
   <!-- Col 4 (x: 564 to 822) -->
   <rect x="564" y="0" width="97" height="43" fill="#000000"/>
-  <text x="612.5" y="12" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
-  <text x="612.5" y="22" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
-  <text x="612.5" y="35" fill="#FFFFFF" font-size="8.5" class="chinese center-txt">现场安装环境选项</text>
+  <text x="612.5" y="13" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
+  <text x="612.5" y="24.5" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
+  <text x="612.5" y="36.5" fill="#FFFFFF" font-size="10" class="chinese center-txt">现场安装环境选项</text>
 
   <!-- Wall Option Container -->
   <g id="docFieldEnvOption" data-env-type="${escapeHTML(envType)}">
@@ -9381,27 +9404,27 @@
   </g>
 
   <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
-  <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
+  <text x="572" y="58" fill="#000000" font-size="12.5" class="cond-bold">CONTACT PERSON <tspan font-size="11" class="chinese">联络人</tspan>  :</text>
   <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
-  ${makeSvgField('docFieldContactPerson', 765, 59, 11, 'cond-bold center-txt', 'middle')}
+  ${makeSvgField('docFieldContactPerson', 765, 59, 13, 'cond-bold center-txt', 'middle')}
 
-  <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
+  <text x="572" y="85" fill="#000000" font-size="12.5" class="cond-bold">CONTACT NUMBER <tspan font-size="11" class="chinese">联系电话</tspan>  :</text>
   <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
-  ${makeSvgField('docFieldContactNumber', 765, 86, 11, 'cond-bold center-txt', 'middle')}
+  ${makeSvgField('docFieldContactNumber', 765, 86, 13, 'cond-bold center-txt', 'middle')}
 
   <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
 
   <!-- Col 5 (x: 822 to 904) -->
   <rect x="822" y="0" width="82" height="22" fill="#000000"/>
-  <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
-  <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
-  ${makeSvgField('docFieldInstallers', 863, 38, 12, 'cond-bold center-txt', 'middle')}
+  <text x="863" y="11" fill="#FFFFFF" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
+  <text x="863" y="20" fill="#FFFFFF" font-size="9" class="chinese center-txt">安装人数</text>
+  ${makeSvgField('docFieldInstallers', 863, 38, 14, 'cond-bold center-txt', 'middle')}
 
   <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
   <rect x="822" y="48" width="82" height="22" fill="#000000"/>
-  <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
-  <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
-  ${makeSvgField('docFieldDuration', 863, 86, 12, 'cond-bold center-txt', 'middle')}
+  <text x="863" y="59" fill="#FFFFFF" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
+  <text x="863" y="68" fill="#FFFFFF" font-size="9.5" class="chinese center-txt">安装时长</text>
+  ${makeSvgField('docFieldDuration', 863, 86, 14, 'cond-bold center-txt', 'middle')}
 
   <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
 </svg>`;
@@ -15731,18 +15754,18 @@
 
     const STUDIO_FIELDS = [
       { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
-      { id: 'docFieldJoNumber', name: 'JO Number', defX: 54, defY: 2, defW: 168, defH: 29, defSz: 20, color: '#FFFFFF', align: 'start' },
+      { id: 'docFieldJoNumber', name: 'JO Number', defX: 58, defY: 2, defW: 164, defH: 29, defSz: 28, color: '#FFFFFF', align: 'start' },
       { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
-      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 12, color: '#FFFFFF', align: 'middle' },
-      { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 11.5, color: '#000000', align: 'middle' },
-      { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 11.5, color: '#000000', align: 'middle' },
-      { id: 'docFieldInCharge', name: 'In-Charge', defX: 8, defY: 34, defW: 215, defH: 19, defSz: 13, color: '#000000', align: 'end' },
-      { id: 'docFieldDrawnBy', name: 'Drawn By', defX: 8, defY: 55, defW: 215, defH: 19, defSz: 13, color: '#000000', align: 'end' },
-      { id: 'docFieldAddress', name: 'Address', defX: 99, defY: 77, defW: 122, defH: 17, defSz: 10, color: '#000000', align: 'middle' },
-      { id: 'docFieldContactPerson', name: 'Contact Person', defX: 715, defY: 46, defW: 100, defH: 18, defSz: 11, color: '#000000', align: 'middle' },
-      { id: 'docFieldContactNumber', name: 'Contact Number', defX: 715, defY: 73, defW: 100, defH: 18, defSz: 11, color: '#000000', align: 'middle' },
-      { id: 'docFieldInstallers', name: 'Installers', defX: 824, defY: 2, defW: 78, defH: 44, defSz: 12, color: '#000000', align: 'middle' },
-      { id: 'docFieldDuration', name: 'Duration', defX: 824, defY: 50, defW: 78, defH: 44, defSz: 12, color: '#000000', align: 'middle' }
+      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 14.5, color: '#FFFFFF', align: 'middle' },
+      { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldInCharge', name: 'In-Charge', defX: 8, defY: 34, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },
+      { id: 'docFieldDrawnBy', name: 'Drawn By', defX: 8, defY: 55, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },
+      { id: 'docFieldAddress', name: 'Address', defX: 99, defY: 77, defW: 122, defH: 17, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactPerson', name: 'Contact Person', defX: 715, defY: 46, defW: 100, defH: 18, defSz: 13, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactNumber', name: 'Contact Number', defX: 715, defY: 73, defW: 100, defH: 18, defSz: 13, color: '#000000', align: 'middle' },
+      { id: 'docFieldInstallers', name: 'Installers', defX: 824, defY: 2, defW: 78, defH: 44, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldDuration', name: 'Duration', defX: 824, defY: 50, defW: 78, defH: 44, defSz: 14, color: '#000000', align: 'middle' }
     ];
 
     if (!state.customBoxPositions) state.customBoxPositions = {};
