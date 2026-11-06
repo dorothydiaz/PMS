@@ -8510,6 +8510,10 @@
     setTxt('docFieldInstallers', rec.installers || '', '');
     setTxt('docFieldDuration', rec.duration || '', '');
     setDirectiveEnvType(rec.envType || rec.wallType || '');
+    const loc = String(rec.location || '').toLowerCase().trim();
+    const isIndoor = (loc !== '—' && loc !== '-' && loc !== '') && (loc.includes('indoor') || loc.includes('both'));
+    const isOutdoor = (loc !== '—' && loc !== '-' && loc !== '') && (loc.includes('outdoor') || loc.includes('both'));
+    setDirectiveLocation(isIndoor, isOutdoor);
 
     // Sync Checkboxes (Install / Deliver / Pick up)
     const mode = (rec.releasingMode || 'Pickup').toLowerCase();
@@ -8556,6 +8560,17 @@
       });
     }
 
+    const ctrlLoc = document.getElementById('ctrlLocation');
+    if (ctrlLoc) {
+      ctrlLoc.addEventListener('change', () => {
+        const val = ctrlLoc.value;
+        const indoor = val.includes('Indoor');
+        const outdoor = val.includes('Outdoor');
+        setDirectiveLocation(indoor, outdoor);
+        showToast(`Location set to: ${val || 'None'}`);
+      });
+    }
+
     const ctrlMode = document.getElementById('ctrlReleasingMode');
     const ctrlNotes = document.getElementById('ctrlNotes');
     const ctrlInCharge = document.getElementById('ctrlInCharge');
@@ -8567,7 +8582,6 @@
     if (ctrlNotes) ctrlNotes.value = rec.notes || '';
     if (ctrlInCharge) ctrlInCharge.value = rec.inCharge || rec.salesRep || '';
     if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || '';
-    const ctrlEnv = document.getElementById('ctrlEnvType');
     if (ctrlEnv) ctrlEnv.value = rec.envType || rec.wallType || '';
 
     renderAttachmentsList();
@@ -8590,6 +8604,27 @@
       autoFitDirectiveTexts();
       updateProjDividerLine();
     }, 20);
+  }
+
+  function setDirectiveLocation(indoor, outdoor) {
+    state.directiveLocation = { indoor: !!indoor, outdoor: !!outdoor };
+    const bgIndoor = document.getElementById('bgIndoor');
+    const lblIndoor = document.getElementById('lblIndoor');
+    const bgOutdoor = document.getElementById('bgOutdoor');
+    const lblOutdoor = document.getElementById('lblOutdoor');
+
+    if (bgIndoor) bgIndoor.setAttribute('fill', indoor ? '#E10600' : '#FFFFFF');
+    if (lblIndoor) lblIndoor.setAttribute('fill', indoor ? '#FFFFFF' : '#000000');
+    if (bgOutdoor) bgOutdoor.setAttribute('fill', outdoor ? '#E10600' : '#FFFFFF');
+    if (lblOutdoor) lblOutdoor.setAttribute('fill', outdoor ? '#FFFFFF' : '#000000');
+
+    const ctrlLoc = document.getElementById('ctrlLocation');
+    if (ctrlLoc) {
+      if (indoor && outdoor) ctrlLoc.value = 'Indoor & Outdoor';
+      else if (indoor) ctrlLoc.value = 'Indoor';
+      else if (outdoor) ctrlLoc.value = 'Outdoor';
+      else ctrlLoc.value = '';
+    }
   }
 
   function setupDirectiveControlsSync() {
@@ -8622,6 +8657,17 @@
       envContainer.addEventListener('click', (e) => {
         e.stopPropagation();
         openEnvOptionMenu(envContainer);
+      });
+    }
+
+    const ctrlLoc = document.getElementById('ctrlLocation');
+    if (ctrlLoc) {
+      ctrlLoc.addEventListener('change', () => {
+        const val = ctrlLoc.value;
+        const indoor = val.includes('Indoor');
+        const outdoor = val.includes('Outdoor');
+        setDirectiveLocation(indoor, outdoor);
+        showToast(`Location set to: ${val || 'None'}`);
       });
     }
 
@@ -8805,6 +8851,21 @@
     const releasingModeVal = (document.getElementById('ctrlReleasingMode')?.value || rec.releasingMode || 'Pickup').toLowerCase();
     const envType = (document.getElementById('ctrlEnvType')?.value !== undefined ? document.getElementById('ctrlEnvType').value : (rec.envType || rec.wallType || state.directiveEnvType || '')).trim();
     const envSvgContent = DIRECTIVE_WALL_SVGS[envType] || '';
+    let isIndoor = false;
+    let isOutdoor = false;
+    const bgIndoorEl = document.getElementById('bgIndoor');
+    const bgOutdoorEl = document.getElementById('bgOutdoor');
+    if (bgIndoorEl && bgOutdoorEl) {
+      isIndoor = bgIndoorEl.getAttribute('fill') === '#E10600';
+      isOutdoor = bgOutdoorEl.getAttribute('fill') === '#E10600';
+    } else if (state.directiveLocation) {
+      isIndoor = !!state.directiveLocation.indoor;
+      isOutdoor = !!state.directiveLocation.outdoor;
+    } else if (rec && rec.location) {
+      const locStr = String(rec.location || '').toLowerCase().trim();
+      isIndoor = (locStr !== '—' && locStr !== '-' && locStr !== '') && (locStr.includes('indoor') || locStr.includes('both'));
+      isOutdoor = (locStr !== '—' && locStr !== '-' && locStr !== '') && (locStr.includes('outdoor') || locStr.includes('both'));
+    }
     const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '';
     const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '';
     const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || rec.location || '-';
@@ -8927,10 +8988,11 @@
   <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
 
   <!-- Col 3 (x: 340 to 564) -->
-  <rect x="340" y="0" width="224" height="18" fill="#E10600"/>
+  <rect x="340" y="0" width="112" height="18" fill="${isIndoor ? '#E10600' : '#FFFFFF'}"/>
+  <rect x="452" y="0" width="112" height="18" fill="${isOutdoor ? '#E10600' : '#FFFFFF'}"/>
   <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
-  <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
-  <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
+  <text x="396" y="13" fill="${isIndoor ? '#FFFFFF' : '#000000'}" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
+  <text x="508" y="13" fill="${isOutdoor ? '#FFFFFF' : '#000000'}" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
 
   <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
   ${makeSvgField('docFieldClientName', 452, 44, 22, 'cond-black center-txt', 'middle', '0.8')}
@@ -9538,13 +9600,22 @@
         }
 
         // Check for Indoor / Outdoor toggle
-        const indoorLbl = e.target.closest('#lblIndoor');
-        const outdoorLbl = e.target.closest('#lblOutdoor');
-        if (indoorLbl || outdoorLbl) {
-          const isIndoor = !!indoorLbl;
-          const rect = gridTable.querySelector('rect[x="340"][y="0"]');
-          if (rect) rect.setAttribute('fill', isIndoor ? '#E10600' : '#0F172A');
-          showToast(`Directive Location: ${isIndoor ? 'INDOOR' : 'OUTDOOR'}`);
+        const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
+        const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+        if (indoorTarget || outdoorTarget) {
+          const curState = state.directiveLocation || {
+            indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+            outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+          };
+          if (indoorTarget) {
+            const nextIndoor = !curState.indoor;
+            setDirectiveLocation(nextIndoor, curState.outdoor);
+            showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+          } else {
+            const nextOutdoor = !curState.outdoor;
+            setDirectiveLocation(curState.indoor, nextOutdoor);
+            showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+          }
           return;
         }
 
@@ -9564,6 +9635,25 @@
             const scaleY = 96 / svgRect.height;
             const svgX = (e.clientX - svgRect.left) * scaleX;
             const svgY = (e.clientY - svgRect.top) * scaleY;
+
+            // Indoor / Outdoor header (row 1 of column 3, y <= 18)
+            if (svgX >= 340 && svgX <= 564 && svgY <= 18) {
+              const isIndoorClick = svgX <= 452;
+              const curState = state.directiveLocation || {
+                indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+                outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+              };
+              if (isIndoorClick) {
+                const nextIndoor = !curState.indoor;
+                setDirectiveLocation(nextIndoor, curState.outdoor);
+                showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+              } else {
+                const nextOutdoor = !curState.outdoor;
+                setDirectiveLocation(curState.indoor, nextOutdoor);
+                showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+              }
+              return;
+            }
 
             // Releasing mode checkboxes (row 3 of column 3)
             if (svgX >= 340 && svgX <= 564 && svgY > 73) {
@@ -15387,6 +15477,42 @@
 
     // 5. Direct Artboard Click to Select Field
     svg.addEventListener('click', (e) => {
+      const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
+      const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+      if (indoorTarget || outdoorTarget) {
+        const curState = state.directiveLocation || {
+          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+        };
+        if (indoorTarget) {
+          const nextIndoor = !curState.indoor;
+          setDirectiveLocation(nextIndoor, curState.outdoor);
+          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+        } else {
+          const nextOutdoor = !curState.outdoor;
+          setDirectiveLocation(curState.indoor, nextOutdoor);
+          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+        }
+        return;
+      }
+      const coords = getArtboardCoords(e);
+      if (coords.x >= 340 && coords.x <= 564 && coords.y <= 18) {
+        const isIndoorClick = coords.x <= 452;
+        const curState = state.directiveLocation || {
+          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+        };
+        if (isIndoorClick) {
+          const nextIndoor = !curState.indoor;
+          setDirectiveLocation(nextIndoor, curState.outdoor);
+          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+        } else {
+          const nextOutdoor = !curState.outdoor;
+          setDirectiveLocation(curState.indoor, nextOutdoor);
+          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+        }
+        return;
+      }
       const targetCell = e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
       if (targetCell && targetCell.id) {
         selectStudioField(targetCell.id);

@@ -47,6 +47,9 @@ $docDueDate = ($targetRecord && !empty($targetRecord['design_deadline'])) ? form
 $docClient = $targetRecord ? ($targetRecord['client'] ?: '—') : '—';
 $docOrderDate = ($targetRecord && !empty($targetRecord['order_date'])) ? formatDotDateStudio($targetRecord['order_date']) : '00.00.0000';
 $docLocation = $targetRecord ? ($targetRecord['location'] ?: '—') : '—';
+$locLower = strtolower(trim($docLocation));
+$isIndoor = ($locLower !== '—' && $locLower !== '-' && $locLower !== '' && (strpos($locLower, 'indoor') !== false || strpos($locLower, 'both') !== false));
+$isOutdoor = ($locLower !== '—' && $locLower !== '-' && $locLower !== '' && (strpos($locLower, 'outdoor') !== false || strpos($locLower, 'both') !== false));
 $docReleasingDate = ($targetRecord && !empty($targetRecord['releasing_date'])) ? formatDotDateStudio($targetRecord['releasing_date']) : '00.00.0000';
 $docInCharge = $targetRecord ? strtoupper($targetRecord['sales_rep'] ?: '—') : '—';
 $docDrawnBy = $targetRecord ? strtoupper($targetRecord['artist'] ?: '—') : '—';
@@ -272,10 +275,12 @@ require_once __DIR__ . '/includes/sidebar.php';
             <!-- ========================================== -->
             <!-- COLUMN 3: (340 to 564) -->
             <!-- ========================================== -->
-            <rect x="340" y="0" width="224" height="18" fill="#E10600"/>
+            <!-- Indoor & Outdoor Header Blocks -->
+            <rect x="340" y="0" width="112" height="18" fill="<?= $isIndoor ? '#E10600' : '#FFFFFF' ?>" id="bgIndoor" style="cursor: pointer;"/>
+            <rect x="452" y="0" width="112" height="18" fill="<?= $isOutdoor ? '#E10600' : '#FFFFFF' ?>" id="bgOutdoor" style="cursor: pointer;"/>
             <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
-            <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor" style="cursor: pointer;">INDOOR</text>
-            <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor" style="cursor: pointer;">OUTDOOR</text>
+            <text x="396" y="13" fill="<?= $isIndoor ? '#FFFFFF' : '#000000' ?>" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor" style="cursor: pointer; user-select: none;">INDOOR</text>
+            <text x="508" y="13" fill="<?= $isOutdoor ? '#FFFFFF' : '#000000' ?>" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor" style="cursor: pointer; user-select: none;">OUTDOOR</text>
 
             <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
 
