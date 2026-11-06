@@ -8126,6 +8126,18 @@
     } else if (fieldId === 'docFieldJoNumber') {
       const inp = document.getElementById('directiveLookupInput');
       if (inp) inp.value = val.split('\n')[0];
+    } else if (fieldId === 'docFieldAddress') {
+      const c = document.getElementById('ctrlAddress');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldOrderDate') {
+      const c = document.getElementById('ctrlOrderDate');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldDueDate') {
+      const c = document.getElementById('ctrlDueDate');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldReleasingDate') {
+      const c = document.getElementById('ctrlReleasingDate');
+      if (c) c.value = val;
     }
   }
 
@@ -8583,6 +8595,14 @@
     if (ctrlInCharge) ctrlInCharge.value = rec.inCharge || rec.salesRep || '';
     if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || '';
     if (ctrlEnv) ctrlEnv.value = rec.envType || rec.wallType || '';
+    const ctrlAddr = document.getElementById('ctrlAddress');
+    if (ctrlAddr) ctrlAddr.value = (rec.completeAddress && rec.completeAddress !== 'N/A') ? rec.completeAddress : ((rec.location && rec.location !== 'N/A') ? rec.location : '-');
+    const ctrlOrder = document.getElementById('ctrlOrderDate');
+    if (ctrlOrder) ctrlOrder.value = toDotDate(rec.orderDate);
+    const ctrlDue = document.getElementById('ctrlDueDate');
+    if (ctrlDue) ctrlDue.value = toDotDate(rec.designDeadline || rec.releasingDate);
+    const ctrlRelease = document.getElementById('ctrlReleasingDate');
+    if (ctrlRelease) ctrlRelease.value = toDotDate(rec.releasingDate);
 
     renderAttachmentsList();
 
@@ -8633,7 +8653,7 @@
       const target = document.getElementById(docFieldId);
       if (ctrl && target) {
         ctrl.addEventListener('input', () => {
-          target.textContent = ctrl.value || fallback;
+          setFieldMultilineText(target, ctrl.value || fallback);
           autoFitCellText(target);
         });
       }
@@ -8643,6 +8663,10 @@
     bindSync('ctrlDuration', 'docFieldDuration', '');
     bindSync('ctrlInCharge', 'docFieldInCharge', 'DONA');
     bindSync('ctrlDrawnBy', 'docFieldDrawnBy', 'GLEN');
+    bindSync('ctrlAddress', 'docFieldAddress', '-');
+    bindSync('ctrlOrderDate', 'docFieldOrderDate', '00.00.0000');
+    bindSync('ctrlDueDate', 'docFieldDueDate', '00.00.0000');
+    bindSync('ctrlReleasingDate', 'docFieldReleasingDate', '00.00.0000');
 
     const ctrlEnv = document.getElementById('ctrlEnvType');
     if (ctrlEnv) {
@@ -9627,6 +9651,16 @@
             showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
           }
           return;
+        }
+
+        // Handle clicks on address gray pill or due date black box directly
+        if (e.target.id === 'bgFieldAddress' || e.target.closest('#bgFieldAddress')) {
+          const elAddr = document.getElementById('docFieldAddress');
+          if (elAddr) { selectDirectiveCell(elAddr, true); return; }
+        }
+        if (e.target.id === 'bgFieldDueDate' || e.target.closest('#bgFieldDueDate')) {
+          const elDue = document.getElementById('docFieldDueDate');
+          if (elDue) { selectDirectiveCell(elDue, true); return; }
         }
 
         // Direct editing target (if clicking directly on text or tspan)

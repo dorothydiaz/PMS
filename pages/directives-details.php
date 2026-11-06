@@ -212,8 +212,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
                     </g>
                     <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
-                    <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
-                    <text x="216" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldAddress" data-field-name="Address" data-base-y="89.5" data-raw-text="<?= htmlspecialchars($docAddress) ?>"><?= htmlspecialchars($docAddress) ?></text>
+                    <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED" id="bgFieldAddress" style="cursor: pointer;"/>
+                    <text x="216" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldAddress" data-field-name="Address" data-base-y="89.5" data-raw-text="<?= htmlspecialchars($docAddress) ?>" style="cursor: pointer;"><?= htmlspecialchars($docAddress) ?></text>
 
                     <!-- Vertical Divider 1 -->
                     <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
@@ -227,7 +227,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
                     <!-- Row 2: Due Date -->
                     <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
-                    <rect x="225" y="33" width="115" height="32" fill="#000000"/>
+                    <rect x="225" y="33" width="115" height="32" fill="#000000" id="bgFieldDueDate" style="cursor: pointer;"/>
                     <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
                     <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDueDate" data-field-name="Due Date" data-base-y="59" data-raw-text="<?= htmlspecialchars($docDueDate) ?>"><?= htmlspecialchars($docDueDate) ?></text>
 
@@ -340,6 +340,22 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div class="studio-card directive-extra-notes" style="margin-top: 20px;">
               <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 12px;">Live Directive Adjustment Controls</h4>
               <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Order Date (Directive Only)</label>
+                  <input type="text" class="form-control" id="ctrlOrderDate" value="<?= htmlspecialchars($docOrderDate) ?>" placeholder="MM.DD.YYYY">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Due Date (Directive Only)</label>
+                  <input type="text" class="form-control" id="ctrlDueDate" value="<?= htmlspecialchars($docDueDate) ?>" placeholder="MM.DD.YYYY">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Date to be Released (Directive Only)</label>
+                  <input type="text" class="form-control" id="ctrlReleasingDate" value="<?= htmlspecialchars($docReleasingDate) ?>" placeholder="MM.DD.YYYY">
+                </div>
+                <div class="form-group col-span-2">
+                  <label class="form-label">Delivery / Installation Address (Directive Only)</label>
+                  <input type="text" class="form-control" id="ctrlAddress" value="<?= htmlspecialchars($docAddress) ?>" placeholder="Delivery or site address...">
+                </div>
                 <div class="form-group">
                   <label class="form-label">Number of Installers</label>
                   <input type="text" class="form-control" id="ctrlInstallers" value="<?= htmlspecialchars($targetRecord['installers'] ?? '') ?>">
