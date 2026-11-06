@@ -158,11 +158,11 @@ require_once __DIR__ . '/includes/sidebar.php';
                           font-weight: normal;
                           font-style: normal;
                         }
-                        text { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; }
-                        .bebas-field { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important; cursor: pointer; user-select: text; }
-                        .cond-black { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: 900; }
-                        .cond-bold { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: 800; }
-                        .cond-semi { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: 700; }
+                        text { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: normal; }
+                        .bebas-field { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important; font-weight: normal !important; cursor: pointer; user-select: text; }
+                        .cond-black { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: normal !important; }
+                        .cond-bold { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: normal !important; }
+                        .cond-semi { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: normal !important; }
                         .chinese { font-family: 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif; font-weight: bold; }
                         tspan.chinese { font-family: 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif; font-weight: bold; }
                         .center-txt { text-anchor: middle; }

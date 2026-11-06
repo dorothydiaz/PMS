@@ -7969,21 +7969,21 @@
     return parseFloat(computed) || getCellDefaultFontSize(cell);
   }
 
-  // DIRECTIVE EXACT CELL COORDINATES & PROPERTIES FOR IN-PLACE DIRECT EDITING
+  // DIRECTIVE EXACT CELL COORDINATES & PROPERTIES FOR IN-PLACE DIRECT EDITING (PURE REGULAR BEBAS KAI)
   const DIRECTIVE_FIELD_BOXES = {
-    docFieldJoNumber: { x: 54, y: 2, w: 168, h: 29, color: '#FFFFFF', bg: '#000000', align: 'left', defaultSz: 20, weight: 900, name: 'JO Number' },
-    docFieldInCharge: { x: 104, y: 35, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 800, name: 'In-Charge' },
-    docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 800, name: 'Drawn By' },
-    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 10, weight: 800, name: 'Address' },
-    docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 800, name: 'Order Date' },
-    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 12, weight: 800, name: 'Due Date' },
-    docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 800, name: 'Release Date' },
-    docFieldProjectName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 900, name: 'Project Name' },
-    docFieldClientName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 800, name: 'Client Name' },
-    docFieldContactPerson: { x: 715, y: 46, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 800, name: 'Contact Person' },
-    docFieldContactNumber: { x: 715, y: 73, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 800, name: 'Contact Number' },
-    docFieldInstallers: { x: 824, y: 24, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 800, name: 'Installers' },
-    docFieldDuration: { x: 824, y: 72, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 800, name: 'Duration' }
+    docFieldJoNumber: { x: 54, y: 2, w: 168, h: 29, color: '#FFFFFF', bg: '#000000', align: 'left', defaultSz: 20, weight: 'normal', name: 'JO Number' },
+    docFieldInCharge: { x: 104, y: 35, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 'normal', name: 'In-Charge' },
+    docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 'normal', name: 'Drawn By' },
+    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 10, weight: 'normal', name: 'Address' },
+    docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Order Date' },
+    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 12, weight: 'normal', name: 'Due Date' },
+    docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Release Date' },
+    docFieldProjectName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 'normal', name: 'Project Name' },
+    docFieldClientName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Client Name' },
+    docFieldContactPerson: { x: 715, y: 46, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 'normal', name: 'Contact Person' },
+    docFieldContactNumber: { x: 715, y: 73, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 'normal', name: 'Contact Number' },
+    docFieldInstallers: { x: 824, y: 24, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Installers' },
+    docFieldDuration: { x: 824, y: 72, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Duration' }
   };
 
   let activeDirectEditor = null;
@@ -8189,7 +8189,7 @@
         bg: '#FFFFFF',
         align: cell.getAttribute('text-anchor') === 'middle' ? 'center' : (cell.getAttribute('text-anchor') === 'end' ? 'right' : 'left'),
         defaultSz: parseFloat(cell.getAttribute('font-size') || 12),
-        weight: 800
+        weight: 'normal'
       };
     }
 
@@ -8217,7 +8217,7 @@
     editor.style.minHeight = Math.round(box.h * scaleY) + 'px';
     editor.style.fontSize = Math.round(curSize * scaleY) + 'px';
     editor.style.textAlign = box.align;
-    editor.style.fontWeight = box.weight;
+    editor.style.fontWeight = 'normal';
     editor.style.color = box.color;
     editor.style.background = box.bg === '#000000' ? 'rgba(0,0,0,0.92)' : (box.bg === '#E8EBED' ? '#E8EBED' : 'rgba(255,255,255,0.96)');
 
@@ -8792,10 +8792,10 @@
         font-weight: normal;
         font-style: normal;
       }
-      text { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; }
-      .cond-black { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight:900; }
-      .cond-bold { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight:800; }
-      .cond-semi { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight:700; }
+      text { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .cond-black { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .cond-bold { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .cond-semi { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
       .chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
       tspan.chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
       .center-txt { text-anchor: middle; }

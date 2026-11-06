@@ -6465,13 +6465,21 @@ input[type="password"]::-ms-clear {
 
 .directive-exact-header-wrap svg text {
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
+  font-weight: normal !important;
 }
 
 .directive-exact-header-wrap svg text.bebas-field {
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
+  font-weight: normal !important;
   cursor: pointer;
   user-select: text;
   transition: opacity 0.15s, fill 0.15s;
+}
+
+.directive-exact-header-wrap svg .cond-black,
+.directive-exact-header-wrap svg .cond-bold,
+.directive-exact-header-wrap svg .cond-semi {
+  font-weight: normal !important;
 }
 
 .directive-exact-header-wrap svg text.bebas-field:hover {
@@ -6487,7 +6495,7 @@ input[type="password"]::-ms-clear {
   position: absolute;
   box-sizing: border-box;
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
-  font-weight: 800;
+  font-weight: normal !important;
   border: 2px dashed #E10600;
   border-radius: 3px;
   outline: none;
