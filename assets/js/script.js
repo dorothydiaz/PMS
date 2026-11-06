@@ -8028,14 +8028,14 @@
     el.textContent = '';
     el.removeAttribute('y');
 
-    const lh = Math.round(sz * 1.05 * 10) / 10;
+    const lh = Math.round(sz * 1.15 * 10) / 10;
     const startY = Math.round((baseY - ((lines.length - 1) * lh) / 2) * 10) / 10;
 
     lines.forEach((line, idx) => {
       const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
       tspan.setAttribute('x', xAttr);
       tspan.setAttribute('y', Math.round((startY + idx * lh) * 10) / 10);
-      tspan.textContent = line;
+      tspan.textContent = line || '\u00A0';
       el.appendChild(tspan);
     });
 
@@ -8087,6 +8087,75 @@
     }
   }
 
+  function getFieldIdAtSvgCoords(x, y) {
+    if (x >= 0 && x <= 225) {
+      if (y >= 0 && y <= 33) return 'docFieldJoNumber';
+      if (y > 33 && y <= 54) return 'docFieldInCharge';
+      if (y > 54 && y <= 75) return 'docFieldDrawnBy';
+      if (y > 75 && y <= 96) return 'docFieldAddress';
+    } else if (x > 225 && x <= 340) {
+      if (y >= 0 && y <= 33) return 'docFieldOrderDate';
+      if (y > 33 && y <= 65) return 'docFieldDueDate';
+      if (y > 65 && y <= 96) return 'docFieldReleasingDate';
+    } else if (x > 340 && x <= 564) {
+      if (y >= 18 && y <= 50) return 'docFieldProjectName';
+      if (y > 50 && y <= 73) return 'docFieldClientName';
+    } else if (x > 564 && x <= 822) {
+      if (y > 43 && y <= 70) return 'docFieldContactPerson';
+      if (y > 70 && y <= 96) return 'docFieldContactNumber';
+    } else if (x > 822 && x <= 904) {
+      if (y >= 0 && y <= 48) return 'docFieldInstallers';
+      if (y > 48 && y <= 96) return 'docFieldDuration';
+    }
+    return null;
+  }
+
+  function syncToolbarBoxInputs(cell) {
+    if (!cell) return;
+    const cellId = cell.id;
+    const boxDef = DIRECTIVE_FIELD_BOXES[cellId] || { w: 100, h: 20 };
+    const savedBox = (state.customBoxSizes && state.customBoxSizes[cellId]) || {};
+    const curW = savedBox.w || boxDef.w;
+    const curH = savedBox.h || boxDef.h;
+    const curSize = Math.round(getCellCurrentFontSize(cell));
+
+    const badge = document.getElementById('fontCtrlCellBadge') || document.getElementById('selectedCellBadge');
+    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${curSize}px (${curW}×${curH})`;
+
+    const inpSz = document.getElementById('cellFontSizeInput');
+    if (inpSz) inpSz.value = curSize;
+
+    const inpW = document.getElementById('cellBoxWidthInput');
+    if (inpW) inpW.value = curW;
+
+    const inpH = document.getElementById('cellBoxHeightInput');
+    if (inpH) inpH.value = curH;
+  }
+
+  function setCellCustomBoxSize(cell, wPx, hPx) {
+    if (!cell) cell = getActiveOrTargetCell();
+    if (!cell) return;
+    const cellId = cell.id;
+    if (!state.customBoxSizes) state.customBoxSizes = {};
+    const boxDef = DIRECTIVE_FIELD_BOXES[cellId] || { w: 100, h: 20 };
+    const cur = state.customBoxSizes[cellId] || { w: boxDef.w, h: boxDef.h };
+    const newW = wPx !== undefined ? Math.max(30, Math.min(800, Math.round(wPx))) : cur.w;
+    const newH = hPx !== undefined ? Math.max(15, Math.min(300, Math.round(hPx))) : cur.h;
+    state.customBoxSizes[cellId] = { w: newW, h: newH };
+    saveStateToStorage();
+
+    syncToolbarBoxInputs(cell);
+
+    if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
+      const svg = document.getElementById('directiveExactSvg');
+      const svgRect = svg ? svg.getBoundingClientRect() : { width: 904, height: 96 };
+      const scaleX = svgRect.width / 904;
+      const scaleY = svgRect.height / 96;
+      activeDirectEditor.style.width = Math.round(newW * scaleX) + 'px';
+      activeDirectEditor.style.height = Math.round(newH * scaleY) + 'px';
+    }
+  }
+
   function openDirectiveDirectEditor(cell) {
     if (!cell) return;
     const cellId = cell.id;
@@ -8127,6 +8196,13 @@
     const curSize = getCellCurrentFontSize(cell);
     const rawVal = getFieldRawText(cell);
 
+    const savedBox = (state.customBoxSizes && state.customBoxSizes[cellId]) || {};
+    const boxW = savedBox.w || box.w;
+    const linesCount = (rawVal.match(/\n/g) || []).length + 1;
+    const autoH = Math.max(box.h, (linesCount * curSize * 1.15) + 6);
+    const boxH = savedBox.h || autoH;
+    const boxY = linesCount > 1 ? Math.max(0, box.y - ((linesCount - 1) * curSize * 0.45)) : box.y;
+
     const editor = document.createElement('textarea');
     editor.id = 'directiveDirectEditor';
     editor.className = 'directive-direct-editor';
@@ -8134,14 +8210,11 @@
     editor.value = rawVal;
     editor.spellcheck = false;
 
-    const linesCount = (rawVal.match(/\n/g) || []).length + 1;
-    const expandedH = Math.max(box.h, (linesCount * curSize * 1.05) + 6);
-    const boxY = linesCount > 1 ? Math.max(0, box.y - ((linesCount - 1) * curSize * 0.45)) : box.y;
-
     editor.style.left = Math.round(offsetX + box.x * scaleX) + 'px';
     editor.style.top = Math.round(offsetY + boxY * scaleY) + 'px';
-    editor.style.width = Math.round(box.w * scaleX) + 'px';
-    editor.style.minHeight = Math.round(expandedH * scaleY) + 'px';
+    editor.style.width = Math.round(boxW * scaleX) + 'px';
+    editor.style.height = Math.round(boxH * scaleY) + 'px';
+    editor.style.minHeight = Math.round(box.h * scaleY) + 'px';
     editor.style.fontSize = Math.round(curSize * scaleY) + 'px';
     editor.style.textAlign = box.align;
     editor.style.fontWeight = box.weight;
@@ -8154,21 +8227,48 @@
     editor.focus();
     editor.select();
 
+    syncToolbarBoxInputs(cell);
+
     const updateLayout = () => {
       const val = editor.value;
       setFieldMultilineText(cell, val);
       syncControlValues(cellId, val);
 
-      const lines = (val.match(/\n/g) || []).length + 1;
-      const dynH = Math.max(box.h, (lines * curSize * 1.05) + 6);
-      const dynY = lines > 1 ? Math.max(0, box.y - ((lines - 1) * curSize * 0.45)) : box.y;
-      editor.style.top = Math.round(offsetY + dynY * scaleY) + 'px';
-      editor.style.minHeight = Math.round(dynH * scaleY) + 'px';
+      if (!state.customBoxSizes || !state.customBoxSizes[cellId] || !state.customBoxSizes[cellId].h) {
+        const lines = (val.match(/\n/g) || []).length + 1;
+        const dynH = Math.max(box.h, (lines * curSize * 1.15) + 6);
+        const dynY = lines > 1 ? Math.max(0, box.y - ((lines - 1) * curSize * 0.45)) : box.y;
+        editor.style.top = Math.round(offsetY + dynY * scaleY) + 'px';
+        editor.style.height = Math.round(dynH * scaleY) + 'px';
+        const inpH = document.getElementById('cellBoxHeightInput');
+        if (inpH) inpH.value = Math.round(dynH);
+      }
     };
 
     editor.addEventListener('input', updateLayout);
 
+    // Track user drag-resizing of the textbox
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        if (!activeDirectEditor || activeDirectEditor !== editor) return;
+        const curW = Math.round(editor.offsetWidth / scaleX);
+        const curH = Math.round(editor.offsetHeight / scaleY);
+        if (!state.customBoxSizes) state.customBoxSizes = {};
+        state.customBoxSizes[cellId] = { w: curW, h: curH };
+        saveStateToStorage();
+        syncToolbarBoxInputs(cell);
+      });
+      ro.observe(editor);
+      editor.__resizeObserver = ro;
+    }
+
     editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        // Support next line when user enters!
+        e.stopPropagation();
+        setTimeout(updateLayout, 10);
+        return;
+      }
       if (e.key === 'Tab') {
         e.preventDefault();
         closeDirectiveDirectEditor(true);
@@ -8176,7 +8276,7 @@
         const idx = keys.indexOf(cellId);
         const nextId = keys[(idx + (e.shiftKey ? -1 : 1) + keys.length) % keys.length];
         const nextEl = document.getElementById(nextId);
-        if (nextEl) selectDirectiveCell(nextEl);
+        if (nextEl) selectDirectiveCell(nextEl, true);
       } else if (e.key === 'Escape') {
         e.preventDefault();
         closeDirectiveDirectEditor(true);
@@ -8196,6 +8296,10 @@
     if (!activeDirectEditor) return;
     const editor = activeDirectEditor;
     const cell = editor.__targetCell;
+    if (editor.__resizeObserver) {
+      editor.__resizeObserver.disconnect();
+      delete editor.__resizeObserver;
+    }
     activeDirectEditor = null;
     if (commit && cell) {
       setFieldMultilineText(cell, editor.value);
@@ -8221,12 +8325,7 @@
       cell.classList.add('active-svg-cell');
     }
 
-    const currentSize = Math.round(getCellCurrentFontSize(cell));
-    const badge = document.getElementById('selectedCellBadge') || document.getElementById('fontCtrlCellBadge');
-    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${currentSize}px`;
-
-    const input = document.getElementById('cellFontSizeInput');
-    if (input) input.value = currentSize;
+    syncToolbarBoxInputs(cell);
 
     if (shouldOpenEditor && (window.SVGElement && cell instanceof SVGElement)) {
       openDirectiveDirectEditor(cell);
@@ -8252,17 +8351,13 @@
       setFieldMultilineText(cell, getFieldRawText(cell));
     }
 
-    const input = document.getElementById('cellFontSizeInput');
-    if (input) input.value = Math.round(clamped);
-
-    const badge = document.getElementById('selectedCellBadge') || document.getElementById('fontCtrlCellBadge');
-    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${Math.round(clamped)}px`;
-
     if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
       const svg = document.getElementById('directiveExactSvg');
       const scaleY = svg ? (svg.getBoundingClientRect().height / 96) : 1;
       activeDirectEditor.style.fontSize = Math.round(clamped * scaleY) + 'px';
     }
+
+    syncToolbarBoxInputs(cell);
 
     if (!state.customCellFonts) state.customCellFonts = {};
     const key = cell.id || cell.className;
@@ -9191,6 +9286,99 @@
       cellFontInput.addEventListener('change', handleCellFontChange);
     }
 
+    // Box Width Controls
+    const btnBoxWDec = document.getElementById('btnBoxWidthDec');
+    if (btnBoxWDec) {
+      btnBoxWDec.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { w: 100 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.w || boxDef.w;
+          setCellCustomBoxSize(cell, Math.max(30, cur - 10));
+        }
+      });
+    }
+
+    const btnBoxWInc = document.getElementById('btnBoxWidthInc');
+    if (btnBoxWInc) {
+      btnBoxWInc.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { w: 100 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.w || boxDef.w;
+          setCellCustomBoxSize(cell, Math.min(800, cur + 10));
+        }
+      });
+    }
+
+    const cellBoxWInput = document.getElementById('cellBoxWidthInput');
+    if (cellBoxWInput) {
+      const handleWChange = () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const val = parseFloat(cellBoxWInput.value);
+          if (!isNaN(val) && val >= 30 && val <= 800) {
+            setCellCustomBoxSize(cell, val);
+          }
+        }
+      };
+      cellBoxWInput.addEventListener('input', handleWChange);
+      cellBoxWInput.addEventListener('change', handleWChange);
+    }
+
+    // Box Height Controls
+    const btnBoxHDec = document.getElementById('btnBoxHeightDec');
+    if (btnBoxHDec) {
+      btnBoxHDec.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { h: 20 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.h || boxDef.h;
+          setCellCustomBoxSize(cell, undefined, Math.max(15, cur - 5));
+        }
+      });
+    }
+
+    const btnBoxHInc = document.getElementById('btnBoxHeightInc');
+    if (btnBoxHInc) {
+      btnBoxHInc.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { h: 20 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.h || boxDef.h;
+          setCellCustomBoxSize(cell, undefined, Math.min(300, cur + 5));
+        }
+      });
+    }
+
+    const cellBoxHInput = document.getElementById('cellBoxHeightInput');
+    if (cellBoxHInput) {
+      const handleHChange = () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const val = parseFloat(cellBoxHInput.value);
+          if (!isNaN(val) && val >= 15 && val <= 300) {
+            setCellCustomBoxSize(cell, undefined, val);
+          }
+        }
+      };
+      cellBoxHInput.addEventListener('input', handleHChange);
+      cellBoxHInput.addEventListener('change', handleHChange);
+    }
+
+    // Done editing button
+    const btnDone = document.getElementById('btnEditorDone');
+    if (btnDone) {
+      btnDone.addEventListener('click', () => {
+        closeDirectiveDirectEditor(true);
+        showToast('Directive edits committed.');
+      });
+    }
+
     const btnCellReset = document.getElementById('btnCellFontReset');
     if (btnCellReset) {
       btnCellReset.addEventListener('click', () => {
@@ -9216,13 +9404,21 @@
           if (window.SVGElement && cell instanceof SVGElement && cell.id && defaultSizes[cell.id]) {
             cell.setAttribute('font-size', defaultSizes[cell.id]);
           }
-          autoFitCellText(cell);
-          if (cellFontInput) cellFontInput.value = Math.round(getCellCurrentFontSize(cell));
           if (state.customCellFonts && cell.id) {
             delete state.customCellFonts[cell.id];
-            saveStateToStorage();
           }
-          showToast(`Reset font size for ${getCellFriendlyName(cell)} to default (${Math.round(getCellCurrentFontSize(cell))}px)`);
+          if (state.customBoxSizes && cell.id) {
+            delete state.customBoxSizes[cell.id];
+          }
+          saveStateToStorage();
+
+          setFieldMultilineText(cell, getFieldRawText(cell));
+          syncToolbarBoxInputs(cell);
+
+          if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
+            openDirectiveDirectEditor(cell);
+          }
+          showToast(`Reset font and box size for ${getCellFriendlyName(cell)} to default.`);
         }
       });
     }
@@ -9231,6 +9427,11 @@
     const gridTable = document.getElementById('directiveGridTable');
     if (gridTable) {
       gridTable.addEventListener('click', (e) => {
+        // If clicking inside active editor, allow typing/editing without closing
+        if (activeDirectEditor && (e.target === activeDirectEditor || activeDirectEditor.contains(e.target))) {
+          return;
+        }
+
         // Check for releasing mode checkbox clicks
         const checkGrp = e.target.closest('.deh-check-grp');
         if (checkGrp) {
@@ -9252,10 +9453,40 @@
           return;
         }
 
-        // Direct editing target
+        // Direct editing target (if clicking directly on text or tspan)
         const targetCell = e.target.closest('td') || e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
         if (targetCell) {
           selectDirectiveCell(targetCell, true);
+          return;
+        }
+
+        // Coordinate-based cell selection: click anywhere in the cell box!
+        const svg = document.getElementById('directiveExactSvg');
+        if (svg) {
+          const svgRect = svg.getBoundingClientRect();
+          if (svgRect.width > 0 && svgRect.height > 0) {
+            const scaleX = 904 / svgRect.width;
+            const scaleY = 96 / svgRect.height;
+            const svgX = (e.clientX - svgRect.left) * scaleX;
+            const svgY = (e.clientY - svgRect.top) * scaleY;
+
+            // Releasing mode checkboxes (row 3 of column 3)
+            if (svgX >= 340 && svgX <= 564 && svgY > 73) {
+              if (svgX < 420) setMode('Install');
+              else if (svgX < 490) setMode('Deliver');
+              else setMode('Pickup');
+              return;
+            }
+
+            const fieldId = getFieldIdAtSvgCoords(svgX, svgY);
+            if (fieldId) {
+              const el = document.getElementById(fieldId);
+              if (el) {
+                selectDirectiveCell(el, true);
+                return;
+              }
+            }
+          }
         }
       });
 
@@ -9286,7 +9517,7 @@
       document.addEventListener('mousedown', (e) => {
         if (activeDirectEditor) {
           if (e.target === activeDirectEditor || activeDirectEditor.contains(e.target)) return;
-          if (e.target.closest && (e.target.closest('.doc-font-controls') || e.target.closest('.interactive-field') || e.target.closest('.bebas-field'))) return;
+          if (e.target.closest && (e.target.closest('.doc-font-controls') || e.target.closest('.interactive-field') || e.target.closest('.bebas-field') || e.target.closest('#directiveGridTable'))) return;
           closeDirectiveDirectEditor(true);
         }
       });

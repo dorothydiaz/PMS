@@ -6488,24 +6488,44 @@ input[type="password"]::-ms-clear {
   box-sizing: border-box;
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
   font-weight: 800;
-  border: 1.5px dashed #E10600;
-  border-radius: 2px;
+  border: 2px dashed #E10600;
+  border-radius: 3px;
   outline: none;
-  resize: none;
-  overflow: hidden;
-  white-space: pre;
-  word-break: break-word;
-  line-height: 1.05;
-  padding: 1px 3px;
+  resize: both !important;
+  overflow: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  line-height: 1.15;
+  padding: 2px 4px;
   margin: 0;
-  z-index: 100;
-  box-shadow: 0 4px 14px rgba(225, 6, 0, 0.25);
+  z-index: 150;
+  box-shadow: 0 4px 16px rgba(225, 6, 0, 0.35);
   transition: border-color 0.15s, box-shadow 0.15s;
+  min-width: 45px;
+  min-height: 18px;
+  max-width: 900px;
+  max-height: 300px;
 }
 
 .directive-direct-editor:focus {
-  border-color: #2563EB;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+  border: 2px solid #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+/* Red accent grabber handle for adjustable textbox corner */
+.directive-direct-editor::-webkit-resizer {
+  background-color: #E10600;
+  border-radius: 2px;
+}
+
+.font-ctrl-divider {
+  display: inline-block;
+  user-select: none;
+}
+
+.font-ctrl-label {
+  user-select: none;
+  font-size: 11px;
 }
 
 .deh-check-grp {
