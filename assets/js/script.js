@@ -7974,7 +7974,7 @@
     docFieldJoNumber: { x: 54, y: 2, w: 168, h: 29, color: '#FFFFFF', bg: '#000000', align: 'left', defaultSz: 20, weight: 'normal', name: 'JO Number' },
     docFieldInCharge: { x: 104, y: 35, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 'normal', name: 'In-Charge' },
     docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 13, weight: 'normal', name: 'Drawn By' },
-    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 10, weight: 'normal', name: 'Address' },
+    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'right', defaultSz: 10, weight: 'normal', name: 'Address' },
     docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Order Date' },
     docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 12, weight: 'normal', name: 'Due Date' },
     docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Release Date' },
@@ -8469,10 +8469,10 @@
     const input = document.getElementById('directiveLookupInput');
     if (input) input.value = rec.joNumber || rec.requestId || rec.projectName || '';
 
-    const setTxt = (id, val) => {
+    const setTxt = (id, val, fallback = '—') => {
       const el = document.getElementById(id);
       if (!el) return;
-      const textVal = (val !== undefined && val !== null && String(val).trim() !== '') ? String(val) : '—';
+      const textVal = (val !== undefined && val !== null && String(val).trim() !== '') ? String(val) : fallback;
       setFieldMultilineText(el, textVal);
     };
 
@@ -8501,8 +8501,8 @@
     setTxt('docFieldReleasingDate', toDotDate(rec.releasingDate));
     setTxt('docFieldReleasingMode', normalizeReleasingMode(rec.releasingMode));
     setTxt('docFieldAddress', (rec.completeAddress && rec.completeAddress !== 'N/A') ? rec.completeAddress : ((rec.location && rec.location !== 'N/A') ? rec.location : '-'));
-    setTxt('docFieldInstallers', rec.installers || '2 Installers');
-    setTxt('docFieldDuration', rec.duration || '1 Day (4 Hours)');
+    setTxt('docFieldInstallers', rec.installers || '', '');
+    setTxt('docFieldDuration', rec.duration || '', '');
 
     // Sync Checkboxes (Install / Deliver / Pick up)
     const mode = (rec.releasingMode || 'Pickup').toLowerCase();
@@ -8579,8 +8579,8 @@
       }
     };
 
-    bindSync('ctrlInstallers', 'docFieldInstallers', '2 Installers');
-    bindSync('ctrlDuration', 'docFieldDuration', '1 Day (4 Hours)');
+    bindSync('ctrlInstallers', 'docFieldInstallers', '');
+    bindSync('ctrlDuration', 'docFieldDuration', '');
     bindSync('ctrlInCharge', 'docFieldInCharge', 'DONA');
     bindSync('ctrlDrawnBy', 'docFieldDrawnBy', 'GLEN');
 
@@ -8762,8 +8762,8 @@
     const inChargeVal = (document.getElementById('docFieldInCharge')?.textContent?.trim() || rec.inCharge || rec.salesRep || 'SOL').toUpperCase();
     const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'DOROTHY').toUpperCase();
     const releasingModeVal = (document.getElementById('ctrlReleasingMode')?.value || rec.releasingMode || 'Pickup').toLowerCase();
-    const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '2 Installers';
-    const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '1 Day (4 Hours)';
+    const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '';
+    const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '';
     const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || rec.location || '-';
     const projectNameVal = document.getElementById('docFieldProjectName')?.textContent?.trim() || rec.projectName || 'DTF FABRIC';
     const clientVal = document.getElementById('docFieldClientName')?.textContent?.trim() || rec.client || 'DANIELA TAYANGONA';
@@ -8864,7 +8864,7 @@
   </g>
   <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
   <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
-  ${makeSvgField('docFieldAddress', 160, 89.5, 10, 'cond-bold center-txt', 'middle')}
+  ${makeSvgField('docFieldAddress', 216, 89.5, 10, 'cond-bold', 'end')}
 
   <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
 

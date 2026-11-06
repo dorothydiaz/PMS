@@ -178,7 +178,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                     </g>
                     <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
                     <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
-                    <text x="160" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field center-txt" id="docFieldAddress" data-field-name="Address" data-base-y="89.5" data-raw-text="<?= htmlspecialchars($docAddress) ?>"><?= htmlspecialchars($docAddress) ?></text>
+                    <text x="216" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldAddress" data-field-name="Address" data-base-y="89.5" data-raw-text="<?= htmlspecialchars($docAddress) ?>"><?= htmlspecialchars($docAddress) ?></text>
 
                     <!-- Vertical Divider 1 -->
                     <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
@@ -278,14 +278,14 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <rect x="822" y="0" width="82" height="22" fill="#000000"/>
                     <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
                     <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
-                    <text x="863" y="38" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldInstallers" data-field-name="Installers" data-base-y="38" data-raw-text="<?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?>"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></text>
+                    <text x="863" y="38" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldInstallers" data-field-name="Installers" data-base-y="38" data-raw-text="<?= htmlspecialchars($targetRecord['installers'] ?? '') ?>"><?= htmlspecialchars($targetRecord['installers'] ?? '') ?></text>
 
                     <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
 
                     <rect x="822" y="48" width="82" height="22" fill="#000000"/>
                     <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
                     <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
-                    <text x="863" y="86" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDuration" data-field-name="Duration" data-base-y="86" data-raw-text="<?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?>"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></text>
+                    <text x="863" y="86" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDuration" data-field-name="Duration" data-base-y="86" data-raw-text="<?= htmlspecialchars($targetRecord['duration'] ?? '') ?>"><?= htmlspecialchars($targetRecord['duration'] ?? '') ?></text>
 
                     <!-- Outer Border Outline -->
                     <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
@@ -300,11 +300,11 @@ require_once __DIR__ . '/includes/sidebar.php';
               <div class="form-grid-3">
                 <div class="form-group">
                   <label class="form-label">Number of Installers</label>
-                  <input type="text" class="form-control" id="ctrlInstallers" value="2 Installers">
+                  <input type="text" class="form-control" id="ctrlInstallers" value="<?= htmlspecialchars($targetRecord['installers'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Installation Duration</label>
-                  <input type="text" class="form-control" id="ctrlDuration" value="1 Day (4 Hours)">
+                  <input type="text" class="form-control" id="ctrlDuration" value="<?= htmlspecialchars($targetRecord['duration'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Releasing Mode</label>
