@@ -3285,6 +3285,8 @@ select.filter-input {
   align-items: flex-start;
   overflow-x: auto;
   box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.05);
+  position: relative;
+  z-index: 1;
 }
 
 /* Master Directive Landscape Letter Sheet (11in x 8.5in Ratio, Floating with Ambient Drop Shadow) */
@@ -3303,6 +3305,8 @@ select.filter-input {
   flex-direction: column;
   padding: 0.25in;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 /* Top Action Bar (Screen Only) */
@@ -3310,8 +3314,11 @@ select.filter-input {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   gap: 16px;
+  position: relative;
+  z-index: 1050;
+  width: 100%;
 }
 
 /* REQUEST ID NUMBER Badge (Solid Surfaces with Drop Shadow, No Outlines) */
@@ -6754,6 +6761,7 @@ input[type="password"]::-ms-clear {
   position: relative;
   display: inline-block;
   vertical-align: middle;
+  z-index: 1060;
 }
 
 .directive-dropdown-btn {
@@ -6773,15 +6781,15 @@ input[type="password"]::-ms-clear {
   top: calc(100% + 6px);
   right: 0;
   min-width: 320px;
-  max-height: 245px;
+  max-height: 420px;
   overflow-y: auto;
   overflow-x: hidden;
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22), 0 4px 12px rgba(15, 23, 42, 0.08);
   padding: 6px;
-  z-index: 1000;
+  z-index: 99999 !important;
   display: none;
   opacity: 0;
   transform: translateY(-6px);
@@ -6791,6 +6799,18 @@ input[type="password"]::-ms-clear {
   letter-spacing: normal !important;
   scrollbar-width: thin;
   scrollbar-color: #CBD5E1 #F8FAFC;
+}
+
+.directive-export-menu.open-on-top,
+.directive-dropdown-container.dropup .directive-export-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform: translateY(6px);
+}
+
+.directive-export-menu.open-on-top.show,
+.directive-dropdown-container.dropup .directive-export-menu.show {
+  transform: translateY(0);
 }
 
 .directive-export-menu::-webkit-scrollbar {

@@ -112,102 +112,103 @@ require_once __DIR__ . '/includes/sidebar.php';
 
           <!-- DIRECTIVE DOCUMENT PREVIEW (Exact Sign Depot Document Layout) -->
           <div class="directive-subtab-content active" id="tab-directive-preview" style="display: block;">
+            
+            <!-- Directive Top Quick Bar (Vector Ready) -->
+            <div class="doc-top-bar no-print">
+              <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; width: 100%;">
+                <!-- Real-time Font Size Controls -->
+                <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale font size, or edit text directly">
+                  <span class="font-ctrl-cell-badge" id="fontCtrlCellBadge">PROJECT NAME: 22px</span>
+                  <button class="btn-font-scale" id="btnCellFontDec" title="Decrease font size (Ctrl+[)">A−</button>
+                  <input type="number" class="cell-font-size-input" id="cellFontSizeInput" min="6" max="72" value="22" title="Custom font size in px">
+                  <span class="font-ctrl-unit">px</span>
+                  <button class="btn-font-scale" id="btnCellFontInc" title="Increase font size (Ctrl+])">A+</button>
+                  <button class="btn-font-scale" id="btnCellFontReset" title="Reset font size for active field">↺</button>
+                </div>
+
+                <!-- Real-time Zoom Controls -->
+                <div class="doc-font-controls doc-zoom-controls" id="directiveZoomControls" title="Zoom Directive Preview">
+                  <span class="font-ctrl-cell-badge" id="zoomCtrlBadge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    ZOOM
+                  </span>
+                  <button class="btn-font-scale" id="btnDirectiveZoomOut" title="Zoom Out (−)">−</button>
+                  <span class="zoom-level-text" id="directiveZoomLevelText" title="Click to toggle or reset zoom">100%</span>
+                  <button class="btn-font-scale" id="btnDirectiveZoomIn" title="Zoom In (+)">+</button>
+                  <button class="btn-font-scale" id="btnDirectiveZoomFit" title="Fit to Container Width">FIT</button>
+                  <button class="btn-font-scale" id="btnDirectiveZoomReset" title="Reset Zoom to 100%">↺</button>
+                </div>
+
+                <div class="directive-dropdown-container">
+                  <button class="btn btn-primary btn-sm directive-dropdown-btn" id="btnDirectiveExportDropdown" type="button" aria-haspopup="true" aria-expanded="false">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Export / Copy</span>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <div class="directive-export-menu" id="directiveExportMenu">
+                    <button type="button" class="directive-export-item is-featured" id="optDirectiveDownloadEMF">
+                      <div class="export-item-icon emf-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      </div>
+                      <div class="export-item-body">
+                        <div class="export-item-title-row">
+                          <span class="export-item-title">Download EMF (CorelDRAW)</span>
+                          <span class="export-item-badge badge-corel">CorelDRAW Compatible</span>
+                        </div>
+                        <span class="export-item-desc">Native vector with outlined text — 1-click import into CorelDRAW</span>
+                      </div>
+                    </button>
+                    
+                    <div class="directive-export-divider"></div>
+
+                    <button type="button" class="directive-export-item" id="optDirectiveCopyPNG">
+                      <div class="export-item-icon img-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                      </div>
+                      <div class="export-item-body">
+                        <div class="export-item-title-row">
+                          <span class="export-item-title">Copy Image 4K (Ctrl+V)</span>
+                          <span class="export-item-badge badge-green">Ultra-Sharp</span>
+                        </div>
+                        <span class="export-item-desc">3616 × 384 px clipboard image — instant Ctrl+V into Corel / PS</span>
+                      </div>
+                    </button>
+
+                    <button type="button" class="directive-export-item" id="optDirectiveCopySVG">
+                      <div class="export-item-icon svg-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                      </div>
+                      <div class="export-item-body">
+                        <div class="export-item-title-row">
+                          <span class="export-item-title">Copy Vector SVG</span>
+                          <span class="export-item-badge badge-blue">Illustrator / Figma</span>
+                        </div>
+                        <span class="export-item-desc">Standard vector SVG code copied directly to clipboard</span>
+                      </div>
+                    </button>
+
+                    <div class="directive-export-divider"></div>
+
+                    <button type="button" class="directive-export-item" id="optDirectiveDownloadSVG">
+                      <div class="export-item-icon dl-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      </div>
+                      <div class="export-item-body">
+                        <div class="export-item-title-row">
+                          <span class="export-item-title">Download Vector SVG (.svg)</span>
+                        </div>
+                        <span class="export-item-desc">Raw scalable vector graphic file</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnDirectiveReset" title="Reset directive to default values">Reset</button>
+              </div>
+            </div>
+
             <div class="directive-canvas-wrap">
               <!-- Master Directive Landscape Letter Sheet (11in x 8.5in Ratio) -->
               <div class="directive-sheet-landscape" id="printableDirectiveDocument">
-                <!-- Directive Top Quick Bar (Vector Ready) -->
-                <div class="doc-top-bar no-print">
-                  <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <!-- Real-time Font Size Controls -->
-                    <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale font size, or edit text directly">
-                      <span class="font-ctrl-cell-badge" id="fontCtrlCellBadge">PROJECT NAME: 22px</span>
-                      <button class="btn-font-scale" id="btnCellFontDec" title="Decrease font size (Ctrl+[)">A−</button>
-                      <input type="number" class="cell-font-size-input" id="cellFontSizeInput" min="6" max="72" value="22" title="Custom font size in px">
-                      <span class="font-ctrl-unit">px</span>
-                      <button class="btn-font-scale" id="btnCellFontInc" title="Increase font size (Ctrl+])">A+</button>
-                      <button class="btn-font-scale" id="btnCellFontReset" title="Reset font size for active field">↺</button>
-                    </div>
-
-                    <!-- Real-time Zoom Controls -->
-                    <div class="doc-font-controls doc-zoom-controls" id="directiveZoomControls" title="Zoom Directive Preview">
-                      <span class="font-ctrl-cell-badge" id="zoomCtrlBadge">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-                        ZOOM
-                      </span>
-                      <button class="btn-font-scale" id="btnDirectiveZoomOut" title="Zoom Out (−)">−</button>
-                      <span class="zoom-level-text" id="directiveZoomLevelText" title="Click to toggle or reset zoom">100%</span>
-                      <button class="btn-font-scale" id="btnDirectiveZoomIn" title="Zoom In (+)">+</button>
-                      <button class="btn-font-scale" id="btnDirectiveZoomFit" title="Fit to Container Width">FIT</button>
-                      <button class="btn-font-scale" id="btnDirectiveZoomReset" title="Reset Zoom to 100%">↺</button>
-                    </div>
-
-                    <div class="directive-dropdown-container">
-                      <button class="btn btn-primary btn-sm directive-dropdown-btn" id="btnDirectiveExportDropdown" type="button" aria-haspopup="true" aria-expanded="false" title="Export or Copy Directive (EMF, SVG, 4K Image)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        <span>Export / Copy</span>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                      </button>
-                      <div class="directive-export-menu" id="directiveExportMenu">
-                        <button type="button" class="directive-export-item is-featured" id="optDirectiveDownloadEMF" title="Download pure vector EMF file directly compatible with CorelDRAW">
-                          <div class="export-item-icon emf-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                          </div>
-                          <div class="export-item-body">
-                            <div class="export-item-title-row">
-                              <span class="export-item-title">Download EMF (CorelDRAW)</span>
-                              <span class="export-item-badge badge-corel">CorelDRAW Compatible</span>
-                            </div>
-                            <span class="export-item-desc">Native vector with outlined text — 1-click import into CorelDRAW</span>
-                          </div>
-                        </button>
-                        
-                        <div class="directive-export-divider"></div>
-
-                        <button type="button" class="directive-export-item" id="optDirectiveCopyPNG" title="Copy ultra high-res 4K graphic (3616 × 384 px) to clipboard for direct Ctrl+V pasting into CorelDRAW, Photoshop, Affinity, or Illustrator">
-                          <div class="export-item-icon img-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                          </div>
-                          <div class="export-item-body">
-                            <div class="export-item-title-row">
-                              <span class="export-item-title">Copy Image 4K (Ctrl+V)</span>
-                              <span class="export-item-badge badge-green">Ultra-Sharp</span>
-                            </div>
-                            <span class="export-item-desc">3616 × 384 px clipboard image — instant Ctrl+V into Corel / PS</span>
-                          </div>
-                        </button>
-
-                        <button type="button" class="directive-export-item" id="optDirectiveCopySVG" title="Copy exact vector SVG to clipboard for Illustrator, Figma, or CorelDRAW">
-                          <div class="export-item-icon svg-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                          </div>
-                          <div class="export-item-body">
-                            <div class="export-item-title-row">
-                              <span class="export-item-title">Copy Vector SVG</span>
-                              <span class="export-item-badge badge-blue">Illustrator / Figma</span>
-                            </div>
-                            <span class="export-item-desc">Standard vector SVG code copied directly to clipboard</span>
-                          </div>
-                        </button>
-
-                        <div class="directive-export-divider"></div>
-
-                        <button type="button" class="directive-export-item" id="optDirectiveDownloadSVG" title="Download standard Vector SVG file">
-                          <div class="export-item-icon dl-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                          </div>
-                          <div class="export-item-body">
-                            <div class="export-item-title-row">
-                              <span class="export-item-title">Download Vector SVG (.svg)</span>
-                            </div>
-                            <span class="export-item-desc">Raw scalable vector graphic file</span>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                    <button class="btn btn-secondary btn-sm" id="btnDirectiveReset" title="Reset directive to default values">Reset</button>
-                  </div>
-                </div>
-
                 <!-- Exact 1:1 Vector Production Directive Header (Pure Original SVG Format with Bebas Kai & Dynamic Fields) -->
                 <div class="directive-zoom-container" id="directiveZoomContainer">
                   <div class="directive-exact-header-wrap" id="directiveGridTable">

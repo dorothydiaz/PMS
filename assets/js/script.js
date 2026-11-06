@@ -9650,9 +9650,19 @@
         const isOpen = expMenu.classList.contains('show');
         document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
         if (!isOpen) {
+          const rect = btnExpDropdown.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          if (spaceBelow < 260 && spaceAbove > 220) {
+            expMenu.classList.add('open-on-top');
+          } else {
+            expMenu.classList.remove('open-on-top');
+          }
           expMenu.classList.add('show');
           btnExpDropdown.setAttribute('aria-expanded', 'true');
         } else {
+          expMenu.classList.remove('show');
+          expMenu.classList.remove('open-on-top');
           btnExpDropdown.setAttribute('aria-expanded', 'false');
         }
       });
