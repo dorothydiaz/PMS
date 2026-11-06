@@ -241,11 +241,9 @@ require_once __DIR__ . '/includes/sidebar.php';
             <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
             <text x="218" y="47" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldInCharge" data-field-name="In-Charge" data-base-y="47" data-raw-text="<?= htmlspecialchars($docInCharge) ?>"><?= htmlspecialchars($docInCharge) ?></text>
 
-            <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
             <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
             <text x="218" y="68" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldDrawnBy" data-field-name="Drawn By" data-base-y="68" data-raw-text="<?= htmlspecialchars($docDrawnBy) ?>"><?= htmlspecialchars($docDrawnBy) ?></text>
 
-            <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
             <g transform="translate(7, 80) scale(0.65)">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
             </g>
@@ -289,8 +287,6 @@ require_once __DIR__ . '/includes/sidebar.php';
             <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
             <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldProjectName" data-field-name="Project Name" data-base-y="65" data-raw-text="<?= htmlspecialchars($docProj) ?>"><?= htmlspecialchars($docProj) ?></text>
 
-            <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
-
             <g class="deh-check-grp" id="grpCheckInstall" style="cursor: pointer;" data-mode="Install">
               <rect x="347" y="78.5" width="10" height="10" fill="<?= strtolower($docReleasingMode) === 'install' ? '#E10600' : '#FFFFFF' ?>" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
               <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckInstall" style="display:none;"></text>
@@ -328,8 +324,6 @@ require_once __DIR__ . '/includes/sidebar.php';
             <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
             <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
             <text x="765" y="59" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactPerson" data-field-name="Contact Person" data-base-y="59" data-raw-text="<?= htmlspecialchars($docContact) ?>"><?= htmlspecialchars($docContact) ?></text>
-
-            <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
 
             <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
             <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>

@@ -9304,11 +9304,9 @@
   <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
   ${makeSvgField('docFieldInCharge', 218, 47, 13, 'cond-bold', 'end')}
 
-  <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
   <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
   ${makeSvgField('docFieldDrawnBy', 218, 68, 13, 'cond-bold', 'end')}
 
-  <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
   <g transform="translate(7, 80) scale(0.65)">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
   </g>
@@ -9347,7 +9345,6 @@
   }
   <line x1="${clientX1}" y1="${clientFit.divY}" x2="${clientX2}" y2="${clientFit.divY}" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
   ${makeSvgField('docFieldProjectName', 452, clientFit.projY, projAutoSz, 'cond-bold center-txt', 'middle', '0.5')}
-  <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
   <rect x="347" y="78.5" width="10" height="10" fill="${releasingModeVal === 'install' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
   <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
@@ -9379,7 +9376,6 @@
   <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
   ${makeSvgField('docFieldContactPerson', 765, 59, 11, 'cond-bold center-txt', 'middle')}
 
-  <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
   <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
   <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
   ${makeSvgField('docFieldContactNumber', 765, 86, 11, 'cond-bold center-txt', 'middle')}
