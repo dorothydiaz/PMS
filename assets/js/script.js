@@ -4672,6 +4672,7 @@
     monthlyOutputPerPage: initialRowsPerPage,
     selectedTemplateElemId: null,
     customCellFonts: {},
+    directiveZoom: 100,
     draftSalesRequest: null
   };
 
@@ -4840,6 +4841,7 @@
                 }
               });
             }
+            if (parsed.directiveZoom) state.directiveZoom = parsed.directiveZoom;
             if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
             if (parsed.attachments && Array.isArray(parsed.attachments) && parsed.attachments.length > 0) {
               state.attachments = parsed.attachments;
@@ -4957,7 +4959,8 @@
         requests: state.requests,
         templateElements: state.templateElements,
         attachments: state.attachments,
-        customCellFonts: state.customCellFonts || {}
+        customCellFonts: state.customCellFonts || {},
+        directiveZoom: state.directiveZoom || 100
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
       if (window.PmsCache) {
@@ -9249,6 +9252,7 @@
     if (btnReset) {
       btnReset.addEventListener('click', () => {
         state.customCellFonts = {};
+        if (typeof setDirectiveZoom === 'function') setDirectiveZoom(100);
         saveStateToStorage();
         const table = document.getElementById('directiveGridTable');
         if (table) {
@@ -9605,6 +9609,109 @@
         }
       });
     });
+  }
+
+  // DIRECTIVE REAL-TIME ZOOM ENGINE & CONTROLS
+  const DIRECTIVE_ZOOM_LEVELS = [50, 65, 75, 85, 100, 115, 125, 150, 175, 200, 250, 300];
+
+  function setDirectiveZoom(zoom) {
+    const clamped = Math.max(40, Math.min(350, Math.round(zoom)));
+    state.directiveZoom = clamped;
+    saveStateToStorage();
+
+    const wrap = document.getElementById('directiveGridTable');
+    const label = document.getElementById('directiveZoomLevelText');
+    const baseW = 904;
+    const baseH = 96;
+    const newW = Math.round((baseW * clamped) / 100);
+    const newH = Math.round((baseH * clamped) / 100);
+
+    if (wrap) {
+      wrap.style.setProperty('--directive-zoom-width', newW + 'px');
+      wrap.style.setProperty('--directive-zoom-height', newH + 'px');
+      wrap.style.width = newW + 'px';
+      wrap.style.height = newH + 'px';
+      wrap.style.minWidth = newW + 'px';
+      wrap.style.minHeight = newH + 'px';
+    }
+
+    if (label) {
+      label.textContent = clamped + '%';
+    }
+
+    if (activeDirectEditor && activeDirectEditor.__targetCell) {
+      openDirectiveDirectEditor(activeDirectEditor.__targetCell);
+    }
+  }
+
+  function setupDirectiveZoomControls() {
+    const btnZoomOut = document.getElementById('btnDirectiveZoomOut');
+    const btnZoomIn = document.getElementById('btnDirectiveZoomIn');
+    const btnZoomReset = document.getElementById('btnDirectiveZoomReset');
+    const btnZoomFit = document.getElementById('btnDirectiveZoomFit');
+    const zoomLabel = document.getElementById('directiveZoomLevelText');
+    const container = document.getElementById('directiveZoomContainer');
+
+    const getCurrentZoom = () => state.directiveZoom || 100;
+
+    if (btnZoomOut) {
+      btnZoomOut.addEventListener('click', () => {
+        const cur = getCurrentZoom();
+        const smaller = DIRECTIVE_ZOOM_LEVELS.filter(z => z < cur);
+        const next = smaller.length > 0 ? smaller[smaller.length - 1] : Math.max(40, cur - 15);
+        setDirectiveZoom(next);
+      });
+    }
+
+    if (btnZoomIn) {
+      btnZoomIn.addEventListener('click', () => {
+        const cur = getCurrentZoom();
+        const larger = DIRECTIVE_ZOOM_LEVELS.filter(z => z > cur);
+        const next = larger.length > 0 ? larger[0] : Math.min(350, cur + 15);
+        setDirectiveZoom(next);
+      });
+    }
+
+    if (btnZoomReset) {
+      btnZoomReset.addEventListener('click', () => {
+        setDirectiveZoom(100);
+        showToast('Zoom reset to 100%');
+      });
+    }
+
+    if (zoomLabel) {
+      zoomLabel.addEventListener('click', () => {
+        const cur = getCurrentZoom();
+        setDirectiveZoom(cur === 100 ? 150 : 100);
+      });
+    }
+
+    if (btnZoomFit) {
+      btnZoomFit.addEventListener('click', () => {
+        if (!container) return;
+        const availW = container.clientWidth - 28;
+        if (availW > 100) {
+          const fitZoom = Math.round((availW / 904) * 100);
+          setDirectiveZoom(fitZoom);
+          showToast('Zoom fitted to container: ' + fitZoom + '%');
+        }
+      });
+    }
+
+    if (container) {
+      container.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          const cur = getCurrentZoom();
+          const delta = e.deltaY < 0 ? 10 : -10;
+          setDirectiveZoom(cur + delta);
+        }
+      }, { passive: false });
+    }
+
+    if (state.directiveZoom && state.directiveZoom !== 100) {
+      setDirectiveZoom(state.directiveZoom);
+    }
   }
 
   function copyFallback(text) {
@@ -15295,6 +15402,7 @@
         state.customBoxPositions = {};
         state.customBoxSizes = {};
         state.customCellFonts = {};
+        if (typeof setDirectiveZoom === 'function') setDirectiveZoom(100);
         saveStateToStorage();
         STUDIO_FIELDS.forEach(f => {
           const el = document.getElementById(f.id);
@@ -15326,6 +15434,7 @@
     setupDirectiveControlsSync();
     setupDirectiveAutocomplete();
     setupDirectiveActions();
+    setupDirectiveZoomControls();
     setupGlobalSearch();
     setupModals();
 

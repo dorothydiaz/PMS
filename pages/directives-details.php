@@ -107,6 +107,19 @@ require_once __DIR__ . '/includes/sidebar.php';
                       <button class="btn-font-scale" id="btnCellFontReset" title="Reset font size for active field">↺</button>
                     </div>
 
+                    <!-- Real-time Zoom Controls -->
+                    <div class="doc-font-controls doc-zoom-controls" id="directiveZoomControls" title="Zoom Directive Preview">
+                      <span class="font-ctrl-cell-badge" id="zoomCtrlBadge" style="display:inline-flex; align-items:center; gap:4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                        ZOOM
+                      </span>
+                      <button class="btn-font-scale" id="btnDirectiveZoomOut" title="Zoom Out (−)">−</button>
+                      <span class="zoom-level-text" id="directiveZoomLevelText" style="font-weight: 800; font-size: 11.5px; min-width: 42px; text-align: center; color: #0F172A; cursor: pointer; user-select: none;" title="Click to toggle or reset zoom">100%</span>
+                      <button class="btn-font-scale" id="btnDirectiveZoomIn" title="Zoom In (+)">+</button>
+                      <button class="btn-font-scale" id="btnDirectiveZoomFit" title="Fit to Container Width" style="font-size: 10px; font-weight: 800; padding: 2px 6px;">FIT</button>
+                      <button class="btn-font-scale" id="btnDirectiveZoomReset" title="Reset Zoom to 100%">↺</button>
+                    </div>
+
                     <button class="btn btn-primary btn-sm" id="btnDirectiveCopySVG" title="Copy exact vector SVG to clipboard for Illustrator, Figma, or CorelDRAW">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                       Copy Vector SVG
@@ -120,7 +133,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                 </div>
 
                 <!-- Exact 1:1 Vector Production Directive Header (Pure Original SVG Format with Bebas Kai & Dynamic Fields) -->
-                <div class="directive-exact-header-wrap" id="directiveGridTable">
+                <div class="directive-zoom-container" id="directiveZoomContainer">
+                  <div class="directive-exact-header-wrap" id="directiveGridTable">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="904" height="96" id="directiveExactSvg" style="background:#FFFFFF; display:block;">
                     <defs>
                       <style>
@@ -293,6 +307,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                 </div>
               </div>
             </div>
+          </div>
 
             <!-- Live Adjustment Controls -->
             <div class="studio-card directive-extra-notes" style="margin-top: 20px;">

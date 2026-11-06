@@ -6439,26 +6439,54 @@ input[type="password"]::-ms-clear {
 /* ==========================================================================
    EXACT 1:1 DIRECTIVE HEADER TEMPLATE COMPONENT (Clear Vector & High-Res)
    ========================================================================== */
+.directive-zoom-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 0 18px;
+  box-sizing: border-box;
+  display: flex;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 #F1F5F9;
+}
+
+.directive-zoom-container::-webkit-scrollbar {
+  height: 6px;
+}
+.directive-zoom-container::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 4px;
+}
+.directive-zoom-container::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+.directive-zoom-container::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
 .directive-exact-header-wrap {
   position: relative;
-  width: 904px;
-  height: 96px;
-  max-width: 100%;
-  margin: 0 auto 24px;
+  width: var(--directive-zoom-width, 904px);
+  height: var(--directive-zoom-height, 96px);
+  min-width: var(--directive-zoom-width, 904px);
+  min-height: var(--directive-zoom-height, 96px);
+  margin: 0 auto;
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-x: auto;
   background-color: #FFFFFF;
   box-sizing: border-box;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif;
+  transition: width 0.12s ease-out, height 0.12s ease-out, min-width 0.12s ease-out, min-height 0.12s ease-out;
 }
 
 .directive-exact-header-wrap svg {
   display: block;
-  width: 904px !important;
-  height: 96px !important;
+  width: 100% !important;
+  height: 100% !important;
   flex-shrink: 0;
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif;
 }
@@ -6843,7 +6871,15 @@ input[type="password"]::-ms-clear {
 
 /* Print Overrides for 1:1 Directive Header */
 @media print {
+  .directive-zoom-container {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
   .directive-exact-header-wrap {
+    width: 904px !important;
+    height: 96px !important;
+    min-width: 904px !important;
+    min-height: 96px !important;
     box-shadow: none !important;
     border: 2px solid #000000 !important;
     page-break-inside: avoid !important;
