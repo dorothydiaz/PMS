@@ -8560,17 +8560,6 @@
       });
     }
 
-    const ctrlLoc = document.getElementById('ctrlLocation');
-    if (ctrlLoc) {
-      ctrlLoc.addEventListener('change', () => {
-        const val = ctrlLoc.value;
-        const indoor = val.includes('Indoor');
-        const outdoor = val.includes('Outdoor');
-        setDirectiveLocation(indoor, outdoor);
-        showToast(`Location set to: ${val || 'None'}`);
-      });
-    }
-
     const ctrlMode = document.getElementById('ctrlReleasingMode');
     const ctrlNotes = document.getElementById('ctrlNotes');
     const ctrlInCharge = document.getElementById('ctrlInCharge');
@@ -15518,7 +15507,6 @@
         selectStudioField(targetCell.id);
         return;
       }
-      const coords = getArtboardCoords(e);
       const fieldId = getFieldIdAtSvgCoords(coords.x, coords.y);
       if (fieldId) {
         selectStudioField(fieldId);
