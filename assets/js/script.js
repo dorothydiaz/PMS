@@ -9469,6 +9469,135 @@
       }
     };
 
+    // Download EMF file converted for native CorelDRAW vector compatibility
+    async function downloadDirectiveEMF(record) {
+      const cur = record || (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+      const svgString = generateDirectiveSVG(cur);
+      const joRaw = cur && (cur.joNumber || cur.requestId || 'Header');
+      const joClean = String(joRaw).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `Directive-Header-${joClean}`;
+
+      showToast('Converting vector to CorelDRAW EMF format...', 'info');
+
+      try {
+        const formData = new FormData();
+        formData.append('svg', svgString);
+        formData.append('filename', filename);
+
+        const apiEndpoint = (window.PMS_API_URL || 'api.php') + '?action=convert_emf';
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          let msg = 'Conversion failed';
+          try {
+            const j = JSON.parse(errText);
+            if (j.error) msg = j.error;
+          } catch (e) {
+            if (errText) msg = errText;
+          }
+          throw new Error(msg);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.emf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('CorelDRAW EMF vector downloaded! Drag & drop directly into CorelDRAW or press Ctrl+I.', 'success');
+      } catch (err) {
+        console.error('EMF conversion error:', err);
+        showToast('Failed to convert EMF: ' + err.message, 'error');
+      }
+    }
+    window.downloadDirectiveEMF = downloadDirectiveEMF;
+
+    // Export Dropdown menu bindings (Directives Details page)
+    const btnExpDropdown = document.getElementById('btnDirectiveExportDropdown');
+    const expMenu = document.getElementById('directiveExportMenu');
+    if (btnExpDropdown && expMenu) {
+      btnExpDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = expMenu.classList.contains('show');
+        document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
+        if (!isOpen) {
+          expMenu.classList.add('show');
+          btnExpDropdown.setAttribute('aria-expanded', 'true');
+        } else {
+          btnExpDropdown.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    if (!window.__directiveExportMenuGlobalListenerAttached) {
+      window.__directiveExportMenuGlobalListenerAttached = true;
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.directive-dropdown-container')) {
+          document.querySelectorAll('.directive-export-menu.show').forEach(m => {
+            m.classList.remove('show');
+            const btn = m.parentElement ? m.parentElement.querySelector('.directive-dropdown-btn') : null;
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+          });
+        }
+      });
+    }
+
+    const optDownloadEMF = document.getElementById('optDirectiveDownloadEMF');
+    if (optDownloadEMF) {
+      optDownloadEMF.addEventListener('click', () => {
+        if (expMenu) expMenu.classList.remove('show');
+        downloadDirectiveEMF();
+      });
+    }
+
+    const optCopyPNG = document.getElementById('optDirectiveCopyPNG');
+    if (optCopyPNG) {
+      optCopyPNG.addEventListener('click', (e) => {
+        if (expMenu) expMenu.classList.remove('show');
+        const legacyBtn = document.getElementById('btnDirectiveCopyPNG');
+        if (legacyBtn) legacyBtn.click();
+      });
+    }
+
+    const optCopySVG = document.getElementById('optDirectiveCopySVG');
+    if (optCopySVG) {
+      optCopySVG.addEventListener('click', (e) => {
+        if (expMenu) expMenu.classList.remove('show');
+        handleCopyVector(e);
+      });
+    }
+
+    const optDownloadSVG = document.getElementById('optDirectiveDownloadSVG');
+    if (optDownloadSVG) {
+      optDownloadSVG.addEventListener('click', () => {
+        if (expMenu) expMenu.classList.remove('show');
+        const legacyDl = document.getElementById('btnDirectiveDownloadSVG');
+        if (legacyDl) {
+          legacyDl.click();
+        } else {
+          const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                      (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+          const svgString = generateDirectiveSVG(cur);
+          const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.');
+        }
+      });
+    }
+
     const btnCopySVG = document.getElementById('btnDirectiveCopySVG');
     const btnQuickCopy = document.getElementById('btnQuickCopyVector');
     if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
@@ -15976,7 +16105,65 @@
       };
     });
 
-    // 8. Studio Export Actions
+    // 8. Studio Export Actions & Dropdown
+    const btnStudioExpDropdown = document.getElementById('btnStudioExportDropdown');
+    const studioExpMenu = document.getElementById('studioExportMenu');
+    if (btnStudioExpDropdown && studioExpMenu) {
+      btnStudioExpDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = studioExpMenu.classList.contains('show');
+        document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
+        if (!isOpen) {
+          studioExpMenu.classList.add('show');
+          btnStudioExpDropdown.setAttribute('aria-expanded', 'true');
+        } else {
+          btnStudioExpDropdown.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    const optStudioDownloadEMF = document.getElementById('optStudioDownloadEMF');
+    if (optStudioDownloadEMF) {
+      optStudioDownloadEMF.addEventListener('click', () => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        downloadDirectiveEMF();
+      });
+    }
+
+    const optStudioCopyPNG = document.getElementById('optStudioCopyPNG');
+    if (optStudioCopyPNG) {
+      optStudioCopyPNG.addEventListener('click', (e) => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        if (copyPngBtn) copyPngBtn.click();
+      });
+    }
+
+    const optStudioCopySVG = document.getElementById('optStudioCopySVG');
+    if (optStudioCopySVG) {
+      optStudioCopySVG.addEventListener('click', (e) => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        if (copySvgBtn) copySvgBtn.click();
+      });
+    }
+
+    const optStudioDownloadSVG = document.getElementById('optStudioDownloadSVG');
+    if (optStudioDownloadSVG) {
+      optStudioDownloadSVG.addEventListener('click', () => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgString = generateDirectiveSVG(cur);
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.');
+      });
+    }
+
     const copySvgBtn = document.getElementById('studioCopySVG');
     if (copySvgBtn) {
       copySvgBtn.onclick = () => {

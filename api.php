@@ -209,6 +209,102 @@ if (!empty($inputJson)) {
 }
 
 switch ($action) {
+    case 'convert_emf':
+        // CorelDRAW-compatible EMF vector conversion
+        $svg = $_POST['svg'] ?? $bodyData['svg'] ?? '';
+        $rawFilename = $_POST['filename'] ?? $bodyData['filename'] ?? 'Directive-Header';
+        $filename = preg_replace('/[^a-zA-Z0-9_-]/', '_', $rawFilename);
+        if (empty($filename)) $filename = 'Directive-Header';
+
+        if (empty($svg)) {
+            sendJsonResponse(['success' => false, 'error' => 'SVG data is required for conversion.'], 400);
+            exit;
+        }
+
+        // Locate Inkscape executable
+        $candidatePaths = [
+            'C:\\Program Files\\Inkscape\\bin\\inkscape.com',
+            'C:\\Program Files\\Inkscape\\bin\\inkscape.exe',
+            'C:\\Program Files (x86)\\Inkscape\\bin\\inkscape.com',
+            'C:\\Program Files (x86)\\Inkscape\\bin\\inkscape.exe',
+            'inkscape'
+        ];
+
+        $inkscapePath = null;
+        foreach ($candidatePaths as $p) {
+            if ($p === 'inkscape') {
+                $check = @shell_exec('where inkscape 2>nul');
+                if (!empty($check)) {
+                    $inkscapePath = 'inkscape';
+                    break;
+                }
+            } elseif (file_exists($p)) {
+                $inkscapePath = $p;
+                break;
+            }
+        }
+
+        if (!$inkscapePath) {
+            sendJsonResponse(['success' => false, 'error' => 'Inkscape converter not found on server.'], 500);
+            exit;
+        }
+
+        $tempSvg = tempnam(sys_get_temp_dir(), 'svg_') . '.svg';
+        $tempEmf = tempnam(sys_get_temp_dir(), 'emf_') . '.emf';
+        file_put_contents($tempSvg, $svg);
+
+        // Convert with text-to-path for 100% outline fidelity in CorelDRAW
+        $cmd = escapeshellarg($inkscapePath) . ' ' . escapeshellarg($tempSvg) . ' -o ' . escapeshellarg($tempEmf) . ' --export-text-to-path 2>&1';
+        $cmdOutput = [];
+        $returnCode = 0;
+        exec($cmd, $cmdOutput, $returnCode);
+
+        // Fallback without --export-text-to-path if first attempt produced an empty file
+        if (!file_exists($tempEmf) || filesize($tempEmf) === 0) {
+            $cmdFallback = escapeshellarg($inkscapePath) . ' ' . escapeshellarg($tempSvg) . ' -o ' . escapeshellarg($tempEmf) . ' 2>&1';
+            exec($cmdFallback, $cmdOutput, $returnCode);
+        }
+
+        if (file_exists($tempEmf) && filesize($tempEmf) > 0) {
+            $emfContent = file_get_contents($tempEmf);
+            @unlink($tempSvg);
+            @unlink($tempEmf);
+
+            $reqFormat = $_GET['format'] ?? $_POST['format'] ?? $bodyData['format'] ?? '';
+            if ($reqFormat === 'json') {
+                sendJsonResponse([
+                    'success' => true,
+                    'filename' => $filename . '.emf',
+                    'base64' => base64_encode($emfContent),
+                    'size' => strlen($emfContent)
+                ]);
+                exit;
+            }
+
+            // Stream binary file download
+            while (ob_get_level()) { ob_end_clean(); }
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/x-msmetafile');
+            header('Content-Disposition: attachment; filename="' . $filename . '.emf"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . strlen($emfContent));
+            echo $emfContent;
+            exit;
+        } else {
+            @unlink($tempSvg);
+            @unlink($tempEmf);
+            sendJsonResponse([
+                'success' => false,
+                'error' => 'Inkscape failed to generate EMF file.',
+                'details' => implode("\n", $cmdOutput)
+            ], 500);
+            exit;
+        }
+        break;
+
     case 'get_stats':
         try {
             $today = date('Y-m-d');

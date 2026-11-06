@@ -98,14 +98,69 @@ require_once __DIR__ . '/includes/sidebar.php';
 
     <!-- Export & Sync Actions -->
     <div class="studio-nav-right">
-      <button class="btn btn-sm btn-primary" id="studioCopySVG" title="Copy clean Vector SVG code for Adobe Illustrator, Figma, or CorelDRAW">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-        Copy Vector SVG
-      </button>
-      <button class="btn btn-sm btn-green" id="studioCopyPNG" title="Copy 4K Ultra-Sharp Bitmap (3616×384) to clipboard">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-        Copy Image 4K
-      </button>
+      <div class="directive-dropdown-container">
+        <button class="btn btn-sm btn-primary directive-dropdown-btn" id="btnStudioExportDropdown" type="button" aria-haspopup="true" aria-expanded="false" title="Export or Copy Directive (EMF, SVG, 4K Image)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Export / Copy</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="directive-export-menu" id="studioExportMenu">
+          <button type="button" class="directive-export-item is-featured" id="optStudioDownloadEMF" title="Download pure vector EMF file directly compatible with CorelDRAW">
+            <div class="export-item-icon emf-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="export-item-body">
+              <div class="export-item-title-row">
+                <span class="export-item-title">Download EMF (CorelDRAW)</span>
+                <span class="export-item-badge badge-corel">CorelDRAW Compatible</span>
+              </div>
+              <span class="export-item-desc">Native vector with outlined text — 1-click import into CorelDRAW</span>
+            </div>
+          </button>
+          
+          <div class="directive-export-divider"></div>
+
+          <button type="button" class="directive-export-item" id="optStudioCopyPNG" title="Copy 4K Ultra-Sharp Bitmap (3616×384) to clipboard">
+            <div class="export-item-icon img-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+            <div class="export-item-body">
+              <div class="export-item-title-row">
+                <span class="export-item-title">Copy Image 4K (Ctrl+V)</span>
+                <span class="export-item-badge badge-green">Ultra-Sharp</span>
+              </div>
+              <span class="export-item-desc">3616 × 384 px clipboard image — instant Ctrl+V into Corel / PS</span>
+            </div>
+          </button>
+
+          <button type="button" class="directive-export-item" id="optStudioCopySVG" title="Copy clean Vector SVG code for Adobe Illustrator, Figma, or CorelDRAW">
+            <div class="export-item-icon svg-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </div>
+            <div class="export-item-body">
+              <div class="export-item-title-row">
+                <span class="export-item-title">Copy Vector SVG</span>
+                <span class="export-item-badge badge-blue">Illustrator / Figma</span>
+              </div>
+              <span class="export-item-desc">Standard vector SVG code copied directly to clipboard</span>
+            </div>
+          </button>
+
+          <div class="directive-export-divider"></div>
+
+          <button type="button" class="directive-export-item" id="optStudioDownloadSVG" title="Download standard Vector SVG file">
+            <div class="export-item-icon dl-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+            <div class="export-item-body">
+              <div class="export-item-title-row">
+                <span class="export-item-title">Download Vector SVG (.svg)</span>
+              </div>
+              <span class="export-item-desc">Raw scalable vector graphic file</span>
+            </div>
+          </button>
+        </div>
+      </div>
       <button class="btn btn-sm btn-danger" id="studioResetAll" title="Reset all custom sizes and positions to template defaults">
         ↺ Reset Defaults
       </button>

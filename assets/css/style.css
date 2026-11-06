@@ -6645,6 +6645,171 @@ input[type="password"]::-ms-clear {
   border-radius: 2px;
 }
 
+/* ==========================================================================
+   DIRECTIVE EXPORT DROPDOWN COMPONENT (EMF, SVG, 4K IMAGE)
+   ========================================================================== */
+.directive-dropdown-container {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.directive-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.directive-export-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 320px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08);
+  padding: 6px;
+  z-index: 1000;
+  display: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.directive-export-menu.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.directive-export-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  font-family: inherit;
+  color: var(--text-main);
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.directive-export-item:hover {
+  background: #F8FAFC;
+}
+
+.directive-export-item.is-featured {
+  background: #FFF5F5;
+  border-color: #FED7D7;
+}
+
+.directive-export-item.is-featured:hover {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+}
+
+.export-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.export-item-icon.emf-icon {
+  background: #E10600;
+  color: #FFFFFF;
+}
+
+.export-item-icon.img-icon {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.export-item-icon.svg-icon {
+  background: #3B82F6;
+  color: #FFFFFF;
+}
+
+.export-item-icon.dl-icon {
+  background: #64748B;
+  color: #FFFFFF;
+}
+
+.export-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.export-item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.export-item-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0F172A;
+  white-space: nowrap;
+}
+
+.export-item-desc {
+  font-size: 11px;
+  color: #64748B;
+  line-height: 1.3;
+}
+
+.export-item-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.badge-corel {
+  background: #E10600;
+  color: #FFFFFF;
+}
+
+.badge-green {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.badge-blue {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.directive-export-divider {
+  height: 1px;
+  background: #F1F5F9;
+  margin: 4px 6px;
+}
+
 .font-ctrl-divider {
   display: inline-block;
   user-select: none;
