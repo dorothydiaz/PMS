@@ -56,6 +56,24 @@ $initialDirectiveKey = $targetRecord ? ($targetRecord['request_id'] ?: $targetRe
 $fontFile = dirname(__DIR__) . '/assets/fonts/BebasKai.otf';
 $bebasB64 = file_exists($fontFile) ? base64_encode(file_get_contents($fontFile)) : '';
 
+function getWallSvgContent($type) {
+    if (empty($type) || $type === 'blank') return '';
+    $path = dirname(__DIR__) . '/assets/img/walls/' . basename($type) . '.svg';
+    if (!file_exists($path)) return '';
+    $raw = file_get_contents($path);
+    if (preg_match('/<g id="Layer_x0020_1">(.*?)<\/svg>/s', $raw, $m)) {
+        $inner = preg_replace('/<\/g>\s*$/', '', trim($m[1]));
+        $inner = str_replace('class="fil1"', 'fill="#000000" fill-rule="nonzero"', $inner);
+        $inner = str_replace('class="fil2"', 'fill="#ED3237"', $inner);
+        $inner = str_replace('class="fil0"', 'fill="#FFFFFF"', $inner);
+        return preg_replace('/<metadata[^>]*\/?>/', '', $inner);
+    }
+    return '';
+}
+
+$docEnvType = $targetRecord['env_type'] ?? $targetRecord['wall_type'] ?? '';
+$docEnvSvgHtml = getWallSvgContent($docEnvType);
+
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
 ?>
@@ -265,9 +283,13 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <text x="612.5" y="22" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
                     <text x="612.5" y="35" fill="#FFFFFF" font-size="8.5" class="chinese center-txt">现场安装环境选项</text>
 
-                    <rect x="674" y="10" width="4.5" height="23" fill="#E10600"/>
-                    <text x="684" y="21" fill="#000000" font-size="11.5" class="cond-bold" letter-spacing="0.3">CONCRETE WALL</text>
-                    <text x="684" y="32.5" fill="#000000" font-size="9.5" class="chinese">水泥墙</text>
+                    <!-- Wall Option Container (Clickable to switch wall type or leave blank) -->
+                    <g id="docFieldEnvOption" class="interactive-field" data-field-name="Environment Option" data-env-type="<?= htmlspecialchars($docEnvType) ?>" style="cursor: pointer;" title="Click to select wall environment">
+                      <rect x="661" y="0" width="161" height="43" fill="#FFFFFF"/>
+                      <svg id="docEnvSvg" x="661" y="0" width="161" height="43" viewBox="0 0 10572.6 3022.83" preserveAspectRatio="xMidYMid meet">
+                        <?= $docEnvSvgHtml ?>
+                      </svg>
+                    </g>
 
                     <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
 
@@ -327,6 +349,17 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <option value="Install" <?= $docReleasingMode === 'Install' ? 'selected' : '' ?>>Install</option>
                     <option value="Deliver" <?= $docReleasingMode === 'Deliver' ? 'selected' : '' ?>>Deliver</option>
                     <option value="Pickup" <?= ($docReleasingMode === 'Pickup' || empty($docReleasingMode)) ? 'selected' : '' ?>>Pickup</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Environment Options (Wall Type)</label>
+                  <select class="form-control" id="ctrlEnvType">
+                    <option value="" <?= empty($docEnvType) ? 'selected' : '' ?>>Blank (None)</option>
+                    <option value="concrete-wall" <?= $docEnvType === 'concrete-wall' ? 'selected' : '' ?>>Concrete Wall (水泥墙)</option>
+                    <option value="glass-wall" <?= $docEnvType === 'glass-wall' ? 'selected' : '' ?>>Glass Wall (玻璃墙)</option>
+                    <option value="iron-plated" <?= $docEnvType === 'iron-plated' ? 'selected' : '' ?>>Iron-plated / Iron Framework Wall (铁皮/铁架墙)</option>
+                    <option value="woodenpanel" <?= $docEnvType === 'woodenpanel' ? 'selected' : '' ?>>Wooden Panel Wall (木板墙)</option>
+                    <option value="acp" <?= $docEnvType === 'acp' ? 'selected' : '' ?>>ACP Wall (铝塑板墙)</option>
                   </select>
                 </div>
                 <div class="form-group col-span-2">
