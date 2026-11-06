@@ -7983,7 +7983,7 @@
     docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 15, weight: 'normal', name: 'Drawn By' },
     docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'right', defaultSz: 12, weight: 'normal', name: 'Address' },
     docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Order Date' },
-    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 14.5, weight: 'normal', name: 'Due Date' },
+    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 14, weight: 'normal', name: 'Due Date' },
     docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Release Date' },
     docFieldClientName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 'normal', name: 'Client Name' },
     docFieldProjectName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Project Name' },
@@ -9355,7 +9355,7 @@
   <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
   <rect x="225" y="33" width="115" height="32" fill="#000000"/>
   <text x="282.5" y="47" fill="#FFFFFF" font-size="13" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
-  ${makeSvgField('docFieldDueDate', 282.5, 60, 14.5, 'cond-bold center-txt', 'middle', '', '#FFFFFF')}
+  ${makeSvgField('docFieldDueDate', 282.5, 60, 14, 'cond-bold center-txt', 'middle', '', '#FFFFFF')}
 
   <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
   <text x="282.5" y="77" fill="#000000" font-size="11.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
@@ -9900,19 +9900,19 @@
             c.style.removeProperty('font-size');
           });
           const defaultSizes = {
-            docFieldJoNumber: 20,
+            docFieldJoNumber: 28,
             docFieldDueDate: 14,
-            docFieldOrderDate: 10,
-            docFieldReleasingDate: 10,
+            docFieldOrderDate: 14,
+            docFieldReleasingDate: 14,
             docFieldClientName: 22,
             docFieldProjectName: 12,
-            docFieldInCharge: 11,
-            docFieldDrawnBy: 11,
-            docFieldAddress: 11,
-            docFieldContactPerson: 11,
-            docFieldContactNumber: 11,
-            docFieldInstallers: 12,
-            docFieldDuration: 12
+            docFieldInCharge: 15,
+            docFieldDrawnBy: 15,
+            docFieldAddress: 12,
+            docFieldContactPerson: 13,
+            docFieldContactNumber: 13,
+            docFieldInstallers: 14,
+            docFieldDuration: 14
           };
           Object.entries(defaultSizes).forEach(([id, sz]) => {
             const el = document.getElementById(id);
@@ -10076,19 +10076,19 @@
           cell.removeAttribute('data-custom-size');
           cell.style.removeProperty('font-size');
           const defaultSizes = {
-            docFieldJoNumber: 20,
+            docFieldJoNumber: 28,
             docFieldDueDate: 14,
-            docFieldOrderDate: 10,
-            docFieldReleasingDate: 10,
+            docFieldOrderDate: 14,
+            docFieldReleasingDate: 14,
             docFieldClientName: 22,
             docFieldProjectName: 12,
-            docFieldInCharge: 11,
-            docFieldDrawnBy: 11,
-            docFieldAddress: 11,
-            docFieldContactPerson: 11,
-            docFieldContactNumber: 11,
-            docFieldInstallers: 12,
-            docFieldDuration: 12
+            docFieldInCharge: 15,
+            docFieldDrawnBy: 15,
+            docFieldAddress: 12,
+            docFieldContactPerson: 13,
+            docFieldContactNumber: 13,
+            docFieldInstallers: 14,
+            docFieldDuration: 14
           };
           if (window.SVGElement && cell instanceof SVGElement && cell.id && defaultSizes[cell.id]) {
             cell.setAttribute('font-size', defaultSizes[cell.id]);
@@ -15766,7 +15766,7 @@
       { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
       { id: 'docFieldJoNumber', name: 'JO Number', defX: 58, defY: 2, defW: 164, defH: 29, defSz: 28, color: '#FFFFFF', align: 'start' },
       { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
-      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 14.5, color: '#FFFFFF', align: 'middle' },
+      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 14, color: '#FFFFFF', align: 'middle' },
       { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 14, color: '#000000', align: 'middle' },
       { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 14, color: '#000000', align: 'middle' },
       { id: 'docFieldInCharge', name: 'In-Charge', defX: 8, defY: 34, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },

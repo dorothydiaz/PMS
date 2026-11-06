@@ -326,7 +326,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
             <rect x="225" y="33" width="115" height="32" fill="#000000"/>
             <text x="282.5" y="47" fill="#FFFFFF" font-size="13" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
-            <text x="282.5" y="60" fill="#FFFFFF" font-size="14.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDueDate" data-field-name="Due Date" data-base-y="60" data-raw-text="<?= htmlspecialchars($docDueDate) ?>"><?= htmlspecialchars($docDueDate) ?></text>
+            <text x="282.5" y="60" fill="#FFFFFF" font-size="14" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDueDate" data-field-name="Due Date" data-base-y="60" data-raw-text="<?= htmlspecialchars($docDueDate) ?>"><?= htmlspecialchars($docDueDate) ?></text>
 
             <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
             <text x="282.5" y="77" fill="#000000" font-size="11.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
