@@ -6842,3 +6842,512 @@ input[type="password"]::-ms-clear {
     break-inside: avoid !important;
   }
 }
+
+/* ==========================================================================
+   FULL-PLEDGE VECTOR TEXT STUDIO EDITOR (Corel / Illustrator Mode)
+   ========================================================================== */
+
+.studio-fullpage-wrapper {
+  background: #0D1015 !important;
+  color: #F1F5F9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  user-select: none;
+}
+
+/* Top Navigation Bar */
+.studio-top-nav {
+  height: 48px;
+  background: #14171E;
+  border-bottom: 1px solid #232732;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 16px;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.studio-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-studio-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #1F242F;
+  color: #E2E8F0;
+  border: 1px solid #333947;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.btn-studio-back:hover {
+  background: #2D3342;
+  color: #FFFFFF;
+}
+
+.studio-nav-divider {
+  width: 1px;
+  height: 22px;
+  background: #2D3342;
+}
+
+.studio-branding-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studio-badge-tag {
+  background: #E10600;
+  color: #FFFFFF;
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.studio-proj-title {
+  color: #F8FAFC;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', sans-serif;
+  letter-spacing: 0.4px;
+}
+
+/* Zoom Controls in Nav */
+.studio-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #1B202A;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #2E3544;
+}
+
+.btn-studio-icon {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #CBD5E1;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.btn-studio-icon:hover {
+  background: #29303F;
+  color: #FFFFFF;
+}
+
+.studio-zoom-select {
+  background: #14171E;
+  color: #E2E8F0;
+  border: 1px solid #2E3544;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+.btn-studio-text {
+  padding: 3px 8px;
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.btn-studio-text:hover {
+  background: #29303F;
+  color: #FFFFFF;
+}
+
+.studio-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Property Inspector Ribbon */
+.studio-property-inspector {
+  height: 42px;
+  background: #181C24;
+  border-bottom: 1px solid #232732;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  z-index: 40;
+}
+
+.inspector-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inspector-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #64748B;
+  letter-spacing: 0.5px;
+}
+
+.inspector-select {
+  background: #101318;
+  color: #F8FAFC;
+  border: 1px solid #2E3544;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+.inspector-divider {
+  width: 1px;
+  height: 20px;
+  background: #282F3D;
+}
+
+.inspector-input-num {
+  width: 52px;
+  height: 26px;
+  background: #101318;
+  color: #F8FAFC;
+  border: 1px solid #2E3544;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.inspector-input-num:focus {
+  border-color: #2563EB;
+}
+
+.inspector-font-badge {
+  background: #1F242F;
+  color: #E2E8F0;
+  border: 1px solid #333947;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+.btn-inspector-step {
+  width: 24px;
+  height: 26px;
+  background: #1F242F;
+  border: 1px solid #333947;
+  color: #CBD5E1;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-inspector-step:hover {
+  background: #2D3342;
+  color: #FFFFFF;
+}
+
+.inspector-btn-group {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #2E3544;
+}
+
+.btn-inspector-toggle {
+  background: #101318;
+  border: none;
+  color: #94A3B8;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-inspector-toggle:not(:last-child) {
+  border-right: 1px solid #2E3544;
+}
+
+.btn-inspector-toggle.active,
+.btn-inspector-toggle:hover {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+.inspector-swatches {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.swatch-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid #475569;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.swatch-btn:hover {
+  transform: scale(1.15);
+}
+
+.swatch-btn.swatch-black { background: #000000; border-color: #64748B; }
+.swatch-btn.swatch-white { background: #FFFFFF; border-color: #CBD5E1; }
+.swatch-btn.swatch-red   { background: #E10600; border-color: #FF4D4D; }
+.swatch-btn.swatch-slate { background: #475569; border-color: #94A3B8; }
+
+/* Workspace Split: Canvas + Sidebar */
+.studio-workspace-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Artboard Viewport (Dark Studio CAD Canvas) */
+.studio-artboard-viewport {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background-color: #0E1116;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+.studio-artboard-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.studio-artboard-artwrap {
+  position: relative;
+  transform-origin: center center;
+  transition: transform 0.1s ease-out;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* Corel / Illustrator 8-Handle Transform Box Overlay */
+.studio-transform-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid #2563EB;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.studio-transform-box .transform-drag-area {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  cursor: move;
+  pointer-events: auto;
+}
+
+.studio-transform-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #FFFFFF;
+  border: 1.5px solid #2563EB;
+  border-radius: 1px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  z-index: 210;
+  transition: transform 0.1s;
+}
+
+.studio-transform-handle:hover {
+  transform: scale(1.3);
+  background: #2563EB;
+}
+
+.studio-transform-handle.handle-nw { top: -4px; left: -4px; cursor: nwse-resize; }
+.studio-transform-handle.handle-ne { top: -4px; right: -4px; cursor: nesw-resize; }
+.studio-transform-handle.handle-se { bottom: -4px; right: -4px; cursor: nwse-resize; }
+.studio-transform-handle.handle-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+.studio-transform-handle.handle-n  { top: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+.studio-transform-handle.handle-s  { bottom: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+.studio-transform-handle.handle-w  { top: calc(50% - 4px); left: -4px; cursor: ew-resize; }
+.studio-transform-handle.handle-e  { top: calc(50% - 4px); right: -4px; cursor: ew-resize; }
+
+/* Right Inspector Sidebar */
+.studio-layers-sidebar {
+  width: 280px;
+  background: #14171E;
+  border-left: 1px solid #232732;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 14px;
+  gap: 14px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #232732;
+}
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94A3B8;
+  letter-spacing: 0.8px;
+}
+
+.sidebar-tag {
+  background: #1F242F;
+  color: #64748B;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.sidebar-card {
+  background: #191D26;
+  border: 1px solid #252B38;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.sidebar-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  color: #94A3B8;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #101318;
+  border: 1px solid #2E3544;
+  border-radius: 4px;
+  color: #F8FAFC;
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', sans-serif;
+  font-size: 14px;
+  padding: 8px;
+  outline: none;
+  resize: vertical;
+  line-height: 1.25;
+}
+
+.sidebar-textarea:focus {
+  border-color: #2563EB;
+}
+
+/* Layers List */
+.sidebar-layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #191D26;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.layer-item:hover {
+  background: #202531;
+  border-color: #2E3647;
+}
+
+.layer-item.active {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: #2563EB;
+}
+
+.layer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.layer-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: #E2E8F0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer-preview {
+  font-size: 10.5px;
+  color: #94A3B8;
+  font-family: 'Bebas Kai', 'BebasKai', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer-badge {
+  font-size: 10px;
+  color: #64748B;
+  font-weight: 700;
+  flex-shrink: 0;
+}

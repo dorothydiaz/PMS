@@ -8436,6 +8436,11 @@
     state.currentDirectiveJo = rec.requestId || rec.joNumber || rec.id;
     try { sessionStorage.setItem('SIGN_DEPOT_CURRENT_DIRECTIVE', state.currentDirectiveJo); } catch (e) {}
 
+    const btnOpenEditor = document.getElementById('btnOpenFullEditor');
+    if (btnOpenEditor) {
+      btnOpenEditor.href = `directive-editor.php?id=${encodeURIComponent(state.currentDirectiveJo)}`;
+    }
+
     const input = document.getElementById('directiveLookupInput');
     if (input) input.value = rec.joNumber || rec.requestId || rec.projectName || '';
 
@@ -14817,6 +14822,460 @@
     showToast(`Downloaded ${filename}`);
   }
 
+  // ==========================================================================
+  // FULL-PLEDGE VECTOR STUDIO EDITOR (CorelDRAW / Adobe Illustrator Mode)
+  // ==========================================================================
+
+  function initStudioVectorEditor() {
+    const inspector = document.getElementById('studioPropertyInspector');
+    if (!inspector) return;
+
+    const svg = document.getElementById('directiveExactSvg');
+    const artwrap = document.getElementById('studioArtboardWrap');
+    const transformBox = document.getElementById('studioTransformBox');
+    if (!svg || !artwrap || !transformBox) return;
+
+    let zoom = 1.25;
+    let activeFieldId = 'docFieldProjectName';
+    let isMoving = false;
+    let isResizing = false;
+    let activeHandle = null;
+    let dragStart = { x: 0, y: 0 };
+    let initBox = { x: 0, y: 0, w: 0, h: 0 };
+
+    const STUDIO_FIELDS = [
+      { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
+      { id: 'docFieldJoNumber', name: 'JO Number', defX: 54, defY: 2, defW: 168, defH: 29, defSz: 20, color: '#FFFFFF', align: 'start' },
+      { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 12, color: '#FFFFFF', align: 'middle' },
+      { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 11.5, color: '#000000', align: 'middle' },
+      { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 11.5, color: '#000000', align: 'middle' },
+      { id: 'docFieldInCharge', name: 'In-Charge', defX: 8, defY: 34, defW: 215, defH: 19, defSz: 13, color: '#000000', align: 'end' },
+      { id: 'docFieldDrawnBy', name: 'Drawn By', defX: 8, defY: 55, defW: 215, defH: 19, defSz: 13, color: '#000000', align: 'end' },
+      { id: 'docFieldAddress', name: 'Address', defX: 99, defY: 77, defW: 122, defH: 17, defSz: 10, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactPerson', name: 'Contact Person', defX: 715, defY: 46, defW: 100, defH: 18, defSz: 11, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactNumber', name: 'Contact Number', defX: 715, defY: 73, defW: 100, defH: 18, defSz: 11, color: '#000000', align: 'middle' },
+      { id: 'docFieldInstallers', name: 'Installers', defX: 824, defY: 2, defW: 78, defH: 44, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldDuration', name: 'Duration', defX: 824, defY: 50, defW: 78, defH: 44, defSz: 12, color: '#000000', align: 'middle' }
+    ];
+
+    if (!state.customBoxPositions) state.customBoxPositions = {};
+    if (!state.customBoxSizes) state.customBoxSizes = {};
+    if (!state.customCellFonts) state.customCellFonts = {};
+
+    // 1. Zoom Engine
+    const applyZoom = (z) => {
+      zoom = Math.max(0.5, Math.min(3, z));
+      artwrap.style.transform = `scale(${zoom})`;
+      const zoomSel = document.getElementById('studioZoomSelect');
+      if (zoomSel) zoomSel.value = String(zoom);
+    };
+
+    const btnZoomIn = document.getElementById('studioZoomIn');
+    if (btnZoomIn) btnZoomIn.onclick = () => applyZoom(Math.round((zoom + 0.25) * 100) / 100);
+
+    const btnZoomOut = document.getElementById('studioZoomOut');
+    if (btnZoomOut) btnZoomOut.onclick = () => applyZoom(Math.round((zoom - 0.25) * 100) / 100);
+
+    const btnZoomReset = document.getElementById('studioZoomReset');
+    if (btnZoomReset) btnZoomReset.onclick = () => applyZoom(1);
+
+    const btnZoomFit = document.getElementById('studioZoomFit');
+    if (btnZoomFit) {
+      btnZoomFit.onclick = () => {
+        const viewport = document.getElementById('studioArtboardViewport');
+        if (viewport) {
+          const availW = viewport.clientWidth - 100;
+          const fitZ = Math.min(2, Math.max(0.75, Math.round((availW / 904) * 10) / 10));
+          applyZoom(fitZ);
+        }
+      };
+    }
+
+    const zoomSelect = document.getElementById('studioZoomSelect');
+    if (zoomSelect) {
+      zoomSelect.onchange = () => applyZoom(parseFloat(zoomSelect.value));
+    }
+
+    // 2. Field Selection & Transform Bounding Box
+    const getFieldData = (id) => {
+      const def = STUDIO_FIELDS.find(f => f.id === id) || STUDIO_FIELDS[0];
+      const pos = (state.customBoxPositions && state.customBoxPositions[id]) || { x: def.defX, y: def.defY };
+      const sz = (state.customBoxSizes && state.customBoxSizes[id]) || { w: def.defW, h: def.defH };
+      const fontSz = (state.customCellFonts && state.customCellFonts[id]) || def.defSz;
+      return {
+        id,
+        name: def.name,
+        x: pos.x !== undefined ? pos.x : def.defX,
+        y: pos.y !== undefined ? pos.y : def.defY,
+        w: sz.w !== undefined ? sz.w : def.defW,
+        h: sz.h !== undefined ? sz.h : def.defH,
+        fontSize: fontSz,
+        align: def.align,
+        color: def.color
+      };
+    };
+
+    const updateTransformBoxUI = (fieldId) => {
+      const data = getFieldData(fieldId);
+      transformBox.style.display = 'block';
+      transformBox.style.left = `${data.x}px`;
+      transformBox.style.top = `${data.y}px`;
+      transformBox.style.width = `${data.w}px`;
+      transformBox.style.height = `${data.h}px`;
+
+      // Update Inspector Inputs
+      const inpX = document.getElementById('propPosX');
+      const inpY = document.getElementById('propPosY');
+      const inpW = document.getElementById('propBoxW');
+      const inpH = document.getElementById('propBoxH');
+      const inpSz = document.getElementById('propFontSize');
+      const selField = document.getElementById('studioFieldSelect');
+      const textInput = document.getElementById('studioActiveTextInput');
+
+      if (inpX) inpX.value = Math.round(data.x);
+      if (inpY) inpY.value = Math.round(data.y);
+      if (inpW) inpW.value = Math.round(data.w);
+      if (inpH) inpH.value = Math.round(data.h);
+      if (inpSz) inpSz.value = Math.round(data.fontSize);
+      if (selField) selField.value = fieldId;
+
+      const el = document.getElementById(fieldId);
+      if (el && textInput) {
+        textInput.value = getFieldRawText(el);
+      }
+
+      // Update Layers List Active State
+      document.querySelectorAll('.sidebar-layers-list .layer-item').forEach(item => {
+        item.classList.toggle('active', item.getAttribute('data-field-id') === fieldId);
+      });
+    };
+
+    const selectStudioField = (fieldId) => {
+      activeFieldId = fieldId;
+      const el = document.getElementById(fieldId);
+      if (el) {
+        document.querySelectorAll('#directiveExactSvg .active-svg-cell').forEach(c => c.classList.remove('active-svg-cell'));
+        el.classList.add('active-svg-cell');
+      }
+      updateTransformBoxUI(fieldId);
+    };
+
+    // 3. Populate Layers List in Sidebar
+    const renderLayersList = () => {
+      const container = document.getElementById('studioLayersList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      STUDIO_FIELDS.forEach(f => {
+        const el = document.getElementById(f.id);
+        const rawText = el ? getFieldRawText(el) : '';
+        const item = document.createElement('div');
+        item.className = `layer-item ${f.id === activeFieldId ? 'active' : ''}`;
+        item.setAttribute('data-field-id', f.id);
+        item.innerHTML = `
+          <div class="layer-info">
+            <span class="layer-name">${escapeHTML(f.name)}</span>
+            <span class="layer-preview">${escapeHTML(rawText.replace(/\\n/g, ' ↵ ') || '—')}</span>
+          </div>
+          <span class="layer-badge">${Math.round(getCellCurrentFontSize(el))}px</span>
+        `;
+        item.onclick = () => selectStudioField(f.id);
+        container.appendChild(item);
+      });
+    };
+
+    // 4. Transform Box Mouse Handlers (Move & 8-Handle Resize in Artboard Coordinates)
+    const getArtboardCoords = (e) => {
+      const rect = svg.getBoundingClientRect();
+      const scaleX = 904 / rect.width;
+      const scaleY = 96 / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    };
+
+    const dragArea = transformBox.querySelector('.transform-drag-area');
+    if (dragArea) {
+      dragArea.addEventListener('mousedown', (e) => {
+        isMoving = true;
+        const cur = getFieldData(activeFieldId);
+        const mouse = getArtboardCoords(e);
+        dragStart = { x: mouse.x, y: mouse.y };
+        initBox = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    }
+
+    transformBox.querySelectorAll('.studio-transform-handle').forEach(handle => {
+      handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        activeHandle = handle.getAttribute('data-handle');
+        const cur = getFieldData(activeFieldId);
+        const mouse = getArtboardCoords(e);
+        dragStart = { x: mouse.x, y: mouse.y };
+        initBox = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMoving && !isResizing) return;
+      const mouse = getArtboardCoords(e);
+      const dx = mouse.x - dragStart.x;
+      const dy = mouse.y - dragStart.y;
+      const data = getFieldData(activeFieldId);
+
+      if (isMoving) {
+        let newX = Math.round(initBox.x + dx);
+        let newY = Math.round(initBox.y + dy);
+        newX = Math.max(0, Math.min(904 - initBox.w, newX));
+        newY = Math.max(0, Math.min(96 - initBox.h, newY));
+
+        data.x = newX;
+        data.y = newY;
+        state.customBoxPositions[activeFieldId] = { x: newX, y: newY };
+        saveStateToStorage();
+
+        // Update SVG text coordinates
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          const tspans = el.querySelectorAll('tspan');
+          if (tspans && tspans.length > 0) {
+            const fontSz = getCellCurrentFontSize(el);
+            const lh = Math.round(fontSz * 1.15 * 10) / 10;
+            const startY = Math.round(newY + fontSz);
+            tspans.forEach((t, i) => {
+              t.setAttribute('x', Math.round(newX + data.w / 2));
+              t.setAttribute('y', Math.round(startY + i * lh));
+            });
+          } else {
+            el.setAttribute('x', Math.round(newX + data.w / 2));
+            el.setAttribute('y', Math.round(newY + data.h * 0.75));
+          }
+        }
+        updateTransformBoxUI(activeFieldId);
+      } else if (isResizing) {
+        let { x, y, w, h } = initBox;
+
+        if (activeHandle.includes('e')) w = Math.max(20, initBox.w + dx);
+        if (activeHandle.includes('s')) h = Math.max(12, initBox.h + dy);
+        if (activeHandle.includes('w')) {
+          const maxDx = initBox.w - 20;
+          const appliedDx = Math.min(maxDx, dx);
+          x = initBox.x + appliedDx;
+          w = initBox.w - appliedDx;
+        }
+        if (activeHandle.includes('n')) {
+          const maxDy = initBox.h - 12;
+          const appliedDy = Math.min(maxDy, dy);
+          y = initBox.y + appliedDy;
+          h = initBox.h - appliedDy;
+        }
+
+        data.x = Math.round(x);
+        data.y = Math.round(y);
+        data.w = Math.round(w);
+        data.h = Math.round(h);
+
+        state.customBoxPositions[activeFieldId] = { x: data.x, y: data.y };
+        state.customBoxSizes[activeFieldId] = { w: data.w, h: data.h };
+        saveStateToStorage();
+
+        updateTransformBoxUI(activeFieldId);
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isMoving || isResizing) {
+        isMoving = false;
+        isResizing = false;
+        activeHandle = null;
+        renderLayersList();
+      }
+    });
+
+    // 5. Direct Artboard Click to Select Field
+    svg.addEventListener('click', (e) => {
+      const targetCell = e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
+      if (targetCell && targetCell.id) {
+        selectStudioField(targetCell.id);
+        return;
+      }
+      const coords = getArtboardCoords(e);
+      const fieldId = getFieldIdAtSvgCoords(coords.x, coords.y);
+      if (fieldId) {
+        selectStudioField(fieldId);
+      }
+    });
+
+    // 6. Right Sidebar Textarea: Multi-line with Enter key support
+    const textInput = document.getElementById('studioActiveTextInput');
+    if (textInput) {
+      textInput.addEventListener('input', () => {
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          setFieldMultilineText(el, textInput.value);
+          syncControlValues(activeFieldId, textInput.value);
+          renderLayersList();
+          updateTransformBoxUI(activeFieldId);
+        }
+      });
+      textInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation(); // Next line supported naturally!
+        }
+      });
+    }
+
+    // 7. Inspector Toolbar Input Bindings
+    const selField = document.getElementById('studioFieldSelect');
+    if (selField) {
+      selField.addEventListener('change', () => selectStudioField(selField.value));
+    }
+
+    const inpSz = document.getElementById('propFontSize');
+    const btnSzDec = document.getElementById('propFontDec');
+    const btnSzInc = document.getElementById('propFontInc');
+
+    const changeFontSz = (deltaOrVal) => {
+      const el = document.getElementById(activeFieldId);
+      if (!el) return;
+      const cur = getCellCurrentFontSize(el);
+      const next = typeof deltaOrVal === 'number' ? Math.max(6, Math.min(72, deltaOrVal)) : Math.max(6, Math.min(72, cur + (deltaOrVal === 'dec' ? -1 : 1)));
+      setCellCustomFontSize(el, next);
+      if (inpSz) inpSz.value = Math.round(next);
+      updateTransformBoxUI(activeFieldId);
+      renderLayersList();
+    };
+
+    if (btnSzDec) btnSzDec.onclick = () => changeFontSz('dec');
+    if (btnSzInc) btnSzInc.onclick = () => changeFontSz('inc');
+    if (inpSz) inpSz.onchange = () => changeFontSz(parseFloat(inpSz.value));
+
+    // Position / Dimension Inputs
+    const inpX = document.getElementById('propPosX');
+    const inpY = document.getElementById('propPosY');
+    const inpW = document.getElementById('propBoxW');
+    const inpH = document.getElementById('propBoxH');
+
+    const updateManualTransform = () => {
+      const data = getFieldData(activeFieldId);
+      const newX = inpX ? parseFloat(inpX.value) : data.x;
+      const newY = inpY ? parseFloat(inpY.value) : data.y;
+      const newW = inpW ? parseFloat(inpW.value) : data.w;
+      const newH = inpH ? parseFloat(inpH.value) : data.h;
+
+      data.x = isNaN(newX) ? data.x : Math.max(0, Math.min(904, newX));
+      data.y = isNaN(newY) ? data.y : Math.max(0, Math.min(96, newY));
+      data.w = isNaN(newW) ? data.w : Math.max(20, Math.min(800, newW));
+      data.h = isNaN(newH) ? data.h : Math.max(10, Math.min(300, newH));
+
+      state.customBoxPositions[activeFieldId] = { x: data.x, y: data.y };
+      state.customBoxSizes[activeFieldId] = { w: data.w, h: data.h };
+      saveStateToStorage();
+      updateTransformBoxUI(activeFieldId);
+    };
+
+    [inpX, inpY, inpW, inpH].forEach(inp => {
+      if (inp) inp.addEventListener('change', updateManualTransform);
+    });
+
+    // Swatches
+    document.querySelectorAll('.inspector-swatches .swatch-btn').forEach(sw => {
+      sw.onclick = () => {
+        const color = sw.getAttribute('data-color');
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          el.setAttribute('fill', color);
+          el.style.fill = color;
+          showToast(`Set ${activeFieldId} color to ${color}`);
+        }
+      };
+    });
+
+    // 8. Studio Export Actions
+    const copySvgBtn = document.getElementById('studioCopySVG');
+    if (copySvgBtn) {
+      copySvgBtn.onclick = () => {
+        const cur = state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0]) : null;
+        const svgCode = generateDirectiveSVG(cur);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(svgCode).then(() => showToast('Vector SVG copied for Illustrator / CorelDRAW!'));
+        } else {
+          copyFallback(svgCode);
+          showToast('Vector SVG copied to clipboard!');
+        }
+      };
+    }
+
+    const copyPngBtn = document.getElementById('studioCopyPNG');
+    if (copyPngBtn) {
+      copyPngBtn.onclick = () => {
+        const cur = state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0]) : null;
+        const svgString = generateDirectiveSVG(cur);
+        const scale = 4;
+        const targetWidth = 904 * scale;
+        const targetHeight = 96 * scale;
+        const svg4K = svgString.replace(/width="[0-9]+"/, `width="${targetWidth}"`).replace(/height="[0-9]+"/, `height="${targetHeight}"`);
+
+        const img = new Image();
+        const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d', { alpha: false });
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob((blob) => {
+            if (blob && navigator.clipboard && window.ClipboardItem) {
+              navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                .then(() => showToast('Ultra HD 4K image copied to clipboard (Ctrl+V ready)!'))
+                .catch(() => showToast('4K image render completed.'));
+            }
+          }, 'image/png');
+        };
+        img.src = url;
+      };
+    }
+
+    const resetAllBtn = document.getElementById('studioResetAll');
+    if (resetAllBtn) {
+      resetAllBtn.onclick = () => {
+        state.customBoxPositions = {};
+        state.customBoxSizes = {};
+        state.customCellFonts = {};
+        saveStateToStorage();
+        STUDIO_FIELDS.forEach(f => {
+          const el = document.getElementById(f.id);
+          if (el) {
+            el.removeAttribute('data-custom-size');
+            el.style.removeProperty('font-size');
+            el.setAttribute('font-size', f.defSz);
+            setFieldMultilineText(el, getFieldRawText(el));
+          }
+        });
+        selectStudioField(activeFieldId);
+        renderLayersList();
+        showToast('All text positions and sizes reset to defaults.');
+      };
+    }
+
+    // Initial Setup
+    renderLayersList();
+    selectStudioField('docFieldProjectName');
+    applyZoom(1.25);
+  }
+
   function initApp() {
     if (window.SignDepotNav && typeof window.SignDepotNav.renderComponents === 'function') {
       window.SignDepotNav.renderComponents();
@@ -14852,6 +15311,12 @@
 
     if (currentView === 'view-directives-details') {
       renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+    }
+
+    // Initialize Dedicated Vector Studio Editor if on directive-editor.php
+    if (document.getElementById('studioPropertyInspector')) {
+      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      setTimeout(initStudioVectorEditor, 50);
     }
 
     updateDeadlineAlertCenter();
