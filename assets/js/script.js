@@ -8112,24 +8112,13 @@
 
   function syncToolbarBoxInputs(cell) {
     if (!cell) return;
-    const cellId = cell.id;
-    const boxDef = DIRECTIVE_FIELD_BOXES[cellId] || { w: 100, h: 20 };
-    const savedBox = (state.customBoxSizes && state.customBoxSizes[cellId]) || {};
-    const curW = savedBox.w || boxDef.w;
-    const curH = savedBox.h || boxDef.h;
     const curSize = Math.round(getCellCurrentFontSize(cell));
 
     const badge = document.getElementById('fontCtrlCellBadge') || document.getElementById('selectedCellBadge');
-    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${curSize}px (${curW}×${curH})`;
+    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${curSize}px`;
 
     const inpSz = document.getElementById('cellFontSizeInput');
     if (inpSz) inpSz.value = curSize;
-
-    const inpW = document.getElementById('cellBoxWidthInput');
-    if (inpW) inpW.value = curW;
-
-    const inpH = document.getElementById('cellBoxHeightInput');
-    if (inpH) inpH.value = curH;
   }
 
   function setCellCustomBoxSize(cell, wPx, hPx) {

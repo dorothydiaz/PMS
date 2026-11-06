@@ -97,26 +97,14 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <!-- Directive Top Quick Bar (Vector Ready) -->
                 <div class="doc-top-bar no-print">
                   <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <!-- Real-time Font Size & Adjustable Textbox Controls -->
-                    <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to edit directly, enter for next line, and drag corner to resize textbox">
+                    <!-- Real-time Font Size Controls -->
+                    <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale font size, or edit text directly">
                       <span class="font-ctrl-cell-badge" id="fontCtrlCellBadge">PROJECT NAME: 22px</span>
                       <button class="btn-font-scale" id="btnCellFontDec" title="Decrease font size (Ctrl+[)">A−</button>
                       <input type="number" class="cell-font-size-input" id="cellFontSizeInput" min="6" max="72" value="22" title="Custom font size in px">
                       <span class="font-ctrl-unit">px</span>
                       <button class="btn-font-scale" id="btnCellFontInc" title="Increase font size (Ctrl+])">A+</button>
-
-                      <span class="font-ctrl-divider" style="color:#CBD5E1; margin:0 4px;">|</span>
-                      <span class="font-ctrl-label" style="font-size:11px; font-weight:700; color:#475569;">Box:</span>
-                      <button class="btn-font-scale" id="btnBoxWidthDec" title="Decrease box width">W−</button>
-                      <input type="number" class="cell-font-size-input" id="cellBoxWidthInput" min="30" max="800" value="220" title="Box Width in px" style="width:52px;">
-                      <button class="btn-font-scale" id="btnBoxWidthInc" title="Increase box width">W+</button>
-
-                      <button class="btn-font-scale" id="btnBoxHeightDec" title="Decrease box height">H−</button>
-                      <input type="number" class="cell-font-size-input" id="cellBoxHeightInput" min="15" max="300" value="28" title="Box Height in px" style="width:48px;">
-                      <button class="btn-font-scale" id="btnBoxHeightInc" title="Increase box height">H+</button>
-
-                      <button class="btn-font-scale" id="btnCellFontReset" title="Reset font and box size for active field">↺</button>
-                      <button class="btn btn-sm btn-primary" id="btnEditorDone" style="padding: 2px 10px; font-size: 11px; height: 26px; border-radius: 4px; margin-left: 2px;" title="Finish editing (or click outside)">✓ Done</button>
+                      <button class="btn-font-scale" id="btnCellFontReset" title="Reset font size for active field">↺</button>
                     </div>
 
                     <button class="btn btn-primary btn-sm" id="btnDirectiveCopySVG" title="Copy exact vector SVG to clipboard for Illustrator, Figma, or CorelDRAW">
