@@ -284,9 +284,10 @@ require_once __DIR__ . '/includes/sidebar.php';
 
             <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
 
-            <text x="452" y="44" fill="#000000" font-size="22" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldProjectName" data-field-name="Project Name" data-base-y="44" data-raw-text="<?= htmlspecialchars($docProj) ?>"><?= htmlspecialchars($docProj) ?></text>
+            <!-- Client Name (Larger) & Project Name (Smaller) Swapped -->
+            <text x="452" y="44" fill="#000000" font-size="22" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldClientName" data-field-name="Client Name" data-base-y="44" data-raw-text="<?= htmlspecialchars($docClient) ?>"><?= htmlspecialchars($docClient) ?></text>
             <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
-            <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldClientName" data-field-name="Client Name" data-base-y="65" data-raw-text="<?= htmlspecialchars($docClient) ?>"><?= htmlspecialchars($docClient) ?></text>
+            <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldProjectName" data-field-name="Project Name" data-base-y="65" data-raw-text="<?= htmlspecialchars($docProj) ?>"><?= htmlspecialchars($docProj) ?></text>
 
             <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 

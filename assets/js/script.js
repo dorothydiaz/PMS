@@ -8036,10 +8036,217 @@
     return '';
   }
 
+  function estimateBebasKaiWidth(text, fontSize, letterSpacing = 0.8) {
+    if (!text) return 0;
+    const str = String(text).toUpperCase();
+    let total = 0;
+    const ls = parseFloat(letterSpacing) || 0;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      let ratio = 0.56;
+      if (ch === ' ' || ch === '.' || ch === ',' || ch === ':' || ch === ';' || ch === '!' || ch === '\'' || ch === '|') {
+        ratio = (ch === ' ') ? 0.28 : 0.24;
+      } else if (ch === 'I') {
+        ratio = 0.26;
+      } else if (ch === 'M' || ch === 'W') {
+        ratio = 0.78;
+      } else if (ch === 'J' || ch === 'L') {
+        ratio = 0.44;
+      } else if (ch === '-' || ch === '(' || ch === ')') {
+        ratio = 0.32;
+      }
+      total += ratio * fontSize + ls;
+    }
+    return total;
+  }
+
+  let _measureCanvas = null;
+  function getSvgTextWidth(text, fontSize, letterSpacing = 0.8) {
+    if (!text) return 0;
+    try {
+      if (typeof document !== 'undefined') {
+        if (!_measureCanvas) _measureCanvas = document.createElement('canvas');
+        const ctx = _measureCanvas.getContext('2d');
+        if (ctx) {
+          ctx.font = `${fontSize}px 'Bebas Kai', 'BebasKai', 'Oswald', sans-serif`;
+          const m = ctx.measureText(text);
+          const ls = parseFloat(letterSpacing) || 0;
+          const w = m.width + (ls ? text.length * ls : 0);
+          if (w > 0) return w;
+        }
+      }
+    } catch (e) {}
+    return estimateBebasKaiWidth(text, fontSize, letterSpacing);
+  }
+
+  function fitDirectiveClientName(rawText, userBaseSize) {
+    const MAX_W = 210;
+    const raw = String(rawText !== undefined && rawText !== null ? rawText : '').trim().replace(/\r\n/g, '\n');
+    if (!raw) {
+      return {
+        lines: [''],
+        fontSize: 22,
+        isMultiline: false,
+        baseY: 44,
+        startY: 44,
+        lastLineY: 44,
+        lineHeight: 25,
+        divY: 50,
+        projY: 65,
+        widestLineWidth: 40
+      };
+    }
+
+    let lines = raw.split('\n');
+
+    // If text is a single line, check if it exceeds container width
+    if (lines.length === 1) {
+      const singleText = lines[0];
+      const wAt22 = getSvgTextWidth(singleText, 22, 0.8);
+      // If it exceeds the container at 22px and contains spaces, wrap into 2 lines
+      if (wAt22 > MAX_W && singleText.includes(' ')) {
+        const words = singleText.split(/\s+/).filter(Boolean);
+        if (words.length > 1) {
+          let bestIdx = 1;
+          let minDiff = Infinity;
+          for (let i = 1; i < words.length; i++) {
+            const l1 = words.slice(0, i).join(' ');
+            const l2 = words.slice(i).join(' ');
+            const diff = Math.abs(l1.length - l2.length);
+            if (diff < minDiff) {
+              minDiff = diff;
+              bestIdx = i;
+            }
+          }
+          lines = [
+            words.slice(0, bestIdx).join(' '),
+            words.slice(bestIdx).join(' ')
+          ];
+        }
+      }
+    }
+
+    // Determine target font size
+    let sz = userBaseSize ? parseFloat(userBaseSize) : (lines.length > 1 ? 18 : 22);
+    if (isNaN(sz) || sz <= 0) sz = (lines.length > 1 ? 18 : 22);
+    if (!userBaseSize && lines.length > 1) {
+      sz = Math.min(18, sz);
+    }
+
+    // Automatically adjust font size so that every line fits within MAX_W
+    const minSz = 11;
+    while (sz > minSz) {
+      const maxLineW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+      if (maxLineW <= MAX_W) break;
+      sz = Math.round((sz - 0.5) * 10) / 10;
+    }
+
+    const maxLineW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+
+    if (lines.length > 1) {
+      const lh = Math.round(sz * 1.15 * 10) / 10;
+      const lastLineY = 48;
+      const startY = Math.round((lastLineY - (lines.length - 1) * lh) * 10) / 10;
+      const divY = 53;
+      const projY = 67;
+
+      return {
+        lines,
+        fontSize: sz,
+        isMultiline: true,
+        startY,
+        lastLineY,
+        lineHeight: lh,
+        divY,
+        projY,
+        widestLineWidth: maxLineW
+      };
+    }
+
+    return {
+      lines,
+      fontSize: sz,
+      isMultiline: false,
+      baseY: 44,
+      startY: 44,
+      lastLineY: 44,
+      lineHeight: Math.round(sz * 1.15 * 10) / 10,
+      divY: 50,
+      projY: 65,
+      widestLineWidth: maxLineW
+    };
+  }
+
   function setFieldMultilineText(el, text, customBaseY) {
     if (!el) return;
     const raw = String(text !== undefined && text !== null ? text : '').replace(/\r\n/g, '\n');
     el.setAttribute('data-raw-text', raw);
+
+    if (el.id === 'docFieldClientName') {
+      const customSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : (state.customCellFonts?.['docFieldClientName'] || null);
+      const fit = fitDirectiveClientName(raw, customSz);
+
+      el.setAttribute('font-size', fit.fontSize);
+      el.style.setProperty('font-size', fit.fontSize + 'px', 'important');
+
+      if (!fit.isMultiline) {
+        el.removeAttribute('data-multiline');
+        el.setAttribute('y', fit.baseY || 44);
+        el.textContent = fit.lines[0] || '';
+      } else {
+        el.setAttribute('data-multiline', 'true');
+        el.textContent = '';
+        el.removeAttribute('y');
+
+        const xAttr = el.getAttribute('x') || '452';
+        fit.lines.forEach((line, idx) => {
+          const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+          tspan.setAttribute('x', xAttr);
+          tspan.setAttribute('y', Math.round((fit.startY + idx * fit.lineHeight) * 10) / 10);
+          tspan.textContent = line || '\u00A0';
+          el.appendChild(tspan);
+        });
+      }
+
+      updateProjDividerLine();
+      return;
+    }
+
+    if (el.id === 'docFieldProjectName') {
+      const customSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : (state.customCellFonts?.['docFieldProjectName'] || null);
+      let sz = customSz || 12;
+      const MAX_W = 210;
+      while (sz > 8.5 && getSvgTextWidth(raw, sz, 0.5) > MAX_W) {
+        sz = Math.round((sz - 0.5) * 10) / 10;
+      }
+      el.setAttribute('font-size', sz);
+      el.style.setProperty('font-size', sz + 'px', 'important');
+
+      const lines = raw.split('\n');
+      if (lines.length <= 1) {
+        el.removeAttribute('data-multiline');
+        const curY = el.getAttribute('y') || '65';
+        el.setAttribute('y', curY);
+        el.textContent = lines[0] || '';
+        return;
+      }
+
+      el.setAttribute('data-multiline', 'true');
+      el.textContent = '';
+      el.removeAttribute('y');
+      const lh = Math.round(sz * 1.15 * 10) / 10;
+      const curBaseY = parseFloat(el.getAttribute('data-base-y')) || 65;
+      const startY = Math.round((curBaseY - ((lines.length - 1) * lh) / 2) * 10) / 10;
+      const xAttr = el.getAttribute('x') || '452';
+      lines.forEach((line, idx) => {
+        const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+        tspan.setAttribute('x', xAttr);
+        tspan.setAttribute('y', Math.round((startY + idx * lh) * 10) / 10);
+        tspan.textContent = line || '\u00A0';
+        el.appendChild(tspan);
+      });
+      return;
+    }
 
     let baseY = customBaseY !== undefined ? customBaseY : parseFloat(el.getAttribute('data-base-y'));
     if (isNaN(baseY)) {
@@ -8105,9 +8312,9 @@
     if (!clientWidth || isNaN(clientWidth) || clientWidth < 5) {
       const text = getFieldRawText(clientEl) || '';
       const lines = text.split('\n');
-      const maxLen = Math.max(...lines.map(l => l.length), 0);
       const sz = getCellCurrentFontSize(clientEl) || 22;
-      clientWidth = Math.max(30, maxLen * (sz * 0.56));
+      clientWidth = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+      if (!clientWidth || clientWidth < 5) clientWidth = 40;
     }
 
     const finalWidth = Math.min(214, Math.max(16, clientWidth));
@@ -8122,12 +8329,12 @@
     const tspans = clientEl.querySelectorAll('tspan');
     if (tspans && tspans.length > 1) {
       const lastTspan = tspans[tspans.length - 1];
-      const lastY = parseFloat(lastTspan.getAttribute('y') || 44);
-      const divY = Math.min(70, Math.round(lastY + 5));
+      const lastY = parseFloat(lastTspan.getAttribute('y') || 48);
+      const divY = Math.min(54, Math.round(lastY + 5));
       divider.setAttribute('y1', divY);
       divider.setAttribute('y2', divY);
       if (projEl && !projEl.hasAttribute('data-multiline')) {
-        const projY = Math.min(88, Math.round(divY + 14));
+        const projY = Math.min(68, Math.round(divY + 14));
         projEl.setAttribute('y', projY);
       }
     } else {
@@ -8970,16 +9177,13 @@
     };
 
     const clientRaw = getFieldRawText('docFieldClientName') || 'INTEGU PHILIPPINES, INC';
-    const clientLines = clientRaw.split('\n');
-    const clientSz = getSz('docFieldClientName', 22);
-    let clientDivY = 50;
-    let projDefY = 65;
-    if (clientLines.length > 1) {
-      const cLh = Math.round(clientSz * 1.05 * 10) / 10;
-      const cStartY = Math.round((44 - ((clientLines.length - 1) * cLh) / 2) * 10) / 10;
-      const lastLineY = cStartY + (clientLines.length - 1) * cLh;
-      clientDivY = Math.min(70, Math.round(lastLineY + 5));
-      projDefY = Math.min(88, Math.round(clientDivY + 14));
+    const clientCustomSz = (state.customCellFonts && state.customCellFonts['docFieldClientName']) ? state.customCellFonts['docFieldClientName'] : null;
+    const clientFit = fitDirectiveClientName(clientRaw, clientCustomSz);
+
+    const projRaw = getFieldRawText('docFieldProjectName') || 'DTF FABRIC';
+    let projAutoSz = getSz('docFieldProjectName', 12);
+    while (projAutoSz > 8.5 && getSvgTextWidth(projRaw, projAutoSz, 0.5) > 210) {
+      projAutoSz = Math.round((projAutoSz - 0.5) * 10) / 10;
     }
 
     let clientX1 = 412;
@@ -8989,8 +9193,7 @@
       clientX1 = parseFloat(domLine.getAttribute('x1'));
       clientX2 = parseFloat(domLine.getAttribute('x2'));
     } else {
-      const maxLen = Math.max(...clientLines.map(l => l.length), 0);
-      const estW = Math.min(214, Math.max(16, maxLen * (clientSz * 0.56)));
+      const estW = Math.min(214, Math.max(16, clientFit.widestLineWidth));
       clientX1 = Math.round((452 - estW / 2) * 10) / 10;
       clientX2 = Math.round((452 + estW / 2) * 10) / 10;
     }
@@ -9063,9 +9266,12 @@
   <text x="508" y="13" fill="${isOutdoor ? '#FFFFFF' : '#000000'}" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
 
   <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
-  ${makeSvgField('docFieldClientName', 452, 44, 22, 'cond-black center-txt', 'middle', '0.8')}
-  <line x1="${clientX1}" y1="${clientDivY}" x2="${clientX2}" y2="${clientDivY}" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
-  ${makeSvgField('docFieldProjectName', 452, projDefY, 12, 'cond-bold center-txt', 'middle', '0.5')}
+  ${clientFit.lines.length <= 1 ?
+    `<text x="452" y="44" font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${escapeHTML(clientFit.lines[0] || '')}</text>` :
+    `<text font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${clientFit.lines.map((l, idx) => `<tspan x="452" y="${Math.round((clientFit.startY + idx * clientFit.lineHeight) * 10) / 10}">${escapeHTML(l)}</tspan>`).join('')}</text>`
+  }
+  <line x1="${clientX1}" y1="${clientFit.divY}" x2="${clientX2}" y2="${clientFit.divY}" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
+  ${makeSvgField('docFieldProjectName', 452, clientFit.projY, projAutoSz, 'cond-bold center-txt', 'middle', '0.5')}
   <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
   <rect x="347" y="78.5" width="10" height="10" fill="${releasingModeVal === 'install' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
@@ -15308,9 +15514,9 @@
     let initBox = { x: 0, y: 0, w: 0, h: 0 };
 
     const STUDIO_FIELDS = [
-      { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
+      { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
       { id: 'docFieldJoNumber', name: 'JO Number', defX: 54, defY: 2, defW: 168, defH: 29, defSz: 20, color: '#FFFFFF', align: 'start' },
-      { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
       { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 12, color: '#FFFFFF', align: 'middle' },
       { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 11.5, color: '#000000', align: 'middle' },
       { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 11.5, color: '#000000', align: 'middle' },

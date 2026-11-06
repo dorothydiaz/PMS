@@ -252,9 +252,79 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
 
                     <!-- Client Name (Larger) & Project Name (Smaller) Swapped -->
-                    <text x="452" y="44" fill="#000000" font-size="22" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldClientName" data-field-name="Client Name" data-base-y="44" data-raw-text="<?= htmlspecialchars($docClient) ?>"><?= htmlspecialchars($docClient) ?></text>
-                    <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
-                    <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldProjectName" data-field-name="Project Name" data-base-y="65" data-raw-text="<?= htmlspecialchars($docProj) ?>"><?= htmlspecialchars($docProj) ?></text>
+                    <?php
+                      $docClientRaw = trim($docClient);
+                      $clientLines = [$docClientRaw];
+                      $clientSz = 22;
+                      $clientDivY = 50;
+                      $projDefY = 65;
+                      $isClientMulti = false;
+                      $clientStartY = 44;
+                      $clientLastY = 44;
+
+                      $calcEstW = function($txt, $sz) {
+                        $str = strtoupper($txt);
+                        $total = 0;
+                        for ($i = 0; $i < strlen($str); $i++) {
+                          $ch = $str[$i];
+                          $r = ($ch === ' ') ? 0.28 : (($ch === '.' || $ch === ',' || $ch === ':' || $ch === ';' || $ch === '!' || $ch === '\'' || $ch === '|') ? 0.24 : (($ch === 'I') ? 0.26 : (($ch === 'M' || $ch === 'W') ? 0.78 : (($ch === 'J' || $ch === 'L') ? 0.44 : 0.56))));
+                          $total += $r * $sz + 0.8;
+                        }
+                        return $total;
+                      };
+
+                      if ($calcEstW($docClientRaw, 22) > 210 && strpos($docClientRaw, ' ') !== false) {
+                        $words = preg_split('/\s+/', $docClientRaw);
+                        if (count($words) > 1) {
+                          $bestIdx = 1;
+                          $minDiff = 999999;
+                          for ($i = 1; $i < count($words); $i++) {
+                            $l1 = implode(' ', array_slice($words, 0, $i));
+                            $l2 = implode(' ', array_slice($words, $i));
+                            $diff = abs(strlen($l1) - strlen($l2));
+                            if ($diff < $minDiff) {
+                              $minDiff = $diff;
+                              $bestIdx = $i;
+                            }
+                          }
+                          $clientLines = [
+                            implode(' ', array_slice($words, 0, $bestIdx)),
+                            implode(' ', array_slice($words, $bestIdx))
+                          ];
+                          $clientSz = 18;
+                          while ($clientSz > 11) {
+                            $mW = max($calcEstW($clientLines[0], $clientSz), $calcEstW($clientLines[1], $clientSz));
+                            if ($mW <= 210) break;
+                            $clientSz -= 0.5;
+                          }
+                          $isClientMulti = true;
+                          $clientLh = round($clientSz * 1.15, 1);
+                          $clientLastY = 48;
+                          $clientStartY = round($clientLastY - $clientLh, 1);
+                          $clientDivY = 53;
+                          $projDefY = 67;
+                        }
+                      } else {
+                        while ($clientSz > 11 && $calcEstW($docClientRaw, $clientSz) > 210) {
+                          $clientSz -= 0.5;
+                        }
+                      }
+
+                      $maxLineW = $isClientMulti ? max($calcEstW($clientLines[0], $clientSz), $calcEstW($clientLines[1], $clientSz)) : $calcEstW($docClientRaw, $clientSz);
+                      $divW = min(214, max(16, round($maxLineW, 1)));
+                      $divX1 = round(452 - $divW / 2, 1);
+                      $divX2 = round(452 + $divW / 2, 1);
+                    ?>
+                    <?php if ($isClientMulti): ?>
+                    <text font-size="<?= $clientSz ?>" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldClientName" data-field-name="Client Name" data-raw-text="<?= htmlspecialchars($docClient) ?>" data-multiline="true">
+                      <tspan x="452" y="<?= $clientStartY ?>"><?= htmlspecialchars($clientLines[0]) ?></tspan>
+                      <tspan x="452" y="<?= $clientLastY ?>"><?= htmlspecialchars($clientLines[1]) ?></tspan>
+                    </text>
+                    <?php else: ?>
+                    <text x="452" y="44" fill="#000000" font-size="<?= $clientSz ?>" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldClientName" data-field-name="Client Name" data-base-y="44" data-raw-text="<?= htmlspecialchars($docClient) ?>"><?= htmlspecialchars($docClient) ?></text>
+                    <?php endif; ?>
+                    <line x1="<?= $divX1 ?>" y1="<?= $clientDivY ?>" x2="<?= $divX2 ?>" y2="<?= $clientDivY ?>" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
+                    <text x="452" y="<?= $projDefY ?>" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldProjectName" data-field-name="Project Name" data-base-y="<?= $projDefY ?>" data-raw-text="<?= htmlspecialchars($docProj) ?>"><?= htmlspecialchars($docProj) ?></text>
 
                     <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
