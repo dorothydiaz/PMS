@@ -383,7 +383,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                       $divX2 = round(452 + $divW / 2, 1);
                     ?>
                     <?php if ($isClientMulti): ?>
-                    <text font-size="<?= $clientSz ?>" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldClientName" data-field-name="Client Name" data-raw-text="<?= htmlspecialchars($docClient) ?>" data-multiline="true">
+                    <text x="452" font-size="<?= $clientSz ?>" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldClientName" data-field-name="Client Name" data-raw-text="<?= htmlspecialchars($docClient) ?>" data-multiline="true">
                       <tspan x="452" y="<?= $clientStartY ?>"><?= htmlspecialchars($clientLines[0]) ?></tspan>
                       <tspan x="452" y="<?= $clientLastY ?>"><?= htmlspecialchars($clientLines[1]) ?></tspan>
                     </text>

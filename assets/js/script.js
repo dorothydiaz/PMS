@@ -8250,22 +8250,24 @@
       const customSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : (state.customCellFonts?.['docFieldClientName'] || null);
       const fit = fitDirectiveClientName(raw, customSz);
 
+      el.setAttribute('x', '452');
       el.setAttribute('font-size', fit.fontSize);
       el.style.setProperty('font-size', fit.fontSize + 'px', 'important');
 
       if (!fit.isMultiline) {
         el.removeAttribute('data-multiline');
+        el.setAttribute('x', '452');
         el.setAttribute('y', fit.baseY || 44);
         el.textContent = fit.lines[0] || '';
       } else {
         el.setAttribute('data-multiline', 'true');
         el.textContent = '';
+        el.setAttribute('x', '452');
         el.removeAttribute('y');
 
-        const xAttr = el.getAttribute('x') || '452';
         fit.lines.forEach((line, idx) => {
           const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-          tspan.setAttribute('x', xAttr);
+          tspan.setAttribute('x', '452');
           tspan.setAttribute('y', Math.round((fit.startY + idx * fit.lineHeight) * 10) / 10);
           tspan.textContent = line || '\u00A0';
           el.appendChild(tspan);
@@ -8285,11 +8287,13 @@
       }
       el.setAttribute('font-size', sz);
       el.style.setProperty('font-size', sz + 'px', 'important');
+      el.setAttribute('x', '452');
 
       const lines = raw.split('\n');
       if (lines.length <= 1) {
         el.removeAttribute('data-multiline');
-        const curY = el.getAttribute('y') || '65';
+        const curY = el.getAttribute('data-base-y') || el.getAttribute('y') || '65';
+        el.setAttribute('x', '452');
         el.setAttribute('y', curY);
         el.textContent = lines[0] || '';
         return;
@@ -8297,14 +8301,14 @@
 
       el.setAttribute('data-multiline', 'true');
       el.textContent = '';
+      el.setAttribute('x', '452');
       el.removeAttribute('y');
       const lh = Math.round(sz * 1.15 * 10) / 10;
       const curBaseY = parseFloat(el.getAttribute('data-base-y')) || 65;
       const startY = Math.round((curBaseY - ((lines.length - 1) * lh) / 2) * 10) / 10;
-      const xAttr = el.getAttribute('x') || '452';
       lines.forEach((line, idx) => {
         const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-        tspan.setAttribute('x', xAttr);
+        tspan.setAttribute('x', '452');
         tspan.setAttribute('y', Math.round((startY + idx * lh) * 10) / 10);
         tspan.textContent = line || '\u00A0';
         el.appendChild(tspan);
@@ -8318,12 +8322,16 @@
       el.setAttribute('data-base-y', baseY);
     }
 
-    const xAttr = el.getAttribute('x') || el.querySelector('tspan')?.getAttribute('x') || '0';
+    let xAttr = el.getAttribute('x') || el.querySelector('tspan')?.getAttribute('x');
+    if (!xAttr && el.getAttribute('data-base-x')) xAttr = el.getAttribute('data-base-x');
+    if (!xAttr) xAttr = '0';
+    el.setAttribute('data-base-x', xAttr);
     const sz = getCellCurrentFontSize(el);
     const lines = raw.split('\n');
 
     if (lines.length <= 1) {
       el.removeAttribute('data-multiline');
+      el.setAttribute('x', xAttr);
       el.setAttribute('y', baseY);
       el.textContent = lines[0] || '';
       updateProjDividerLine();
@@ -8332,6 +8340,7 @@
 
     el.setAttribute('data-multiline', 'true');
     el.textContent = '';
+    el.setAttribute('x', xAttr);
     el.removeAttribute('y');
 
     const lh = Math.round(sz * 1.15 * 10) / 10;
@@ -9341,7 +9350,7 @@
   <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
   ${clientFit.lines.length <= 1 ?
     `<text x="452" y="44" font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${escapeHTML(clientFit.lines[0] || '')}</text>` :
-    `<text font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${clientFit.lines.map((l, idx) => `<tspan x="452" y="${Math.round((clientFit.startY + idx * clientFit.lineHeight) * 10) / 10}">${escapeHTML(l)}</tspan>`).join('')}</text>`
+    `<text x="452" font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${clientFit.lines.map((l, idx) => `<tspan x="452" y="${Math.round((clientFit.startY + idx * clientFit.lineHeight) * 10) / 10}">${escapeHTML(l)}</tspan>`).join('')}</text>`
   }
   <line x1="${clientX1}" y1="${clientFit.divY}" x2="${clientX2}" y2="${clientFit.divY}" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
   ${makeSvgField('docFieldProjectName', 452, clientFit.projY, projAutoSz, 'cond-bold center-txt', 'middle', '0.5')}
