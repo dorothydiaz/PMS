@@ -9161,7 +9161,11 @@
   // ==========================================================================
 
     function generateDirectiveSVG(rec) {
-    if (!rec) rec = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
+    if (!rec) {
+      rec = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+            (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : null) ||
+            {};
+    }
 
     const toDot = (v) => {
       if (!v || v === '—' || v === '-' || v === '0000-00-00') return '00.00.0000';
@@ -9212,23 +9216,30 @@
     const getSz = (id, def) => (state.customCellFonts && state.customCellFonts[id]) ? state.customCellFonts[id] : def;
     const bebasB64 = (typeof window !== 'undefined' && window.__BEBAS_KAI_B64) ? `url('data:font/otf;charset=utf-8;base64,${window.__BEBAS_KAI_B64}') format('opentype'), ` : '';
 
-    const makeSvgField = (id, x, defaultY, defaultSz, className, textAnchor = 'middle', letterSpacing = '') => {
+    const makeSvgField = (id, x, defaultY, defaultSz, className, textAnchor = 'middle', letterSpacing = '', defaultFill = null) => {
       const sz = getSz(id, defaultSz);
       let raw = getFieldRawText(id);
       if (!raw) {
-        if (id === 'docFieldInstallers') raw = document.getElementById('ctrlInstallers')?.value?.trim() || rec.installers || '';
-        else if (id === 'docFieldDuration') raw = document.getElementById('ctrlDuration')?.value?.trim() || rec.duration || '';
-        else if (id === 'docFieldAddress') raw = document.getElementById('ctrlAddress')?.value?.trim() || rec.completeAddress || rec.location || '-';
-        else if (id === 'docFieldOrderDate') raw = document.getElementById('ctrlOrderDate')?.value?.trim() || toDot(rec.orderDate);
-        else if (id === 'docFieldDueDate') raw = document.getElementById('ctrlDueDate')?.value?.trim() || toDot(rec.designDeadline || rec.releasingDate);
-        else if (id === 'docFieldReleasingDate') raw = document.getElementById('ctrlReleasingDate')?.value?.trim() || toDot(rec.releasingDate);
+        if (id === 'docFieldInstallers') raw = document.getElementById('ctrlInstallers')?.value?.trim() || rec?.installers || '';
+        else if (id === 'docFieldDuration') raw = document.getElementById('ctrlDuration')?.value?.trim() || rec?.duration || '';
+        else if (id === 'docFieldAddress') raw = document.getElementById('ctrlAddress')?.value?.trim() || rec?.completeAddress || rec?.location || '-';
+        else if (id === 'docFieldOrderDate') raw = document.getElementById('ctrlOrderDate')?.value?.trim() || toDot(rec?.orderDate);
+        else if (id === 'docFieldDueDate') raw = document.getElementById('ctrlDueDate')?.value?.trim() || toDot(rec?.designDeadline || rec?.releasingDate);
+        else if (id === 'docFieldReleasingDate') raw = document.getElementById('ctrlReleasingDate')?.value?.trim() || toDot(rec?.releasingDate);
+        else if (id === 'docFieldJoNumber') raw = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec?.joNumber || rec?.requestId || '';
+      }
+      if (id === 'docFieldJoNumber' && raw) {
+        raw = raw.replace(/^JO#:\s*/i, '').trim();
       }
       const lines = raw ? raw.split('\n') : [''];
       const anchorAttr = textAnchor !== 'start' ? `text-anchor="${textAnchor}"` : '';
       const spacingAttr = letterSpacing ? `letter-spacing="${letterSpacing}"` : '';
+      const isWhiteText = (id === 'docFieldJoNumber' || id === 'docFieldDueDate');
+      const textFill = defaultFill || (isWhiteText ? '#FFFFFF' : '#000000');
+      const fillAttr = `fill="${textFill}"`;
 
       if (lines.length <= 1) {
-        return `<text x="${x}" y="${defaultY}" font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr}>${escapeHTML(lines[0] || '')}</text>`;
+        return `<text x="${x}" y="${defaultY}" ${fillAttr} font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr} id="${id}">${escapeHTML(lines[0] || '')}</text>`;
       }
 
       const lh = Math.round(sz * 1.05 * 10) / 10;
@@ -9237,7 +9248,7 @@
         const lineY = Math.round((startY + idx * lh) * 10) / 10;
         return `<tspan x="${x}" y="${lineY}">${escapeHTML(line)}</tspan>`;
       }).join('');
-      return `<text font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr}>${tspans}</text>`;
+      return `<text ${fillAttr} font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr} id="${id}">${tspans}</text>`;
     };
 
     const clientRaw = getFieldRawText('docFieldClientName') || 'INTEGU PHILIPPINES, INC';
@@ -9287,7 +9298,7 @@
   <!-- Col 1 (x: 0 to 225) -->
   <rect x="0" y="0" width="225" height="33" fill="#000000"/>
   <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
-  ${makeSvgField('docFieldJoNumber', 56, 24, 20, 'cond-black', 'start', '0.5')}
+  ${makeSvgField('docFieldJoNumber', 56, 24, 20, 'cond-black', 'start', '0.5', '#FFFFFF')}
 
   <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
   <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
@@ -9314,7 +9325,7 @@
   <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
   <rect x="225" y="33" width="115" height="32" fill="#000000"/>
   <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
-  ${makeSvgField('docFieldDueDate', 282.5, 59, 12, 'cond-bold center-txt', 'middle')}
+  ${makeSvgField('docFieldDueDate', 282.5, 59, 12, 'cond-bold center-txt', 'middle', '', '#FFFFFF')}
 
   <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
   <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
@@ -9394,7 +9405,8 @@
   function setupDirectiveActions() {
     // COPY AS VECTOR GRAPHIC (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity Designer)
     const handleCopyVector = async () => {
-      const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
+      const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
       const cleanSvg = generateDirectiveSVG(cur).trim();
       
       // Standard HTML clipboard fragment for Windows CF_HTML (Photoshop Smart Object & Corel/Illustrator Vector parse)
@@ -9500,7 +9512,8 @@
     const btnCopyPNG = document.getElementById('btnDirectiveCopyPNG');
     if (btnCopyPNG) {
       btnCopyPNG.addEventListener('click', (e) => {
-        const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
         const svgString = generateDirectiveSVG(cur);
         
         // 4K Ultra-High Definition resolution: 3616 × 384 px (scale = 4 of 904 × 96)
@@ -9589,7 +9602,8 @@
     const btnDownloadSVG = document.getElementById('btnDirectiveDownloadSVG');
     if (btnDownloadSVG) {
       btnDownloadSVG.addEventListener('click', () => {
-        const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0];
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
         const svgString = generateDirectiveSVG(cur);
         const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -15970,7 +15984,8 @@
     const copySvgBtn = document.getElementById('studioCopySVG');
     if (copySvgBtn) {
       copySvgBtn.onclick = () => {
-        const cur = state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0]) : null;
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
         const svgCode = generateDirectiveSVG(cur);
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(svgCode).then(() => showToast('Vector SVG copied for Illustrator / CorelDRAW!'));
@@ -15984,7 +15999,8 @@
     const copyPngBtn = document.getElementById('studioCopyPNG');
     if (copyPngBtn) {
       copyPngBtn.onclick = () => {
-        const cur = state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo) || state.requests[0]) : null;
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
         const svgString = generateDirectiveSVG(cur);
         const scale = 4;
         const targetWidth = 904 * scale;
