@@ -9316,10 +9316,10 @@
   <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
   ${makeSvgField('docFieldDrawnBy', 218, 68, 13, 'cond-bold', 'end')}
 
-  <g transform="translate(7, 80) scale(0.65)">
+  <g transform="translate(6, 80.7) scale(0.39)">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
   </g>
-  <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
+  <text x="16.5" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
   <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
   ${makeSvgField('docFieldAddress', 216, 89.5, 10, 'cond-bold', 'end')}
 
