@@ -130,14 +130,14 @@ require_once __DIR__ . '/includes/sidebar.php';
 
                     <!-- Real-time Zoom Controls -->
                     <div class="doc-font-controls doc-zoom-controls" id="directiveZoomControls" title="Zoom Directive Preview">
-                      <span class="font-ctrl-cell-badge" id="zoomCtrlBadge" style="display:inline-flex; align-items:center; gap:4px;">
+                      <span class="font-ctrl-cell-badge" id="zoomCtrlBadge">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                         ZOOM
                       </span>
                       <button class="btn-font-scale" id="btnDirectiveZoomOut" title="Zoom Out (−)">−</button>
-                      <span class="zoom-level-text" id="directiveZoomLevelText" style="font-weight: 800; font-size: 11.5px; min-width: 42px; text-align: center; color: #0F172A; cursor: pointer; user-select: none;" title="Click to toggle or reset zoom">100%</span>
+                      <span class="zoom-level-text" id="directiveZoomLevelText" title="Click to toggle or reset zoom">100%</span>
                       <button class="btn-font-scale" id="btnDirectiveZoomIn" title="Zoom In (+)">+</button>
-                      <button class="btn-font-scale" id="btnDirectiveZoomFit" title="Fit to Container Width" style="font-size: 10px; font-weight: 800; padding: 2px 6px;">FIT</button>
+                      <button class="btn-font-scale" id="btnDirectiveZoomFit" title="Fit to Container Width">FIT</button>
                       <button class="btn-font-scale" id="btnDirectiveZoomReset" title="Reset Zoom to 100%">↺</button>
                     </div>
 
