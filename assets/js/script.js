@@ -7959,6 +7959,10 @@
     if (!cell) return 13;
     const custom = cell.getAttribute('data-custom-size');
     if (custom) return parseFloat(custom);
+    if (window.SVGElement && cell instanceof SVGElement) {
+      const attrSize = cell.getAttribute('font-size');
+      if (attrSize) return parseFloat(attrSize);
+    }
     const inline = cell.style.fontSize;
     if (inline) return parseFloat(inline);
     const computed = window.getComputedStyle(cell).fontSize;
@@ -7969,31 +7973,44 @@
     if (!cell) return;
     const table = document.getElementById('directiveGridTable');
     if (table) {
-      table.querySelectorAll('.directive-active-cell').forEach(c => c.classList.remove('directive-active-cell'));
+      table.querySelectorAll('.directive-active-cell, .active-svg-cell').forEach(c => {
+        c.classList.remove('directive-active-cell');
+        c.classList.remove('active-svg-cell');
+      });
     }
     activeDirectiveCell = cell;
     cell.classList.add('directive-active-cell');
+    if (window.SVGElement && cell instanceof SVGElement) {
+      cell.classList.add('active-svg-cell');
+    }
 
-    const badge = document.getElementById('selectedCellBadge');
-    if (badge) badge.textContent = getCellFriendlyName(cell);
+    const currentSize = Math.round(getCellCurrentFontSize(cell));
+    const badge = document.getElementById('selectedCellBadge') || document.getElementById('fontCtrlCellBadge');
+    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${currentSize}px`;
 
     const input = document.getElementById('cellFontSizeInput');
-    if (input) input.value = Math.round(getCellCurrentFontSize(cell));
+    if (input) input.value = currentSize;
   }
 
   function setCellCustomFontSize(cell, sizePx) {
     if (!cell) {
-      cell = document.getElementById('docFieldProjectName') || document.querySelector('.doc-proj-cell');
+      cell = document.getElementById('docFieldProjectName') || document.querySelector('.interactive-field') || document.querySelector('.doc-proj-cell');
       if (cell) selectDirectiveCell(cell);
     }
     if (!cell) return;
 
     const clamped = Math.max(6, Math.min(72, Math.round(sizePx * 10) / 10));
     cell.setAttribute('data-custom-size', clamped);
+    if (window.SVGElement && cell instanceof SVGElement) {
+      cell.setAttribute('font-size', clamped);
+    }
     cell.style.setProperty('font-size', clamped + 'px', 'important');
 
     const input = document.getElementById('cellFontSizeInput');
     if (input) input.value = Math.round(clamped);
+
+    const badge = document.getElementById('selectedCellBadge') || document.getElementById('fontCtrlCellBadge');
+    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${Math.round(clamped)}px`;
 
     if (!state.customCellFonts) state.customCellFonts = {};
     const key = cell.id || cell.className;
@@ -8117,6 +8134,13 @@
     if (chkDeliver) chkDeliver.textContent = mode === 'deliver' ? '✓' : '';
     if (chkPickup) chkPickup.textContent = (mode === 'pickup' || !mode) ? '✓' : '';
 
+    const svgChkInstall = document.getElementById('docFieldCheckInstall');
+    const svgChkDeliver = document.getElementById('docFieldCheckDeliver');
+    const svgChkPickup = document.getElementById('docFieldCheckPickup');
+    if (svgChkInstall) svgChkInstall.textContent = mode === 'install' ? '✓' : '';
+    if (svgChkDeliver) svgChkDeliver.textContent = mode === 'deliver' ? '✓' : '';
+    if (svgChkPickup) svgChkPickup.textContent = (mode === 'pickup' || !mode) ? '✓' : '';
+
     const priorityEl = document.getElementById('docFieldPriorityStatus');
     if (priorityEl) {
       priorityEl.innerHTML = `Priority: <strong>${escapeHTML(rec.priority || 'Normal')}</strong> | Status: <strong>${escapeHTML(rec.projectStatus || rec.status || 'Pending')}</strong>`;
@@ -8150,6 +8174,9 @@
         const target = document.getElementById(key);
         if (target && size > 0) {
           target.setAttribute('data-custom-size', size);
+          if (window.SVGElement && target instanceof SVGElement) {
+            target.setAttribute('font-size', size);
+          }
           target.style.setProperty('font-size', size + 'px', 'important');
         }
       });
@@ -8248,28 +8275,76 @@
       }
     });
 
-    const btnSearch = document.getElementById('btnDirectiveSearch');
-    if (btnSearch) {
-      btnSearch.addEventListener('click', () => {
-        const q = input.value.trim();
-        const found = getDirectiveRecord(q);
-        if (found) {
-          renderDirectivePreview(found.joNumber);
-          if (statusEl) {
-            statusEl.textContent = 'Loaded!';
-            statusEl.style.color = '#176B55';
-            setTimeout(() => statusEl.textContent = '', 2500);
+    const doSearch = (query) => {
+      const q = (query !== undefined ? query : input.value).trim();
+      if (!q) return;
+      if (statusEl) {
+        statusEl.textContent = 'Searching...';
+        statusEl.style.color = '#64748B';
+      }
+      box.classList.remove('show');
+
+      const found = getDirectiveRecord(q);
+      if (found) {
+        renderDirectivePreview(found.joNumber || found.requestId);
+        if (statusEl) {
+          statusEl.textContent = 'Loaded!';
+          statusEl.style.color = '#176B55';
+          setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+        }
+        showToast(`Directive for ${found.joNumber || found.requestId} loaded.`);
+        return;
+      }
+
+      // Query database via API
+      const apiUrl = window.PMS_API_URL || 'api.php';
+      fetch(apiUrl + '?action=get_request&id=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            normalizeRequestItem(res.data);
+            if (!state.requests) state.requests = [];
+            const idx = state.requests.findIndex(r => r.id == res.data.id || r.requestId == res.data.requestId || r.joNumber == res.data.joNumber);
+            if (idx >= 0) {
+              state.requests[idx] = res.data;
+            } else {
+              state.requests.unshift(res.data);
+            }
+            renderDirectivePreview(res.data.joNumber || res.data.requestId);
+            if (statusEl) {
+              statusEl.textContent = 'Loaded!';
+              statusEl.style.color = '#176B55';
+              setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+            }
+            showToast(`Directive for ${res.data.joNumber || res.data.requestId} loaded.`);
+          } else {
+            if (statusEl) {
+              statusEl.textContent = 'Not found';
+              statusEl.style.color = '#E53935';
+            }
+            showToast(`Job "${q}" not found.`, 'error');
           }
-          showToast(`Directive for ${found.joNumber} loaded.`);
-        } else {
+        })
+        .catch(err => {
           if (statusEl) {
-            statusEl.textContent = 'Not found';
+            statusEl.textContent = 'Search error';
             statusEl.style.color = '#E53935';
           }
-          showToast(`Job "${q}" not found.`, 'error');
-        }
-      });
+          showToast(`Could not search server for "${q}".`, 'error');
+        });
+    };
+
+    const btnSearch = document.getElementById('btnDirectiveSearch');
+    if (btnSearch) {
+      btnSearch.addEventListener('click', () => doSearch());
     }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        doSearch();
+      }
+    });
 
     const btnClear = document.getElementById('btnDirectiveClear');
     if (btnClear) {
@@ -8317,13 +8392,15 @@
     const checkDeliver = releasingModeVal === 'deliver' ? '✓' : '';
     const checkPickup = (releasingModeVal === 'pickup' || !releasingModeVal) ? '✓' : '';
 
+    const getSz = (id, def) => (state.customCellFonts && state.customCellFonts[id]) ? state.customCellFonts[id] : def;
+    const bebasB64 = (typeof window !== 'undefined' && window.__BEBAS_KAI_B64) ? `url('data:font/otf;charset=utf-8;base64,${window.__BEBAS_KAI_B64}') format('opentype'), ` : '';
+
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="3616" height="384" style="background:#FFFFFF;">
   <defs>
     <style>
       @font-face {
         font-family: 'Bebas Kai';
-        src: url('data:font/otf;charset=utf-8;base64,` + (window.__BEBAS_KAI_B64 || '') + `') format('opentype'),
-             url('../fonts/BebasKai.otf') format('opentype'),
+        src: ${bebasB64}url('../fonts/BebasKai.otf') format('opentype'),
              url('../fonts/BebasKai.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
@@ -8343,15 +8420,15 @@
   <!-- Col 1 (x: 0 to 225) -->
   <rect x="0" y="0" width="225" height="33" fill="#000000"/>
   <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
-  <text x="56" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">${escapeHTML(joNumberVal)}</text>
+  <text x="56" y="24" fill="#FFFFFF" font-size="${getSz('docFieldJoNumber', 20)}" class="cond-black" letter-spacing="0.5">${escapeHTML(joNumberVal)}</text>
 
   <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
   <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
-  <text x="218" y="47" fill="#000000" font-size="11.5" class="cond-bold" text-anchor="end">${escapeHTML(inChargeVal)}</text>
+  <text x="218" y="47" fill="#000000" font-size="${getSz('docFieldInCharge', 13)}" class="cond-bold" text-anchor="end">${escapeHTML(inChargeVal)}</text>
 
   <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
   <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
-  <text x="218" y="68" fill="#000000" font-size="11.5" class="cond-bold" text-anchor="end">${escapeHTML(drawnByVal)}</text>
+  <text x="218" y="68" fill="#000000" font-size="${getSz('docFieldDrawnBy', 13)}" class="cond-bold" text-anchor="end">${escapeHTML(drawnByVal)}</text>
 
   <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
   <g transform="translate(7, 80) scale(0.65)">
@@ -8359,22 +8436,22 @@
   </g>
   <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
   <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
-  <text x="160" y="89.5" fill="#000000" font-size="9.5" class="cond-semi" text-anchor="middle">${escapeHTML(addressVal)}</text>
+  <text x="160" y="89.5" fill="#000000" font-size="${getSz('docFieldAddress', 10)}" class="cond-bold center-txt">${escapeHTML(addressVal)}</text>
 
   <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
 
   <!-- Col 2 (x: 225 to 340) -->
   <text x="282.5" y="14" fill="#000000" font-size="10" class="cond-bold center-txt">ORDER DATE <tspan font-size="9" class="chinese">订购日期</tspan></text>
-  <text x="282.5" y="27" fill="#000000" font-size="12" class="cond-bold center-txt">${escapeHTML(orderDateVal)}</text>
+  <text x="282.5" y="27" fill="#000000" font-size="${getSz('docFieldOrderDate', 11.5)}" class="cond-bold center-txt">${escapeHTML(orderDateVal)}</text>
 
   <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
   <rect x="225" y="33" width="115" height="32" fill="#000000"/>
   <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
-  <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold center-txt">${escapeHTML(dueDateFormatted)}</text>
+  <text x="282.5" y="59" fill="#FFFFFF" font-size="${getSz('docFieldDueDate', 12)}" class="cond-bold center-txt">${escapeHTML(dueDateFormatted)}</text>
 
   <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
   <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
-  <text x="282.5" y="89.5" fill="#000000" font-size="11.5" class="cond-bold center-txt">${escapeHTML(releasingDateFormatted)}</text>
+  <text x="282.5" y="89.5" fill="#000000" font-size="${getSz('docFieldReleasingDate', 11.5)}" class="cond-bold center-txt">${escapeHTML(releasingDateFormatted)}</text>
 
   <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
 
@@ -8385,20 +8462,21 @@
   <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
 
   <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
-  <text x="452" y="45" fill="#000000" font-size="20" class="cond-black center-txt" text-decoration="underline">${escapeHTML(projectNameVal)}</text>
-  <text x="452" y="60" fill="#1F2937" font-size="11" class="cond-bold center-txt">${escapeHTML(clientVal)}</text>
+  <text x="452" y="44" fill="#000000" font-size="${getSz('docFieldProjectName', 22)}" class="cond-black center-txt" letter-spacing="0.8">${escapeHTML(projectNameVal)}</text>
+  <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1"/>
+  <text x="452" y="65" fill="#000000" font-size="${getSz('docFieldClientName', 12)}" class="cond-bold center-txt" letter-spacing="0.5">${escapeHTML(clientVal)}</text>
   <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
   <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-  <text x="352" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt">${checkInstall}</text>
+  <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt">${checkInstall}</text>
   <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
 
   <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-  <text x="429" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt">${checkDeliver}</text>
+  <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt">${checkDeliver}</text>
   <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
 
   <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-  <text x="503" y="86.5" fill="#000000" font-size="9" class="cond-black center-txt">${checkPickup}</text>
+  <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt">${checkPickup}</text>
   <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
 
   <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
@@ -8416,12 +8494,12 @@
   <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
   <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
   <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
-  <text x="765" y="59" fill="#000000" font-size="10" class="cond-semi center-txt">${escapeHTML(contactPersonVal)}</text>
+  <text x="765" y="59" fill="#000000" font-size="${getSz('docFieldContactPerson', 11)}" class="cond-bold center-txt">${escapeHTML(contactPersonVal)}</text>
 
   <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
   <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
   <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
-  <text x="765" y="86" fill="#000000" font-size="10" class="cond-semi center-txt">${escapeHTML(contactNumberVal)}</text>
+  <text x="765" y="86" fill="#000000" font-size="${getSz('docFieldContactNumber', 11)}" class="cond-bold center-txt">${escapeHTML(contactNumberVal)}</text>
 
   <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
 
@@ -8429,13 +8507,13 @@
   <rect x="822" y="0" width="82" height="22" fill="#000000"/>
   <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
   <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
-  <text x="863" y="38" fill="#000000" font-size="11.5" class="cond-bold center-txt">${escapeHTML(installersVal)}</text>
+  <text x="863" y="38" fill="#000000" font-size="${getSz('docFieldInstallers', 12)}" class="cond-bold center-txt">${escapeHTML(installersVal)}</text>
 
   <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
   <rect x="822" y="48" width="82" height="22" fill="#000000"/>
   <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
   <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
-  <text x="863" y="86" fill="#000000" font-size="11.5" class="cond-bold center-txt">${escapeHTML(durationVal)}</text>
+  <text x="863" y="86" fill="#000000" font-size="${getSz('docFieldDuration', 12)}" class="cond-bold center-txt">${escapeHTML(durationVal)}</text>
 
   <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
 </svg>`;
@@ -8738,9 +8816,28 @@
         saveStateToStorage();
         const table = document.getElementById('directiveGridTable');
         if (table) {
-          table.querySelectorAll('td').forEach(c => {
+          table.querySelectorAll('td, text.interactive-field, text.bebas-field').forEach(c => {
             c.removeAttribute('data-custom-size');
             c.style.removeProperty('font-size');
+          });
+          const defaultSizes = {
+            docFieldJoNumber: 20,
+            docFieldDueDate: 14,
+            docFieldOrderDate: 10,
+            docFieldReleasingDate: 10,
+            docFieldProjectName: 20,
+            docFieldClientName: 16,
+            docFieldInCharge: 11,
+            docFieldDrawnBy: 11,
+            docFieldAddress: 11,
+            docFieldContactPerson: 11,
+            docFieldContactNumber: 11,
+            docFieldInstallers: 12,
+            docFieldDuration: 12
+          };
+          Object.entries(defaultSizes).forEach(([id, sz]) => {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('font-size', sz);
           });
         }
         renderDirectivePreview(state.currentDirectiveJo);
@@ -8753,7 +8850,7 @@
       if (activeDirectiveCell && document.body.contains(activeDirectiveCell)) {
         return activeDirectiveCell;
       }
-      const defaultCell = document.getElementById('docFieldProjectName') || document.querySelector('.doc-proj-cell') || document.querySelector('.doc-value-cell');
+      const defaultCell = document.getElementById('docFieldProjectName') || document.querySelector('.doc-proj-cell') || document.querySelector('.interactive-field');
       if (defaultCell) selectDirectiveCell(defaultCell);
       return defaultCell;
     };
@@ -8806,6 +8903,24 @@
         if (cell) {
           cell.removeAttribute('data-custom-size');
           cell.style.removeProperty('font-size');
+          const defaultSizes = {
+            docFieldJoNumber: 20,
+            docFieldDueDate: 14,
+            docFieldOrderDate: 10,
+            docFieldReleasingDate: 10,
+            docFieldProjectName: 20,
+            docFieldClientName: 16,
+            docFieldInCharge: 11,
+            docFieldDrawnBy: 11,
+            docFieldAddress: 11,
+            docFieldContactPerson: 11,
+            docFieldContactNumber: 11,
+            docFieldInstallers: 12,
+            docFieldDuration: 12
+          };
+          if (window.SVGElement && cell instanceof SVGElement && cell.id && defaultSizes[cell.id]) {
+            cell.setAttribute('font-size', defaultSizes[cell.id]);
+          }
           autoFitCellText(cell);
           if (cellFontInput) cellFontInput.value = Math.round(getCellCurrentFontSize(cell));
           if (state.customCellFonts && cell.id) {
@@ -8821,25 +8936,25 @@
     const gridTable = document.getElementById('directiveGridTable');
     if (gridTable) {
       gridTable.addEventListener('click', (e) => {
-        const targetCell = e.target.closest('td');
+        const targetCell = e.target.closest('td') || e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
         if (targetCell) {
           selectDirectiveCell(targetCell);
         }
       });
 
       gridTable.addEventListener('focusin', (e) => {
-        const targetCell = e.target.closest('td');
+        const targetCell = e.target.closest('td') || e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
         if (targetCell) {
           selectDirectiveCell(targetCell);
         }
       });
 
       // Hotkeys: Ctrl+[ decreases active cell font, Ctrl+] increases active cell font
-      gridTable.addEventListener('keydown', (e) => {
+      document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && (e.key === '[' || e.key === ']')) {
-          e.preventDefault();
-          const targetCell = e.target.closest('td') || getActiveOrTargetCell();
+          const targetCell = getActiveOrTargetCell();
           if (targetCell) {
+            e.preventDefault();
             selectDirectiveCell(targetCell);
             const current = getCellCurrentFontSize(targetCell);
             const step = e.key === '[' ? -1 : 1;

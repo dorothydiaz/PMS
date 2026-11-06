@@ -53,6 +53,8 @@ $docReleasingMode = $targetRecord ? ($targetRecord['releasing_mode'] ?: 'Pickup'
 $docAddress = ($targetRecord && !empty($targetRecord['complete_address']) && $targetRecord['complete_address'] !== 'N/A') ? $targetRecord['complete_address'] : (($targetRecord && !empty($targetRecord['location']) && $targetRecord['location'] !== 'N/A') ? $targetRecord['location'] : '-');
 $docLookupVal = $targetRecord ? ($targetRecord['jo_number'] ?: $targetRecord['request_id'] ?: $targetRecord['project_name'] ?: '') : '';
 $initialDirectiveKey = $targetRecord ? ($targetRecord['request_id'] ?: $targetRecord['jo_number'] ?: $targetRecord['id'] ?: '') : '';
+$fontFile = dirname(__DIR__) . '/assets/fonts/BebasKai.otf';
+$bebasB64 = file_exists($fontFile) ? base64_encode(file_get_contents($fontFile)) : '';
 
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
@@ -95,6 +97,16 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <!-- Directive Top Quick Bar (Vector Ready) -->
                 <div class="doc-top-bar no-print">
                   <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <!-- Real-time Font Size Controls -->
+                    <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale its font size (or use Ctrl+[ and Ctrl+])">
+                      <span class="font-ctrl-cell-badge" id="fontCtrlCellBadge">PROJECT NAME: 22px</span>
+                      <button class="btn-font-scale" id="btnCellFontDec" title="Decrease font size (Ctrl+[)">A−</button>
+                      <input type="number" class="cell-font-size-input" id="cellFontSizeInput" min="6" max="72" value="22" title="Custom font size in px">
+                      <span class="font-ctrl-unit">px</span>
+                      <button class="btn-font-scale" id="btnCellFontInc" title="Increase font size (Ctrl+])">A+</button>
+                      <button class="btn-font-scale" id="btnCellFontReset" title="Reset font size">↺</button>
+                    </div>
+
                     <button class="btn btn-primary btn-sm" id="btnDirectiveCopySVG" title="Copy exact vector SVG to clipboard for Illustrator, Figma, or CorelDRAW">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                       Copy Vector SVG
@@ -107,14 +119,171 @@ require_once __DIR__ . '/includes/sidebar.php';
                   </div>
                 </div>
 
-                <!-- Exact 1:1 Vector Production Directive Header (Pure Original SVG File at Actual Size) -->
+                <!-- Exact 1:1 Vector Production Directive Header (Pure Original SVG Format with Bebas Kai & Dynamic Fields) -->
                 <div class="directive-exact-header-wrap" id="directiveGridTable">
-                  <?php
-                    $svgPath = dirname(__DIR__) . '/assets/img/directive-header-clear.svg';
-                    if (file_exists($svgPath)) {
-                      echo file_get_contents($svgPath);
-                    }
-                  ?>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="904" height="96" id="directiveExactSvg" style="background:#FFFFFF; display:block;">
+                    <defs>
+                      <style>
+                        @font-face {
+                          font-family: 'Bebas Kai';
+                          src: url('data:font/otf;charset=utf-8;base64,<?= $bebasB64 ?>') format('opentype'),
+                               url('../assets/fonts/BebasKai.otf') format('opentype'),
+                               url('../assets/fonts/BebasKai.ttf') format('truetype');
+                          font-weight: normal;
+                          font-style: normal;
+                        }
+                        @font-face {
+                          font-family: 'BebasKai';
+                          src: url('data:font/otf;charset=utf-8;base64,<?= $bebasB64 ?>') format('opentype'),
+                               url('../assets/fonts/BebasKai.otf') format('opentype'),
+                               url('../assets/fonts/BebasKai.ttf') format('truetype');
+                          font-weight: normal;
+                          font-style: normal;
+                        }
+                        text { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; }
+                        .bebas-field { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important; cursor: pointer; user-select: text; }
+                        .cond-black { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: 900; }
+                        .cond-bold { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: 800; }
+                        .cond-semi { font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif; font-weight: 700; }
+                        .chinese { font-family: 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif; font-weight: bold; }
+                        tspan.chinese { font-family: 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif; font-weight: bold; }
+                        .center-txt { text-anchor: middle; }
+                        .interactive-field { cursor: pointer; transition: opacity 0.15s, fill 0.15s; }
+                        .interactive-field:hover { opacity: 0.75; }
+                        .active-svg-cell { outline: 2px dashed #E10600; fill: #E10600 !important; }
+                      </style>
+                    </defs>
+
+                    <!-- Base White Canvas -->
+                    <rect x="0" y="0" width="904" height="96" fill="#FFFFFF"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 1: (0 to 225) -->
+                    <!-- ========================================== -->
+                    <rect x="0" y="0" width="225" height="33" fill="#000000"/>
+                    <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
+                    <text x="56" y="24" fill="#FFFFFF" font-size="20" class="cond-black bebas-field interactive-field" letter-spacing="0.5" id="docFieldJoNumber" data-field-name="JO Number"><?= htmlspecialchars($docJo) ?></text>
+
+                    <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
+                    <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
+                    <text x="218" y="47" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldInCharge" data-field-name="In-Charge"><?= htmlspecialchars($docInCharge) ?></text>
+
+                    <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
+                    <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
+                    <text x="218" y="68" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldDrawnBy" data-field-name="Drawn By"><?= htmlspecialchars($docDrawnBy) ?></text>
+
+                    <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
+                    <g transform="translate(7, 80) scale(0.65)">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
+                    </g>
+                    <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
+                    <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
+                    <text x="160" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field center-txt" id="docFieldAddress" data-field-name="Address"><?= htmlspecialchars($docAddress) ?></text>
+
+                    <!-- Vertical Divider 1 -->
+                    <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 2: (225 to 340) -->
+                    <!-- ========================================== -->
+                    <!-- Row 1: Order Date -->
+                    <text x="282.5" y="14" fill="#000000" font-size="10" class="cond-bold center-txt">ORDER DATE <tspan font-size="9" class="chinese">订购日期</tspan></text>
+                    <text x="282.5" y="27" fill="#000000" font-size="11.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldOrderDate" data-field-name="Order Date"><?= htmlspecialchars($docOrderDate) ?></text>
+
+                    <!-- Row 2: Due Date -->
+                    <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
+                    <rect x="225" y="33" width="115" height="32" fill="#000000"/>
+                    <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
+                    <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDueDate" data-field-name="Due Date"><?= htmlspecialchars($docDueDate) ?></text>
+
+                    <!-- Row 3: Date to be Release -->
+                    <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
+                    <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
+                    <text x="282.5" y="89.5" fill="#000000" font-size="11.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldReleasingDate" data-field-name="Release Date"><?= htmlspecialchars($docReleasingDate) ?></text>
+
+                    <!-- Vertical Divider 2 -->
+                    <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 3: (340 to 564) -->
+                    <!-- ========================================== -->
+                    <rect x="340" y="0" width="224" height="18" fill="#E10600"/>
+                    <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
+                    <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor">INDOOR</text>
+                    <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor">OUTDOOR</text>
+
+                    <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Project Name & Client Name -->
+                    <text x="452" y="44" fill="#000000" font-size="22" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldProjectName" data-field-name="Project Name"><?= htmlspecialchars($docProj) ?></text>
+                    <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1"/>
+                    <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldClientName" data-field-name="Client Name"><?= htmlspecialchars($docClient) ?></text>
+
+                    <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Row 3: Checkboxes -->
+                    <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                    <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckInstall"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></text>
+                    <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
+
+                    <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                    <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckDeliver"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></text>
+                    <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
+
+                    <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                    <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckPickup"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></text>
+                    <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
+
+                    <!-- Vertical Divider 3 -->
+                    <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 4: (564 to 822) -->
+                    <!-- ========================================== -->
+                    <rect x="564" y="0" width="97" height="43" fill="#000000"/>
+                    <text x="612.5" y="12" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
+                    <text x="612.5" y="22" fill="#FFFFFF" font-size="8.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
+                    <text x="612.5" y="35" fill="#FFFFFF" font-size="8.5" class="chinese center-txt">现场安装环境选项</text>
+
+                    <rect x="674" y="10" width="4.5" height="23" fill="#E10600"/>
+                    <text x="684" y="21" fill="#000000" font-size="11.5" class="cond-bold" letter-spacing="0.3">CONCRETE WALL</text>
+                    <text x="684" y="32.5" fill="#000000" font-size="9.5" class="chinese">水泥墙</text>
+
+                    <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Row 2: Contact Person -->
+                    <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
+                    <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+                    <text x="765" y="59" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactPerson" data-field-name="Contact Person"><?= htmlspecialchars($docContact) ?></text>
+
+                    <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
+
+                    <!-- Row 3: Contact Number -->
+                    <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
+                    <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+                    <text x="765" y="86" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactNumber" data-field-name="Contact Number"><?= htmlspecialchars($docPhone) ?></text>
+
+                    <!-- Vertical Divider 4 -->
+                    <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
+
+                    <!-- ========================================== -->
+                    <!-- COLUMN 5: (822 to 904) -->
+                    <!-- ========================================== -->
+                    <rect x="822" y="0" width="82" height="22" fill="#000000"/>
+                    <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
+                    <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
+                    <text x="863" y="38" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldInstallers" data-field-name="Installers"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></text>
+
+                    <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
+
+                    <rect x="822" y="48" width="82" height="22" fill="#000000"/>
+                    <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
+                    <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
+                    <text x="863" y="86" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDuration" data-field-name="Duration"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></text>
+
+                    <!-- Outer Border Outline -->
+                    <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
+                  </svg>
                 </div>
               </div>
             </div>

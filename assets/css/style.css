@@ -6467,6 +6467,22 @@ input[type="password"]::-ms-clear {
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
 }
 
+.directive-exact-header-wrap svg text.bebas-field {
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
+  cursor: pointer;
+  user-select: text;
+  transition: opacity 0.15s, fill 0.15s;
+}
+
+.directive-exact-header-wrap svg text.bebas-field:hover {
+  opacity: 0.75;
+}
+
+.directive-exact-header-wrap svg text.active-svg-cell {
+  outline: 2px dashed #E10600 !important;
+  fill: #E10600 !important;
+}
+
 .directive-exact-header-wrap svg .chinese,
 .directive-exact-header-wrap svg tspan.chinese {
   font-family: 'Bebas Kai', 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif !important;
