@@ -7978,8 +7978,8 @@
     docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Order Date' },
     docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 12, weight: 'normal', name: 'Due Date' },
     docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 11.5, weight: 'normal', name: 'Release Date' },
-    docFieldProjectName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 'normal', name: 'Project Name' },
-    docFieldClientName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Client Name' },
+    docFieldClientName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 'normal', name: 'Client Name' },
+    docFieldProjectName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Project Name' },
     docFieldContactPerson: { x: 715, y: 46, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 'normal', name: 'Contact Person' },
     docFieldContactNumber: { x: 715, y: 73, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 11, weight: 'normal', name: 'Contact Number' },
     docFieldInstallers: { x: 824, y: 24, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Installers' },
@@ -8044,26 +8044,62 @@
 
   function updateProjDividerLine() {
     const divider = document.getElementById('docProjDividerLine');
-    const projEl = document.getElementById('docFieldProjectName');
     const clientEl = document.getElementById('docFieldClientName');
-    if (!divider || !projEl) return;
+    const projEl = document.getElementById('docFieldProjectName');
+    if (!divider || !clientEl) return;
 
-    const tspans = projEl.querySelectorAll('tspan');
+    // Underline width must exactly match Client Name width!
+    let clientWidth = 0;
+    try {
+      if (typeof clientEl.getComputedTextLength === 'function') {
+        const tspans = clientEl.querySelectorAll('tspan');
+        if (tspans && tspans.length > 0) {
+          tspans.forEach(t => {
+            const w = t.getComputedTextLength();
+            if (w > clientWidth) clientWidth = w;
+          });
+        } else {
+          clientWidth = clientEl.getComputedTextLength();
+        }
+      } else if (typeof clientEl.getBBox === 'function') {
+        clientWidth = clientEl.getBBox().width;
+      }
+    } catch (e) {}
+
+    // Fallback approximation if DOM not rendered yet
+    if (!clientWidth || isNaN(clientWidth) || clientWidth < 5) {
+      const text = getFieldRawText(clientEl) || '';
+      const lines = text.split('\n');
+      const maxLen = Math.max(...lines.map(l => l.length), 0);
+      const sz = getCellCurrentFontSize(clientEl) || 22;
+      clientWidth = Math.max(30, maxLen * (sz * 0.56));
+    }
+
+    const finalWidth = Math.min(214, Math.max(16, clientWidth));
+    const centerX = 452;
+    const halfW = Math.round((finalWidth / 2) * 10) / 10;
+    const x1 = Math.round((centerX - halfW) * 10) / 10;
+    const x2 = Math.round((centerX + halfW) * 10) / 10;
+    divider.setAttribute('x1', x1);
+    divider.setAttribute('x2', x2);
+
+    // Vertical positioning: underline sits directly under Client Name
+    const tspans = clientEl.querySelectorAll('tspan');
     if (tspans && tspans.length > 1) {
       const lastTspan = tspans[tspans.length - 1];
       const lastY = parseFloat(lastTspan.getAttribute('y') || 44);
       const divY = Math.min(70, Math.round(lastY + 5));
       divider.setAttribute('y1', divY);
       divider.setAttribute('y2', divY);
-      if (clientEl && !clientEl.hasAttribute('data-multiline')) {
-        const clientY = Math.min(88, Math.round(divY + 14));
-        clientEl.setAttribute('y', clientY);
+      if (projEl && !projEl.hasAttribute('data-multiline')) {
+        const projY = Math.min(88, Math.round(divY + 14));
+        projEl.setAttribute('y', projY);
       }
     } else {
       divider.setAttribute('y1', '50');
       divider.setAttribute('y2', '50');
-      if (clientEl && !clientEl.hasAttribute('data-multiline')) {
-        clientEl.setAttribute('y', '65');
+      if (projEl && !projEl.hasAttribute('data-multiline')) {
+        projEl.setAttribute('y', '65');
       }
     }
   }
@@ -8098,8 +8134,8 @@
       if (y > 33 && y <= 65) return 'docFieldDueDate';
       if (y > 65 && y <= 96) return 'docFieldReleasingDate';
     } else if (x > 340 && x <= 564) {
-      if (y >= 18 && y <= 50) return 'docFieldProjectName';
-      if (y > 50 && y <= 73) return 'docFieldClientName';
+      if (y >= 18 && y <= 50) return 'docFieldClientName';
+      if (y > 50 && y <= 73) return 'docFieldProjectName';
     } else if (x > 564 && x <= 822) {
       if (y > 43 && y <= 70) return 'docFieldContactPerson';
       if (y > 70 && y <= 96) return 'docFieldContactNumber';
@@ -8525,7 +8561,10 @@
       });
     }
 
-    setTimeout(autoFitDirectiveTexts, 20);
+    setTimeout(() => {
+      autoFitDirectiveTexts();
+      updateProjDividerLine();
+    }, 20);
   }
 
   function setupDirectiveControlsSync() {
@@ -8758,17 +8797,30 @@
       return `<text font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr}>${tspans}</text>`;
     };
 
-    const projRaw = getFieldRawText('docFieldProjectName') || 'DTF FABRIC';
-    const projLines = projRaw.split('\n');
-    let projDivY = 50;
-    let clientDefY = 65;
-    if (projLines.length > 1) {
-      const pSz = getSz('docFieldProjectName', 22);
-      const pLh = Math.round(pSz * 1.05 * 10) / 10;
-      const pStartY = Math.round((44 - ((projLines.length - 1) * pLh) / 2) * 10) / 10;
-      const lastLineY = pStartY + (projLines.length - 1) * pLh;
-      projDivY = Math.min(70, Math.round(lastLineY + 5));
-      clientDefY = Math.min(88, Math.round(projDivY + 14));
+    const clientRaw = getFieldRawText('docFieldClientName') || 'INTEGU PHILIPPINES, INC';
+    const clientLines = clientRaw.split('\n');
+    const clientSz = getSz('docFieldClientName', 22);
+    let clientDivY = 50;
+    let projDefY = 65;
+    if (clientLines.length > 1) {
+      const cLh = Math.round(clientSz * 1.05 * 10) / 10;
+      const cStartY = Math.round((44 - ((clientLines.length - 1) * cLh) / 2) * 10) / 10;
+      const lastLineY = cStartY + (clientLines.length - 1) * cLh;
+      clientDivY = Math.min(70, Math.round(lastLineY + 5));
+      projDefY = Math.min(88, Math.round(clientDivY + 14));
+    }
+
+    let clientX1 = 412;
+    let clientX2 = 492;
+    const domLine = document.getElementById('docProjDividerLine');
+    if (domLine && domLine.getAttribute('x1') && domLine.getAttribute('x2')) {
+      clientX1 = parseFloat(domLine.getAttribute('x1'));
+      clientX2 = parseFloat(domLine.getAttribute('x2'));
+    } else {
+      const maxLen = Math.max(...clientLines.map(l => l.length), 0);
+      const estW = Math.min(214, Math.max(16, maxLen * (clientSz * 0.56)));
+      clientX1 = Math.round((452 - estW / 2) * 10) / 10;
+      clientX2 = Math.round((452 + estW / 2) * 10) / 10;
     }
 
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="3616" height="384" style="background:#FFFFFF;">
@@ -8838,9 +8890,9 @@
   <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
 
   <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
-  ${makeSvgField('docFieldProjectName', 452, 44, 22, 'cond-black center-txt', 'middle', '0.8')}
-  <line x1="412" y1="${projDivY}" x2="492" y2="${projDivY}" stroke="#000000" stroke-width="1"/>
-  ${makeSvgField('docFieldClientName', 452, clientDefY, 12, 'cond-bold center-txt', 'middle', '0.5')}
+  ${makeSvgField('docFieldClientName', 452, 44, 22, 'cond-black center-txt', 'middle', '0.8')}
+  <line x1="${clientX1}" y1="${clientDivY}" x2="${clientX2}" y2="${clientDivY}" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
+  ${makeSvgField('docFieldProjectName', 452, projDefY, 12, 'cond-bold center-txt', 'middle', '0.5')}
   <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
   <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
@@ -9209,8 +9261,8 @@
             docFieldDueDate: 14,
             docFieldOrderDate: 10,
             docFieldReleasingDate: 10,
-            docFieldProjectName: 20,
-            docFieldClientName: 16,
+            docFieldClientName: 22,
+            docFieldProjectName: 12,
             docFieldInCharge: 11,
             docFieldDrawnBy: 11,
             docFieldAddress: 11,
@@ -9385,8 +9437,8 @@
             docFieldDueDate: 14,
             docFieldOrderDate: 10,
             docFieldReleasingDate: 10,
-            docFieldProjectName: 20,
-            docFieldClientName: 16,
+            docFieldClientName: 22,
+            docFieldProjectName: 12,
             docFieldInCharge: 11,
             docFieldDrawnBy: 11,
             docFieldAddress: 11,
