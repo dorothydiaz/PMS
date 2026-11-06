@@ -6483,6 +6483,40 @@ input[type="password"]::-ms-clear {
   fill: #E10600 !important;
 }
 
+.directive-direct-editor {
+  position: absolute;
+  box-sizing: border-box;
+  font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
+  font-weight: 800;
+  border: 1.5px dashed #E10600;
+  border-radius: 2px;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  white-space: pre;
+  word-break: break-word;
+  line-height: 1.05;
+  padding: 1px 3px;
+  margin: 0;
+  z-index: 100;
+  box-shadow: 0 4px 14px rgba(225, 6, 0, 0.25);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.directive-direct-editor:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+}
+
+.deh-check-grp {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.deh-check-grp:hover {
+  opacity: 0.75;
+}
+
 .directive-exact-header-wrap svg .chinese,
 .directive-exact-header-wrap svg tspan.chinese {
   font-family: 'Bebas Kai', 'Microsoft YaHei', 'SimSun', 'PingFang SC', 'Noto Sans CJK SC', sans-serif !important;

@@ -162,15 +162,15 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- ========================================== -->
                     <rect x="0" y="0" width="225" height="33" fill="#000000"/>
                     <text x="14" y="24" fill="#FFFFFF" font-size="20" class="cond-black" letter-spacing="0.5">JO#:</text>
-                    <text x="56" y="24" fill="#FFFFFF" font-size="20" class="cond-black bebas-field interactive-field" letter-spacing="0.5" id="docFieldJoNumber" data-field-name="JO Number"><?= htmlspecialchars($docJo) ?></text>
+                    <text x="56" y="24" fill="#FFFFFF" font-size="20" class="cond-black bebas-field interactive-field" letter-spacing="0.5" id="docFieldJoNumber" data-field-name="JO Number" data-base-y="24" data-raw-text="<?= htmlspecialchars($docJo) ?>"><?= htmlspecialchars($docJo) ?></text>
 
                     <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
                     <text x="8" y="47" fill="#000000" font-size="11.5" class="cond-bold">IN CHARGE<tspan font-size="10" class="chinese">负责人</tspan>  :</text>
-                    <text x="218" y="47" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldInCharge" data-field-name="In-Charge"><?= htmlspecialchars($docInCharge) ?></text>
+                    <text x="218" y="47" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldInCharge" data-field-name="In-Charge" data-base-y="47" data-raw-text="<?= htmlspecialchars($docInCharge) ?>"><?= htmlspecialchars($docInCharge) ?></text>
 
                     <line x1="0" y1="54" x2="225" y2="54" stroke="#000000" stroke-width="1.5"/>
                     <text x="8" y="68" fill="#000000" font-size="11.5" class="cond-bold">DRAWN BY <tspan font-size="10" class="chinese">通过绘制</tspan>  :</text>
-                    <text x="218" y="68" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldDrawnBy" data-field-name="Drawn By"><?= htmlspecialchars($docDrawnBy) ?></text>
+                    <text x="218" y="68" fill="#000000" font-size="13" class="cond-bold bebas-field interactive-field" text-anchor="end" id="docFieldDrawnBy" data-field-name="Drawn By" data-base-y="68" data-raw-text="<?= htmlspecialchars($docDrawnBy) ?>"><?= htmlspecialchars($docDrawnBy) ?></text>
 
                     <line x1="0" y1="75" x2="225" y2="75" stroke="#000000" stroke-width="1.5"/>
                     <g transform="translate(7, 80) scale(0.65)">
@@ -178,7 +178,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                     </g>
                     <text x="21" y="89.5" fill="#000000" font-size="10.5" class="cond-bold">ADDRESS <tspan font-size="9.5" class="chinese">地址</tspan>  :</text>
                     <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
-                    <text x="160" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field center-txt" id="docFieldAddress" data-field-name="Address"><?= htmlspecialchars($docAddress) ?></text>
+                    <text x="160" y="89.5" fill="#000000" font-size="10" class="cond-bold bebas-field interactive-field center-txt" id="docFieldAddress" data-field-name="Address" data-base-y="89.5" data-raw-text="<?= htmlspecialchars($docAddress) ?>"><?= htmlspecialchars($docAddress) ?></text>
 
                     <!-- Vertical Divider 1 -->
                     <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
@@ -188,18 +188,18 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- ========================================== -->
                     <!-- Row 1: Order Date -->
                     <text x="282.5" y="14" fill="#000000" font-size="10" class="cond-bold center-txt">ORDER DATE <tspan font-size="9" class="chinese">订购日期</tspan></text>
-                    <text x="282.5" y="27" fill="#000000" font-size="11.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldOrderDate" data-field-name="Order Date"><?= htmlspecialchars($docOrderDate) ?></text>
+                    <text x="282.5" y="27" fill="#000000" font-size="11.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldOrderDate" data-field-name="Order Date" data-base-y="27" data-raw-text="<?= htmlspecialchars($docOrderDate) ?>"><?= htmlspecialchars($docOrderDate) ?></text>
 
                     <!-- Row 2: Due Date -->
                     <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
                     <rect x="225" y="33" width="115" height="32" fill="#000000"/>
                     <text x="282.5" y="46" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
-                    <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDueDate" data-field-name="Due Date"><?= htmlspecialchars($docDueDate) ?></text>
+                    <text x="282.5" y="59" fill="#FFFFFF" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDueDate" data-field-name="Due Date" data-base-y="59" data-raw-text="<?= htmlspecialchars($docDueDate) ?>"><?= htmlspecialchars($docDueDate) ?></text>
 
                     <!-- Row 3: Date to be Release -->
                     <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
                     <text x="282.5" y="76.5" fill="#000000" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
-                    <text x="282.5" y="89.5" fill="#000000" font-size="11.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldReleasingDate" data-field-name="Release Date"><?= htmlspecialchars($docReleasingDate) ?></text>
+                    <text x="282.5" y="89.5" fill="#000000" font-size="11.5" class="cond-bold bebas-field interactive-field center-txt" id="docFieldReleasingDate" data-field-name="Release Date" data-base-y="89.5" data-raw-text="<?= htmlspecialchars($docReleasingDate) ?>"><?= htmlspecialchars($docReleasingDate) ?></text>
 
                     <!-- Vertical Divider 2 -->
                     <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
@@ -209,30 +209,36 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- ========================================== -->
                     <rect x="340" y="0" width="224" height="18" fill="#E10600"/>
                     <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
-                    <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor">INDOOR</text>
-                    <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor">OUTDOOR</text>
+                    <text x="396" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor" style="cursor: pointer;">INDOOR</text>
+                    <text x="508" y="13" fill="#FFFFFF" font-size="11.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor" style="cursor: pointer;">OUTDOOR</text>
 
                     <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
 
                     <!-- Project Name & Client Name -->
-                    <text x="452" y="44" fill="#000000" font-size="22" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldProjectName" data-field-name="Project Name"><?= htmlspecialchars($docProj) ?></text>
-                    <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1"/>
-                    <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldClientName" data-field-name="Client Name"><?= htmlspecialchars($docClient) ?></text>
+                    <text x="452" y="44" fill="#000000" font-size="22" class="cond-black bebas-field interactive-field center-txt" letter-spacing="0.8" id="docFieldProjectName" data-field-name="Project Name" data-base-y="44" data-raw-text="<?= htmlspecialchars($docProj) ?>"><?= htmlspecialchars($docProj) ?></text>
+                    <line x1="412" y1="50" x2="492" y2="50" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
+                    <text x="452" y="65" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" letter-spacing="0.5" id="docFieldClientName" data-field-name="Client Name" data-base-y="65" data-raw-text="<?= htmlspecialchars($docClient) ?>"><?= htmlspecialchars($docClient) ?></text>
 
                     <line x1="340" y1="73" x2="564" y2="73" stroke="#000000" stroke-width="1.5"/>
 
                     <!-- Row 3: Checkboxes -->
-                    <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-                    <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckInstall"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></text>
-                    <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
+                    <g class="deh-check-grp" id="grpCheckInstall" style="cursor: pointer;" data-mode="Install">
+                      <rect x="347" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                      <text x="352" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckInstall"><?= strtolower($docReleasingMode) === 'install' ? '✓' : '' ?></text>
+                      <text x="361" y="87" fill="#000000" font-size="10.5" class="cond-bold">INSTALL <tspan font-size="9" class="chinese">安装</tspan></text>
+                    </g>
 
-                    <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-                    <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckDeliver"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></text>
-                    <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
+                    <g class="deh-check-grp" id="grpCheckDeliver" style="cursor: pointer;" data-mode="Deliver">
+                      <rect x="424" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                      <text x="429" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckDeliver"><?= strtolower($docReleasingMode) === 'deliver' ? '✓' : '' ?></text>
+                      <text x="438" y="87" fill="#000000" font-size="10.5" class="cond-bold">DELIVER <tspan font-size="9" class="chinese">送货</tspan></text>
+                    </g>
 
-                    <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-                    <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckPickup"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></text>
-                    <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
+                    <g class="deh-check-grp" id="grpCheckPickup" style="cursor: pointer;" data-mode="Pickup">
+                      <rect x="498" y="78.5" width="10" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
+                      <text x="503" y="87.5" fill="#E10600" font-size="11" font-weight="900" class="center-txt" id="docFieldCheckPickup"><?= (strtolower($docReleasingMode) === 'pickup' || empty($docReleasingMode)) ? '✓' : '' ?></text>
+                      <text x="512" y="87" fill="#000000" font-size="10.5" class="cond-bold">PICK UP <tspan font-size="9" class="chinese">自取</tspan></text>
+                    </g>
 
                     <!-- Vertical Divider 3 -->
                     <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
@@ -254,14 +260,14 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- Row 2: Contact Person -->
                     <text x="572" y="58" fill="#000000" font-size="10.5" class="cond-bold">CONTACT PERSON <tspan font-size="9.5" class="chinese">联络人</tspan>  :</text>
                     <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
-                    <text x="765" y="59" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactPerson" data-field-name="Contact Person"><?= htmlspecialchars($docContact) ?></text>
+                    <text x="765" y="59" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactPerson" data-field-name="Contact Person" data-base-y="59" data-raw-text="<?= htmlspecialchars($docContact) ?>"><?= htmlspecialchars($docContact) ?></text>
 
                     <line x1="564" y1="70" x2="822" y2="70" stroke="#000000" stroke-width="1.5"/>
 
                     <!-- Row 3: Contact Number -->
                     <text x="572" y="85" fill="#000000" font-size="10.5" class="cond-bold">CONTACT NUMBER <tspan font-size="9.5" class="chinese">联系电话</tspan>  :</text>
                     <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
-                    <text x="765" y="86" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactNumber" data-field-name="Contact Number"><?= htmlspecialchars($docPhone) ?></text>
+                    <text x="765" y="86" fill="#000000" font-size="11" class="cond-bold bebas-field interactive-field center-txt" id="docFieldContactNumber" data-field-name="Contact Number" data-base-y="86" data-raw-text="<?= htmlspecialchars($docPhone) ?>"><?= htmlspecialchars($docPhone) ?></text>
 
                     <!-- Vertical Divider 4 -->
                     <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
@@ -272,14 +278,14 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <rect x="822" y="0" width="82" height="22" fill="#000000"/>
                     <text x="863" y="10.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
                     <text x="863" y="19" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装人数</text>
-                    <text x="863" y="38" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldInstallers" data-field-name="Installers"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></text>
+                    <text x="863" y="38" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldInstallers" data-field-name="Installers" data-base-y="38" data-raw-text="<?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?>"><?= htmlspecialchars($targetRecord['installers'] ?? '2 Installers') ?></text>
 
                     <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
 
                     <rect x="822" y="48" width="82" height="22" fill="#000000"/>
                     <text x="863" y="58.5" fill="#FFFFFF" font-size="7.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
                     <text x="863" y="67" fill="#FFFFFF" font-size="7.5" class="chinese center-txt">安装时长</text>
-                    <text x="863" y="86" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDuration" data-field-name="Duration"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></text>
+                    <text x="863" y="86" fill="#000000" font-size="12" class="cond-bold bebas-field interactive-field center-txt" id="docFieldDuration" data-field-name="Duration" data-base-y="86" data-raw-text="<?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?>"><?= htmlspecialchars($targetRecord['duration'] ?? '1 Day (4 Hours)') ?></text>
 
                     <!-- Outer Border Outline -->
                     <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
