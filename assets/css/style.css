@@ -346,30 +346,30 @@ body.sidebar-open {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: #2D3139 transparent;
+  scrollbar-width: thin !important;
+  scrollbar-color: #2D3139 transparent !important;
 }
 
 .sidebar::-webkit-scrollbar,
 .sidebar-nav::-webkit-scrollbar {
-  width: 5px;
+  width: 5px !important;
 }
 
 .sidebar::-webkit-scrollbar-track,
 .sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
+  background: transparent !important;
 }
 
 .sidebar::-webkit-scrollbar-thumb,
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: #2D3139;
-  border-radius: 10px;
-  transition: background 0.2s ease;
+  background: #2D3139 !important;
+  border-radius: 10px !important;
+  transition: background 0.2s ease !important;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover,
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: var(--sd-red-ui, #E10600);
+  background: var(--sd-red-ui, #E10600) !important;
 }
 
 .nav-section-label {
@@ -4216,7 +4216,6 @@ textarea.form-control {
 .table-studio-wrap,
 .directive-canvas-wrap,
 .directive-tabs,
-.sidebar-nav,
 .modal-body {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
