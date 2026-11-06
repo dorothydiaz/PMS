@@ -7997,14 +7997,43 @@
   function getFieldRawText(idOrEl) {
     const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
     if (!el) return '';
+
+    const ctrlMap = {
+      docFieldInstallers: 'ctrlInstallers',
+      docFieldDuration: 'ctrlDuration',
+      docFieldAddress: 'ctrlAddress',
+      docFieldOrderDate: 'ctrlOrderDate',
+      docFieldDueDate: 'ctrlDueDate',
+      docFieldReleasingDate: 'ctrlReleasingDate',
+      docFieldInCharge: 'ctrlInCharge',
+      docFieldDrawnBy: 'ctrlDrawnBy'
+    };
+    if (el.id && ctrlMap[el.id]) {
+      const c = document.getElementById(ctrlMap[el.id]);
+      if (c && c.value !== undefined && c.value !== null && c.value.trim() !== '') {
+        return c.value.trim();
+      }
+    }
+
     if (el.hasAttribute('data-raw-text')) {
-      return el.getAttribute('data-raw-text');
+      const rawAttr = el.getAttribute('data-raw-text');
+      if (rawAttr !== undefined && rawAttr !== null && rawAttr.trim() !== '') {
+        return rawAttr;
+      }
     }
     const tspans = el.querySelectorAll('tspan:not(.chinese)');
     if (tspans && tspans.length > 0) {
-      return Array.from(tspans).map(t => t.textContent).join('\n');
+      const text = Array.from(tspans).map(t => t.textContent).join('\n').trim();
+      if (text !== '') return text;
     }
-    return (el.textContent || '').trim();
+    const textContent = (el.textContent || '').trim();
+    if (textContent !== '') return textContent;
+
+    if (el.id && ctrlMap[el.id]) {
+      const c = document.getElementById(ctrlMap[el.id]);
+      if (c && c.value) return c.value.trim();
+    }
+    return '';
   }
 
   function setFieldMultilineText(el, text, customBaseY) {
@@ -8345,6 +8374,7 @@
     }
     activeDirectEditor = null;
     if (commit && cell) {
+      cell.setAttribute('data-raw-text', editor.value);
       setFieldMultilineText(cell, editor.value);
       syncControlValues(cell.id, editor.value);
     }
@@ -8653,6 +8683,7 @@
       const target = document.getElementById(docFieldId);
       if (ctrl && target) {
         ctrl.addEventListener('input', () => {
+          target.setAttribute('data-raw-text', ctrl.value);
           setFieldMultilineText(target, ctrl.value || fallback);
           autoFitCellText(target);
         });
@@ -8710,8 +8741,10 @@
     const editableInstallers = document.getElementById('docFieldInstallers');
     if (editableInstallers) {
       editableInstallers.addEventListener('input', () => {
+        const val = editableInstallers.textContent.trim();
+        editableInstallers.setAttribute('data-raw-text', val);
         const ctrl = document.getElementById('ctrlInstallers');
-        if (ctrl) ctrl.value = editableInstallers.textContent.trim();
+        if (ctrl) ctrl.value = val;
         autoFitCellText(editableInstallers);
       });
     }
@@ -8719,8 +8752,10 @@
     const editableDuration = document.getElementById('docFieldDuration');
     if (editableDuration) {
       editableDuration.addEventListener('input', () => {
+        const val = editableDuration.textContent.trim();
+        editableDuration.setAttribute('data-raw-text', val);
         const ctrl = document.getElementById('ctrlDuration');
-        if (ctrl) ctrl.value = editableDuration.textContent.trim();
+        if (ctrl) ctrl.value = val;
         autoFitCellText(editableDuration);
       });
     }
@@ -8908,7 +8943,15 @@
 
     const makeSvgField = (id, x, defaultY, defaultSz, className, textAnchor = 'middle', letterSpacing = '') => {
       const sz = getSz(id, defaultSz);
-      const raw = getFieldRawText(id);
+      let raw = getFieldRawText(id);
+      if (!raw) {
+        if (id === 'docFieldInstallers') raw = document.getElementById('ctrlInstallers')?.value?.trim() || rec.installers || '';
+        else if (id === 'docFieldDuration') raw = document.getElementById('ctrlDuration')?.value?.trim() || rec.duration || '';
+        else if (id === 'docFieldAddress') raw = document.getElementById('ctrlAddress')?.value?.trim() || rec.completeAddress || rec.location || '-';
+        else if (id === 'docFieldOrderDate') raw = document.getElementById('ctrlOrderDate')?.value?.trim() || toDot(rec.orderDate);
+        else if (id === 'docFieldDueDate') raw = document.getElementById('ctrlDueDate')?.value?.trim() || toDot(rec.designDeadline || rec.releasingDate);
+        else if (id === 'docFieldReleasingDate') raw = document.getElementById('ctrlReleasingDate')?.value?.trim() || toDot(rec.releasingDate);
+      }
       const lines = raw ? raw.split('\n') : [''];
       const anchorAttr = textAnchor !== 'start' ? `text-anchor="${textAnchor}"` : '';
       const spacingAttr = letterSpacing ? `letter-spacing="${letterSpacing}"` : '';
