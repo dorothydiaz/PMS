@@ -15333,6 +15333,9 @@
         }
         state.salesFilter.page = 1;
         renderSalesRequests();
+        if (typeof btn.scrollIntoView === 'function') {
+          btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
       });
     });
 

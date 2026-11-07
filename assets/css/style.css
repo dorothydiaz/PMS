@@ -5533,6 +5533,7 @@ textarea.form-control {
   margin-bottom: 18px;
   display: flex;
   align-items: center;
+  max-width: 100%;
 }
 
 .sales-approval-tabs,
@@ -5542,17 +5543,38 @@ textarea.form-control {
   gap: 4px;
   background: #E2E6EC;
   border: none;
-  padding: 4px;
+  padding: 4px 8px;
   border-radius: var(--radius-full);
   box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06);
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sales-approval-tabs::-webkit-scrollbar,
 .tracker-acceptance-tabs::-webkit-scrollbar {
   display: none;
+}
+
+.sales-approval-tabs::before,
+.tracker-acceptance-tabs::before {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  min-width: 2px;
+  height: 1px;
+  flex-shrink: 0;
+}
+
+.sales-approval-tabs::after,
+.tracker-acceptance-tabs::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  min-width: 12px;
+  height: 1px;
+  flex-shrink: 0;
 }
 
 .sales-approval-tab,
@@ -5574,6 +5596,12 @@ textarea.form-control {
   outline: none;
   user-select: none;
   flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.sales-approval-tab:last-of-type,
+.tracker-acceptance-tab:last-of-type {
+  margin-right: 6px;
 }
 
 .sales-approval-tab:hover,
@@ -5609,6 +5637,9 @@ textarea.form-control {
 .tab-status-dot.dot-approved { background: #10B981; }
 
 .tab-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11.5px;
   font-weight: 700;
   padding: 2px 8px;
@@ -5617,6 +5648,22 @@ textarea.form-control {
   color: #334155;
   transition: all 0.2s ease;
   line-height: 1.3;
+  flex-shrink: 0;
+  min-width: 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1440px) {
+  .sales-approval-tab,
+  .tracker-acceptance-tab {
+    padding: 6px 12px;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+  .tab-count-pill {
+    font-size: 11px;
+    padding: 1px 7px;
+  }
 }
 
 .sales-approval-tab.active .tab-count-pill,
