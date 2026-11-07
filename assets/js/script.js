@@ -4857,7 +4857,7 @@
             state.workloadPerPage = storedRows;
             state.dashboardPerPage = storedRows;
             state.monthlyOutputPerPage = storedRows;
-            return;
+            hydratedFromCache = true;
           }
         }
       }
@@ -4865,24 +4865,24 @@
       console.warn('LocalStorage error:', e);
     }
 
-    // 2. Use high-speed cached requests if consent is granted, otherwise use default dataset
-    let hydratedFromCache = false;
-    if (window.PmsCache && window.PmsCache.isCachePermitted()) {
-      const cached = window.PmsCache.getCachedRequests();
-      if (cached && Array.isArray(cached) && cached.length > 0) {
-        cached.forEach(normalizeRequestItem);
-        state.requests = cached;
-        hydratedFromCache = true;
-      }
-    }
-
+    // 2. Fallback to cached requests or default dataset if not hydrated from local storage
     if (!hydratedFromCache) {
-      state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
-      state.requests.forEach(normalizeRequestItem);
+      if (window.PmsCache && window.PmsCache.isCachePermitted()) {
+        const cached = window.PmsCache.getCachedRequests();
+        if (cached && Array.isArray(cached) && cached.length > 0) {
+          cached.forEach(normalizeRequestItem);
+          state.requests = cached;
+          hydratedFromCache = true;
+        }
+      }
+      if (!hydratedFromCache) {
+        state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+        state.requests.forEach(normalizeRequestItem);
+      }
+      state.artists = DEFAULT_ARTISTS.map(toTitleCase);
+      state.salesReps = DEFAULT_SALES_REPS.map(toTitleCase);
+      saveStateToStorage();
     }
-    state.artists = DEFAULT_ARTISTS.map(toTitleCase);
-    state.salesReps = DEFAULT_SALES_REPS.map(toTitleCase);
-    saveStateToStorage();
 
     // 3. If running in PHP environment with live MySQL backend, sync live records
     if (window.PMS_API_URL) {
@@ -4933,6 +4933,7 @@
             if (window.PmsCache && window.PmsCache.isCachePermitted()) {
               window.PmsCache.setCachedRequests(res.data);
             }
+            updateDashboardKPIs();
             renderCurrentView(state.activeView);
           } else if (res && !res.success) {
             console.error('MySQL live requests fetch failed:', res.error);
