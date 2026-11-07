@@ -4796,6 +4796,7 @@
   }
 
   function loadStateFromStorage() {
+    let hydratedFromCache = false;
     // 1. Check localStorage, but PURGE if it contains old fictional mock data
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
