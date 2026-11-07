@@ -6259,13 +6259,13 @@
     const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
 
     // Dashboard elements
-    const elTot = document.getElementById('kpiTotalRequests'); if (elTot) elTot.textContent = Number(totalRequests).toLocaleString();
-    const elPend = document.getElementById('kpiPendingApproval'); if (elPend) elPend.textContent = Number(pendingApproval).toLocaleString();
-    const elWork = document.getElementById('kpiWorking'); if (elWork) elWork.textContent = Number(working).toLocaleString();
-    const elAppr = document.getElementById('kpiApproved'); if (elAppr) elAppr.textContent = Number(approved).toLocaleString();
-    const elComp = document.getElementById('kpiCompleted'); if (elComp) elComp.textContent = Number(approved).toLocaleString();
-    const elRev = document.getElementById('kpiRevising'); if (elRev) elRev.textContent = Number(revising).toLocaleString();
-    const elOver = document.getElementById('kpiOverdue'); if (elOver) elOver.textContent = Number(overdue).toLocaleString();
+    const elTot = document.getElementById('kpiTotalRequests');
+    const elPend = document.getElementById('kpiPendingApproval');
+    const elWork = document.getElementById('kpiWorking');
+    const elAppr = document.getElementById('kpiApproved');
+    const elComp = document.getElementById('kpiCompleted');
+    const elRev = document.getElementById('kpiRevising');
+    const elOver = document.getElementById('kpiOverdue');
 
     // Creatives Tracker KPI elements
     const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = Number(trkTotal).toLocaleString();
@@ -6292,6 +6292,15 @@
           }
         })
         .catch(() => {});
+    } else {
+      // Pure offline fallback
+      if (elTot) elTot.textContent = Number(totalRequests).toLocaleString();
+      if (elPend) elPend.textContent = Number(pendingApproval).toLocaleString();
+      if (elWork) elWork.textContent = Number(working).toLocaleString();
+      if (elAppr) elAppr.textContent = Number(approved).toLocaleString();
+      if (elComp) elComp.textContent = Number(approved).toLocaleString();
+      if (elRev) elRev.textContent = Number(revising).toLocaleString();
+      if (elOver) elOver.textContent = Number(overdue).toLocaleString();
     }
   }
 
