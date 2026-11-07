@@ -3018,6 +3018,18 @@ select.filter-input {
   flex-wrap: wrap;
 }
 
+.lookup-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .lookup-input-wrap {
   position: relative;
   flex: 1;
@@ -4540,7 +4552,7 @@ textarea.form-control {
 
   /* Directives Document Toolbar & Canvas */
   .directive-lookup-card {
-    padding: 16px 14px;
+    padding: 14px 16px;
   }
 
   .lookup-flex {
@@ -4551,10 +4563,24 @@ textarea.form-control {
 
   .lookup-input-wrap {
     width: 100%;
+    flex: none !important;
+    min-width: 0 !important;
+    height: 42px;
+  }
+
+  .lookup-btn-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .lookup-btn-group .btn {
+    flex: 1;
+    width: auto;
+    justify-content: center;
   }
 
   .lookup-flex .btn {
-    width: 100%;
     justify-content: center;
   }
 
@@ -4614,6 +4640,7 @@ textarea.form-control {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+    margin-bottom: 12px;
   }
 
   .doc-top-quick-actions {
@@ -4626,6 +4653,26 @@ textarea.form-control {
   .doc-font-controls {
     justify-content: space-between;
     width: 100%;
+    overflow-x: auto;
+  }
+
+  .doc-action-btn-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .doc-action-btn-group .directive-dropdown-container,
+  .doc-action-btn-group .custom-dropdown-wrap,
+  .doc-action-btn-group > .btn {
+    flex: 1;
+    width: auto;
+  }
+
+  .doc-action-btn-group .directive-dropdown-btn,
+  .doc-action-btn-group .custom-dropdown-trigger {
+    width: 100%;
+    justify-content: center;
   }
 
   /* Modals as Responsive Bottom-Sheets on Small Screens */

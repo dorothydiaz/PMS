@@ -104,8 +104,10 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <input type="text" class="lookup-input" id="directiveLookupInput" value="<?= htmlspecialchars($docLookupVal) ?>" placeholder="e.g. P260701373, URAL, or LR-26-1230..." autocomplete="off">
                 <div class="autocomplete-box" id="directiveAutocompleteBox"></div>
               </div>
-              <button class="btn btn-primary" id="btnDirectiveSearch">Load Job</button>
-              <button class="btn btn-secondary" id="btnDirectiveClear">Clear</button>
+              <div class="lookup-btn-group">
+                <button class="btn btn-primary" id="btnDirectiveSearch">Load Job</button>
+                <button class="btn btn-secondary" id="btnDirectiveClear">Clear</button>
+              </div>
               <span id="directiveLookupStatus" style="font-size: 13px; font-weight: 700; margin-left: 8px;"></span>
             </div>
           </div>
@@ -139,70 +141,72 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <button class="btn-font-scale" id="btnDirectiveZoomReset" title="Reset Zoom to 100%">↺</button>
                 </div>
 
-                <div class="directive-dropdown-container">
-                  <button class="btn btn-primary btn-sm directive-dropdown-btn" id="btnDirectiveExportDropdown" type="button" aria-haspopup="true" aria-expanded="false">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    <span>Export / Copy</span>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                  </button>
-                  <div class="directive-export-menu" id="directiveExportMenu">
-                    <button type="button" class="directive-export-item is-featured" id="optDirectiveDownloadEMF">
-                      <div class="export-item-icon emf-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                      </div>
-                      <div class="export-item-body">
-                        <div class="export-item-title-row">
-                          <span class="export-item-title">Download EMF (CorelDRAW)</span>
-                          <span class="export-item-badge badge-corel">CorelDRAW Compatible</span>
-                        </div>
-                        <span class="export-item-desc">Native vector with outlined text — 1-click import into CorelDRAW</span>
-                      </div>
+                <div class="doc-action-btn-group">
+                  <div class="directive-dropdown-container">
+                    <button class="btn btn-primary btn-sm directive-dropdown-btn" id="btnDirectiveExportDropdown" type="button" aria-haspopup="true" aria-expanded="false">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      <span>Export / Copy</span>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
-                    
-                    <div class="directive-export-divider"></div>
-
-                    <button type="button" class="directive-export-item" id="optDirectiveCopyPNG">
-                      <div class="export-item-icon img-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                      </div>
-                      <div class="export-item-body">
-                        <div class="export-item-title-row">
-                          <span class="export-item-title">Copy Image 4K (Ctrl+V)</span>
-                          <span class="export-item-badge badge-green">Ultra-Sharp</span>
+                    <div class="directive-export-menu" id="directiveExportMenu">
+                      <button type="button" class="directive-export-item is-featured" id="optDirectiveDownloadEMF">
+                        <div class="export-item-icon emf-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         </div>
-                        <span class="export-item-desc">3616 × 384 px clipboard image — instant Ctrl+V into Corel / PS</span>
-                      </div>
-                    </button>
-
-                    <button type="button" class="directive-export-item" id="optDirectiveCopySVG">
-                      <div class="export-item-icon svg-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                      </div>
-                      <div class="export-item-body">
-                        <div class="export-item-title-row">
-                          <span class="export-item-title">Copy Vector SVG</span>
-                          <span class="export-item-badge badge-blue">Illustrator / Figma</span>
+                        <div class="export-item-body">
+                          <div class="export-item-title-row">
+                            <span class="export-item-title">Download EMF (CorelDRAW)</span>
+                            <span class="export-item-badge badge-corel">CorelDRAW Compatible</span>
+                          </div>
+                          <span class="export-item-desc">Native vector with outlined text — 1-click import into CorelDRAW</span>
                         </div>
-                        <span class="export-item-desc">Standard vector SVG code copied directly to clipboard</span>
-                      </div>
-                    </button>
+                      </button>
+                      
+                      <div class="directive-export-divider"></div>
 
-                    <div class="directive-export-divider"></div>
-
-                    <button type="button" class="directive-export-item" id="optDirectiveDownloadSVG">
-                      <div class="export-item-icon dl-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                      </div>
-                      <div class="export-item-body">
-                        <div class="export-item-title-row">
-                          <span class="export-item-title">Download Vector SVG (.svg)</span>
+                      <button type="button" class="directive-export-item" id="optDirectiveCopyPNG">
+                        <div class="export-item-icon img-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                         </div>
-                        <span class="export-item-desc">Raw scalable vector graphic file</span>
-                      </div>
-                    </button>
+                        <div class="export-item-body">
+                          <div class="export-item-title-row">
+                            <span class="export-item-title">Copy Image 4K (Ctrl+V)</span>
+                            <span class="export-item-badge badge-green">Ultra-Sharp</span>
+                          </div>
+                          <span class="export-item-desc">3616 × 384 px clipboard image — instant Ctrl+V into Corel / PS</span>
+                        </div>
+                      </button>
+
+                      <button type="button" class="directive-export-item" id="optDirectiveCopySVG">
+                        <div class="export-item-icon svg-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        </div>
+                        <div class="export-item-body">
+                          <div class="export-item-title-row">
+                            <span class="export-item-title">Copy Vector SVG</span>
+                            <span class="export-item-badge badge-blue">Illustrator / Figma</span>
+                          </div>
+                          <span class="export-item-desc">Standard vector SVG code copied directly to clipboard</span>
+                        </div>
+                      </button>
+
+                      <div class="directive-export-divider"></div>
+
+                      <button type="button" class="directive-export-item" id="optDirectiveDownloadSVG">
+                        <div class="export-item-icon dl-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </div>
+                        <div class="export-item-body">
+                          <div class="export-item-title-row">
+                            <span class="export-item-title">Download Vector SVG (.svg)</span>
+                          </div>
+                          <span class="export-item-desc">Raw scalable vector graphic file</span>
+                        </div>
+                      </button>
+                    </div>
                   </div>
+                  <button class="btn btn-secondary btn-sm" id="btnDirectiveReset" title="Reset directive to default values">Reset</button>
                 </div>
-                <button class="btn btn-secondary btn-sm" id="btnDirectiveReset" title="Reset directive to default values">Reset</button>
               </div>
             </div>
 
