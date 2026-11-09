@@ -146,10 +146,23 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <input type="date" class="filter-input" id="trackerFilterDateCustom" style="display: none; width: 135px; padding: 5px 8px;" title="Pick Specific Date">
               </div>
 
-              <select class="filter-input" id="trackerFilterProjectStatus">
+              <select class="filter-input" id="trackerFilterHeadApproval" title="Filter by Head Approval Status">
+                <option value="">All Head Approvals</option>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+              <select class="filter-input" id="trackerFilterProjectStatus" title="Filter by Project Status">
                 <option value="">All Project Statuses</option>
-                <option value="Completed">Completed</option>
                 <option value="On-going">On-going</option>
+                <option value="For Review">For Review</option>
+                <option value="Revising">Revising</option>
+                <option value="Completed">Completed</option>
+                <option value="Released">Released</option>
+                <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+                <option value="Onhold">Onhold</option>
+                <option value="Pending Approval">Pending Approval</option>
+                <option value="Approved">Approved</option>
               </select>
               <select class="filter-input" id="trackerFilterDesignStatus">
                 <option value="">All Design Statuses</option>
@@ -190,6 +203,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="salesRep_desc">Sort: Sales Rep (Z → A)</option>
                 <option value="designStatus_asc">Sort: Design Status (A → Z)</option>
                 <option value="headApproval_asc">Sort: Head Approval (A → Z)</option>
+                <option value="headApproval_desc">Sort: Head Approval (Z → A)</option>
                 <option value="designDeadline_asc">Sort: Deadline (Earliest)</option>
                 <option value="designDeadline_desc">Sort: Deadline (Latest)</option>
                 <option value="revisionCount_desc">Sort: Revisions (High → Low)</option>
@@ -211,11 +225,11 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <th data-sort="artist" title="Click to sort alphabetically (A-Z / Z-A)">Artist</th>
                   <th data-sort="projectName" title="Click to sort alphabetically (A-Z / Z-A)">Project Name</th>
                   <th data-sort="designDeadline" title="Click to sort by Deadline Date">Design Deadline</th>
-                  <th data-sort="headApproval" title="Click to sort alphabetically">Head Approval</th>
+                  <th class="col-head-approval" data-sort="headApproval" title="Click to sort alphabetically">Head Approval</th>
                   <th data-sort="countStandard" title="Click to sort numerically">Standard</th>
                   <th data-sort="countSpecial" title="Click to sort numerically">Special</th>
                   <th data-sort="countPrinting" title="Click to sort numerically">Printing</th>
-                  <th data-sort="projectStatus" title="Click to sort alphabetically">Project Status</th>
+                  <th class="col-project-status" data-sort="projectStatus" title="Click to sort alphabetically">Project Status</th>
                   <th data-sort="designStatus" title="Click to sort alphabetically">Design Status</th>
                   <th data-sort="deadlineStatus" title="Click to sort by Overdue severity">Overdue Indicator</th>
                   <th data-sort="revisionCount" title="Click to sort numerically">Revision Count</th>

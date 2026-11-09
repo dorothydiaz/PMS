@@ -122,8 +122,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="Normal">Normal</option>
                 <option value="Rush">Rush</option>
               </select>
-              <select class="filter-input" id="salesFilterApproval">
-                <option value="">All Approvals</option>
+              <select class="filter-input" id="salesFilterApproval" title="Filter by Project Status">
+                <option value="">All Project Statuses</option>
                 <option value="On-going">On-going</option>
                 <option value="For Review">For Review</option>
                 <option value="Revising">Revising</option>
@@ -184,7 +184,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <th class="col-releasing-mode" data-sort="releasingMode" title="Mode of Releasing">Mode of Releasing</th>
                   <th class="col-contact-person" data-sort="contactPerson" title="Client Contact Person">Contact Person</th>
                   <th class="col-contact-number" data-sort="contactNumber" title="Contact Number">Contact Number</th>
-                  <th class="col-client-approval" data-sort="clientApproval" title="Client Approval State">Client Approval</th>
+                  <th class="col-client-approval col-project-status" data-sort="clientApproval" title="Click to sort by Project Status">Project Status</th>
                   <th class="col-priority" data-sort="priority" title="Priority Level">Priority Level</th>
                   <th class="col-actions no-sort">Actions</th>
                 </tr>

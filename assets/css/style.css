@@ -1892,7 +1892,10 @@ body.sidebar-open {
 #salesRequestsTable th.col-contact-number { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
 
 #salesRequestsTable th:nth-child(16), #salesRequestsTable td:nth-child(16),
-#salesRequestsTable th.col-client-approval { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+#salesRequestsTable th.col-client-approval,
+#salesRequestsTable td.col-client-approval,
+#salesRequestsTable th.col-project-status,
+#salesRequestsTable td.col-project-status { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
 
 #salesRequestsTable th:nth-child(17), #salesRequestsTable td:nth-child(17),
 #salesRequestsTable th.col-priority { width: 135px !important; min-width: 135px !important; max-width: 135px !important; }
@@ -1940,7 +1943,9 @@ body.sidebar-open {
 #creativesProductionTable th:nth-child(5), #creativesProductionTable td:nth-child(5) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
 
 #creativesTrackerTable th:nth-child(6), #creativesTrackerTable td:nth-child(6),
-#creativesProductionTable th:nth-child(6), #creativesProductionTable td:nth-child(6) { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+#creativesProductionTable th:nth-child(6), #creativesProductionTable td:nth-child(6),
+#creativesTrackerTable th.col-head-approval, #creativesTrackerTable td.col-head-approval,
+#creativesProductionTable th.col-head-approval, #creativesProductionTable td.col-head-approval { width: 145px !important; min-width: 145px !important; max-width: 145px !important; }
 
 #creativesTrackerTable th:nth-child(7), #creativesTrackerTable td:nth-child(7),
 #creativesProductionTable th:nth-child(7), #creativesProductionTable td:nth-child(7) { width: 95px !important; min-width: 95px !important; max-width: 95px !important; text-align: center !important; }
@@ -1952,7 +1957,9 @@ body.sidebar-open {
 #creativesProductionTable th:nth-child(9), #creativesProductionTable td:nth-child(9) { width: 95px !important; min-width: 95px !important; max-width: 95px !important; text-align: center !important; }
 
 #creativesTrackerTable th:nth-child(10), #creativesTrackerTable td:nth-child(10),
-#creativesProductionTable th:nth-child(10), #creativesProductionTable td:nth-child(10) { width: 140px !important; min-width: 140px !important; max-width: 140px !important; }
+#creativesProductionTable th:nth-child(10), #creativesProductionTable td:nth-child(10),
+#creativesTrackerTable th.col-project-status, #creativesTrackerTable td.col-project-status,
+#creativesProductionTable th.col-project-status, #creativesProductionTable td.col-project-status { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
 
 #creativesTrackerTable th:nth-child(11), #creativesTrackerTable td:nth-child(11),
 #creativesProductionTable th:nth-child(11), #creativesProductionTable td:nth-child(11) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
@@ -2406,12 +2413,20 @@ body.sidebar-open {
   max-width: 130px !important;
 }
 
+#trackerFilterHeadApproval,
+#trackerFilterHeadApproval + .custom-filter-dropdown-btn,
+.filter-btn-trackerFilterHeadApproval {
+  width: 160px !important;
+  min-width: 160px !important;
+  max-width: 160px !important;
+}
+
 #trackerFilterProjectStatus,
 #trackerFilterProjectStatus + .custom-filter-dropdown-btn,
 .filter-btn-trackerFilterProjectStatus {
-  width: 155px !important;
-  min-width: 155px !important;
-  max-width: 155px !important;
+  width: 165px !important;
+  min-width: 165px !important;
+  max-width: 165px !important;
 }
 
 #trackerFilterDesignStatus,

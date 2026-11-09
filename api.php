@@ -100,7 +100,7 @@ function getDefaultPermissionPresets() {
     $nonePerms = [];
 
     $artistCols = [
-        'creatives-tracker' => ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
+        'creatives-tracker' => ['headApproval', 'designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
         'sales-requests' => ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
         'artist-workload' => ['designDeadline', 'projectStatus'],
         'directives-details' => ['projectName', 'reference'],
@@ -324,7 +324,7 @@ switch ($action) {
             $total = (int)$stmt->fetchColumn();
 
             // Pending Approval
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (client_approval = 'Pending' OR project_status = 'Pending') $artistClause");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (head_approval = 'Pending' OR client_approval IN ('Pending', 'Pending Approval') OR project_status IN ('Pending', 'Pending Approval')) $artistClause");
             $stmt->execute($baseParams);
             $pending = (int)$stmt->fetchColumn();
 
@@ -334,7 +334,7 @@ switch ($action) {
             $ongoing = (int)$stmt->fetchColumn();
 
             // Approved
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (client_approval = 'Approved' OR project_status = 'Approved') $artistClause");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (head_approval = 'Approved' OR client_approval = 'Approved' OR project_status = 'Approved') $artistClause");
             $stmt->execute($baseParams);
             $approved = (int)$stmt->fetchColumn();
 
@@ -719,11 +719,21 @@ switch ($action) {
             }
 
             try {
-                $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
-                $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+                if ($col === 'project_status' || $col === 'client_approval') {
+                    $stmt = $pdo->prepare("UPDATE sales_requests SET `project_status` = :v1, `client_approval` = :v2, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
+                    $stmt->execute([':v1' => $value, ':v2' => $value, ':id1' => $id, ':id2' => $id]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
+                    $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+                }
             } catch (Exception $e) {
-                $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
-                $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+                if ($col === 'project_status' || $col === 'client_approval') {
+                    $stmt = $pdo->prepare("UPDATE sales_requests SET `project_status` = :v1, `client_approval` = :v2 WHERE `id` = :id1 OR `request_id` = :id2");
+                    $stmt->execute([':v1' => $value, ':v2' => $value, ':id1' => $id, ':id2' => $id]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
+                    $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
+                }
             }
 
             // Audit Trail Log
@@ -904,8 +914,8 @@ switch ($action) {
                 ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? ''),
                 ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? ''),
                 ':contact_n' => trim($data['contactNumber'] ?? $data['contact_number'] ?? ''),
-                ':status' => trim($data['projectStatus'] ?? $data['project_status'] ?? ''),
-                ':appr' => trim($data['clientApproval'] ?? $data['client_approval'] ?? ''),
+                ':status' => trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? $data['client_approval'] ?? 'On-going') ?: 'On-going',
+                ':appr' => trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? $data['client_approval'] ?? 'On-going') ?: 'On-going',
                 ':priority' => trim($data['priority'] ?? ''),
                 ':head_appr' => trim($data['headApproval'] ?? $data['head_approval'] ?? 'Pending'),
                 ':std' => (int)($data['countStandard'] ?? $data['count_standard'] ?? 0),
@@ -1065,6 +1075,7 @@ switch ($action) {
                 releasing_date = :releasing,
                 file_sent = :file_sent,
                 location = :loc,
+                project_status = :status,
                 client_approval = :appr,
                 priority = :priority,
                 releasing_mode = :rel_mode,
@@ -1072,6 +1083,8 @@ switch ($action) {
                 contact_number = :contact_n,
                 complete_address = :addr
             WHERE id = :id1 OR request_id = :id2";
+
+            $unifiedStatus = trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? $data['client_approval'] ?? 'On-going') ?: 'On-going';
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
@@ -1085,7 +1098,8 @@ switch ($action) {
                 ':releasing' => trim($data['releasingDate'] ?? $data['releasing_date'] ?? ''),
                 ':file_sent' => trim($data['fileSent'] ?? $data['file_sent'] ?? 'Pending'),
                 ':loc' => trim($data['location'] ?? 'Indoor'),
-                ':appr' => trim($data['clientApproval'] ?? $data['client_approval'] ?? 'Pending'),
+                ':status' => $unifiedStatus,
+                ':appr' => $unifiedStatus,
                 ':priority' => trim($data['priority'] ?? 'Normal'),
                 ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? 'INSTALL'),
                 ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? ''),

@@ -94,9 +94,9 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label required">Client Approval</label>
+            <label class="form-label required">Project Status</label>
             <select class="form-control" id="salesFormClientApproval" required>
-              <option value="">Select Approval Status...</option>
+              <option value="">Select Project Status...</option>
               <option value="Pending Approval" selected>Pending Approval</option>
               <option value="On-going">On-going</option>
               <option value="For Review">For Review</option>
@@ -170,8 +170,15 @@
           <div class="form-group">
             <label class="form-label">Project Status</label>
             <select class="form-control" id="trackerFormProjectStatus">
-              <option value="Completed">Completed</option>
               <option value="On-going" selected>On-going</option>
+              <option value="For Review">For Review</option>
+              <option value="Revising">Revising</option>
+              <option value="Completed">Completed</option>
+              <option value="Released">Released</option>
+              <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+              <option value="Onhold">Onhold</option>
+              <option value="Pending Approval">Pending Approval</option>
+              <option value="Approved">Approved</option>
             </select>
           </div>
           <div class="form-group">

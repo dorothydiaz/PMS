@@ -876,8 +876,8 @@ require_once __DIR__ . '/includes/sidebar.php';
         { key: 'releasingDate', label: 'Release Date', desc: 'Production release date', type: 'Date' },
         { key: 'releasingMode', label: 'Releasing Mode', desc: 'Install / Delivery / Pick-up', type: 'Dropdown' },
         { key: 'fileSent', label: 'File Sent Status', desc: 'File Sent / Pending / To Follow', type: 'Dropdown' },
-        { key: 'clientApproval', label: 'Client Approval', desc: 'Pending / Approved / Revising', type: 'Dropdown' },
-        { key: 'projectStatus', label: 'Project Status', desc: 'Pending / On-going / Approved / Completed', type: 'Dropdown' },
+        { key: 'clientApproval', label: 'Project Status', desc: 'Project Status (On-going / Completed / Pending Approval / etc.)', type: 'Dropdown' },
+        { key: 'projectStatus', label: 'Project Status (Backend)', desc: 'Pending / On-going / Approved / Completed', type: 'Dropdown' },
         { key: 'priority', label: 'Priority', desc: 'Normal / Rush / High / Low', type: 'Dropdown' },
         { key: 'completeAddress', label: 'Complete Address', desc: 'Installation venue & address', type: 'Text' },
         { key: 'location', label: 'Location', desc: 'Indoor / Outdoor installation', type: 'Dropdown' },
@@ -890,6 +890,7 @@ require_once __DIR__ . '/includes/sidebar.php';
       label: 'Creatives Tracker Table',
       subtitle: 'Production queue, design progress, release dates, and assignment counts.',
       columns: [
+        { key: 'headApproval', label: 'Head Approval Status', desc: 'Design Head approval (Approved / Pending / Rejected)', type: 'Dropdown' },
         { key: 'designStatus', label: 'Design Status', desc: 'Not Started / In Progress / Submitted', type: 'Dropdown' },
         { key: 'projectStatus', label: 'Project Status', desc: 'Pending / On-going / Approved / Completed', type: 'Dropdown' },
         { key: 'artist', label: 'Assigned Artist', desc: 'Assigned graphic designer', type: 'Dropdown' },
@@ -1150,7 +1151,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     const allP = {}, roP = {}, artP = {}, salP = {}, nonP = {};
 
     const artistCols = {
-      'creatives-tracker': ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
+      'creatives-tracker': ['headApproval', 'designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
       'sales-requests': ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
       'artist-workload': ['designDeadline', 'projectStatus'],
       'directives-details': ['projectName', 'reference'],
