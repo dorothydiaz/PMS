@@ -445,7 +445,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     </div>
 
     <div class="login-footer-info">
-      Sign Depot Creative Operations © <?= date('Y') ?> • Enterprise PMS v2.5
+      © <?= date('Y') ?> Sign Depot • PMS v2.5 • Dorothy Diaz
     </div>
   </div>
 
