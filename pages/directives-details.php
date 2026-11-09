@@ -60,18 +60,26 @@ $fontFile = dirname(__DIR__) . '/assets/fonts/BebasKai.otf';
 $bebasB64 = file_exists($fontFile) ? base64_encode(file_get_contents($fontFile)) : '';
 
 function getWallSvgContent($type) {
-    if (empty($type) || $type === 'blank') return '';
-    $path = dirname(__DIR__) . '/assets/img/walls/' . basename($type) . '.svg';
-    if (!file_exists($path)) return '';
-    $raw = file_get_contents($path);
-    if (preg_match('/<g id="Layer_x0020_1">(.*?)<\/svg>/s', $raw, $m)) {
-        $inner = preg_replace('/<\/g>\s*$/', '', trim($m[1]));
-        $inner = str_replace('class="fil1"', 'fill="#000000" fill-rule="nonzero"', $inner);
-        $inner = str_replace('class="fil2"', 'fill="#ED3237"', $inner);
-        $inner = str_replace('class="fil0"', 'fill="#FFFFFF"', $inner);
-        return preg_replace('/<metadata[^>]*\/?>/', '', $inner);
+    if (!empty($type) && $type !== 'blank') {
+        $path = dirname(__DIR__) . '/assets/img/walls/' . basename($type) . '.svg';
+        if (file_exists($path)) {
+            $raw = file_get_contents($path);
+            if (preg_match('/<g id="Layer_x0020_1">(.*?)<\/svg>/s', $raw, $m)) {
+                $inner = preg_replace('/<\/g>\s*$/', '', trim($m[1]));
+                $inner = str_replace('class="fil1"', 'fill="#000000" fill-rule="nonzero"', $inner);
+                $inner = str_replace('class="fil2"', 'fill="#ED3237"', $inner);
+                $inner = str_replace('class="fil0"', 'fill="#FFFFFF"', $inner);
+                return preg_replace('/<metadata[^>]*\/?>/', '', $inner);
+            }
+        }
     }
-    return '';
+    // High-visibility vector placeholder when unselected so the box is never an empty white void
+    return '<g class="doc-env-placeholder" style="cursor: pointer;">' .
+           '<rect x="0" y="0" width="10572.6" height="3022.83" fill="#F8FAFC"/>' .
+           '<rect x="400" y="300" width="9772.6" height="2422.83" rx="300" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="80" stroke-dasharray="240 120"/>' .
+           '<text x="5286.3" y="1450" fill="#E10600" font-family="\'Inter\', sans-serif" font-size="950" font-weight="800" text-anchor="middle" letter-spacing="40">＋ SELECT WALL ENVIRONMENT</text>' .
+           '<text x="5286.3" y="2200" fill="#64748B" font-family="\'Inter\', sans-serif" font-size="620" font-weight="700" text-anchor="middle" letter-spacing="20">CONCRETE · GLASS · IRON · WOOD · ACP</text>' .
+           '</g>';
 }
 
 $docEnvType = $targetRecord['env_type'] ?? $targetRecord['wall_type'] ?? '';
@@ -117,7 +125,16 @@ require_once __DIR__ . '/includes/sidebar.php';
             
             <!-- Directive Top Quick Bar (Vector Ready) -->
             <div class="doc-top-bar no-print">
-              <div class="doc-top-quick-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; width: 100%;">
+              <div class="doc-top-bar-left">
+                <div class="doc-active-badge">
+                  <span class="doc-active-dot"></span>
+                  <span class="doc-active-label">DIRECTIVE DOCUMENT</span>
+                  <span class="doc-active-divider">|</span>
+                  <span class="doc-active-jo" id="docActiveJoBadge"><?= !empty($docLookupVal) ? htmlspecialchars($docLookupVal) : 'Ready' ?></span>
+                </div>
+              </div>
+
+              <div class="doc-top-quick-actions">
                 <!-- Real-time Font Size Controls -->
                 <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale font size, or edit text directly">
                   <span class="font-ctrl-cell-badge" id="fontCtrlCellBadge">PROJECT NAME: 22px</span>
@@ -432,14 +449,14 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- ========================================== -->
                     <!-- COLUMN 4: (564 to 822) -->
                     <!-- ========================================== -->
-                    <rect x="564" y="0" width="97" height="43" fill="#000000"/>
-                    <text x="612.5" y="13" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
-                    <text x="612.5" y="24.5" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
-                    <text x="612.5" y="36.5" fill="#FFFFFF" font-size="10" class="chinese center-txt">现场安装环境选项</text>
-
                     <!-- Wall Option Container (Clickable to switch wall type or leave blank) -->
-                    <g id="docFieldEnvOption" class="interactive-field" data-field-name="Environment Option" data-env-type="<?= htmlspecialchars($docEnvType) ?>" style="cursor: pointer;" title="Click to select wall environment">
-                      <rect x="661" y="0" width="161" height="43" fill="#FFFFFF"/>
+                    <g id="docFieldEnvOption" class="interactive-field" data-field-name="Environment Option" data-env-type="<?= htmlspecialchars($docEnvType) ?>" style="cursor: pointer;" title="Click to select wall environment" onclick="if(window.openEnvOptionMenu) window.openEnvOptionMenu(this, event);">
+                      <rect x="564" y="0" width="97" height="43" fill="#000000"/>
+                      <text x="612.5" y="13" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
+                      <text x="612.5" y="24.5" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
+                      <text x="612.5" y="36.5" fill="#FFFFFF" font-size="10" class="chinese center-txt">现场安装环境选项</text>
+
+                      <rect id="bgFieldEnv" class="doc-env-bg" x="661" y="0" width="161" height="43" fill="#FFFFFF"/>
                       <svg id="docEnvSvg" x="661" y="0" width="161" height="43" viewBox="0 0 10572.6 3022.83" preserveAspectRatio="xMidYMid meet">
                         <?= $docEnvSvgHtml ?>
                       </svg>

@@ -156,13 +156,12 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="">All Project Statuses</option>
                 <option value="On-going">On-going</option>
                 <option value="For Review">For Review</option>
-                <option value="Revising">Revising</option>
-                <option value="Completed">Completed</option>
-                <option value="Released">Released</option>
-                <option value="Incomplete Details/Files">Incomplete Details/Files</option>
-                <option value="Onhold">Onhold</option>
                 <option value="Pending Approval">Pending Approval</option>
                 <option value="Approved">Approved</option>
+                <option value="Completed">Completed</option>
+                <option value="On-hold">On-hold</option>
+                <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
               <select class="filter-input" id="trackerFilterDesignStatus">
                 <option value="">All Design Statuses</option>

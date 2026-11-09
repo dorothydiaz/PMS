@@ -35,8 +35,8 @@
 
   // --- Cache Engine ---
   const PmsCache = {
-    KEY_REQUESTS: 'pms_cached_requests',
-    KEY_TIMESTAMP: 'pms_cached_requests_ts',
+    KEY_REQUESTS: 'pms_cached_requests_v2',
+    KEY_TIMESTAMP: 'pms_cached_requests_ts_v2',
     KEY_PREFS: 'pms_cookie_preferences',
     KEY_CONSENT: 'pms_cookie_consent',
     TTL_MS: 3 * 60 * 1000, // 3 minutes TTL for background revalidation
@@ -124,6 +124,10 @@
         sessionStorage.removeItem(this.KEY_TIMESTAMP);
         localStorage.removeItem(this.KEY_REQUESTS);
         localStorage.removeItem(this.KEY_TIMESTAMP);
+        sessionStorage.removeItem('pms_cached_requests');
+        sessionStorage.removeItem('pms_cached_requests_ts');
+        localStorage.removeItem('pms_cached_requests');
+        localStorage.removeItem('pms_cached_requests_ts');
       } catch (e) {}
     },
 

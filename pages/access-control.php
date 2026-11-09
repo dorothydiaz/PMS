@@ -876,8 +876,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         { key: 'releasingDate', label: 'Release Date', desc: 'Production release date', type: 'Date' },
         { key: 'releasingMode', label: 'Releasing Mode', desc: 'Install / Delivery / Pick-up', type: 'Dropdown' },
         { key: 'fileSent', label: 'File Sent Status', desc: 'File Sent / Pending / To Follow', type: 'Dropdown' },
-        { key: 'clientApproval', label: 'Project Status', desc: 'Project Status (On-going / Completed / Pending Approval / etc.)', type: 'Dropdown' },
-        { key: 'projectStatus', label: 'Project Status (Backend)', desc: 'Pending / On-going / Approved / Completed', type: 'Dropdown' },
+        { key: 'projectStatus', label: 'Project Status', desc: 'Project Status (On-going / Completed / Pending Approval / etc.)', type: 'Dropdown' },
         { key: 'priority', label: 'Priority', desc: 'Normal / Rush / High / Low', type: 'Dropdown' },
         { key: 'completeAddress', label: 'Complete Address', desc: 'Installation venue & address', type: 'Text' },
         { key: 'location', label: 'Location', desc: 'Indoor / Outdoor installation', type: 'Dropdown' },
@@ -1112,7 +1111,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     } else if (presetType === 'sales') {
       document.getElementById('colModeAll').checked = false;
       document.getElementById('colModeCustom').checked = true;
-      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
+      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
       currentEditingPerms[currentPermTable].editable_columns = cfg.columns.map(c => c.key).filter(k => salesCols.includes(k));
     }
     renderColumnPermGrid(currentPermTable);
@@ -1160,8 +1159,8 @@ require_once __DIR__ . '/includes/sidebar.php';
     };
 
     const salesCols = {
-      'sales-requests': ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
-      'creatives-tracker': ['clientApproval', 'remarks'],
+      'sales-requests': ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
+      'creatives-tracker': ['projectStatus', 'remarks'],
       'artist-workload': [],
       'directives-details': ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference'],
       'account-settings': ['fullName', 'password', 'avatar'],
@@ -1586,7 +1585,7 @@ require_once __DIR__ . '/includes/sidebar.php';
       const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'];
       editingPresetWorkingPerms[tableKey].editable_columns = cfg.columns.map(c => c.key).filter(k => artistCols.includes(k));
     } else if (presetType === 'sales') {
-      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
+      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
       editingPresetWorkingPerms[tableKey].editable_columns = cfg.columns.map(c => c.key).filter(k => salesCols.includes(k));
     }
     renderEditPresetColGrid();

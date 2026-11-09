@@ -109,8 +109,8 @@ function getDefaultPermissionPresets() {
     ];
 
     $salesCols = [
-        'sales-requests' => ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'clientApproval', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
-        'creatives-tracker' => ['clientApproval', 'remarks'],
+        'sales-requests' => ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
+        'creatives-tracker' => ['projectStatus', 'remarks'],
         'artist-workload' => [],
         'directives-details' => ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference'],
         'account-settings' => ['fullName', 'password', 'avatar'],
@@ -324,7 +324,7 @@ switch ($action) {
             $total = (int)$stmt->fetchColumn();
 
             // Pending Approval
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (head_approval = 'Pending' OR client_approval IN ('Pending', 'Pending Approval') OR project_status IN ('Pending', 'Pending Approval')) $artistClause");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (head_approval = 'Pending' OR project_status IN ('Pending', 'Pending Approval')) $artistClause");
             $stmt->execute($baseParams);
             $pending = (int)$stmt->fetchColumn();
 
@@ -334,7 +334,7 @@ switch ($action) {
             $ongoing = (int)$stmt->fetchColumn();
 
             // Approved
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (head_approval = 'Approved' OR client_approval = 'Approved' OR project_status = 'Approved') $artistClause");
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE (head_approval = 'Approved' OR project_status = 'Approved') $artistClause");
             $stmt->execute($baseParams);
             $approved = (int)$stmt->fetchColumn();
 
@@ -367,17 +367,13 @@ switch ($action) {
 
     case 'get_recent_activity':
         try {
-            $logs = [];
-            $stmt = $pdo->query("SELECT `user`, `role`, `action`, `module`, `description` AS `desc`, `status`, DATE_FORMAT(`created_at`, '%Y-%m-%d %H:%i:%s') AS `time` FROM audit_logs ORDER BY `created_at` DESC LIMIT 15");
+            // Fetch 100% real database audit logs
+            $stmt = $pdo->query("SELECT `id`, `user`, `role`, `action`, `module`, `description` AS `desc`, `status`, DATE_FORMAT(`created_at`, '%Y-%m-%d %H:%i:%s') AS `time` FROM audit_logs ORDER BY `created_at` DESC LIMIT 50");
             $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $reqStmt = $pdo->query("SELECT request_id, project_name, client, artist, project_status, client_approval, order_date, DATE_FORMAT(COALESCE(created_at, NOW()), '%Y-%m-%d %H:%i:%s') AS `time` FROM sales_requests ORDER BY id DESC LIMIT 10");
-            $recentReqs = $reqStmt->fetchAll(PDO::FETCH_ASSOC);
 
             sendJsonResponse([
                 'success' => true,
-                'logs' => $logs,
-                'recent_requests' => $recentReqs
+                'logs' => $logs
             ]);
         } catch (Exception $e) {
             sendJsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
@@ -386,32 +382,109 @@ switch ($action) {
 
     case 'get_progress_timeline':
         try {
-            // Calculate daily velocity metrics for the current active week
-            // Days: Monday through Sunday
-            $timeline = [
-                ['day' => 'M', 'dayName' => 'Monday', 'created' => 12, 'completed' => 7, 'date' => '2026-10-19'],
-                ['day' => 'T', 'dayName' => 'Tuesday', 'created' => 16, 'completed' => 11, 'date' => '2026-10-20'],
-                ['day' => 'W', 'dayName' => 'Wednesday', 'created' => 19, 'completed' => 24, 'date' => '2026-10-21', 'isPeak' => true],
-                ['day' => 'T', 'dayName' => 'Thursday', 'created' => 14, 'completed' => 15, 'date' => '2026-10-22'],
-                ['day' => 'F', 'dayName' => 'Friday', 'created' => 18, 'completed' => 17, 'date' => '2026-10-23', 'isCurrent' => true],
-                ['day' => 'S', 'dayName' => 'Saturday', 'created' => 7, 'completed' => 4, 'date' => '2026-10-24', 'isProjected' => true],
-                ['day' => 'S', 'dayName' => 'Sunday', 'created' => 5, 'completed' => 3, 'date' => '2026-10-25', 'isProjected' => true],
-            ];
+            $today = new DateTime();
+            $todayStr = $today->format('Y-m-d');
 
-            // If actual requests exist for this date range, sync dynamic metrics
-            try {
-                $countCreated = $pdo->query("SELECT COUNT(*) FROM sales_requests WHERE order_date >= '2026-10-19' AND order_date <= '2026-10-25'")->fetchColumn();
-                $countCompleted = $pdo->query("SELECT COUNT(*) FROM sales_requests WHERE project_status = 'Completed' AND order_date >= '2026-10-19' AND order_date <= '2026-10-25'")->fetchColumn();
-                if ($countCreated > 0) {
-                    $timeline[2]['completed'] = max((int)$countCompleted, 24);
+            // Find current week Monday to Sunday
+            $monday = new DateTime();
+            $monday->setISODate((int)$today->format('o'), (int)$today->format('W'), 1);
+            $monday->setTime(0, 0, 0);
+
+            $startWeekStr = $monday->format('Y-m-d');
+            $endWeekStr = (clone $monday)->modify('+6 days')->format('Y-m-d');
+
+            // Check if current week has any requests
+            $hasWeekData = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE (order_date >= '$startWeekStr' AND order_date <= '$endWeekStr') OR (DATE(created_at) >= '$startWeekStr' AND DATE(created_at) <= '$endWeekStr')")->fetchColumn();
+
+            // If no requests in current calendar week, check if records exist in another week
+            if ($hasWeekData === 0) {
+                $latestDate = $pdo->query("SELECT MAX(COALESCE(NULLIF(order_date, ''), DATE(created_at))) FROM sales_requests WHERE (order_date IS NOT NULL AND order_date != '') OR created_at IS NOT NULL")->fetchColumn();
+                if ($latestDate) {
+                    $refDate = new DateTime($latestDate);
+                    $monday->setISODate((int)$refDate->format('o'), (int)$refDate->format('W'), 1);
+                    $startWeekStr = $monday->format('Y-m-d');
+                    $endWeekStr = (clone $monday)->modify('+6 days')->format('Y-m-d');
                 }
-            } catch (Exception $e) {}
+            }
+
+            $timeline = [];
+            $dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+            $dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            $xCoords = [48, 128, 208, 288, 368, 448, 518];
+
+            $maxCompleted = -1;
+            $peakDayName = 'Monday';
+            $totalCreated = 0;
+            $totalCompleted = 0;
+
+            for ($i = 0; $i < 7; $i++) {
+                $dayObj = (clone $monday)->modify("+$i days");
+                $dayDate = $dayObj->format('Y-m-d');
+                $isToday = ($dayDate === $todayStr);
+                $isFuture = ($dayObj > $today);
+
+                // Real tasks created on this day from database
+                $stmtC = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE order_date = :d OR DATE(created_at) = :d2");
+                $stmtC->execute([':d' => $dayDate, ':d2' => $dayDate]);
+                $created = (int)$stmtC->fetchColumn();
+
+                // Real tasks completed on this day from database
+                $stmtComp = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE project_status = 'Completed' AND (DATE(updated_at) = :d OR (updated_at IS NULL AND (order_date = :d2 OR DATE(created_at) = :d3)))");
+                $stmtComp->execute([':d' => $dayDate, ':d2' => $dayDate, ':d3' => $dayDate]);
+                $compReq = (int)$stmtComp->fetchColumn();
+
+                $stmtAudit = $pdo->prepare("SELECT COUNT(*) FROM audit_logs WHERE description LIKE '%Completed%' AND DATE(created_at) = :d");
+                $stmtAudit->execute([':d' => $dayDate]);
+                $compAudit = (int)$stmtAudit->fetchColumn();
+
+                $completed = max($compReq, $compAudit);
+
+                $totalCreated += $created;
+                $totalCompleted += $completed;
+
+                if ($completed > $maxCompleted) {
+                    $maxCompleted = $completed;
+                    $peakDayName = $dayNames[$i];
+                }
+
+                $timeline[] = [
+                    'key' => $dayLetters[$i],
+                    'name' => $dayNames[$i],
+                    'date' => $dayDate,
+                    'created' => $created,
+                    'completed' => $completed,
+                    'isCurrent' => $isToday,
+                    'isProjected' => $isFuture,
+                    'x' => $xCoords[$i]
+                ];
+            }
+
+            // Flag peak day
+            foreach ($timeline as &$td) {
+                if ($td['name'] === $peakDayName) {
+                    $td['isPeak'] = true;
+                }
+            }
+            unset($td);
+
+            $peakTitle = "Peak productivity on $peakDayName";
+            if ($totalCompleted > 0) {
+                $peakSubtitle = "$totalCompleted project" . ($totalCompleted > 1 ? 's' : '') . " completed this week";
+            } elseif ($totalCreated > 0) {
+                $peakSubtitle = "$totalCreated new order" . ($totalCreated > 1 ? 's' : '') . " logged this week";
+            } else {
+                $peakSubtitle = "Focus shifted to task completion";
+            }
 
             sendJsonResponse([
                 'success' => true,
-                'peakDay' => 'Wednesday',
-                'peakTitle' => 'Peak productivity on Wednesday',
-                'peakSubtitle' => 'Focus shifted to task completion',
+                'weekStart' => $startWeekStr,
+                'weekEnd' => $endWeekStr,
+                'peakDay' => $peakDayName,
+                'peakTitle' => $peakTitle,
+                'peakSubtitle' => $peakSubtitle,
+                'totalCreated' => $totalCreated,
+                'totalCompleted' => $totalCompleted,
                 'timeline' => $timeline
             ]);
         } catch (Exception $e) {
@@ -454,7 +527,6 @@ switch ($action) {
                 'contactPerson' => $r['contact_person'],
                 'contactNumber' => $r['contact_number'],
                 'projectStatus' => $r['project_status'],
-                'clientApproval' => $r['client_approval'],
                 'priority' => $r['priority'],
                 'headApproval' => $r['head_approval'],
                 'countStandard' => (int)$r['count_standard'],
@@ -502,7 +574,7 @@ switch ($action) {
             // Approval filter
             $approval = trim($_GET['approval'] ?? $bodyData['approval'] ?? '');
             if (!empty($approval)) {
-                $where[] = "client_approval = :approval";
+                $where[] = "project_status = :approval";
                 $params[':approval'] = $approval;
             }
 
@@ -579,7 +651,6 @@ switch ($action) {
                     'contactPerson' => $r['contact_person'],
                     'contactNumber' => $r['contact_number'],
                     'projectStatus' => $r['project_status'],
-                    'clientApproval' => $r['client_approval'],
                     'priority' => $r['priority'],
                     'headApproval' => $r['head_approval'],
                     'countStandard' => (int)$r['count_standard'],
@@ -632,7 +703,6 @@ switch ($action) {
                     'contactPerson' => $r['contact_person'],
                     'contactNumber' => $r['contact_number'],
                     'projectStatus' => $r['project_status'],
-                    'clientApproval' => $r['client_approval'],
                     'priority' => $r['priority'],
                     'headApproval' => $r['head_approval'],
                     'countStandard' => (int)$r['count_standard'],
@@ -694,7 +764,6 @@ switch ($action) {
                 'contactPerson' => 'contact_person',
                 'contactNumber' => 'contact_number',
                 'projectStatus' => 'project_status',
-                'clientApproval' => 'client_approval',
                 'priority' => 'priority',
                 'headApproval' => 'head_approval',
                 'countStandard' => 'count_standard',
@@ -719,21 +788,11 @@ switch ($action) {
             }
 
             try {
-                if ($col === 'project_status' || $col === 'client_approval') {
-                    $stmt = $pdo->prepare("UPDATE sales_requests SET `project_status` = :v1, `client_approval` = :v2, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
-                    $stmt->execute([':v1' => $value, ':v2' => $value, ':id1' => $id, ':id2' => $id]);
-                } else {
-                    $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
-                    $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
-                }
+                $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val, `updated_at` = NOW() WHERE `id` = :id1 OR `request_id` = :id2");
+                $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
             } catch (Exception $e) {
-                if ($col === 'project_status' || $col === 'client_approval') {
-                    $stmt = $pdo->prepare("UPDATE sales_requests SET `project_status` = :v1, `client_approval` = :v2 WHERE `id` = :id1 OR `request_id` = :id2");
-                    $stmt->execute([':v1' => $value, ':v2' => $value, ':id1' => $id, ':id2' => $id]);
-                } else {
-                    $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
-                    $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
-                }
+                $stmt = $pdo->prepare("UPDATE sales_requests SET `$col` = :val WHERE `id` = :id1 OR `request_id` = :id2");
+                $stmt->execute([':val' => $value, ':id1' => $id, ':id2' => $id]);
             }
 
             // Audit Trail Log
@@ -844,7 +903,7 @@ switch ($action) {
             if (empty($reqId)) {
                 // Auto generate sequential ID with separator dash
                 $stmt = $pdo->query("SELECT request_id FROM sales_requests WHERE request_id LIKE 'LR-%'");
-                $maxSeq = 2103;
+                $maxSeq = 0;
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     if (preg_match('/(\d+)$/', $row['request_id'], $m)) {
                         $n = (int)$m[1];
@@ -853,7 +912,7 @@ switch ($action) {
                 }
                 $nextSeq = $maxSeq + 1;
                 $currYear = date('y');
-                $reqId = "LR-{$currYear}-{$nextSeq}";
+                $reqId = sprintf("LR-%s-%04d", $currYear, $nextSeq);
             }
             $id = strtolower(str_replace(' ', '-', $reqId));
 
@@ -886,13 +945,13 @@ switch ($action) {
                 id, request_id, jo_number, order_date, sales_rep, client, project_name, 
                 artist, design_deadline, releasing_date, file_sent, complete_address, 
                 location, releasing_mode, contact_person, contact_number, project_status, 
-                client_approval, priority, head_approval, count_standard, count_special, 
+                priority, head_approval, count_standard, count_special, 
                 count_printing, design_status, revision_count, remarks, artist_accepted, artist_accepted_date
             ) VALUES (
                 :id, :req_id, :jo, :order_date, :sales_rep, :client, :proj,
                 :artist, :deadline, :releasing, :file_sent, :addr,
                 :loc, :rel_mode, :contact_p, :contact_n, :status,
-                :appr, :priority, :head_appr, :std, :spc,
+                :priority, :head_appr, :std, :spc,
                 :prt, :dstat, :rev, :remarks, :art_acc, :art_acc_date
             )";
 
@@ -914,8 +973,7 @@ switch ($action) {
                 ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? ''),
                 ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? ''),
                 ':contact_n' => trim($data['contactNumber'] ?? $data['contact_number'] ?? ''),
-                ':status' => trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? $data['client_approval'] ?? 'On-going') ?: 'On-going',
-                ':appr' => trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? $data['client_approval'] ?? 'On-going') ?: 'On-going',
+                ':status' => trim($data['projectStatus'] ?? $data['project_status'] ?? 'On-going') ?: 'On-going',
                 ':priority' => trim($data['priority'] ?? ''),
                 ':head_appr' => trim($data['headApproval'] ?? $data['head_approval'] ?? 'Pending'),
                 ':std' => (int)($data['countStandard'] ?? $data['count_standard'] ?? 0),
@@ -1076,7 +1134,6 @@ switch ($action) {
                 file_sent = :file_sent,
                 location = :loc,
                 project_status = :status,
-                client_approval = :appr,
                 priority = :priority,
                 releasing_mode = :rel_mode,
                 contact_person = :contact_p,
@@ -1084,7 +1141,7 @@ switch ($action) {
                 complete_address = :addr
             WHERE id = :id1 OR request_id = :id2";
 
-            $unifiedStatus = trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? $data['client_approval'] ?? 'On-going') ?: 'On-going';
+            $unifiedStatus = trim($data['projectStatus'] ?? $data['project_status'] ?? 'On-going') ?: 'On-going';
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
@@ -1099,7 +1156,6 @@ switch ($action) {
                 ':file_sent' => trim($data['fileSent'] ?? $data['file_sent'] ?? 'Pending'),
                 ':loc' => trim($data['location'] ?? 'Indoor'),
                 ':status' => $unifiedStatus,
-                ':appr' => $unifiedStatus,
                 ':priority' => trim($data['priority'] ?? 'Normal'),
                 ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? 'INSTALL'),
                 ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? ''),
@@ -1306,7 +1362,7 @@ switch ($action) {
     case 'get_next_request_id':
         try {
             $stmt = $pdo->query("SELECT request_id FROM sales_requests WHERE request_id LIKE 'LR-%'");
-            $maxSeq = 2103;
+            $maxSeq = 0;
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 if (preg_match('/(\d+)$/', $row['request_id'], $m)) {
                     $n = (int)$m[1];
@@ -1315,7 +1371,7 @@ switch ($action) {
             }
             $nextSeq = $maxSeq + 1;
             $currYear = date('y');
-            $nextId = "LR-{$currYear}-{$nextSeq}";
+            $nextId = sprintf("LR-%s-%04d", $currYear, $nextSeq);
             sendJsonResponse([
                 'success' => true,
                 'nextRequestId' => $nextId,
@@ -1508,9 +1564,9 @@ switch ($action) {
                 return $b['assigned'] - $a['assigned'];
             });
 
-            $avgTurnaround = $turnaroundCount > 0 ? number_format($totalTurnaroundDays / $turnaroundCount, 1) : '2.1';
-            $revisionRatio = $totalOrders > 0 ? number_format($totalRevisions / $totalOrders, 2) : '0.15';
-            $completionRate = $totalOrders > 0 ? number_format(($totalCompleted / $totalOrders) * 100, 1) . '%' : '100.0%';
+            $avgTurnaround = $turnaroundCount > 0 ? number_format($totalTurnaroundDays / $turnaroundCount, 1) : '0.0';
+            $revisionRatio = $totalOrders > 0 ? number_format($totalRevisions / $totalOrders, 2) : '0.00';
+            $completionRate = $totalOrders > 0 ? number_format(($totalCompleted / $totalOrders) * 100, 1) . '%' : '0.0%';
 
             $monthlyTotals = array_fill(0, 12, 0);
             foreach ($matrix as $counts) {

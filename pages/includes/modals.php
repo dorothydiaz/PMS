@@ -18,8 +18,8 @@
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label required">Request ID</label>
-            <input type="text" class="form-control" id="salesFormReqId" placeholder="e.g. LR-26-2104" required autocomplete="off">
-            <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Auto-generated sequential ID with separator dash (e.g. LR-26-2104)</div>
+            <input type="text" class="form-control" id="salesFormReqId" placeholder="e.g. LR-26-0001" required autocomplete="off">
+            <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Auto-generated sequential ID with separator dash (e.g. LR-26-0001)</div>
           </div>
           <div class="form-group">
             <label class="form-label required">JO Number</label>
@@ -95,17 +95,16 @@
           </div>
           <div class="form-group">
             <label class="form-label required">Project Status</label>
-            <select class="form-control" id="salesFormClientApproval" required>
+            <select class="form-control" id="salesFormProjectStatus" required>
               <option value="">Select Project Status...</option>
-              <option value="Pending Approval" selected>Pending Approval</option>
               <option value="On-going">On-going</option>
               <option value="For Review">For Review</option>
-              <option value="Revising">Revising</option>
-              <option value="Completed">Completed</option>
-              <option value="Released">Released</option>
-              <option value="Incomplete Details/Files">Incomplete Details/Files</option>
-              <option value="Onhold">Onhold</option>
+              <option value="Pending Approval" selected>Pending Approval</option>
               <option value="Approved">Approved</option>
+              <option value="Completed">Completed</option>
+              <option value="On-hold">On-hold</option>
+              <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
           <div class="form-group">
@@ -172,13 +171,12 @@
             <select class="form-control" id="trackerFormProjectStatus">
               <option value="On-going" selected>On-going</option>
               <option value="For Review">For Review</option>
-              <option value="Revising">Revising</option>
-              <option value="Completed">Completed</option>
-              <option value="Released">Released</option>
-              <option value="Incomplete Details/Files">Incomplete Details/Files</option>
-              <option value="Onhold">Onhold</option>
               <option value="Pending Approval">Pending Approval</option>
               <option value="Approved">Approved</option>
+              <option value="Completed">Completed</option>
+              <option value="On-hold">On-hold</option>
+              <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
           <div class="form-group">

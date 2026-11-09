@@ -1562,8 +1562,6 @@ body.sidebar-open {
   background: linear-gradient(180deg, #FFFFFF 0%, #FFF1F2 100%) !important;
   box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15), 0 8px 20px -3px rgba(225, 29, 72, 0.12) !important;
 }
-  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15), 0 8px 20px -3px rgba(225, 29, 72, 0.12) !important;
-}
 
 .kpi-header {
   display: flex;
@@ -1895,7 +1893,9 @@ body.sidebar-open {
 #salesRequestsTable th.col-client-approval,
 #salesRequestsTable td.col-client-approval,
 #salesRequestsTable th.col-project-status,
-#salesRequestsTable td.col-project-status { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+#salesRequestsTable td.col-project-status,
+.data-table th.col-project-status,
+.data-table td.col-project-status { width: 175px !important; min-width: 175px !important; max-width: 185px !important; padding-left: 6px !important; padding-right: 6px !important; }
 
 #salesRequestsTable th:nth-child(17), #salesRequestsTable td:nth-child(17),
 #salesRequestsTable th.col-priority { width: 135px !important; min-width: 135px !important; max-width: 135px !important; }
@@ -1959,7 +1959,7 @@ body.sidebar-open {
 #creativesTrackerTable th:nth-child(10), #creativesTrackerTable td:nth-child(10),
 #creativesProductionTable th:nth-child(10), #creativesProductionTable td:nth-child(10),
 #creativesTrackerTable th.col-project-status, #creativesTrackerTable td.col-project-status,
-#creativesProductionTable th.col-project-status, #creativesProductionTable td.col-project-status { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+#creativesProductionTable th.col-project-status, #creativesProductionTable td.col-project-status { width: 175px !important; min-width: 175px !important; max-width: 185px !important; padding-left: 6px !important; padding-right: 6px !important; }
 
 #creativesTrackerTable th:nth-child(11), #creativesTrackerTable td:nth-child(11),
 #creativesProductionTable th:nth-child(11), #creativesProductionTable td:nth-child(11) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
@@ -2251,7 +2251,7 @@ body.sidebar-open {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 7px;
+  gap: 6px;
   background: #F1F5F9;
   border: none !important;
   outline: none !important;
@@ -2265,7 +2265,38 @@ body.sidebar-open {
   transition: all var(--transition-fast);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   white-space: nowrap;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.custom-select-label,
+.custom-select-btn .custom-select-label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.custom-select-btn.is-readonly {
+  justify-content: center;
+}
+
+.custom-select-btn.is-readonly .custom-select-label {
+  text-align: center;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .custom-select-btn:hover {
@@ -2799,15 +2830,20 @@ body.sidebar-open {
 
 /* Status Badges (Smooth Pill Shape, No Outlines) */
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  display: inline-block;
+  vertical-align: middle;
   padding: 3px 9px;
   border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   border: none !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 1.35;
 }
 
 .badge-pending { background: #FEF3C7; color: #92400E; }
@@ -3020,15 +3056,16 @@ select.filter-input {
   background: #FFFFFF;
   border: none;
   border-radius: var(--radius-lg);
-  padding: 22px 26px;
+  padding: 14px 20px;
+  margin-bottom: 12px;
   box-shadow: var(--shadow-card);
 }
 
 .lookup-flex {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 8px;
   position: relative;
   flex-wrap: wrap;
 }
@@ -3047,20 +3084,21 @@ select.filter-input {
 
 .lookup-input-wrap {
   position: relative;
-  flex: 1;
-  min-width: 280px;
+  flex: 0 1 360px;
+  max-width: 380px;
+  min-width: 240px;
 }
 
 .lookup-input {
   width: 100%;
-  height: 42px;
-  padding: 0 14px 0 40px;
-  font-size: 13.5px;
+  height: 38px;
+  padding: 0 14px 0 38px;
+  font-size: 13px;
   font-weight: 600;
   border-radius: var(--radius-full);
-  border: none;
+  border: 1px solid #E2E8F0;
   background: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: all var(--transition-fast);
 }
 
@@ -3340,12 +3378,67 @@ select.filter-input {
 .doc-top-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  margin-bottom: 14px;
-  gap: 16px;
+  justify-content: space-between;
+  margin-top: 0;
+  margin-bottom: 12px;
+  gap: 12px;
   position: relative;
   z-index: 1050;
   width: 100%;
+}
+
+.doc-top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doc-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.doc-active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  display: inline-block;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.doc-active-label {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.doc-active-divider {
+  color: #CBD5E1;
+  font-weight: 400;
+}
+
+.doc-active-jo {
+  font-weight: 800;
+  color: var(--sd-red-ui, #E10600);
+  letter-spacing: 0.02em;
+}
+
+.doc-top-quick-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* REQUEST ID NUMBER Badge (Solid Surfaces with Drop Shadow, No Outlines) */
@@ -3450,13 +3543,12 @@ select.filter-input {
 
 .font-ctrl-unit {
   font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   color: #64748B !important;
   text-transform: uppercase !important;
   letter-spacing: 0.04em !important;
-  margin-left: -2px;
-  margin-right: 2px;
+  margin: 0 4px;
 }
 
 .btn-font-scale {
@@ -5693,6 +5785,7 @@ textarea.form-control {
 .tab-status-dot.dot-completed { background: #10B981; }
 .tab-status-dot.dot-released { background: #10B981; }
 .tab-status-dot.dot-incomplete { background: #EF4444; }
+.tab-status-dot.dot-cancelled { background: #DC2626; }
 .tab-status-dot.dot-onhold { background: #64748B; }
 .tab-status-dot.dot-pending { background: #F59E0B; }
 .tab-status-dot.dot-revision { background: #8B5CF6; }
@@ -5785,6 +5878,15 @@ textarea.form-control {
 }
 .sales-approval-tab.active .tab-count-pill.pill-incomplete {
   background: #EF4444;
+  color: #FFFFFF;
+}
+
+.tab-count-pill.pill-cancelled {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+.sales-approval-tab.active .tab-count-pill.pill-cancelled {
+  background: #DC2626;
   color: #FFFFFF;
 }
 
@@ -6736,8 +6838,17 @@ input[type="password"]::-ms-clear {
   fill: #E10600 !important;
 }
 
-#docFieldEnvOption:hover rect {
-  fill: #F8FAFC !important;
+#docFieldEnvOption {
+  cursor: pointer !important;
+}
+
+#docFieldEnvOption:hover #bgFieldEnv,
+#docFieldEnvOption:hover .doc-env-bg {
+  fill: #F1F5F9 !important;
+}
+
+#docFieldEnvOption:hover .doc-env-placeholder rect:first-child {
+  fill: #F1F5F9 !important;
 }
 
 .directive-env-picker-menu {

@@ -158,7 +158,7 @@ if (isset($_POST['reimport']) || php_sapi_name() === 'cli') {
     </div>
 
     <form method="POST" style="margin-top: 24px;">
-      <button type="submit" name="reimport" value="1" class="btn btn-primary" onclick="return confirm('Re-importing will reset all tables with complete seed schema (2,103 requests, users, artists, reps, directives, audit logs). Continue?');">
+      <button type="submit" name="reimport" value="1" class="btn btn-primary" onclick="return confirm('Re-importing will reset all tables to a fresh database schema with default users, artists, and sales reps. Continue?');">
         Re-Import Schema & Seeds
       </button>
       <a href="../index.php" class="btn btn-secondary">Open PMS Dashboard &rarr;</a>

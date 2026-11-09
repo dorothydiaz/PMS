@@ -37,7 +37,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             </div>
           </div>
 
-          <!-- Client Approval Status Tabs -->
+          <!-- Project Status Tabs -->
           <div class="sales-tabs-container">
             <div class="sales-approval-tabs" role="tablist">
               <?php if (hasTabPermission('sales-requests', 'all')): ?>
@@ -60,41 +60,6 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <span class="tab-count-pill pill-for-review" id="badgeCountForReview">0</span>
               </button>
               <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'revising')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Revising" id="tabSalesRevising" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-revising"></span>
-                <span class="tab-label">Revising</span>
-                <span class="tab-count-pill pill-revising" id="badgeCountRevising">0</span>
-              </button>
-              <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'completed')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Completed" id="tabSalesCompleted" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-completed"></span>
-                <span class="tab-label">Completed</span>
-                <span class="tab-count-pill pill-completed" id="badgeCountCompleted">0</span>
-              </button>
-              <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'released')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Released" id="tabSalesReleased" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-released"></span>
-                <span class="tab-label">Released</span>
-                <span class="tab-count-pill pill-released" id="badgeCountReleased">0</span>
-              </button>
-              <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'incomplete')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Incomplete Details/Files" id="tabSalesIncomplete" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-incomplete"></span>
-                <span class="tab-label">Incomplete Details/Files</span>
-                <span class="tab-count-pill pill-incomplete" id="badgeCountIncomplete">0</span>
-              </button>
-              <?php endif; ?>
-              <?php if (hasTabPermission('sales-requests', 'onhold')): ?>
-              <button type="button" class="sales-approval-tab" data-tab-approval="Onhold" id="tabSalesOnhold" role="tab" aria-selected="false">
-                <span class="tab-status-dot dot-onhold"></span>
-                <span class="tab-label">Onhold</span>
-                <span class="tab-count-pill pill-onhold" id="badgeCountOnhold">0</span>
-              </button>
-              <?php endif; ?>
               <?php if (hasTabPermission('sales-requests', 'pending_approval')): ?>
               <button type="button" class="sales-approval-tab" data-tab-approval="Pending Approval" id="tabSalesPendingApproval" role="tab" aria-selected="false">
                 <span class="tab-status-dot dot-pending"></span>
@@ -107,6 +72,34 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <span class="tab-status-dot dot-approved"></span>
                 <span class="tab-label">Approved</span>
                 <span class="tab-count-pill pill-approved" id="badgeCountApproved">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'completed')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Completed" id="tabSalesCompleted" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-completed"></span>
+                <span class="tab-label">Completed</span>
+                <span class="tab-count-pill pill-completed" id="badgeCountCompleted">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'onhold')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="On-hold" id="tabSalesOnhold" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-onhold"></span>
+                <span class="tab-label">On-hold</span>
+                <span class="tab-count-pill pill-onhold" id="badgeCountOnhold">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'incomplete')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Incomplete Details/Files" id="tabSalesIncomplete" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-incomplete"></span>
+                <span class="tab-label">Incomplete Details/Files</span>
+                <span class="tab-count-pill pill-incomplete" id="badgeCountIncomplete">0</span>
+              </button>
+              <?php endif; ?>
+              <?php if (hasTabPermission('sales-requests', 'cancelled')): ?>
+              <button type="button" class="sales-approval-tab" data-tab-approval="Cancelled" id="tabSalesCancelled" role="tab" aria-selected="false">
+                <span class="tab-status-dot dot-cancelled"></span>
+                <span class="tab-label">Cancelled</span>
+                <span class="tab-count-pill pill-cancelled" id="badgeCountCancelled">0</span>
               </button>
               <?php endif; ?>
             </div>
@@ -126,13 +119,12 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <option value="">All Project Statuses</option>
                 <option value="On-going">On-going</option>
                 <option value="For Review">For Review</option>
-                <option value="Revising">Revising</option>
-                <option value="Completed">Completed</option>
-                <option value="Released">Released</option>
-                <option value="Incomplete Details/Files">Incomplete Details/Files</option>
-                <option value="Onhold">Onhold</option>
                 <option value="Pending Approval">Pending Approval</option>
                 <option value="Approved">Approved</option>
+                <option value="Completed">Completed</option>
+                <option value="On-hold">On-hold</option>
+                <option value="Incomplete Details/Files">Incomplete Details/Files</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
               <select class="filter-input" id="salesFilterLocation">
                 <option value="">All Placements</option>
@@ -184,7 +176,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <th class="col-releasing-mode" data-sort="releasingMode" title="Mode of Releasing">Mode of Releasing</th>
                   <th class="col-contact-person" data-sort="contactPerson" title="Client Contact Person">Contact Person</th>
                   <th class="col-contact-number" data-sort="contactNumber" title="Contact Number">Contact Number</th>
-                  <th class="col-client-approval col-project-status" data-sort="clientApproval" title="Click to sort by Project Status">Project Status</th>
+                  <th class="col-project-status" data-sort="projectStatus" title="Click to sort by Project Status">Project Status</th>
                   <th class="col-priority" data-sort="priority" title="Priority Level">Priority Level</th>
                   <th class="col-actions no-sort">Actions</th>
                 </tr>

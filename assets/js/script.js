@@ -23,7 +23,7 @@
   ];
 
   const PROJECT_STATUSES = [
-    'On-going', 'For Review', 'Revising', 'Completed', 'Released', 'Incomplete Details/Files', 'Onhold', 'Pending Approval', 'Approved'
+    'On-going', 'For Review', 'Revising', 'Pending Approval', 'Approved', 'Completed', 'On-hold', 'Incomplete Details/Files', 'Cancelled'
   ];
 
   const DESIGN_STATUSES = [
@@ -60,4508 +60,7 @@
 
   // Comprehensive Shared Mock Dataset (25+ real-world Sign Depot projects)
   // Live Spreadsheet Database Orders (LR-26-2102 to LR-26-1950 from 1Uwm-SjFgMgo62S8YY2IonJkmy9BfCmcIvZ7Txvp09Pg)
-  const DEFAULT_REQUESTS = [
-    {
-        "id":  "lr-26-2102",
-        "requestId":  "LR-26-2102",
-        "joNumber":  "P261001356",
-        "salesRep":  "DONA",
-        "client":  "CDJJ DYNAMIC MERCHANDISING",
-        "projectName":  "UNIVERS GB THOM BROWNE \u0026 ACNE STUDIOS WINDOW",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-24",
-        "releasingDate":  "2026-10-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2101",
-        "requestId":  "LR-26-2101",
-        "joNumber":  "P261001337",
-        "salesRep":  "DONA",
-        "client":  "TRADEMASTERS VENTURES OPC",
-        "projectName":  "TIEN MA\u0027S RE-ORDER",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-24",
-        "releasingDate":  "2026-10-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2100",
-        "requestId":  "LR-26-2100",
-        "joNumber":  "P261001348",
-        "salesRep":  "DONA",
-        "client":  "DEcalpro Printing Services",
-        "projectName":  "LACOST \u0026 SMH \u0026 MK",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-24",
-        "releasingDate":  "2026-10-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2099",
-        "requestId":  "LR-26-2099",
-        "joNumber":  "SD261021-028",
-        "salesRep":  "JEN",
-        "client":  "ANYTIME FITNESS",
-        "projectName":  "STICKERS",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-24",
-        "releasingDate":  "2026-10-26",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "AF VISTAHUB BGC",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Fredinel Aguinaldo",
-        "contactNumber":  "639054576672",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2098",
-        "requestId":  "LR-26-2098",
-        "joNumber":  "SD261021-028",
-        "salesRep":  "JEN",
-        "client":  "ANYTIME FITNESS",
-        "projectName":  "SIGNAGE",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-24",
-        "releasingDate":  "2026-10-26",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "AF VISTAHUB BGC",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Fredinel Aguinaldo",
-        "contactNumber":  "639054576672",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2097",
-        "requestId":  "LR-26-2097",
-        "joNumber":  "SD261007-021",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "WINSTON NAPKIN HOLDER \u0026 RESERVED SIGN",
-        "artist":  "Tim",
-        "designDeadline":  "",
-        "releasingDate":  "",
-        "fileSent":  "Pending",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2096",
-        "requestId":  "LR-26-2096",
-        "joNumber":  "SD261020-003",
-        "salesRep":  "JANET",
-        "client":  "SHELL ARTELIA",
-        "projectName":  "CROCS LIGHTBOX",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SLEX NORTHBOUND BINAN LAGUNA",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MS. LOUISE",
-        "contactNumber":  "9164547031",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2095",
-        "requestId":  "LR-26-2095",
-        "joNumber":  "SD261023-026",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL ICONIC PAGBILAO",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-29",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "PAGBILAO",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2094",
-        "requestId":  "LR-26-2094",
-        "joNumber":  "SD261023-025",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL ICONIC BATANGAS",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-29",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "BATANGAS",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2093",
-        "requestId":  "LR-26-2093",
-        "joNumber":  "SD261016-013",
-        "salesRep":  "JANET",
-        "client":  "REDBIN",
-        "projectName":  "TENT CARD RESAMPLE",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "MAIN BUILDING S-1, EAST GATE BUSINESS CENTER, LRT ANTIPOLO STATION, MARCOS HIGHWAY, BARANGAY MAYAMOT, ANTIPOLO CITY",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "MS. CIELO",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2092",
-        "requestId":  "LR-26-2092",
-        "joNumber":  "SD260921-001",
-        "salesRep":  "JANET",
-        "client":  "REDBIN",
-        "projectName":  "TENT CARD SAMPLE",
-        "artist":  "Glen",
-        "designDeadline":  "2026-09-21",
-        "releasingDate":  "2026-09-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "MAIN BUILDING S-1, EAST GATE BUSINESS CENTER, LRT ANTIPOLO STATION, MARCOS HIGHWAY, BARANGAY MAYAMOT, ANTIPOLO CITY",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "MS. CIELO",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2091",
-        "requestId":  "LR-26-2091",
-        "joNumber":  "SD260917-021",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "SAMPLE SWATCHES AND PROOFING FOR DRESS UP",
-        "artist":  "Tim",
-        "designDeadline":  "2026-09-21",
-        "releasingDate":  "2026-09-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor \u0026 Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2090",
-        "requestId":  "LR-26-2090",
-        "joNumber":  "SD260917-018",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "VIP PLATE FINAL SAMPLE (OPTION 2)",
-        "artist":  "Tim",
-        "designDeadline":  "2026-09-18",
-        "releasingDate":  "2026-09-18",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2089",
-        "requestId":  "LR-26-2089",
-        "joNumber":  "SD260828-025",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "VIP PLATE SAMPLE FINAL REVISED",
-        "artist":  "Tim",
-        "designDeadline":  "2026-09-02",
-        "releasingDate":  "2026-09-03",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2088",
-        "requestId":  "LR-26-2088",
-        "joNumber":  "SD260828-026",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL DRESS UP SWATCH",
-        "artist":  "Tim",
-        "designDeadline":  "2026-09-02",
-        "releasingDate":  "2026-09-05",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor \u0026 Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2087",
-        "requestId":  "LR-26-2087",
-        "joNumber":  "SD260902-005",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL LED NEON",
-        "artist":  "Tim",
-        "designDeadline":  "2026-09-02",
-        "releasingDate":  "2026-09-11",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2086",
-        "requestId":  "LR-26-2086",
-        "joNumber":  "SD260902-003",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "WINSTON LED NEON",
-        "artist":  "Tim",
-        "designDeadline":  "2026-09-02",
-        "releasingDate":  "2026-09-11",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2085",
-        "requestId":  "LR-26-2085",
-        "joNumber":  "P261001214",
-        "salesRep":  "DONA",
-        "client":  "SD",
-        "projectName":  "QUANTUM POKEMON STANDEE",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-27",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2084",
-        "requestId":  "LR-26-2084",
-        "joNumber":  "P261001303",
-        "salesRep":  "DONA",
-        "client":  "PAU ACILAC",
-        "projectName":  "BELLE OUVRE 10.23",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2083",
-        "requestId":  "LR-26-2083",
-        "joNumber":  "P261001284",
-        "salesRep":  "DONA",
-        "client":  "Decalpro Printing Services",
-        "projectName":  "SALE 1.8MM  L-STAND   10.23",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2082",
-        "requestId":  "LR-26-2082",
-        "joNumber":  "SD261020-022",
-        "salesRep":  "FLORA",
-        "client":  "MODULART",
-        "projectName":  "KAPOOR LIGHTBOX",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-25",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "VALENZUELA CITY",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "JANSEN CHUA",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2081",
-        "requestId":  "LR-26-2081",
-        "joNumber":  "P261001275",
-        "salesRep":  "DONA",
-        "client":  "CDJJ DYNAMIC MERCHANDISING",
-        "projectName":  "MAISON DTF",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2080",
-        "requestId":  "LR-26-2080",
-        "joNumber":  "SD261009-018",
-        "salesRep":  "JOYCE",
-        "client":  "STUDIO LYV",
-        "projectName":  "ALTITUDE PARK TRIANGLE PARK - BGC",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "TRIANGLE PARK BGC",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Joseph Doble",
-        "contactNumber":  "(0995) 572 6988",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2079",
-        "requestId":  "LR-26-2079",
-        "joNumber":  "P261001224",
-        "salesRep":  "DONA",
-        "client":  "MAKING FINE BEVERAGES CORP.",
-        "projectName":  "TIGER SUGAR BANDERITAS",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-26",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-23",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2078",
-        "requestId":  "LR-26-2078",
-        "joNumber":  "SD260821-001",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "SHELL BENCH \u0026 RAMP 6TH BATCH",
-        "artist":  "Tim",
-        "designDeadline":  "2026-08-24",
-        "releasingDate":  "2026-09-01",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SOUTHSEA NAVOTAS",
-        "location":  "Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR JACKSON",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2077",
-        "requestId":  "LR-26-2077",
-        "joNumber":  "SD260926-005",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "WINSTON ROULETTE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-09-11",
-        "releasingDate":  "2026-09-14",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2076",
-        "requestId":  "LR-26-2076",
-        "joNumber":  "TF",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "YUMAPANDA",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET TAYTAY",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2075",
-        "requestId":  "LR-26-2075",
-        "joNumber":  "SD2601023-004",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "ALEXAS DELIGHT WINGS",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET DASMARINAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2074",
-        "requestId":  "LR-26-2074",
-        "joNumber":  "SD261016-013",
-        "salesRep":  "JANET",
-        "client":  "REDBIN",
-        "projectName":  "WINSTON LAMP",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-17",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "ANTIPOLO CITY",
-        "location":  "Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "MS. TALA",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2073",
-        "requestId":  "LR-26-2073",
-        "joNumber":  "SD261008-007",
-        "salesRep":  "JANET",
-        "client":  "REDBIN",
-        "projectName":  "GOV. WARNING STANDEE / KV POSTERS 2 AREA CAINTA ANTIPOLO",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "ANTIPOLO CITY",
-        "location":  "Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "MS. TALA",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2072",
-        "requestId":  "LR-26-2072",
-        "joNumber":  "SD261012-021",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "MIGHTY STANDARD",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-19",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "DAVAO",
-        "location":  "Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2071",
-        "requestId":  "LR-26-2071",
-        "joNumber":  "SD261007-017",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "PEST GUARD RESAMPLE",
-        "artist":  "Edrian",
-        "designDeadline":  "2026-10-13",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR JACKSON",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2070",
-        "requestId":  "LR-26-2070",
-        "joNumber":  "SD260923-009",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "PEST GUARD SAMPLE",
-        "artist":  "Edrian",
-        "designDeadline":  "2026-09-23",
-        "releasingDate":  "2026-09-24",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR JACKSON",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2069",
-        "requestId":  "LR-26-2069",
-        "joNumber":  "SD261010-021",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "WINSTON BILI NA LIGHTED SIGNAGE",
-        "artist":  "Edrian",
-        "designDeadline":  "Ocotber 13, 2026",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2068",
-        "requestId":  "LR-26-2068",
-        "joNumber":  "SD260921-004",
-        "salesRep":  "JANET",
-        "client":  "FINCOM",
-        "projectName":  "MALLPLUS  SIGNAGE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "ROBINSONS MAGNOLIA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MS. GEN BERMUDO",
-        "contactNumber":  "639173239460",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2067",
-        "requestId":  "LR-26-2067",
-        "joNumber":  "SD261002-007",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL NAPKIN HOLDER (ONLY) REVISED",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-07",
-        "releasingDate":  "2026-10-07",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2066",
-        "requestId":  "LR-26-2066",
-        "joNumber":  "SD261006-018",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "WINSTON LED NEON REORDER (GMA ALLOCATION)",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-06",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor \u0026 Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2065",
-        "requestId":  "LR-26-2065",
-        "joNumber":  "SD261002-007",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL NAPKIN HOLDER",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-02",
-        "releasingDate":  "2026-10-03",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2064",
-        "requestId":  "LR-26-2064",
-        "joNumber":  "SD261001-012",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "CAMEL ICONIC STO. TOMAS",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-01",
-        "releasingDate":  "2026-10-02",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "BATANGAS, LAGUNA, QUEZON",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2063",
-        "requestId":  "LR-26-2063",
-        "joNumber":  "PROOFING",
-        "salesRep":  "JASTINE",
-        "client":  "The Crave Lab Corp.",
-        "projectName":  "SOMETHAI BOARD UP",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "UNit 195-A Tomas Morato Corner Scout Fuentebella Laging Handa 1103 QUEZON CITY",
-        "location":  "Outdoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2062",
-        "requestId":  "LR-26-2062",
-        "joNumber":  "N/A",
-        "salesRep":  "JANET",
-        "client":  "TOPVALUE",
-        "projectName":  "PROOFING WINSTON, MIGHTY, CAMEL",
-        "artist":  "Tim",
-        "designDeadline":  "2022-10-21",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "18 SHIBUYAN STA. MESA HEIGHTS. QC",
-        "location":  "Indoor \u0026 Outdoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "SIR LAU",
-        "contactNumber":  "9175956385",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2061",
-        "requestId":  "LR-26-2061",
-        "joNumber":  "SD261022-013",
-        "salesRep":  "FLORA",
-        "client":  "PARADIGMA",
-        "projectName":  "L-STAND MENU",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "BINONDO",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "ANA FORTIN",
-        "contactNumber":  "639771566932",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2060",
-        "requestId":  "LR-26-2060",
-        "joNumber":  "SD2601021-023",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-21",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2059",
-        "requestId":  "LR-26-2059",
-        "joNumber":  "SD2601020-017",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT GOLDEN BAY",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-17",
-        "releasingDate":  "2026-10-25",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "GOLDEN BAY",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2058",
-        "requestId":  "LR-26-2058",
-        "joNumber":  "SD2601014-029",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "QUICKLY",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-26",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET TAYTAY",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2057",
-        "requestId":  "LR-26-2057",
-        "joNumber":  "SD2601020-029",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "CAPTAIN CALAMARES",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-28",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET BATANGAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2056",
-        "requestId":  "LR-26-2056",
-        "joNumber":  "SD2601020-028",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "BUKO ZONE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-26",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET DASMARINAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2055",
-        "requestId":  "LR-26-2055",
-        "joNumber":  "SD2601020-024",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "PAOTSIN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-24",
-        "releasingDate":  "2026-10-28",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET SORSOGON",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2054",
-        "requestId":  "LR-26-2054",
-        "joNumber":  "SD2601019-009",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "MANG PASTIL",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET BICUTAN",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2053",
-        "requestId":  "LR-26-2053",
-        "joNumber":  "SD2601019-008",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "MASTER SIOMAI",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET LEMERY BATANGAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2052",
-        "requestId":  "LR-26-2052",
-        "joNumber":  "SD261022-011",
-        "salesRep":  "FLORA",
-        "client":  "MG PARIAL CONTRUCTION",
-        "projectName":  "FORTHEO SIGNAGE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-23",
-        "releasingDate":  "2026-10-26",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "QUEZON CITY",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "MARY GRACE PARIAL",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2051",
-        "requestId":  "LR-26-2051",
-        "joNumber":  "SD2601015-020",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-18",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2050",
-        "requestId":  "LR-26-2050",
-        "joNumber":  "SD2601014-013",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC AM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-18",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2049",
-        "requestId":  "LR-26-2049",
-        "joNumber":  "SD2601014-027",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET VALENZUELA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA;AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2048",
-        "requestId":  "LR-26-2048",
-        "joNumber":  "SD2601014-024",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET NORTH EDSA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2047",
-        "requestId":  "LR-26-2047",
-        "joNumber":  "SD2601014-026",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MARILAO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2046",
-        "requestId":  "LR-26-2046",
-        "joNumber":  "SD2601014-025",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET NOVALICHES",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2045",
-        "requestId":  "LR-26-2045",
-        "joNumber":  "SD2601014-022",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MOA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2044",
-        "requestId":  "LR-26-2044",
-        "joNumber":  "SD2601014-008",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2043",
-        "requestId":  "LR-26-2043",
-        "joNumber":  "SD2601016-001",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "FAMOUS BELGIAN WAFFLE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET NOVALICHES",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2042",
-        "requestId":  "LR-26-2042",
-        "joNumber":  "SD2601008-019",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "POTATO GIANT",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-08",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET SUCAT",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2041",
-        "requestId":  "LR-26-2041",
-        "joNumber":  "SD2601014-023",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET FAIRVIEW",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2040",
-        "requestId":  "LR-26-2040",
-        "joNumber":  "SD2601014-028",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "RBX",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MANDALUYONG",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2039",
-        "requestId":  "LR-26-2039",
-        "joNumber":  "SD2601009-011",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "PAOTSIN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MANDALUYONG",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2038",
-        "requestId":  "LR-26-2038",
-        "joNumber":  "SD2601009-010",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "PAOTSIN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET FAIRVIEW",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2037",
-        "requestId":  "LR-26-2037",
-        "joNumber":  "SD2601009-009",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "PAOTSIN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET CUBAO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SAN",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2036",
-        "requestId":  "LR-26-2036",
-        "joNumber":  "SD2601015-004",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "ABUBUTS",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-11-10",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET BACOOR",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2035",
-        "requestId":  "LR-26-2035",
-        "joNumber":  "SD2601015-003",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "CAPTAIN CALAMARES",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET ROSARIO CAVITE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2034",
-        "requestId":  "LR-26-2034",
-        "joNumber":  "SD2601015-002",
-        "salesRep":  "MARIEL",
-        "client":  "SM SUPERMARKET",
-        "projectName":  "WAFFLE TIME",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-11-10",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SUPERMARKET SAN MATEO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM JOCEL",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2033",
-        "requestId":  "LR-26-2033",
-        "joNumber":  "SD2601014-040",
-        "salesRep":  "MARIEL",
-        "client":  "SM SAVEMORE",
-        "projectName":  "KURIMI",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SAVEMORE MUZON 2",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2032",
-        "requestId":  "LR-26-2032",
-        "joNumber":  "SD2601009-015",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "KETTLE CORN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MOA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2031",
-        "requestId":  "LR-26-2031",
-        "joNumber":  "SD2601009-014",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "SAM\u0027S",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MOA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2030",
-        "requestId":  "LR-26-2030",
-        "joNumber":  "SD2601009-013",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "SONYDA",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET SUCAT",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2029",
-        "requestId":  "LR-26-2029",
-        "joNumber":  "SD2601009-012",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "PAOTSIN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-09",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET VALENZUELA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2028",
-        "requestId":  "LR-26-2028",
-        "joNumber":  "SD2601014-004",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "SPUD BOMB POTATO",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-14",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET FAIRVIEW",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2027",
-        "requestId":  "LR-26-2027",
-        "joNumber":  "SD2601008-017",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "SPUD BOMB POTATO",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-08",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MARILAO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2026",
-        "requestId":  "LR-26-2026",
-        "joNumber":  "SD2601010-025",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-10",
-        "releasingDate":  "2026-10-13",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2025",
-        "requestId":  "LR-26-2025",
-        "joNumber":  "SD2601008-018",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "MOMOYO",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-08",
-        "releasingDate":  "2026-10-10",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET MARILAO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2024",
-        "requestId":  "LR-26-2024",
-        "joNumber":  "SD2601007-025",
-        "salesRep":  "MARIEL",
-        "client":  "MINI DEPATO",
-        "projectName":  "MINISO - LAOAG FROSTED STICKER",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-07",
-        "releasingDate":  "2026-10-08",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "MINISO LAOAG",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "SIR MARLO",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2023",
-        "requestId":  "LR-26-2023",
-        "joNumber":  "SD2601008-012",
-        "salesRep":  "MARIEL",
-        "client":  "SM SAVEMORE",
-        "projectName":  "JAMAICAN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-08",
-        "releasingDate":  "2026-10-12",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM SAVEMORE ACACIA",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM SHAIRA",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2022",
-        "requestId":  "LR-26-2022",
-        "joNumber":  "SD2601007-032",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "BUKO JUAN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-07",
-        "releasingDate":  "2026-10-09",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET BICUTAN",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2021",
-        "requestId":  "LR-26-2021",
-        "joNumber":  "SD2601005-004",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-05",
-        "releasingDate":  "2026-10-06",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2020",
-        "requestId":  "LR-26-2020",
-        "joNumber":  "SD2601002-018",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC PM EVENT EAST OCEAN PALACE",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-02",
-        "releasingDate":  "2026-10-04",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "EAST OCEAN PALACE",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2019",
-        "requestId":  "LR-26-2019",
-        "joNumber":  "SD2601001-015",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "HENLIN",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-01",
-        "releasingDate":  "2026-10-05",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET ROSARIO BATANGAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2018",
-        "requestId":  "LR-26-2018",
-        "joNumber":  "SD2601001-016",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "SONYDA",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-01",
-        "releasingDate":  "2026-10-05",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET ROSARIO BATANGAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2017",
-        "requestId":  "LR-26-2017",
-        "joNumber":  "SD2601001-017",
-        "salesRep":  "MARIEL",
-        "client":  "SM HYPERMARKET",
-        "projectName":  "POTATO CORNER",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-01",
-        "releasingDate":  "2026-10-05",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM HYPERMARKET ROSARIO BATANGAS",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "MA\u0027AM ELLE",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2016",
-        "requestId":  "LR-26-2016",
-        "joNumber":  "SD2601002-011",
-        "salesRep":  "MARIEL",
-        "client":  "SINITIC",
-        "projectName":  "SINITIC GOLDEN BAY",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-02",
-        "releasingDate":  "2026-10-04",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "GOLDEN BAY",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "BOSS DANNY",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2015",
-        "requestId":  "LR-26-2015",
-        "joNumber":  "SD261022-006",
-        "salesRep":  "JANET",
-        "client":  "MS. GEN",
-        "projectName":  "CLEAR ACRYLIC BOX (FREE)",
-        "artist":  "Goodrich",
-        "designDeadline":  "2026-10-21",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "ROBINSONS MAGNOLIA",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "MS. GEN BERMUDO",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2014",
-        "requestId":  "LR-26-2014",
-        "joNumber":  "P261001188",
-        "salesRep":  "JASTINE",
-        "client":  "LSG FOOD CORPORATION",
-        "projectName":  "HEY NOAH BOARD UP",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Sir Eries Chan",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2013",
-        "requestId":  "LR-26-2013",
-        "joNumber":  "TF",
-        "salesRep":  "JOYCE",
-        "client":  "PLANET SPORTS",
-        "projectName":  "Halloween - Sticker",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2012",
-        "requestId":  "LR-26-2012",
-        "joNumber":  "P261001183",
-        "salesRep":  "JASTINE",
-        "client":  "CITY SAVINGS",
-        "projectName":  "DATA PRIVACY ACT",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2011",
-        "requestId":  "LR-26-2011",
-        "joNumber":  "SD261021-029",
-        "salesRep":  "KIM",
-        "client":  "LEXIGN ARTS \u0026 SIGNS",
-        "projectName":  "PEDRO AND ELA GAGAN",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Outdoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "Ms. Peng",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2010",
-        "requestId":  "LR-26-2010",
-        "joNumber":  "SD261021-025",
-        "salesRep":  "JOYCE",
-        "client":  "CHINA BANKING CORPORATION",
-        "projectName":  "CBC SAMPLE",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "N/A",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2009",
-        "requestId":  "LR-26-2009",
-        "joNumber":  "N/A",
-        "salesRep":  "FLORA",
-        "client":  "SYSU INTERNATIONAL",
-        "projectName":  "SYSU EXTERIOR SIGNAGE",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-22",
-        "releasingDate":  "",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2008",
-        "requestId":  "LR-26-2008",
-        "joNumber":  "SD261021-014",
-        "salesRep":  "KIM",
-        "client":  "GOD IS LOVE CONSTRUCTION MATERIALS TRADING",
-        "projectName":  "PULL UP BANNER",
-        "artist":  "Glen",
-        "designDeadline":  "1015-10-21",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "MS. ALYSA",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2007",
-        "requestId":  "LR-26-2007",
-        "joNumber":  "P261000939",
-        "salesRep":  "DONA",
-        "client":  "Cullinan Group Inc",
-        "projectName":  "MY DIAMOND",
-        "artist":  "Glen",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2006",
-        "requestId":  "LR-26-2006",
-        "joNumber":  "P261001120",
-        "salesRep":  "DONA",
-        "client":  "PAU ACILAC",
-        "projectName":  "BELLE OUVRE",
-        "artist":  "Glen",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2005",
-        "requestId":  "LR-26-2005",
-        "joNumber":  "P261001148",
-        "salesRep":  "DONA",
-        "client":  "SPACEY DESIGN MANILA",
-        "projectName":  "KIDS ZONE TELA - APHOLSTERY",
-        "artist":  "Jules",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2004",
-        "requestId":  "LR-26-2004",
-        "joNumber":  "P261001121",
-        "salesRep":  "DONA",
-        "client":  "CDJJ DYNAMIC MERCHANDISING",
-        "projectName":  "OT TAI-CHI OG WINDOW SHANGLA 10.21",
-        "artist":  "Jules",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2003",
-        "requestId":  "LR-26-2003",
-        "joNumber":  "P261001127",
-        "salesRep":  "DONA",
-        "client":  "Decalpro Printing Services",
-        "projectName":  "SALE 1.8MM  L-STAND   10.21",
-        "artist":  "Glen",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2002",
-        "requestId":  "LR-26-2002",
-        "joNumber":  "P261001125",
-        "salesRep":  "DONA",
-        "client":  "Global Link MP Events Intl Inc.",
-        "projectName":  "CINEPROD EXPO BACKDROP  ADDITIONAL",
-        "artist":  "Jules",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-2001",
-        "requestId":  "LR-26-2001",
-        "joNumber":  "SD261021-010",
-        "salesRep":  "KIM",
-        "client":  "ADVOS ADVERTISING AGENCY",
-        "projectName":  "SOB",
-        "artist":  "Glen",
-        "designDeadline":  "Octobert 21, 2026",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "Muzon Taytay Rizal",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "Ms. Jesicca",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-2000",
-        "requestId":  "LR-26-2000",
-        "joNumber":  "SD261015-025",
-        "salesRep":  "KIM",
-        "client":  "WAGS AND WHISKERS BY DOC FERDS ANIMAL WELLNESS",
-        "projectName":  "Christmas UV Backlit Film",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-15",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1999",
-        "requestId":  "LR-26-1999",
-        "joNumber":  "P261001082",
-        "salesRep":  "JASTINE",
-        "client":  "FULTON TRADING",
-        "projectName":  "TRAFFIC ADVISORY V7",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "pick up",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1998",
-        "requestId":  "LR-26-1998",
-        "joNumber":  "SD261020-019",
-        "salesRep":  "FLORA",
-        "client":  "RASHEED TASHID",
-        "projectName":  "Congratulatory Tarp",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "pick up",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1997",
-        "requestId":  "LR-26-1997",
-        "joNumber":  "SD260926-007",
-        "salesRep":  "JEN",
-        "client":  "ANYTIME FITNESS",
-        "projectName":  "MURALS",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "AF SAN FERNANDO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Mr. James Sy",
-        "contactNumber":  "639228402612",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1996",
-        "requestId":  "LR-26-1996",
-        "joNumber":  "SD261020-027",
-        "salesRep":  "JOYCE",
-        "client":  "STUDIO LYV",
-        "projectName":  "2XU - Additional",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "TO FOLLOW",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1995",
-        "requestId":  "LR-26-1995",
-        "joNumber":  "SD261016-016",
-        "salesRep":  "JOYCE",
-        "client":  "Zuspresso",
-        "projectName":  "Sample Mock Up",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-21",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "Zus Head Office",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1994",
-        "requestId":  "LR-26-1994",
-        "joNumber":  "SD261020-022",
-        "salesRep":  "FLORA",
-        "client":  "MODULART",
-        "projectName":  "KAPOOR LIGHTBOX",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "VALENZUELA",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1993",
-        "requestId":  "LR-26-1993",
-        "joNumber":  "P261001043",
-        "salesRep":  "JASTINE",
-        "client":  "CGS ADVERTISING SERVICES",
-        "projectName":  "PROJECT COFFEE MENU",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1992",
-        "requestId":  "LR-26-1992",
-        "joNumber":  "N/A",
-        "salesRep":  "FLORA",
-        "client":  "VIKINGS GROUP",
-        "projectName":  "VFV SIGNAGE MOCK UP",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM FAIRVIEW",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1991",
-        "requestId":  "LR-26-1991",
-        "joNumber":  "P261001034",
-        "salesRep":  "JASTINE",
-        "client":  "BASEL SMH MARKETING INC.",
-        "projectName":  "Calvin Klein WPS",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1990",
-        "requestId":  "LR-26-1990",
-        "joNumber":  "P261001032",
-        "salesRep":  "JASTINE",
-        "client":  "BASEL SMH MARKETING INC.",
-        "projectName":  "The Watch Store- Sm Fairview",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-23",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM FAIRVIEW",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1989",
-        "requestId":  "LR-26-1989",
-        "joNumber":  "N/A",
-        "salesRep":  "JASTINE",
-        "client":  "EDGECON",
-        "projectName":  "LAW OFFICE",
-        "artist":  "GOODRICH",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1988",
-        "requestId":  "LR-26-1988",
-        "joNumber":  "P261001021",
-        "salesRep":  "JASTINE",
-        "client":  "FULTON TRADING",
-        "projectName":  "TRAFFIC ADVISORY V6",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-20",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "639171423679",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1987",
-        "requestId":  "LR-26-1987",
-        "joNumber":  "P261001001",
-        "salesRep":  "JASTINE",
-        "client":  "BASEL SMH MARKETING INC.",
-        "projectName":  "SM MEGA MALL",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-22",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "SM MEGA MALL",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "639171423679",
-        "projectStatus":  "Pending",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-19",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1986",
-        "requestId":  "LR-26-1986",
-        "joNumber":  "P261000979",
-        "salesRep":  "JASTINE",
-        "client":  "CGS ADVERTISING SERVICES",
-        "projectName":  "BLACK BACK",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "PICK UP",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "639171423679",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-19",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1985",
-        "requestId":  "LR-26-1985",
-        "joNumber":  "SD261019-013",
-        "salesRep":  "FLORA",
-        "client":  "INTERNATIONAL FINANCE CENTER",
-        "projectName":  "IFC INDICATOR SINTRA",
-        "artist":  "Bob",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "BGC",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "KESHNER LOQUINARIO",
-        "contactNumber":  "639171423679",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1984",
-        "requestId":  "LR-26-1984",
-        "joNumber":  "P261000961",
-        "salesRep":  "JASTINE",
-        "client":  "RED OCTAGON",
-        "projectName":  "CANVAS",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-20",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "PICK UP",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-19",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1983",
-        "requestId":  "LR-26-1983",
-        "joNumber":  "P261000953",
-        "salesRep":  "JASTINE",
-        "client":  "GPF PHILS.",
-        "projectName":  "THE YARD OPEN",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-19",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1982",
-        "requestId":  "LR-26-1982",
-        "joNumber":  "SD261017-005",
-        "salesRep":  "KIM",
-        "client":  "ADVOS ADVERTISING AGENCY",
-        "projectName":  "11.11 SALE TARP",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-17",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "MUZON TAYTAY RIZAL",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "MS. JESSICA",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-17",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1981",
-        "requestId":  "LR-26-1981",
-        "joNumber":  "P261000912",
-        "salesRep":  "DONA",
-        "client":  "RGM Exhibit And Events Services",
-        "projectName":  "AMERICAN",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-17",
-        "releasingDate":  "October 17,2026",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-17",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1980",
-        "requestId":  "LR-26-1980",
-        "joNumber":  "SD261017-002",
-        "salesRep":  "JEN",
-        "client":  "ANYTIME FITNESS",
-        "projectName":  "BILLBOARD",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-19",
-        "releasingDate":  "October 17,2026",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "AF DISTRICT IMUS",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Mr. Dirreck Calixto",
-        "contactNumber":  "639171408442",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-17",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1979",
-        "requestId":  "LR-26-1979",
-        "joNumber":  "SD260926-007",
-        "salesRep":  "JEN",
-        "client":  "ANYTIME FITNESS",
-        "projectName":  "SIGNAGE",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "AF SAN FERNANDO",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "Mr. James Sy",
-        "contactNumber":  "639228402612",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1978",
-        "requestId":  "LR-26-1978",
-        "joNumber":  "TF",
-        "salesRep":  "FLORA",
-        "client":  "MEGAWORLD",
-        "projectName":  "MEGAWORLD SIGNAGE",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1977",
-        "requestId":  "LR-26-1977",
-        "joNumber":  "P261000876",
-        "salesRep":  "DONA",
-        "client":  "RGM Exhibit And Events Services",
-        "projectName":  "SCHULTE AND MINTRA ADDITONAL",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-22",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1976",
-        "requestId":  "LR-26-1976",
-        "joNumber":  "SD261016-014",
-        "salesRep":  "FLORA",
-        "client":  "HAPPY N HEALTHY",
-        "projectName":  "HNH MENU",
-        "artist":  "Goodrich",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-21",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1975",
-        "requestId":  "LR-26-1975",
-        "joNumber":  "P261000868",
-        "salesRep":  "DONA",
-        "client":  "TRADEMASTERS VENTURES OPC",
-        "projectName":  "GRAY FABRIC",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Ongoing",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-20",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1974",
-        "requestId":  "LR-26-1974",
-        "joNumber":  "P261000864",
-        "salesRep":  "DONA",
-        "client":  "PROFIX ADS",
-        "projectName":  "GFORCE ABREEZA",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-19",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1973",
-        "requestId":  "LR-26-1973",
-        "joNumber":  "P261000862",
-        "salesRep":  "DONA",
-        "client":  "SPACEY DESIGN MANILA",
-        "projectName":  "happy sking riser label new font",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-18",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1972",
-        "requestId":  "LR-26-1972",
-        "joNumber":  "P261000859",
-        "salesRep":  "DONA",
-        "client":  "PROFIX ADS",
-        "projectName":  "HAUNTED FORTUNE 10.15",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-17",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1971",
-        "requestId":  "LR-26-1971",
-        "joNumber":  "N/A",
-        "salesRep":  "FLORA",
-        "client":  "VIKINGS GROUP",
-        "projectName":  "KAGUYA",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-17",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1970",
-        "requestId":  "LR-26-1970",
-        "joNumber":  "P261000854",
-        "salesRep":  "JASTINE",
-        "client":  "COOPTECHNOLOGIES",
-        "projectName":  "Bridge Store Hours Stickers",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1969",
-        "requestId":  "LR-26-1969",
-        "joNumber":  "SD261016-005",
-        "salesRep":  "KIM",
-        "client":  "LEXIGN ARTS \u0026 SIGNS",
-        "projectName":  "HERMINA",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "Ms. Peng",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1968",
-        "requestId":  "LR-26-1968",
-        "joNumber":  "SD261017-010",
-        "salesRep":  "JOYCE",
-        "client":  "RBS FOOD CORPORATION",
-        "projectName":  "MANG INASAL SHELL OF ASIA",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "Pending",
-        "completeAddress":  "",
-        "location":  "Indoor \u0026 Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-17",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1967",
-        "requestId":  "LR-26-1967",
-        "joNumber":  "SD261009-019",
-        "salesRep":  "JOYCE",
-        "client":  "STUDIO LYV",
-        "projectName":  "2XU - Signage",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "TO FOLLOW",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Approved",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Not Started",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1966",
-        "requestId":  "LR-26-1966",
-        "joNumber":  "SD261016-007",
-        "salesRep":  "KIM",
-        "client":  "ADVOS ADVERTISING AGENCY",
-        "projectName":  "WALL MURAL",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "mandaue foam antipolo",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "ms. jessica",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1965",
-        "requestId":  "LR-26-1965",
-        "joNumber":  "SD261014-041",
-        "salesRep":  "KIM",
-        "client":  "SQUAREFOOT",
-        "projectName":  "ABLAY-CLEDERA",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "DELIVER",
-        "contactPerson":  "Ms. Nerizza",
-        "contactNumber":  "Messenger",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1964",
-        "requestId":  "LR-26-1964",
-        "joNumber":  "P261000841",
-        "salesRep":  "JASTINE",
-        "client":  "Jorouv Travel and Tours Inc",
-        "projectName":  "JOROUV DTF",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-16",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1963",
-        "requestId":  "LR-26-1963",
-        "joNumber":  "P261000819",
-        "salesRep":  "JASTINE",
-        "client":  "BASEL SMH MARKETING INC.",
-        "projectName":  "The Watch Store - SM Bacolod Rebranding Additional",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1962",
-        "requestId":  "LR-26-1962",
-        "joNumber":  "P261000809",
-        "salesRep":  "JASTINE",
-        "client":  "FULTON TRADING",
-        "projectName":  "TRAFFIC ADVISORY V5",
-        "artist":  "Glen",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1961",
-        "requestId":  "LR-26-1961",
-        "joNumber":  "SD261015-022",
-        "salesRep":  "FLORA",
-        "client":  "POPEYES",
-        "projectName":  "EVO BOARD UP",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Outdoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1960",
-        "requestId":  "LR-26-1960",
-        "joNumber":  "P261000800",
-        "salesRep":  "JASTINE",
-        "client":  "EPCC",
-        "projectName":  "JESUS REIGNS BANNER",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-16",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Outdoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1959",
-        "requestId":  "LR-26-1959",
-        "joNumber":  "P26100787",
-        "salesRep":  "JASTINE",
-        "client":  "NAVCO",
-        "projectName":  "ANKER UPBGC",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1958",
-        "requestId":  "LR-26-1958",
-        "joNumber":  "P26100785",
-        "salesRep":  "JASTINE",
-        "client":  "NAVCO",
-        "projectName":  "ANKER SM NORTH",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1957",
-        "requestId":  "LR-26-1957",
-        "joNumber":  "P26100783",
-        "salesRep":  "JASTINE",
-        "client":  "NAVCO",
-        "projectName":  "ANKER MEGAMALL",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1956",
-        "requestId":  "LR-26-1956",
-        "joNumber":  "P26100782",
-        "salesRep":  "JASTINE",
-        "client":  "NAVCO",
-        "projectName":  "ANKER BACOOR",
-        "artist":  "Jules",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-21",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Submitted",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-15",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1955",
-        "requestId":  "LR-26-1955",
-        "joNumber":  "SD261015-009",
-        "salesRep":  "FLORA",
-        "client":  "MODULART",
-        "projectName":  "HAPPY SKIN SIGNAGE",
-        "artist":  "Raven",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-19",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-24",
-        "month":  "October 2026",
-        "completionDate":  null
-    },
-    {
-        "id":  "lr-26-1954",
-        "requestId":  "LR-26-1954",
-        "joNumber":  "SD261015-011",
-        "salesRep":  "DONA",
-        "client":  "RISING DESIGN PH. INC.",
-        "projectName":  "RISEN CHURCH",
-        "artist":  "Goodrich",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-17",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "PICKUP",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "Completed",
-        "clientApproval":  "Approved",
-        "priority":  "Normal",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "Completed",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-17",
-        "month":  "October 2026",
-        "completionDate":  true
-    },
-    {
-        "id":  "lr-26-1953",
-        "requestId":  "LR-26-1953",
-        "joNumber":  "",
-        "salesRep":  "SOL",
-        "client":  "TEABROS CORP",
-        "projectName":  "SM CHERRY COLLATERALS",
-        "artist":  "Tim",
-        "designDeadline":  "2026-10-15",
-        "releasingDate":  "2026-10-15",
-        "fileSent":  "FILE SENT",
-        "completeAddress":  "",
-        "location":  "Indoor",
-        "releasingMode":  "INSTALL",
-        "contactPerson":  "",
-        "contactNumber":  "",
-        "projectStatus":  "On-going",
-        "clientApproval":  "Pending",
-        "priority":  "Rush",
-        "countStandard":  0,
-        "countSpecial":  0,
-        "countPrinting":  0,
-        "headApproval":  "Pending",
-        "designStatus":  "In Progress",
-        "revisionCount":  0,
-        "remarks":  "",
-        "orderDate":  "2026-10-16",
-        "month":  "October 2026",
-        "completionDate":  null
-    }
-];
+  const DEFAULT_REQUESTS = [];
 
   // Default Template Layout Elements
   const DEFAULT_TEMPLATE_ELEMENTS = [
@@ -4680,29 +179,13 @@
   function normalizeRequestItem(r) {
     if (!r) return;
 
-    // Helper to normalize status values across Project Status & Client Approval
-    function resolveProjectStatus(val) {
-      if (!val || typeof val !== 'string' || !val.trim() || val === '[object Object]' || val === '{}') return '';
-      const s = val.trim().toLowerCase();
-      if (s === 'approved') return 'Approved';
-      if (s === 'pending' || s === 'pending approval') return 'Pending Approval';
-      if (s.includes('revision') || s === 'revising') return 'Revising';
-      if (s === 'completed') return 'Completed';
-      if (s === 'on-going' || s === 'ongoing') return 'On-going';
-      if (s === 'for review') return 'For Review';
-      if (s === 'released') return 'Released';
-      if (s.includes('incomplete')) return 'Incomplete Details/Files';
-      if (s.includes('hold')) return 'Onhold';
-      if (PROJECT_STATUSES.includes(val.trim())) return val.trim();
-      return '';
+    // Normalize projectStatus: (Completed, On-going)
+    if (!r.projectStatus || typeof r.projectStatus !== 'string' || !r.projectStatus.trim() || r.projectStatus === '[object Object]') {
+      r.projectStatus = 'On-going';
+    } else {
+      const ps = r.projectStatus.trim().toLowerCase();
+      r.projectStatus = (ps === 'completed') ? 'Completed' : 'On-going';
     }
-
-    // Unified Project Status (synchronized across Sales Requests & Creatives Tracker)
-    const normPs = resolveProjectStatus(r.projectStatus);
-    const normCa = resolveProjectStatus(r.clientApproval);
-    const resolvedProjStatus = normPs || normCa || 'On-going';
-    r.projectStatus = resolvedProjStatus;
-    r.clientApproval = resolvedProjStatus;
 
     // Normalize designStatus: (On Queue, On-hold, Incomplete Details, Ongoing, For Approval Design, Design Approved, Sent to AE, Sent to Prod, Cancelled, Revising, Completed)
     if (!r.designStatus || typeof r.designStatus !== 'string' || !r.designStatus.trim() || r.designStatus === '[object Object]' || r.designStatus === '{}') {
@@ -4735,6 +218,23 @@
       if (ha.includes('appr')) r.headApproval = 'Approved';
       else if (ha.includes('rej')) r.headApproval = 'Rejected';
       else r.headApproval = 'Pending';
+    }
+
+    // Normalize clientApproval: (On-going, For Review, Revising, Completed, Released, Incomplete Details/Files, Onhold, Pending Approval, Approved)
+    if (!r.clientApproval || typeof r.clientApproval !== 'string' || !r.clientApproval.trim()) {
+      r.clientApproval = 'Pending Approval';
+    } else {
+      const ca = r.clientApproval.trim().toLowerCase();
+      if (ca === 'approved') r.clientApproval = 'Approved';
+      else if (ca === 'pending' || ca === 'pending approval') r.clientApproval = 'Pending Approval';
+      else if (ca.includes('revision') || ca === 'revising') r.clientApproval = 'Revising';
+      else if (ca === 'completed') r.clientApproval = 'Completed';
+      else if (ca === 'on-going' || ca === 'ongoing') r.clientApproval = 'On-going';
+      else if (ca === 'for review') r.clientApproval = 'For Review';
+      else if (ca === 'released') r.clientApproval = 'Released';
+      else if (ca.includes('incomplete')) r.clientApproval = 'Incomplete Details/Files';
+      else if (ca.includes('hold')) r.clientApproval = 'Onhold';
+      else if (!APPROVAL_LEVELS.includes(r.clientApproval)) r.clientApproval = 'Pending Approval';
     }
 
     // Normalize priority level: (Low, Normal, Rush)
@@ -5101,14 +601,8 @@
       rec[fieldName] = (typeof newValue === 'string') ? newValue.trim() : newValue;
     }
 
-    // Keep projectStatus & clientApproval in sync across Sales Requests & Creatives Tracker
-    if (fieldName === 'projectStatus' || fieldName === 'clientApproval') {
-      rec.projectStatus = rec[fieldName];
-      rec.clientApproval = rec[fieldName];
-    }
-
     // Auto update completion date if status is marked Completed
-    if (fieldName === 'projectStatus' || fieldName === 'clientApproval') {
+    if (fieldName === 'projectStatus') {
       if (rec.projectStatus === 'Completed' && !rec.completionDate) {
         rec.completionDate = '2026-10-23';
       }
@@ -5163,12 +657,8 @@
     } else if (state.activeView === 'view-monthly-output') {
       renderMonthlyOutputReport();
     } else if (state.activeView === 'view-sales-requests' || currentMod === 'sales-requests') {
-      if (fieldName === 'clientApproval' || fieldName === 'projectStatus') {
+      if (fieldName === 'clientApproval') {
         renderSalesRequests();
-      }
-    } else if (state.activeView === 'view-creatives-tracker' || currentMod === 'creatives-tracker') {
-      if (fieldName === 'headApproval' || fieldName === 'projectStatus' || fieldName === 'clientApproval') {
-        renderCreativesTracker();
       }
     }
   }
@@ -6232,13 +1722,13 @@
   function getKpiFilteredRequests(type) {
     const reqs = state.requests || [];
     if (type === 'pending') {
-      return reqs.filter(r => r.headApproval === 'Pending' || r.clientApproval === 'Pending' || r.clientApproval === 'Pending Approval' || r.projectStatus === 'Pending' || r.projectStatus === 'Pending Approval');
+      return reqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
     }
     if (type === 'working') {
       return reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
     }
     if (type === 'approved' || type === 'completed') {
-      return reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved' || r.headApproval === 'Approved');
+      return reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved');
     }
     if (type === 'revising') {
       return reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
@@ -6252,9 +1742,9 @@
   function updateDashboardKPIs() {
     const reqs = state.requests;
     const totalRequests = reqs.length;
-    const pendingApproval = reqs.filter(r => r.headApproval === 'Pending' || r.clientApproval === 'Pending' || r.clientApproval === 'Pending Approval' || r.projectStatus === 'Pending' || r.projectStatus === 'Pending Approval').length;
+    const pendingApproval = reqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
     const working = reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
-    const approved = reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved' || r.headApproval === 'Approved').length;
+    const approved = reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
     const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
     const overdue = reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
 
@@ -6262,9 +1752,9 @@
     const myArtist = getLoggedInArtist();
     const trackerReqs = myArtist ? reqs.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : reqs;
     const trkTotal = trackerReqs.length;
-    const trkPending = trackerReqs.filter(r => r.headApproval === 'Pending' || r.clientApproval === 'Pending' || r.clientApproval === 'Pending Approval' || r.projectStatus === 'Pending' || r.projectStatus === 'Pending Approval').length;
+    const trkPending = trackerReqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
     const trkWorking = trackerReqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
-    const trkApproved = trackerReqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved' || r.headApproval === 'Approved').length;
+    const trkApproved = trackerReqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
     const trkRevising = trackerReqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
     const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
 
@@ -6315,42 +1805,67 @@
   }
 
   // ==========================================================================
-  // PROGRESS TIMELINE RENDERER (Image 2 Replica)
+  // PROGRESS TIMELINE RENDERER (100% Real Database Queries)
   // ==========================================================================
-  function renderProgressTimeline() {
+  function renderProgressTimeline(timelinePayload) {
     const container = document.getElementById('progressTimelineChartContainer');
     if (!container) return;
 
-    // Timeline data: 7 days of active week (M, T, W, T, F, S, S)
-    const days = [
-      { key: 'M', name: 'Monday', created: 13, completed: 8, x: 48 },
-      { key: 'T', name: 'Tuesday', created: 17, completed: 12, x: 128 },
-      { key: 'W', name: 'Wednesday', created: 19, completed: 23, x: 208, isPeak: true },
-      { key: 'T', name: 'Thursday', created: 15, completed: 14, x: 288 },
-      { key: 'F', name: 'Friday', created: 18, completed: 17, x: 368, isCurrent: true },
-      { key: 'S', name: 'Saturday', created: 8, completed: 0, x: 448, isProjected: true },
-      { key: 'S', name: 'Sunday', created: 6, completed: 0, x: 518, isProjected: true }
-    ];
+    const data = timelinePayload || window.__TIMELINE_DATA_CACHE || window.__INITIAL_TIMELINE_DATA;
+    if (!data && window.PMS_API_URL && !container._fetchingTimeline) {
+      container._fetchingTimeline = true;
+      fetch(window.PMS_API_URL + '?action=get_progress_timeline')
+        .then(r => r.json())
+        .then(res => {
+          container._fetchingTimeline = false;
+          if (res && res.success) {
+            window.__TIMELINE_DATA_CACHE = res;
+            renderProgressTimeline(res);
+          }
+        })
+        .catch(() => {
+          container._fetchingTimeline = false;
+        });
+      return;
+    }
+
+    const days = (data && Array.isArray(data.timeline) && data.timeline.length === 7) 
+      ? data.timeline 
+      : [
+          { key: 'M', name: 'Monday', created: 0, completed: 0, x: 48 },
+          { key: 'T', name: 'Tuesday', created: 0, completed: 0, x: 128 },
+          { key: 'W', name: 'Wednesday', created: 0, completed: 0, x: 208 },
+          { key: 'T', name: 'Thursday', created: 0, completed: 0, x: 288 },
+          { key: 'F', name: 'Friday', created: 0, completed: 0, x: 368 },
+          { key: 'S', name: 'Saturday', created: 0, completed: 0, x: 448 },
+          { key: 'S', name: 'Sunday', created: 0, completed: 0, x: 518 }
+        ];
+
+    // Peak & Subtitle headers from real database metrics
+    const titleEl = document.getElementById('timelineHighlightTitle');
+    if (titleEl && data && data.peakTitle) {
+      titleEl.textContent = data.peakTitle;
+    }
+    const subtitleEl = document.getElementById('timelineHighlightSubtitle');
+    if (subtitleEl && data && data.peakSubtitle) {
+      subtitleEl.textContent = data.peakSubtitle;
+    }
 
     const chartW = 560;
     const chartH = 160;
     const axisY = 132;
-    const maxVal = 28;
-
-    let peakDay = days[2];
-    days.forEach(d => {
-      if (d.completed > peakDay.completed) peakDay = d;
-    });
-
-    const titleEl = document.getElementById('timelineHighlightTitle');
-    if (titleEl) titleEl.textContent = `Peak productivity on ${peakDay.name}`;
-
-    const subtitleEl = document.getElementById('timelineHighlightSubtitle');
-    if (subtitleEl) subtitleEl.textContent = 'Focus shifted to task completion';
+    
+    // Scale max value dynamically according to real database data
+    const maxDataVal = Math.max(
+      ...days.map(d => Math.max(Number(d.created) || 0, Number(d.completed) || 0)),
+      1
+    );
+    const maxVal = Math.max(5, Math.ceil(maxDataVal * 1.25));
 
     const getY = (val) => {
       const plotH = 96;
-      return Math.round(axisY - (val / maxVal) * plotH);
+      const num = Number(val) || 0;
+      return Math.round(axisY - (num / maxVal) * plotH);
     };
 
     // Smooth cardinal/cubic Bezier spline generator (high subpixel precision)
@@ -6372,14 +1887,22 @@
       return path;
     };
 
-    // Active completed curve (Mon - Fri)
-    const completedPts = days.slice(0, 5).map(d => ({ x: d.x, y: getY(d.completed) }));
-    const dCompletedLine = getSmoothSpline(completedPts, 0.24);
-    const fri = completedPts[completedPts.length - 1];
-    const mon = completedPts[0];
-    const dCompletedArea = `${dCompletedLine} L ${fri.x} ${axisY} L ${mon.x} ${axisY} Z`;
+    // Find current active day index or default to today's weekday
+    let currentDayIndex = days.findIndex(d => d.isCurrent);
+    if (currentDayIndex === -1) {
+      currentDayIndex = 4; // Default Friday
+    }
+    const activeDaysCount = Math.min(Math.max(currentDayIndex + 1, 1), 7);
 
-    // Created tasks curve (Mon - Sun full week projection)
+    // Active completed curve (Mon up to active day)
+    const activeCompletedDays = days.slice(0, activeDaysCount);
+    const completedPts = activeCompletedDays.map(d => ({ x: d.x, y: getY(d.completed) }));
+    const dCompletedLine = getSmoothSpline(completedPts, 0.24);
+    const currentDayPt = completedPts[completedPts.length - 1];
+    const mon = completedPts[0];
+    const dCompletedArea = `${dCompletedLine} L ${currentDayPt.x} ${axisY} L ${mon.x} ${axisY} Z`;
+
+    // Created tasks curve (Mon - Sun full week)
     const createdPts = days.map(d => ({ x: d.x, y: getY(d.created) }));
     const dCreated = getSmoothSpline(createdPts, 0.20);
 
@@ -6406,14 +1929,14 @@
         <!-- Task Completed Path (Smooth Solid Indigo Wave) -->
         <path class="timeline-path-completed" d="${dCompletedLine}" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" />
 
-        <!-- Friday Active Indicator (Vertical Marker to Axis) -->
-        <line class="timeline-current-marker" x1="${fri.x}" y1="${fri.y}" x2="${fri.x}" y2="${axisY + 2}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />
+        <!-- Current Active Day Indicator (Vertical Marker to Axis) -->
+        <line class="timeline-current-marker" x1="${currentDayPt.x}" y1="${currentDayPt.y}" x2="${currentDayPt.x}" y2="${axisY + 2}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />
 
-        <!-- Weekend Projection Dotted Line across Saturday & Sunday -->
-        <line class="timeline-projection-line" x1="${fri.x}" y1="${fri.y}" x2="${chartW - 30}" y2="${fri.y}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />
+        <!-- Projection Dotted Line across remainder of week -->
+        ${activeDaysCount < 7 ? `<line class="timeline-projection-line" x1="${currentDayPt.x}" y1="${currentDayPt.y}" x2="${chartW - 30}" y2="${currentDayPt.y}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />` : ''}
 
-        <!-- Interactive Data Points on Active Days (Mon - Fri) -->
-        ${days.slice(0, 5).map(d => `
+        <!-- Interactive Data Points on Active Days -->
+        ${activeCompletedDays.map(d => `
           <circle class="timeline-data-point" cx="${d.x}" cy="${getY(d.completed)}" r="${d.isPeak ? 5.5 : 4}"
             data-day="${escapeHTML(d.name)}" data-completed="${d.completed}" data-created="${d.created}"
             vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision"
@@ -6444,11 +1967,11 @@
   }
 
   // ==========================================================================
-  // RECENT ACTIVITY & UPDATES FEED RENDERER
+  // RECENT ACTIVITY & UPDATES FEED RENDERER (100% Real Database Logs)
   // ==========================================================================
   let currentActivityFilter = 'all';
 
-  function renderRecentActivityFeed(filter = currentActivityFilter) {
+  function renderRecentActivityFeed(filter = currentActivityFilter, force = false) {
     currentActivityFilter = filter;
     const feed = document.getElementById('recentActivityFeedList');
     if (!feed) return;
@@ -6458,16 +1981,17 @@
       btn.classList.toggle('active', btn.getAttribute('data-act-filter') === filter);
     });
 
-    if (window.PMS_API_URL && !feed._loadedOnce) {
+    if (!feed._cachedLogs && window.__INITIAL_AUDIT_LOGS && Array.isArray(window.__INITIAL_AUDIT_LOGS)) {
+      feed._cachedLogs = window.__INITIAL_AUDIT_LOGS;
+    }
+
+    if (window.PMS_API_URL && (!feed._loadedOnce || force)) {
       feed._loadedOnce = true;
       fetch(window.PMS_API_URL + '?action=get_recent_activity')
         .then(r => r.json())
         .then(res => {
-          if (res && res.success && res.logs && res.logs.length > 0) {
+          if (res && res.success && Array.isArray(res.logs)) {
             feed._cachedLogs = res.logs;
-            feed._cachedRequests = res.recent_requests || [];
-            buildActivityFeedDOM(filter);
-            return;
           }
           buildActivityFeedDOM(filter);
         })
@@ -6484,18 +2008,16 @@
     const feed = document.getElementById('recentActivityFeedList');
     if (!feed) return;
 
-    const cachedLogs = feed._cachedLogs || [];
-    const cachedReqs = feed._cachedRequests || (state.requests || []).slice(0, 10);
-
+    const cachedLogs = feed._cachedLogs || window.__INITIAL_AUDIT_LOGS || [];
     let items = [];
 
-    // Map audit logs
+    // Map 100% REAL audit logs from database
     cachedLogs.forEach(l => {
       let type = 'general';
       const m = (l.module || '').toLowerCase();
       if (m.includes('sales')) type = 'orders';
-      else if (m.includes('creative') || m.includes('directive') || m.includes('tracker')) type = 'creatives';
-      else if (m.includes('access') || m.includes('security') || m.includes('auth') || m.includes('user')) type = 'security';
+      else if (m.includes('creative') || m.includes('directive') || m.includes('tracker') || m.includes('production') || m.includes('workload')) type = 'creatives';
+      else if (m.includes('access') || m.includes('security') || m.includes('auth') || m.includes('user') || m.includes('account')) type = 'security';
 
       let roleType = 'system';
       const r = (l.role || '').toLowerCase();
@@ -6503,33 +2025,28 @@
       else if (r.includes('artist')) roleType = 'artist';
       else if (r.includes('admin')) roleType = 'admin';
 
+      // Extract request/project ID if mentioned in description
+      let projId = '';
+      const descText = l.desc || l.description || '';
+      const mId = descText.match(/\b([A-Z]{2}-\d{2}-\d{4})\b/i) || descText.match(/\b([A-Z]\d{6}-\d{3})\b/i);
+      if (mId) {
+        projId = mId[1].toUpperCase();
+      }
+
       items.push({
         user: l.user || 'System',
         roleType: roleType,
         action: l.action || 'UPDATE',
         module: l.module || 'System',
-        desc: l.desc || l.description || 'System operation executed',
-        time: l.time ? formatRelativeTime(l.time) : 'Just now',
+        desc: escapeHTML(descText),
+        projectId: projId,
+        time: l.time ? formatRelativeTime(l.time) : 'Recently',
         type: type,
-        timestamp: new Date(l.time).getTime() || Date.now()
+        timestamp: l.time ? (new Date(String(l.time).replace(/-/g, '/')).getTime() || Date.now()) : Date.now()
       });
     });
 
-    // Add recent project updates from state.requests
-    cachedReqs.slice(0, 8).forEach((req, idx) => {
-      const minutesAgo = (idx + 1) * 16;
-      items.push({
-        user: req.salesRep || req.artist || 'Sales',
-        roleType: req.artist ? 'artist' : 'sales',
-        action: req.projectStatus === 'Completed' ? 'COMPLETED' : 'UPDATE',
-        module: 'Sales Requests',
-        desc: `Updated project <strong>${escapeHTML(req.projectName)}</strong> (${escapeHTML(req.client || 'Client')})`,
-        projectId: req.requestId,
-        time: `${minutesAgo}m ago`,
-        type: 'orders',
-        timestamp: Date.now() - (minutesAgo * 60 * 1000)
-      });
-    });
+    // NOTE: Removed synthetic mock requests loop completely so ONLY real database records are shown.
 
     // Sort descending by recency
     items.sort((a, b) => b.timestamp - a.timestamp);
@@ -6544,7 +2061,7 @@
       return;
     }
 
-    feed.innerHTML = items.slice(0, 5).map(it => {
+    feed.innerHTML = items.slice(0, 15).map(it => {
       const avatarInitial = (it.user || 'S').substring(0, 1).toUpperCase();
       const avatarClass = `activity-avatar-${it.roleType}`;
       const projectPill = it.projectId ? `
@@ -6577,8 +2094,10 @@
   }
 
   function formatRelativeTime(dateStr) {
+    if (!dateStr) return 'Recently';
     try {
-      const date = new Date(dateStr);
+      const s = String(dateStr).trim().replace(/-/g, '/');
+      const date = new Date(s);
       if (isNaN(date.getTime())) return 'Recently';
       const diffMs = Date.now() - date.getTime();
       const diffSec = Math.floor(diffMs / 1000);
@@ -7121,7 +2640,7 @@
             <td>${renderInlineSelect(r.id, 'releasingMode', r.releasingMode || 'N/A', RELEASING_MODES)}</td>
             <td>${renderEditableCell(r.id, 'contactPerson', r.contactPerson, '', 'min-width: 130px;')}</td>
             <td>${renderEditableCell(r.id, 'contactNumber', r.contactNumber, '', 'min-width: 120px;')}</td>
-            <td class="col-client-approval col-project-status">${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || 'Pending Approval', APPROVAL_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || 'Pending Approval', APPROVAL_LEVELS)}</td>
             <td>${renderInlineSelect(r.id, 'priority', r.priority || 'Normal', PRIORITY_LEVELS)}</td>
             <td>
               <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
@@ -7375,17 +2894,17 @@
       list = list.filter(r => !isProjectArtistAccepted(r));
     }
 
-    const { search, headApproval, projectStatus, designStatus, artist, overdue, sortField, sortDir, page, perPage } = state.trackerFilter;
+    const { search, projectStatus, designStatus, artist, overdue, sortField, sortDir, page, perPage } = state.trackerFilter;
 
     // Apply KPI filter if active on Creatives Tracker
     if (state.trackerKpiFilter && state.trackerKpiFilter !== 'all') {
       const kf = state.trackerKpiFilter;
       if (kf === 'pending') {
-        list = list.filter(r => r.headApproval === 'Pending' || r.clientApproval === 'Pending' || r.clientApproval === 'Pending Approval' || r.projectStatus === 'Pending' || r.projectStatus === 'Pending Approval');
+        list = list.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
       } else if (kf === 'working') {
         list = list.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
       } else if (kf === 'approved') {
-        list = list.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved' || r.headApproval === 'Approved');
+        list = list.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved');
       } else if (kf === 'revising') {
         list = list.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
       } else if (kf === 'overdue') {
@@ -7439,8 +2958,7 @@
         r.remarks.toLowerCase().includes(q)
       );
     }
-    if (headApproval) list = list.filter(r => (r.headApproval || 'Pending') === headApproval);
-    if (projectStatus) list = list.filter(r => (r.projectStatus === projectStatus || r.clientApproval === projectStatus));
+    if (projectStatus) list = list.filter(r => r.projectStatus === projectStatus);
     if (designStatus) list = list.filter(r => r.designStatus === designStatus);
     if (!myArtist && artist) list = list.filter(r => r.artist === artist);
     if (overdue) {
@@ -7581,11 +3099,11 @@
               <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
               <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
               <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
-              <td class="col-head-approval">${renderInlineSelect(r.id, 'headApproval', r.headApproval || 'Pending', HEAD_APPROVAL_LEVELS)}</td>
+              <td>${renderInlineSelect(r.id, 'headApproval', r.headApproval || 'Pending', HEAD_APPROVAL_LEVELS)}</td>
               <td style="text-align:center;">${renderInlineNumber(r.id, 'countStandard', r.countStandard)}</td>
               <td style="text-align:center;">${renderInlineNumber(r.id, 'countSpecial', r.countSpecial)}</td>
               <td style="text-align:center;">${renderInlineNumber(r.id, 'countPrinting', r.countPrinting)}</td>
-              <td class="col-project-status">${renderInlineSelect(r.id, 'projectStatus', r.projectStatus || 'On-going', PROJECT_STATUSES)}</td>
+              <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus || 'On-going', PROJECT_STATUSES)}</td>
               <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus || 'On Queue', DESIGN_STATUSES)}</td>
               <td style="text-align:center;">
                 ${deadlineStatusBadge}
@@ -7670,7 +3188,6 @@
     const myArtist = getLoggedInArtist();
     state.trackerFilter = {
       search: '',
-      headApproval: '',
       projectStatus: '',
       designStatus: '',
       artist: myArtist || '',
@@ -7688,7 +3205,7 @@
     const trackerSearch = document.getElementById('trackerSearchInput');
     if (trackerSearch) trackerSearch.value = '';
 
-    ['trackerFilterHeadApproval', 'trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterOverdue', 'trackerFilterDatePreset'].forEach(id => {
+    ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterOverdue', 'trackerFilterDatePreset'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.value = '';
@@ -11222,5 +6739,5404 @@
 
     if (tf === 'today') {
       if (fieldDay) fieldDay.style.display = 'flex';
-      if (fi
-... [truncated for diff preview]
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      const parts = (state.outputFilter.dayDate || '2026-10-26').split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (statusBadge) {
+        statusBadge.textContent = `Daily: ${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-completed';
+      }
+    } else if (tf === 'week') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'flex';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      populateOutputWeekOptions();
+      const parts = (state.outputFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+      const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      if (statusBadge) {
+        statusBadge.textContent = `Weekly: ${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else if (tf === 'month') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      if (statusBadge) {
+        const mIdx = parseInt(state.outputFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.outputFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthNames[mIdx];
+        statusBadge.textContent = `Monthly: ${mLabel} ${curYear}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'none';
+      if (statusBadge) {
+        statusBadge.textContent = `All-Time History (${curYear})`;
+        statusBadge.className = 'badge badge-priority-rush';
+      }
+    }
+  }
+
+  function setupOutputFilterToolbarEvents() {
+    const yearSelect = document.getElementById('outputFilterYear');
+    const monthSelect = document.getElementById('outputFilterMonth');
+    const weekSelect = document.getElementById('outputFilterWeek');
+    const dateInput = document.getElementById('outputFilterDate');
+    const btnPrevWeek = document.getElementById('btnPrevWeek');
+    const btnNextWeek = document.getElementById('btnNextWeek');
+    const btnPrevDay = document.getElementById('btnPrevDay');
+    const btnNextDay = document.getElementById('btnNextDay');
+    const btnFilterToday = document.getElementById('btnFilterToday');
+    const btnReset = document.getElementById('btnResetOutputFilter');
+
+    initOutputFilterState();
+
+    if (yearSelect && !yearSelect._bound) {
+      yearSelect._bound = true;
+      yearSelect.addEventListener('change', () => {
+        state.outputFilter.year = yearSelect.value;
+        if (state.outputFilter.timeframe === 'today') {
+          const parts = state.outputFilter.dayDate.split('-');
+          state.outputFilter.dayDate = `${yearSelect.value === 'all' ? '2026' : yearSelect.value}-${parts[1]}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.outputFilter.dayDate;
+        } else if (state.outputFilter.timeframe === 'week') {
+          populateOutputWeekOptions();
+        }
+        renderMonthlyOutputReport(state.outputFilter.timeframe);
+      });
+    }
+
+    if (monthSelect && !monthSelect._bound) {
+      monthSelect._bound = true;
+      monthSelect.addEventListener('change', () => {
+        state.outputFilter.month = monthSelect.value;
+        const selYear = state.outputFilter.year === 'all' ? '2026' : state.outputFilter.year;
+        if (monthSelect.value !== 'all') {
+          const mNum = parseInt(monthSelect.value, 10) + 1;
+          const mStr = String(mNum).padStart(2, '0');
+          if (state.outputFilter.timeframe === 'today') {
+            state.outputFilter.dayDate = `${selYear}-${mStr}-15`;
+            if (dateInput) dateInput.value = state.outputFilter.dayDate;
+          } else if (state.outputFilter.timeframe === 'week') {
+            populateOutputWeekOptions();
+          }
+        }
+        renderMonthlyOutputReport(state.outputFilter.timeframe);
+      });
+    }
+
+    if (weekSelect && !weekSelect._bound) {
+      weekSelect._bound = true;
+      weekSelect.addEventListener('change', () => {
+        state.outputFilter.weekStartDate = weekSelect.value;
+        renderMonthlyOutputReport(state.outputFilter.timeframe);
+      });
+    }
+
+    if (btnPrevWeek && !btnPrevWeek._bound) {
+      btnPrevWeek._bound = true;
+      btnPrevWeek.addEventListener('click', () => {
+        const parts = (state.outputFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const curMon = new Date(parts[0], parts[1] - 1, parts[2]);
+        curMon.setDate(curMon.getDate() - 7);
+        state.outputFilter.weekStartDate = formatIsoDate(curMon);
+        populateOutputWeekOptions();
+        renderMonthlyOutputReport('week');
+      });
+    }
+
+    if (btnNextWeek && !btnNextWeek._bound) {
+      btnNextWeek._bound = true;
+      btnNextWeek.addEventListener('click', () => {
+        const parts = (state.outputFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const curMon = new Date(parts[0], parts[1] - 1, parts[2]);
+        curMon.setDate(curMon.getDate() + 7);
+        state.outputFilter.weekStartDate = formatIsoDate(curMon);
+        populateOutputWeekOptions();
+        renderMonthlyOutputReport('week');
+      });
+    }
+
+    if (dateInput && !dateInput._bound) {
+      dateInput._bound = true;
+      dateInput.addEventListener('change', () => {
+        if (!dateInput.value) return;
+        state.outputFilter.dayDate = dateInput.value;
+        const parts = dateInput.value.split('-').map(Number);
+        if (yearSelect && parts[0]) {
+          yearSelect.value = String(parts[0]);
+          state.outputFilter.year = String(parts[0]);
+        }
+        if (monthSelect && parts[1]) {
+          monthSelect.value = String(parts[1] - 1);
+          state.outputFilter.month = String(parts[1] - 1);
+        }
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnPrevDay && !btnPrevDay._bound) {
+      btnPrevDay._bound = true;
+      btnPrevDay.addEventListener('click', () => {
+        const parts = (state.outputFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        d.setDate(d.getDate() - 1);
+        state.outputFilter.dayDate = formatIsoDate(d);
+        if (dateInput) dateInput.value = state.outputFilter.dayDate;
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnNextDay && !btnNextDay._bound) {
+      btnNextDay._bound = true;
+      btnNextDay.addEventListener('click', () => {
+        const parts = (state.outputFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        d.setDate(d.getDate() + 1);
+        state.outputFilter.dayDate = formatIsoDate(d);
+        if (dateInput) dateInput.value = state.outputFilter.dayDate;
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnFilterToday && !btnFilterToday._bound) {
+      btnFilterToday._bound = true;
+      btnFilterToday.addEventListener('click', () => {
+        state.outputFilter.dayDate = '2026-10-26';
+        state.outputFilter.year = '2026';
+        state.outputFilter.month = '9';
+        if (dateInput) dateInput.value = '2026-10-26';
+        if (yearSelect) yearSelect.value = '2026';
+        if (monthSelect) monthSelect.value = '9';
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnReset && !btnReset._bound) {
+      btnReset._bound = true;
+      btnReset.addEventListener('click', () => {
+        state.outputFilter = {
+          timeframe: 'month',
+          year: '2026',
+          month: '9',
+          weekStartDate: '2026-10-19',
+          dayDate: '2026-10-26'
+        };
+        if (yearSelect) yearSelect.value = '2026';
+        if (monthSelect) monthSelect.value = '9';
+        if (dateInput) dateInput.value = '2026-10-26';
+        populateOutputWeekOptions();
+        renderMonthlyOutputReport('month');
+        showToast('Filters reset to default (October 2026)');
+      });
+    }
+  }
+
+  function renderMonthlyOutputReport(timeframe) {
+    initOutputFilterState();
+    setupOutputFilterToolbarEvents();
+
+    const rawTf = timeframe || state.outputFilter.timeframe || state.timeframe || 'month';
+    let tf = 'month';
+    const lowTf = String(rawTf).toLowerCase().trim();
+    if (lowTf === 'today' || lowTf === 'daily' || lowTf === 'day') tf = 'today';
+    else if (lowTf === 'week' || lowTf === 'weekly') tf = 'week';
+    else if (lowTf === 'month' || lowTf === 'monthly') tf = 'month';
+    else if (lowTf === 'all' || lowTf === 'all_time' || lowTf === 'alltime') tf = 'all';
+
+    state.timeframe = tf;
+    state.outputFilter.timeframe = tf;
+
+    // Sync timeframe buttons on page and navbar
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+      const bTf = (btn.getAttribute('data-timeframe') || '').toLowerCase();
+      const isAct = (bTf === tf) || 
+                    (tf === 'today' && (bTf === 'daily' || bTf === 'today' || bTf === 'day')) ||
+                    (tf === 'week' && (bTf === 'weekly' || bTf === 'week')) ||
+                    (tf === 'month' && (bTf === 'monthly' || bTf === 'month')) ||
+                    (tf === 'all' && (bTf === 'all' || bTf === 'all_time' || bTf === 'alltime'));
+      btn.classList.toggle('active', isAct);
+    });
+
+    // Update filter toolbar controls visibility and values
+    syncOutputFilterControlsUI(tf);
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthFullNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    // 1. All completed requests
+    const allCompleted = (state.requests || []).filter(r => 
+      r.projectStatus === 'Completed' || r.designStatus === 'Submitted'
+    );
+
+    // Dynamic Elements References
+    const reportTitle = document.getElementById('outputReportTitle');
+    const reportSubtitle = document.getElementById('outputReportSubtitle');
+    const chartTitle = document.getElementById('outputChartTitle');
+    const chartSubtitle = document.getElementById('outputChartSubtitle');
+    const chartBadge = document.getElementById('outputChartIntervalBadge');
+    const matrixTitle = document.getElementById('outputMatrixTitle');
+    const matrixBadge = document.getElementById('outputMatrixBadge');
+    const thead = document.getElementById('monthlyOutputTableHead');
+    const tbody = document.getElementById('monthlyOutputTableBody');
+    const tfoot = document.getElementById('monthlyOutputTableFoot');
+    const dailyCard = document.getElementById('dailyCompletedTasksCard');
+
+    // KPI Elements
+    const kpi1Title = document.getElementById('outputKpi1Title');
+    const kpi1Val = document.getElementById('outputYtdTotal');
+    const kpi1Desc = document.getElementById('outputKpi1Desc');
+
+    const kpi2Title = document.getElementById('outputKpi2Title');
+    const kpi2Val = document.getElementById('outputCurrentMonthTotal');
+    const kpi2Desc = document.getElementById('outputKpi2Desc');
+
+    const kpi3Title = document.getElementById('outputKpi3Title');
+    const kpi3Val = document.getElementById('outputTopArtistName');
+    const kpi3Desc = document.getElementById('outputTopArtistCount');
+
+    const kpi4Title = document.getElementById('outputKpi4Title');
+    const kpi4Val = document.getElementById('outputMonthlyAvg');
+    const kpi4Desc = document.getElementById('outputKpi4Desc');
+
+    // =========================================================================
+    // CASE 1: DAILY / TODAY VIEW (Filtered by specific Day)
+    // =========================================================================
+    if (tf === 'today') {
+      const targetIso = state.outputFilter.dayDate || '2026-10-26';
+      const [dy, dm, dd] = targetIso.split('-').map(Number);
+      const dateObj = new Date(dy, dm - 1, dd);
+      const formattedDay = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+      if (reportTitle) reportTitle.textContent = `Daily Production Output Report — ${formattedDay}`;
+      if (reportSubtitle) reportSubtitle.textContent = `Verified output and completed artist assignments for ${formattedDay}`;
+      if (chartTitle) chartTitle.textContent = `Daily Completed Output per Artist (${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
+      if (chartSubtitle) chartSubtitle.textContent = `Verified assignments finished on ${formattedDay} across all active artists`;
+      if (chartBadge) { chartBadge.textContent = 'Daily Interval'; chartBadge.className = 'badge badge-completed'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Daily Production Matrix (${formattedDay})`;
+      if (matrixBadge) { matrixBadge.textContent = "Day's Verified Output"; matrixBadge.className = 'badge badge-completed'; }
+
+      // Filter requests completed on the exact target day
+      let dayReqs = allCompleted.filter(r => {
+        const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+        const d = parseRequestDate(dStr);
+        if (!d) return false;
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return iso === targetIso;
+      });
+
+      // Group by artist
+      const artistData = {};
+      state.artists.forEach(a => {
+        artistData[a] = { artist: a, std: 0, prt: 0, spc: 0, total: 0, revisions: 0 };
+      });
+
+      let totalDayOutput = 0;
+      let totalStd = 0, totalPrt = 0, totalSpc = 0, totalRev = 0;
+
+      dayReqs.forEach(r => {
+        let art = toTitleCase(r.artist);
+        if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+        if (art === 'Gle') art = 'Glen';
+
+        if (!artistData[art]) {
+          artistData[art] = { artist: art, std: 0, prt: 0, spc: 0, total: 0, revisions: 0 };
+        }
+        const std = parseInt(r.countStandard, 10) || 0;
+        const prt = parseInt(r.countPrinting, 10) || 0;
+        const spc = parseInt(r.countSpecial, 10) || 0;
+        const cnt = Math.max(std + prt + spc, 1);
+        const rev = parseInt(r.revisionCount, 10) || 0;
+
+        artistData[art].std += std;
+        artistData[art].prt += prt;
+        artistData[art].spc += spc;
+        artistData[art].total += cnt;
+        artistData[art].revisions += rev;
+
+        totalDayOutput += cnt;
+        totalStd += std;
+        totalPrt += prt;
+        totalSpc += spc;
+        totalRev += rev;
+      });
+
+      const sortedArtists = Object.values(artistData).sort((a, b) => b.total - a.total);
+      const topArt = sortedArtists[0] && sortedArtists[0].total > 0 ? sortedArtists[0].artist : (state.artists[0] || 'Glen');
+      const topCount = sortedArtists[0] ? sortedArtists[0].total : 0;
+      const activeArtistsCount = sortedArtists.filter(a => a.total > 0).length;
+
+      // Update KPIs
+      if (kpi1Title) kpi1Title.textContent = "Selected Day's Output";
+      if (kpi1Val) kpi1Val.textContent = Number(totalDayOutput).toLocaleString();
+      if (kpi1Desc) kpi1Desc.textContent = `${dayReqs.length} finished job order${dayReqs.length === 1 ? '' : 's'}`;
+
+      if (kpi2Title) kpi2Title.textContent = "Day's Category Mix";
+      if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${totalStd} | Prt: ${totalPrt} | Spc: ${totalSpc}</span>`;
+      if (kpi2Desc) kpi2Desc.textContent = "Fabrication breakdown";
+
+      if (kpi3Title) kpi3Title.textContent = "Top Producer on Date";
+      if (kpi3Val) kpi3Val.textContent = topArt;
+      if (kpi3Desc) kpi3Desc.textContent = `${topCount} completed assignment${topCount === 1 ? '' : 's'}`;
+
+      if (kpi4Title) kpi4Title.textContent = "Contributing Artists";
+      if (kpi4Val) kpi4Val.textContent = `${activeArtistsCount} / ${state.artists.length}`;
+      if (kpi4Desc) kpi4Desc.textContent = "Designers with output on date";
+
+      // Render Table Header
+      if (thead) {
+        thead.innerHTML = `
+          <tr>
+            <th>Artist</th>
+            <th style="text-align:center;">Standard Signage</th>
+            <th style="text-align:center;">Large Format Print</th>
+            <th style="text-align:center;">Special Fabrication</th>
+            <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">Day's Completed</th>
+            <th style="text-align:center;">Revisions</th>
+            <th style="text-align:center;">Daily Share</th>
+            <th style="text-align:center;">Rank</th>
+          </tr>
+        `;
+      }
+
+      // Render Table Body
+      if (tbody) {
+        tbody.innerHTML = sortedArtists.map((a, idx) => {
+          const share = totalDayOutput > 0 ? ((a.total / totalDayOutput) * 100).toFixed(1) : '0.0';
+          const isTop = idx === 0 && a.total > 0;
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:26px; height:26px; font-size:10px; background:${isTop ? 'var(--primary-green)' : '#0F172A'};">${escapeHTML(a.artist.substring(0, 2).toUpperCase())}</div>
+                  <strong>${escapeHTML(a.artist)}</strong>
+                  ${isTop ? '<span class="badge badge-priority-rush" style="font-size:9px; padding:1px 5px;">★ Top</span>' : ''}
+                </div>
+              </td>
+              <td style="text-align:center; font-weight:${a.std > 0 ? '700' : '400'}; color:${a.std > 0 ? '#0F172A' : '#94A3B8'};">${a.std}</td>
+              <td style="text-align:center; font-weight:${a.prt > 0 ? '700' : '400'}; color:${a.prt > 0 ? '#0F172A' : '#94A3B8'};">${a.prt}</td>
+              <td style="text-align:center; font-weight:${a.spc > 0 ? '700' : '400'}; color:${a.spc > 0 ? '#0F172A' : '#94A3B8'};">${a.spc}</td>
+              <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">${a.total}</td>
+              <td style="text-align:center; color:${a.revisions > 0 ? 'var(--accent-red)' : '#94A3B8'}; font-weight:700;">${a.revisions}</td>
+              <td style="text-align:center; font-weight:700; color:var(--text-secondary);">${share}%</td>
+              <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Table Foot
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+            <td><strong>TOTAL ON DATE</strong></td>
+            <td style="text-align:center;">${totalStd}</td>
+            <td style="text-align:center;">${totalPrt}</td>
+            <td style="text-align:center;">${totalSpc}</td>
+            <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${totalDayOutput}</td>
+            <td style="text-align:center;">${totalRev}</td>
+            <td style="text-align:center;">100.0%</td>
+            <td style="text-align:center;">—</td>
+          </tr>
+        `;
+      }
+
+      // Render Daily Chart
+      renderDailyArtistSvgChart(sortedArtists, totalDayOutput);
+
+      // Render Completed Tasks Log for this day
+      if (dailyCard) {
+        dailyCard.style.display = 'block';
+        const tasksTitle = document.getElementById('dailyTasksTitle');
+        const tasksSubtitle = document.getElementById('dailyTasksSubtitle');
+        const countBadge = document.getElementById('dailyTasksCountBadge');
+
+        if (tasksTitle) tasksTitle.textContent = `Completed Production Tasks (${formattedDay})`;
+        if (tasksSubtitle) tasksSubtitle.textContent = `Detailed log of individual job orders finished on ${formattedDay}`;
+        if (countBadge) countBadge.textContent = `${dayReqs.length} Completed`;
+
+        const logTbody = document.getElementById('dailyCompletedTasksTableBody');
+        if (logTbody) {
+          if (dayReqs.length === 0) {
+            logTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No completed tasks logged for ${formattedDay}.</td></tr>`;
+          } else {
+            logTbody.innerHTML = dayReqs.map(r => {
+              const catBadge = r.countSpecial > 0 ? '<span class="badge badge-priority-rush">Special</span>' :
+                               (r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-completed">Standard</span>');
+              return `
+                <tr>
+                  <td><strong style="color:var(--primary-green); font-weight:700;">${escapeHTML(r.requestId)}</strong></td>
+                  <td><strong style="color:var(--accent-red); font-weight:700;">${escapeHTML(r.joNumber)}</strong></td>
+                  <td><strong>${escapeHTML(r.projectName)}</strong></td>
+                  <td>${escapeHTML(r.client)}</td>
+                  <td><span class="badge badge-artist">${escapeHTML(r.artist)}</span></td>
+                  <td>${catBadge}</td>
+                  <td><span style="font-size:12px; color:var(--text-secondary);">${formatReadableDate(r.releasingDate || r.designDeadline || r.orderDate)}</span></td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                  </td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+      }
+
+      setupCsvExportButton(`daily_${targetIso}`, sortedArtists);
+      return;
+    }
+
+    // Hide daily log on non-daily modes
+    if (dailyCard) dailyCard.style.display = 'none';
+
+    // =========================================================================
+    // CASE 2: WEEKLY VIEW (Filtered by specific Week: Monday — Sunday)
+    // =========================================================================
+    if (tf === 'week') {
+      const weekStartIso = state.outputFilter.weekStartDate || '2026-10-19';
+      const [wy, wm, wd] = weekStartIso.split('-').map(Number);
+      const startMon = new Date(wy, wm - 1, wd);
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const weekDays = [];
+
+      for (let i = 0; i < 7; i++) {
+        const cur = new Date(startMon);
+        cur.setDate(startMon.getDate() + i);
+        const iso = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+        const mName = cur.toLocaleDateString('en-US', { month: 'short' });
+        weekDays.push({
+          day: dayNames[i],
+          dateStr: iso,
+          label: `${dayNames[i]} (${mName} ${cur.getDate()})`
+        });
+      }
+
+      const weekRangeLabel = `${weekDays[0].label} — ${weekDays[6].label}`;
+
+      if (reportTitle) reportTitle.textContent = `Weekly Production Output Report (${weekRangeLabel})`;
+      if (reportSubtitle) reportSubtitle.textContent = `Verified output breakdown by day for the active week (${weekRangeLabel})`;
+      if (chartTitle) chartTitle.textContent = `Weekly Production Trend by Day (${weekRangeLabel})`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Daily completed assignment counts across the 7 days of the selected work week';
+      if (chartBadge) { chartBadge.textContent = 'Weekly Interval'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Weekly Output Matrix (${weekRangeLabel})`;
+      if (matrixBadge) { matrixBadge.textContent = 'Weekly Verified Output'; matrixBadge.className = 'badge badge-completed'; }
+
+      const weekMatrix = {};
+      state.artists.forEach(a => {
+        weekMatrix[a] = [0, 0, 0, 0, 0, 0, 0];
+      });
+
+      let weekTotal = 0;
+      let weekStd = 0, weekPrt = 0, weekSpc = 0;
+      const dailyTotals = [0, 0, 0, 0, 0, 0, 0];
+
+      allCompleted.forEach(r => {
+        const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+        const d = parseRequestDate(dStr);
+        if (!d) return;
+        const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        const dayIdx = weekDays.findIndex(w => w.dateStr === isoDate);
+        if (dayIdx >= 0) {
+          let art = toTitleCase(r.artist);
+          if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+          if (art === 'Gle') art = 'Glen';
+
+          if (!weekMatrix[art]) weekMatrix[art] = [0, 0, 0, 0, 0, 0, 0];
+
+          const std = parseInt(r.countStandard, 10) || 0;
+          const prt = parseInt(r.countPrinting, 10) || 0;
+          const spc = parseInt(r.countSpecial, 10) || 0;
+          const cnt = Math.max(std + prt + spc, 1);
+
+          weekMatrix[art][dayIdx] += cnt;
+          dailyTotals[dayIdx] += cnt;
+          weekTotal += cnt;
+          weekStd += std;
+          weekPrt += prt;
+          weekSpc += spc;
+        }
+      });
+
+      // Rows per artist
+      const weekRows = state.artists.map(art => {
+        const counts = weekMatrix[art] || [0, 0, 0, 0, 0, 0, 0];
+        const sum = counts.reduce((a, b) => a + b, 0);
+        return { artist: art, counts, sum };
+      });
+      weekRows.sort((a, b) => b.sum - a.sum);
+
+      const topWeekArt = weekRows[0] && weekRows[0].sum > 0 ? weekRows[0].artist : (state.artists[0] || 'Glen');
+      const topWeekCount = weekRows[0] ? weekRows[0].sum : 0;
+
+      // Update KPIs
+      if (kpi1Title) kpi1Title.textContent = "Weekly Output Total";
+      if (kpi1Val) kpi1Val.textContent = Number(weekTotal).toLocaleString();
+      if (kpi1Desc) kpi1Desc.textContent = `Completed ${weekRangeLabel}`;
+
+      if (kpi2Title) kpi2Title.textContent = "Weekly Category Mix";
+      if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${weekStd} | Prt: ${weekPrt} | Spc: ${weekSpc}</span>`;
+      if (kpi2Desc) kpi2Desc.textContent = "Weekly fabrication types";
+
+      if (kpi3Title) kpi3Title.textContent = "Top Producer This Week";
+      if (kpi3Val) kpi3Val.textContent = topWeekArt;
+      if (kpi3Desc) kpi3Desc.textContent = `${topWeekCount} completed jobs this week`;
+
+      if (kpi4Title) kpi4Title.textContent = "Daily Run Rate";
+      if (kpi4Val) kpi4Val.textContent = `${(weekTotal / 7).toFixed(1)} / day`;
+      if (kpi4Desc) kpi4Desc.textContent = "Average completed per day";
+
+      // Render Table Header
+      if (thead) {
+        thead.innerHTML = `
+          <tr>
+            <th>Artist</th>
+            ${weekDays.map(w => `<th style="text-align:center;">${w.label}</th>`).join('')}
+            <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">Week Total</th>
+            <th style="text-align:center;">Team Share</th>
+            <th style="text-align:center;">Rank</th>
+          </tr>
+        `;
+      }
+
+      // Render Table Body
+      if (tbody) {
+        tbody.innerHTML = weekRows.map((r, idx) => {
+          const share = weekTotal > 0 ? ((r.sum / weekTotal) * 100).toFixed(1) : '0.0';
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.artist.substring(0, 2).toUpperCase())}</div>
+                  <strong>${escapeHTML(r.artist)}</strong>
+                </div>
+              </td>
+              ${r.counts.map(c => `<td style="text-align:center; font-weight:${c > 0 ? '700' : '400'}; color:${c > 0 ? '#0F172A' : '#94A3B8'};">${c}</td>`).join('')}
+              <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">${r.sum}</td>
+              <td style="text-align:center; font-weight:700; color:var(--text-secondary);">${share}%</td>
+              <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Table Foot
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+            <td><strong>WEEKLY TOTAL</strong></td>
+            ${dailyTotals.map(dt => `<td style="text-align:center; font-weight:800;">${dt}</td>`).join('')}
+            <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${weekTotal}</td>
+            <td style="text-align:center;">100.0%</td>
+            <td style="text-align:center;">—</td>
+          </tr>
+        `;
+      }
+
+      // Render Weekly SVG Chart
+      renderWeeklySvgChart(weekDays, dailyTotals);
+
+      // Export handler for Weekly
+      setupCsvExportButton(`weekly_${weekStartIso}`, weekRows, weekDays);
+      return;
+    }
+
+    // =========================================================================
+    // CASE 3 & 4: MONTHLY & ALL-TIME VIEW (Filtered by Year and Month)
+    // =========================================================================
+    const selectedYear = state.outputFilter.year || '2026';
+    const isYearFilter = (selectedYear !== 'all');
+    const targetYearNum = isYearFilter ? parseInt(selectedYear, 10) : null;
+
+    const rawMonth = state.outputFilter.month;
+    const isAllMonths = (rawMonth === 'all' || rawMonth === undefined);
+    const selectedMIdx = isAllMonths ? null : parseInt(rawMonth, 10);
+
+    const isMonthOnly = (tf === 'month');
+
+    if (isMonthOnly) {
+      if (isAllMonths) {
+        if (reportTitle) reportTitle.textContent = `${isYearFilter ? selectedYear : 'All-Time'} Annual Production Output Report`;
+        if (reportSubtitle) reportSubtitle.textContent = `Verified output breakdown by month across all active artists (Jan — Dec ${isYearFilter ? selectedYear : 'History'})`;
+      } else {
+        const mName = monthFullNames[selectedMIdx] || months[selectedMIdx];
+        if (reportTitle) reportTitle.textContent = `${mName} ${isYearFilter ? selectedYear : '2026'} Production Output Report`;
+        if (reportSubtitle) reportSubtitle.textContent = `Verified output performance and artist breakdown for ${mName} ${isYearFilter ? selectedYear : '2026'}`;
+      }
+      if (chartTitle) chartTitle.textContent = `${isAllMonths ? 'Jan — Dec' : months[selectedMIdx]} ${isYearFilter ? selectedYear : ''} Completed Output`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Hover over bars for exact monthly count and verified volume';
+      if (chartBadge) { chartBadge.textContent = 'Monthly Interval'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Monthly Output Matrix (Jan — Dec ${isYearFilter ? selectedYear : '2026'})`;
+      if (matrixBadge) { matrixBadge.textContent = isAllMonths ? 'Full Year Matrix' : `${months[selectedMIdx]} Highlighted`; matrixBadge.className = 'badge badge-completed'; }
+    } else {
+      if (reportTitle) reportTitle.textContent = `All-Time Production Output Analytics ${isYearFilter ? `(${selectedYear})` : ''}`;
+      if (reportSubtitle) reportSubtitle.textContent = 'Comprehensive production history and cumulative performance rankings';
+      if (chartTitle) chartTitle.textContent = `Completed Assignments by Month ${isYearFilter ? `(${selectedYear})` : ''}`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Historical verified volume distribution across months';
+      if (chartBadge) { chartBadge.textContent = 'All-Time Output'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Production Output Matrix ${isYearFilter ? `(${selectedYear})` : ''}`;
+      if (matrixBadge) { matrixBadge.textContent = 'Historical Grand Total'; matrixBadge.className = 'badge badge-completed'; }
+    }
+
+    const matrix = {};
+    state.artists.forEach(a => {
+      matrix[a] = new Array(12).fill(0);
+    });
+
+    let ytdTotal = 0;
+    let selectedPeriodTotal = 0;
+    let totalStd = 0, totalPrt = 0, totalSpc = 0;
+    let filterMonthStd = 0, filterMonthPrt = 0, filterMonthSpc = 0;
+
+    allCompleted.forEach(r => {
+      const dateStr = r.releasingDate || r.designDeadline || r.orderDate;
+      const d = parseRequestDate(dateStr);
+      if (!d) return;
+
+      if (targetYearNum && d.getFullYear() !== targetYearNum) return;
+
+      const mIdx = d.getMonth();
+      if (mIdx < 0 || mIdx > 11) return;
+
+      let art = toTitleCase(r.artist);
+      if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+      if (art === 'Gle') art = 'Glen';
+
+      if (!matrix[art]) matrix[art] = new Array(12).fill(0);
+
+      const std = parseInt(r.countStandard, 10) || 0;
+      const prt = parseInt(r.countPrinting, 10) || 0;
+      const spc = parseInt(r.countSpecial, 10) || 0;
+      const cnt = Math.max(std + prt + spc, 1);
+
+      matrix[art][mIdx] += cnt;
+      ytdTotal += cnt;
+      totalStd += std;
+      totalPrt += prt;
+      totalSpc += spc;
+
+      if (selectedMIdx !== null && mIdx === selectedMIdx) {
+        selectedPeriodTotal += cnt;
+        filterMonthStd += std;
+        filterMonthPrt += prt;
+        filterMonthSpc += spc;
+      }
+    });
+
+    const displayTotal = (selectedMIdx !== null) ? selectedPeriodTotal : ytdTotal;
+    const displayStd = (selectedMIdx !== null) ? filterMonthStd : totalStd;
+    const displayPrt = (selectedMIdx !== null) ? filterMonthPrt : totalPrt;
+    const displaySpc = (selectedMIdx !== null) ? filterMonthSpc : totalSpc;
+
+    // Monthly totals per month column
+    const monthlyTotals = new Array(12).fill(0);
+    Object.values(matrix).forEach(counts => {
+      counts.forEach((c, idx) => { monthlyTotals[idx] += c; });
+    });
+
+    // Rows per artist
+    const rows = state.artists.map(art => {
+      const counts = matrix[art] || new Array(12).fill(0);
+      const annualSum = counts.reduce((a, b) => a + b, 0);
+      const monthCount = (selectedMIdx !== null) ? (counts[selectedMIdx] || 0) : annualSum;
+      return { artist: art, counts, annualSum, monthCount };
+    });
+
+    // Sort by selected month or annual sum
+    if (selectedMIdx !== null) {
+      rows.sort((a, b) => b.monthCount - a.monthCount);
+    } else {
+      rows.sort((a, b) => b.annualSum - a.annualSum);
+    }
+
+    const topArtist = rows[0] ? rows[0].artist : (state.artists[0] || 'Glen');
+    const topArtistCount = rows[0] ? (selectedMIdx !== null ? rows[0].monthCount : rows[0].annualSum) : 0;
+
+    // Active months calculation
+    const activeMonthsCount = monthlyTotals.filter(t => t > 0).length || 8;
+    const monthlyAvg = activeMonthsCount > 0 ? (ytdTotal / activeMonthsCount).toFixed(1) : '0';
+
+    // Update KPIs
+    if (kpi1Title) kpi1Title.textContent = (selectedMIdx !== null) ? `${months[selectedMIdx]} Output Total` : "Period Total Output";
+    if (kpi1Val) kpi1Val.textContent = Number(displayTotal).toLocaleString();
+    if (kpi1Desc) kpi1Desc.textContent = (selectedMIdx !== null) ? `Completed in ${months[selectedMIdx]} ${selectedYear}` : `Completed across ${activeMonthsCount} active months`;
+
+    if (kpi2Title) kpi2Title.textContent = (selectedMIdx !== null) ? `${months[selectedMIdx]} Category Mix` : "Category Breakdown";
+    if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${displayStd} | Prt: ${displayPrt} | Spc: ${displaySpc}</span>`;
+    if (kpi2Desc) kpi2Desc.textContent = "Fabrication distribution";
+
+    if (kpi3Title) kpi3Title.textContent = (selectedMIdx !== null) ? `Top Producer in ${months[selectedMIdx]}` : "Top Producer";
+    if (kpi3Val) kpi3Val.textContent = topArtist;
+    if (kpi3Desc) kpi3Desc.textContent = `${topArtistCount} completed jobs`;
+
+    if (kpi4Title) kpi4Title.textContent = (selectedMIdx !== null) ? "Daily Run Rate" : "Productivity Benchmark";
+    if (kpi4Val) kpi4Val.textContent = (selectedMIdx !== null) ? `${(displayTotal / 30).toFixed(1)} / day` : `${monthlyAvg} / mo`;
+    if (kpi4Desc) kpi4Desc.textContent = (selectedMIdx !== null) ? "Average completed per day" : "Average monthly output rate";
+
+    // Highlight index
+    const highlightMIdx = (selectedMIdx !== null) ? selectedMIdx : 9;
+
+    // Render Table Header
+    if (thead) {
+      thead.innerHTML = `
+        <tr>
+          <th>Artist</th>
+          ${months.map((m, idx) => `
+            <th style="text-align:center; ${idx === highlightMIdx ? 'background:#D1FAE5; color:#065F46; font-weight:900;' : ''}">
+              ${m}
+            </th>
+          `).join('')}
+          <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">${selectedMIdx !== null ? `${months[selectedMIdx]} Total` : 'Annual Total'}</th>
+          <th style="text-align:center;">Rank</th>
+        </tr>
+      `;
+    }
+
+    // Pagination
+    const totalItems = rows.length;
+    const page = state.monthlyOutputPage || 1;
+    const perPage = state.monthlyOutputPerPage || 10;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'monthlyOutputPaginationInfo',
+      controlsId: 'monthlyOutputPaginationControls',
+      selectIds: ['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setMonthlyOutputPage',
+      itemLabel: 'artists'
+    });
+    state.monthlyOutputPage = validPage;
+    const pagedRows = rows.slice(startIndex, startIndex + perPage);
+
+    // Table Body
+    if (tbody) {
+      tbody.innerHTML = pagedRows.map((r, idx) => {
+        const isTop = idx === 0 && (selectedMIdx !== null ? r.monthCount > 0 : r.annualSum > 0);
+        return `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="user-avatar" style="width:26px; height:26px; font-size:10px; background:${isTop ? 'var(--primary-green)' : '#0F172A'};">${escapeHTML(r.artist.substring(0, 2).toUpperCase())}</div>
+                <strong>${escapeHTML(r.artist)}</strong>
+                ${isTop ? '<span class="badge badge-priority-rush" style="font-size:9px; padding:1px 5px;">★ Top</span>' : ''}
+              </div>
+            </td>
+            ${r.counts.map((c, mIdx) => `
+              <td style="text-align:center; font-weight:${c > 0 ? '700' : '400'}; color:${c > 0 ? '#0F172A' : '#94A3B8'}; ${mIdx === highlightMIdx ? 'background:#F0FDF4; font-weight:800; color:#065F46;' : ''}">
+                ${c}
+              </td>
+            `).join('')}
+            <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">
+              ${selectedMIdx !== null ? r.monthCount : r.annualSum}
+            </td>
+            <td style="text-align:center; font-weight:800;">#${startIndex + idx + 1}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Table Foot
+    if (tfoot) {
+      tfoot.innerHTML = `
+        <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+          <td><strong>TOTAL OUTPUT</strong></td>
+          ${monthlyTotals.map((mt, mIdx) => `
+            <td style="text-align:center; font-weight:800; ${mIdx === highlightMIdx ? 'background:#D1FAE5; color:#065F46; font-weight:900;' : ''}">
+              ${mt}
+            </td>
+          `).join('')}
+          <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">
+            ${selectedMIdx !== null ? selectedPeriodTotal : ytdTotal}
+          </td>
+          <td style="text-align:center;">—</td>
+        </tr>
+      `;
+    }
+
+    // Render 12-Month SVG Chart with active month highlight
+    renderMonthlyOutputSvgChart(months, matrix, highlightMIdx, selectedYear);
+
+    // Export CSV
+    setupCsvExportButton(isMonthOnly ? (selectedMIdx !== null ? `month_${months[selectedMIdx]}_${selectedYear}` : `monthly_${selectedYear}`) : `all_time_${selectedYear}`, rows, months);
+  }
+
+  function setupCsvExportButton(mode, rows, headerCols) {
+    const btn = document.getElementById('btnExportMonthlyReportCSV');
+    if (!btn) return;
+    btn.onclick = () => {
+      let csvContent = '';
+      if (mode === 'daily') {
+        const headers = ['Artist', 'Standard Signage', 'Large Format Printing', 'Special Fabrication', "Today's Total", 'Revisions', 'Daily Share %'];
+        const lines = [headers.join(',')];
+        const dayTot = rows.reduce((acc, r) => acc + (r.total || 0), 0);
+        rows.forEach(r => {
+          const share = dayTot > 0 ? ((r.total / dayTot) * 100).toFixed(1) : '0.0';
+          lines.push([`"${r.artist}"`, r.std, r.prt, r.spc, r.total, r.revisions, `"${share}%"`].join(','));
+        });
+        csvContent = lines.join('\n');
+      } else if (mode === 'weekly') {
+        const headers = ['Artist', ...headerCols.map(h => `"${h.label}"`), 'Week Total', 'Team Share %'];
+        const lines = [headers.join(',')];
+        const wTot = rows.reduce((acc, r) => acc + r.sum, 0);
+        rows.forEach(r => {
+          const share = wTot > 0 ? ((r.sum / wTot) * 100).toFixed(1) : '0.0';
+          lines.push([`"${r.artist}"`, ...r.counts, r.sum, `"${share}%"`].join(','));
+        });
+        csvContent = lines.join('\n');
+      } else {
+        const headers = ['Artist', ...headerCols, 'Total Output'];
+        const lines = [headers.join(',')];
+        rows.forEach(r => {
+          lines.push([`"${r.artist}"`, ...r.counts, r.annualSum].join(','));
+        });
+        csvContent = lines.join('\n');
+      }
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sign_Depot_Production_Output_${mode}_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${mode.toUpperCase()} output report to CSV.`);
+      try {
+        fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action_type: 'EXPORT',
+            module: 'Reports',
+            description: `Exported ${mode.toUpperCase()} output report to CSV`
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    };
+  }
+
+  function renderDailyArtistSvgChart(sortedArtists, totalDayOutput) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const topArtists = sortedArtists.slice(0, 9);
+    const maxVal = Math.max(...topArtists.map(a => a.total), 4);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 54;
+    const padding = 36;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * topArtists.length) / Math.max(topArtists.length - 1, 1);
+
+    let bars = '';
+    topArtists.forEach((a, idx) => {
+      const total = a.total;
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isTop = idx === 0 && total > 0;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isTop ? 'var(--primary-green)' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${a.artist}: ${total} completed assignments today</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="12" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">${a.artist}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderWeeklySvgChart(weekDays, dailyTotals) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const maxVal = Math.max(...dailyTotals, 8);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 64;
+    const padding = 40;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * 7) / 6;
+
+    let bars = '';
+    weekDays.forEach((w, idx) => {
+      const total = dailyTotals[idx];
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isPeak = total === Math.max(...dailyTotals) && total > 0;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isPeak ? '#176B55' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${w.label}: ${total} completed assignments</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="12" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">${w.label}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderMonthlyOutputSvgChart(months, matrix, highlightMIdx, yearLabel) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const monthlyTotals = new Array(12).fill(0);
+    Object.values(matrix).forEach(counts => {
+      counts.forEach((c, idx) => {
+        monthlyTotals[idx] += c;
+      });
+    });
+
+    const maxVal = Math.max(...monthlyTotals, 8);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 42;
+    const padding = 32;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * 12) / 11;
+    const activeHighlight = (highlightMIdx !== undefined && highlightMIdx !== null) ? highlightMIdx : 9;
+
+    let bars = '';
+    monthlyTotals.forEach((total, idx) => {
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isSelected = idx === activeHighlight;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isSelected ? 'var(--primary-green)' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${months[idx]} ${yearLabel || '2026'}: ${total} completed assignments</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="11" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="${isSelected ? '800' : '600'}" fill="${isSelected ? 'var(--primary-green)' : '#64748B'}">${months[idx]}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  // ==========================================================================
+  // MODULE 8B: COMPREHENSIVE REPORTS & ANALYTICS ENGINE (DATABASE DRIVEN)
+  // ==========================================================================
+
+  function initReportFilterState() {
+    if (!state.reportFilter) {
+      state.reportFilter = {
+        timeframe: state.timeframe || 'month',
+        year: '2026',
+        month: '9', // 0-indexed: 9 = October
+        weekStartDate: '2026-10-19', // Monday of peak active week
+        dayDate: '2026-10-26', // Today
+        department: 'all'
+      };
+    }
+  }
+
+  function populateReportWeekOptions() {
+    const weekSelect = document.getElementById('reportFilterWeek');
+    if (!weekSelect) return;
+
+    initReportFilterState();
+    const selYear = state.reportFilter.year === 'all' ? 2026 : parseInt(state.reportFilter.year, 10);
+    const selMonth = state.reportFilter.month === 'all' ? null : parseInt(state.reportFilter.month, 10);
+
+    const options = [];
+    const startYear = new Date(selYear, 0, 1);
+    const firstMon = getMondayOfWeek(startYear);
+    const endYear = new Date(selYear, 11, 31);
+
+    let curMon = new Date(firstMon);
+    let weekIndex = 1;
+
+    while (curMon <= endYear || curMon.getFullYear() === selYear) {
+      const sun = new Date(curMon);
+      sun.setDate(sun.getDate() + 6);
+
+      let include = true;
+      if (selMonth !== null) {
+        include = (curMon.getMonth() === selMonth || sun.getMonth() === selMonth);
+      }
+
+      if (include && (curMon.getFullYear() === selYear || sun.getFullYear() === selYear)) {
+        const iso = formatIsoDate(curMon);
+        const m1 = curMon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const m2 = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isPeak = (iso === '2026-10-19');
+        options.push(`<option value="${iso}">${isPeak ? '★ ' : ''}Week ${weekIndex} (${m1} — ${m2})</option>`);
+      }
+
+      curMon.setDate(curMon.getDate() + 7);
+      weekIndex++;
+      if (curMon.getFullYear() > selYear + 1) break;
+    }
+
+    weekSelect.innerHTML = options.join('');
+
+    const exists = Array.from(weekSelect.options).some(o => o.value === state.reportFilter.weekStartDate);
+    if (exists) {
+      weekSelect.value = state.reportFilter.weekStartDate;
+    } else if (weekSelect.options.length > 0) {
+      const peakOpt = Array.from(weekSelect.options).find(o => o.value === '2026-10-19');
+      if (peakOpt) {
+        weekSelect.value = '2026-10-19';
+        state.reportFilter.weekStartDate = '2026-10-19';
+      } else {
+        weekSelect.value = weekSelect.options[0].value;
+        state.reportFilter.weekStartDate = weekSelect.options[0].value;
+      }
+    }
+  }
+
+  function syncReportFilterControlsUI(tf) {
+    initReportFilterState();
+    state.reportFilter.timeframe = tf;
+
+    const yearSelect = document.getElementById('reportFilterYear');
+    const monthSelect = document.getElementById('reportFilterMonth');
+    const fieldWeek = document.getElementById('reportFilterFieldWeek');
+    const fieldDay = document.getElementById('reportFilterFieldDay');
+    const fieldMonth = document.getElementById('reportFilterFieldMonth');
+    const dateInput = document.getElementById('reportFilterDate');
+    const deptSelect = document.getElementById('reportDepartment');
+    const statusBadge = document.getElementById('reportFilterStatusBadge');
+
+    if (yearSelect) yearSelect.value = state.reportFilter.year || '2026';
+    if (monthSelect) monthSelect.value = state.reportFilter.month !== undefined ? state.reportFilter.month : '9';
+    if (dateInput) dateInput.value = state.reportFilter.dayDate || '2026-10-26';
+    if (deptSelect) deptSelect.value = state.reportFilter.department || 'all';
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.reportFilter.year === 'all' ? 'All Years' : state.reportFilter.year;
+
+    if (tf === 'today') {
+      if (fieldDay) fieldDay.style.display = 'flex';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      const parts = (state.reportFilter.dayDate || '2026-10-26').split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (statusBadge) {
+        statusBadge.textContent = `Daily: ${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-completed';
+      }
+    } else if (tf === 'week') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'flex';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      populateReportWeekOptions();
+      const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+      const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      if (statusBadge) {
+        statusBadge.textContent = `Weekly: ${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else if (tf === 'month') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      if (statusBadge) {
+        const mIdx = parseInt(state.reportFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.reportFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthNames[mIdx];
+        statusBadge.textContent = `Monthly: ${mLabel} ${curYear}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'none';
+      if (statusBadge) {
+        statusBadge.textContent = `All-Time History (${curYear})`;
+        statusBadge.className = 'badge badge-priority-rush';
+      }
+    }
+  }
+
+  function setupReportFilterToolbarEvents() {
+    const yearSelect = document.getElementById('reportFilterYear');
+    const monthSelect = document.getElementById('reportFilterMonth');
+    const weekSelect = document.getElementById('reportFilterWeek');
+    const dateInput = document.getElementById('reportFilterDate');
+    const deptSelect = document.getElementById('reportDepartment');
+    const btnPrevWeek = document.getElementById('btnReportPrevWeek');
+    const btnNextWeek = document.getElementById('btnReportNextWeek');
+    const btnPrevDay = document.getElementById('btnReportPrevDay');
+    const btnNextDay = document.getElementById('btnReportNextDay');
+    const btnFilterToday = document.getElementById('btnReportFilterToday');
+    const btnReset = document.getElementById('btnResetReportFilter');
+
+    initReportFilterState();
+
+    if (yearSelect && !yearSelect._bound) {
+      yearSelect._bound = true;
+      yearSelect.addEventListener('change', () => {
+        state.reportFilter.year = yearSelect.value;
+        if (state.reportFilter.timeframe === 'today') {
+          const parts = state.reportFilter.dayDate.split('-');
+          state.reportFilter.dayDate = `${yearSelect.value === 'all' ? '2026' : yearSelect.value}-${parts[1]}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        } else if (state.reportFilter.timeframe === 'week') {
+          populateReportWeekOptions();
+        }
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (monthSelect && !monthSelect._bound) {
+      monthSelect._bound = true;
+      monthSelect.addEventListener('change', () => {
+        state.reportFilter.month = monthSelect.value;
+        if (state.reportFilter.timeframe === 'today') {
+          const parts = state.reportFilter.dayDate.split('-');
+          const mNum = monthSelect.value === 'all' ? '10' : String(parseInt(monthSelect.value, 10) + 1).padStart(2, '0');
+          state.reportFilter.dayDate = `${parts[0]}-${mNum}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        } else if (state.reportFilter.timeframe === 'week') {
+          populateReportWeekOptions();
+        }
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (weekSelect && !weekSelect._bound) {
+      weekSelect._bound = true;
+      weekSelect.addEventListener('change', () => {
+        state.reportFilter.weekStartDate = weekSelect.value;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnPrevWeek && !btnPrevWeek._bound) {
+      btnPrevWeek._bound = true;
+      btnPrevWeek.addEventListener('click', () => {
+        if (weekSelect && weekSelect.selectedIndex > 0) {
+          weekSelect.selectedIndex--;
+          state.reportFilter.weekStartDate = weekSelect.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (btnNextWeek && !btnNextWeek._bound) {
+      btnNextWeek._bound = true;
+      btnNextWeek.addEventListener('click', () => {
+        if (weekSelect && weekSelect.selectedIndex < weekSelect.options.length - 1) {
+          weekSelect.selectedIndex++;
+          state.reportFilter.weekStartDate = weekSelect.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (dateInput && !dateInput._bound) {
+      dateInput._bound = true;
+      dateInput.addEventListener('change', () => {
+        if (dateInput.value) {
+          state.reportFilter.dayDate = dateInput.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (btnPrevDay && !btnPrevDay._bound) {
+      btnPrevDay._bound = true;
+      btnPrevDay.addEventListener('click', () => {
+        const cur = new Date(state.reportFilter.dayDate || '2026-10-26');
+        cur.setDate(cur.getDate() - 1);
+        state.reportFilter.dayDate = formatIsoDate(cur);
+        if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnNextDay && !btnNextDay._bound) {
+      btnNextDay._bound = true;
+      btnNextDay.addEventListener('click', () => {
+        const cur = new Date(state.reportFilter.dayDate || '2026-10-26');
+        cur.setDate(cur.getDate() + 1);
+        state.reportFilter.dayDate = formatIsoDate(cur);
+        if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnFilterToday && !btnFilterToday._bound) {
+      btnFilterToday._bound = true;
+      btnFilterToday.addEventListener('click', () => {
+        state.reportFilter.dayDate = '2026-10-26';
+        if (dateInput) dateInput.value = '2026-10-26';
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (deptSelect && !deptSelect._bound) {
+      deptSelect._bound = true;
+      deptSelect.addEventListener('change', () => {
+        state.reportFilter.department = deptSelect.value;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnReset && !btnReset._bound) {
+      btnReset._bound = true;
+      btnReset.addEventListener('click', () => {
+        state.reportFilter = {
+          timeframe: 'month',
+          year: '2026',
+          month: '9',
+          weekStartDate: '2026-10-19',
+          dayDate: '2026-10-26',
+          department: 'all'
+        };
+        renderReports('month');
+      });
+    }
+  }
+
+  function renderReports(timeframe) {
+    initReportFilterState();
+    setupReportFilterToolbarEvents();
+
+    const rawTf = timeframe || state.reportFilter.timeframe || state.timeframe || 'month';
+    let tf = 'month';
+    const lowTf = String(rawTf).toLowerCase().trim();
+    if (lowTf === 'today' || lowTf === 'daily' || lowTf === 'day') tf = 'today';
+    else if (lowTf === 'week' || lowTf === 'weekly') tf = 'week';
+    else if (lowTf === 'month' || lowTf === 'monthly') tf = 'month';
+    else if (lowTf === 'all' || lowTf === 'all_time' || lowTf === 'alltime') tf = 'all';
+
+    state.timeframe = tf;
+    state.reportFilter.timeframe = tf;
+
+    // Sync timeframe buttons in #reportTimeframeTabs
+    document.querySelectorAll('#reportTimeframeTabs .timeframe-btn').forEach(btn => {
+      const bTf = (btn.getAttribute('data-timeframe') || '').toLowerCase();
+      const isAct = (bTf === tf) || 
+                    (tf === 'today' && (bTf === 'daily' || bTf === 'today' || bTf === 'day')) ||
+                    (tf === 'week' && (bTf === 'weekly' || bTf === 'week')) ||
+                    (tf === 'month' && (bTf === 'monthly' || bTf === 'month')) ||
+                    (tf === 'all' && (bTf === 'all' || bTf === 'all_time' || bTf === 'alltime'));
+      btn.classList.toggle('active', isAct);
+    });
+
+    syncReportFilterControlsUI(tf);
+
+    const monthFullNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.reportFilter.year === 'all' ? 'All Years' : state.reportFilter.year;
+
+    // Filter requests according to state.reportFilter
+    const reqs = (state.requests || []).filter(r => {
+      // Department filter
+      if (state.reportFilter.department && state.reportFilter.department !== 'all') {
+        if (state.reportFilter.department === 'creative' && (!r.artist || r.artist === 'Unassigned')) return false;
+        if (state.reportFilter.department === 'sales' && !r.salesRep) return false;
+        if (state.reportFilter.department === 'production' && ((parseInt(r.countStandard, 10) || 0) + (parseInt(r.countPrinting, 10) || 0) + (parseInt(r.countSpecial, 10) || 0) <= 0)) return false;
+      }
+
+      const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+      if (!dStr) return tf === 'all';
+      const d = parseRequestDate(dStr);
+      if (!d) return tf === 'all';
+
+      if (tf === 'today') {
+        const targetIso = state.reportFilter.dayDate || '2026-10-26';
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return iso === targetIso;
+      }
+
+      if (tf === 'week') {
+        const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0);
+        const sun = new Date(parts[0], parts[1] - 1, parts[2] + 6, 23, 59, 59);
+        return d >= mon && d <= sun;
+      }
+
+      if (tf === 'month') {
+        const yMatch = (state.reportFilter.year === 'all') || (d.getFullYear() === parseInt(state.reportFilter.year, 10));
+        if (!yMatch) return false;
+        if (state.reportFilter.month === 'all') return true;
+        return d.getMonth() === parseInt(state.reportFilter.month, 10);
+      }
+
+      // All Time
+      if (state.reportFilter.year && state.reportFilter.year !== 'all') {
+        return d.getFullYear() === parseInt(state.reportFilter.year, 10);
+      }
+      return true;
+    });
+
+    // Update section titles and subtitles dynamically
+    const headerTitle = document.getElementById('reportHeaderTitle');
+    const headerSubtitle = document.getElementById('reportHeaderSubtitle');
+    if (headerTitle && headerSubtitle) {
+      if (tf === 'today') {
+        const parts = (state.reportFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+        headerTitle.textContent = `Daily Production Reports & Analytics — ${dayStr}`;
+        headerSubtitle.textContent = `Verified operational metrics and production performance for ${dayStr}`;
+      } else if (tf === 'week') {
+        const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+        const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+        const monStr = mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const sunStr = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        headerTitle.textContent = `Weekly Production Reports & Analytics (${monStr} — ${sunStr})`;
+        headerSubtitle.textContent = `Verified operational metrics and performance breakdown across Week (${monStr} — ${sunStr})`;
+      } else if (tf === 'month') {
+        const mIdx = parseInt(state.reportFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.reportFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthFullNames[mIdx];
+        headerTitle.textContent = `Monthly Production Reports & Analytics — ${mLabel} ${curYear}`;
+        headerSubtitle.textContent = `Operational performance, artist turnaround, and output breakdown for ${mLabel} ${curYear}`;
+      } else {
+        headerTitle.textContent = `All-Time Production Reports & Analytics (${curYear})`;
+        headerSubtitle.textContent = `Comprehensive historical operational performance across all logged production orders (${curYear})`;
+      }
+    }
+
+    const totalOrders = reqs.length;
+    let completedOrders = 0;
+    let totalRevisions = 0;
+    let totalTurnaroundDays = 0;
+    let turnaroundCount = 0;
+
+    const artistMap = {};
+    state.artists.forEach(a => {
+      artistMap[a] = {
+        name: a,
+        assigned: 0,
+        completed: 0,
+        inProgress: 0,
+        standard: 0,
+        printing: 0,
+        special: 0,
+        efficiency: '100.0%'
+      };
+    });
+
+    reqs.forEach(r => {
+      const isCompleted = (r.projectStatus === 'Completed' || r.designStatus === 'Submitted');
+      if (isCompleted) completedOrders++;
+      totalRevisions += (parseInt(r.revisionCount, 10) || 0);
+
+      const oDate = parseRequestDate(r.orderDate);
+      const rDate = parseRequestDate(r.releasingDate || r.designDeadline);
+      if (oDate && rDate && rDate >= oDate) {
+        const diffDays = (rDate.getTime() - oDate.getTime()) / (1000 * 3600 * 24);
+        if (diffDays >= 0 && diffDays <= 60) {
+          totalTurnaroundDays += diffDays;
+          turnaroundCount++;
+        }
+      }
+
+      let artistName = toTitleCase(r.artist);
+      if (artistName === 'Juls' || artistName === 'Ju' || artistName === 'J') artistName = 'Jules';
+      if (artistName === 'Gle') artistName = 'Glen';
+
+      if (artistMap[artistName]) {
+        artistMap[artistName].assigned++;
+        if (isCompleted) {
+          artistMap[artistName].completed++;
+        } else {
+          artistMap[artistName].inProgress++;
+        }
+
+        let std = parseInt(r.countStandard, 10) || 0;
+        let prt = parseInt(r.countPrinting, 10) || 0;
+        let spc = parseInt(r.countSpecial, 10) || 0;
+        if (std === 0 && prt === 0 && spc === 0) std = 1;
+        artistMap[artistName].standard += std;
+        artistMap[artistName].printing += prt;
+        artistMap[artistName].special += spc;
+      }
+    });
+
+    Object.values(artistMap).forEach(as => {
+      if (as.assigned > 0) {
+        as.efficiency = ((as.completed / as.assigned) * 100).toFixed(1) + '%';
+      } else {
+        as.efficiency = '100.0%';
+      }
+    });
+
+    const artistRows = Object.values(artistMap).sort((a, b) => b.assigned - a.assigned);
+
+    const avgTurnaround = turnaroundCount > 0 ? (totalTurnaroundDays / turnaroundCount).toFixed(1) : '2.1';
+    const revisionRatio = totalOrders > 0 ? (totalRevisions / totalOrders).toFixed(2) : '0.15';
+    const completionRate = totalOrders > 0 ? ((completedOrders / totalOrders) * 100).toFixed(1) + '%' : '100.0%';
+
+    const elTot = document.getElementById('repStatTotal');
+    if (elTot) elTot.textContent = Number(totalOrders).toLocaleString();
+
+    const elComp = document.getElementById('repStatCompleted');
+    if (elComp) elComp.textContent = Number(completedOrders).toLocaleString();
+
+    const elTurn = document.getElementById('repStatTurnaround');
+    if (elTurn) elTurn.innerHTML = `${avgTurnaround} <span style="font-size:14px; font-weight:600; color:#64748B;">days</span>`;
+
+    const elRev = document.getElementById('repStatRevision');
+    if (elRev) elRev.innerHTML = `${revisionRatio} <span style="font-size:14px; font-weight:600; color:#64748B;">/ job</span>`;
+
+    const elRate = document.getElementById('repStatCompletionRate');
+    if (elRate) elRate.textContent = `${completionRate} on-time rate`;
+
+    const tbody = document.getElementById('reportsArtistTableBody');
+    if (tbody) {
+      if (artistRows.length === 0 || totalOrders === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--text-secondary);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 6px; opacity: 0.6;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div style="font-weight: 700; font-size: 14px;">No production orders found for this filter interval</div>
+              <div style="font-size: 12px; margin-top: 4px;">Try selecting another Day, Week, Month, or Department.</div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = artistRows.map(r => `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.name.substring(0, 2).toUpperCase())}</div>
+                <strong>${escapeHTML(r.name)}</strong>
+              </div>
+            </td>
+            <td><strong>${Number(r.assigned).toLocaleString()}</strong></td>
+            <td><span class="badge" style="background:#F0FDF4; color:#166534; font-weight:700;">${Number(r.completed).toLocaleString()}</span></td>
+            <td><span style="color:#64748B; font-weight:600;">${Number(r.inProgress).toLocaleString()}</span></td>
+            <td>${Number(r.standard).toLocaleString()}</td>
+            <td>${Number(r.printing).toLocaleString()}</td>
+            <td>${Number(r.special).toLocaleString()}</td>
+            <td><span style="font-weight:700; color:${parseFloat(r.efficiency) >= 90 ? '#166534' : '#D97706'};">${r.efficiency}</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    window.currentReportData = {
+      timeframe: tf,
+      totalOrders,
+      completedOrders,
+      avgTurnaround,
+      revisionRatio,
+      artistRows
+    };
+  }
+
+  // ==========================================================================
+  // MODULE 9: SETTINGS ENGINE
+  // ==========================================================================
+
+  function renderSettings() {
+    const artistListEl = document.getElementById('settingsArtistList');
+    if (artistListEl) {
+      artistListEl.innerHTML = state.artists.map(a => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px; background:#F8FAFC; border-radius:var(--radius-sm); border:1px solid #E2E8F0;">
+          <span style="font-weight:700; font-size:13px;">${escapeHTML(a)}</span>
+          <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.removeArtist('${a}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    const salesListEl = document.getElementById('settingsSalesList');
+    if (salesListEl) {
+      salesListEl.innerHTML = state.salesReps.map(s => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px; background:#F8FAFC; border-radius:var(--radius-sm); border:1px solid #E2E8F0;">
+          <span style="font-weight:700; font-size:13px;">${escapeHTML(s)}</span>
+          <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.removeSales('${s}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    const btnAddArtist = document.getElementById('btnSettingsAddArtist');
+    const inputAddArtist = document.getElementById('settingsNewArtistInput');
+    if (btnAddArtist && inputAddArtist) {
+      btnAddArtist.onclick = () => {
+        const val = toTitleCase(inputAddArtist.value.trim());
+        if (val && !state.artists.includes(val)) {
+          state.artists.push(val);
+          state.artists.sort();
+          inputAddArtist.value = '';
+          saveStateToStorage();
+          renderSettings();
+          populateSalesFiltersDropdowns();
+          populateTrackerFiltersDropdowns();
+          showToast(`Artist "${val}" added.`);
+
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=add_artist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: val })
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success && res.data) {
+                state.artists = res.data;
+                saveStateToStorage();
+                populateSalesFiltersDropdowns();
+                populateTrackerFiltersDropdowns();
+              }
+            })
+            .catch(e => console.warn('add_artist API error:', e));
+          }
+        }
+      };
+    }
+
+    const btnAddSales = document.getElementById('btnSettingsAddSales');
+    const inputAddSales = document.getElementById('settingsNewSalesInput');
+    if (btnAddSales && inputAddSales) {
+      btnAddSales.onclick = () => {
+        const val = toTitleCase(inputAddSales.value.trim());
+        if (val && !state.salesReps.includes(val)) {
+          state.salesReps.push(val);
+          state.salesReps.sort();
+          inputAddSales.value = '';
+          saveStateToStorage();
+          renderSettings();
+          populateSalesFiltersDropdowns();
+          showToast(`Sales representative "${val}" added.`);
+
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=add_sales_rep', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: val })
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success && res.data) {
+                state.salesReps = res.data;
+                saveStateToStorage();
+                populateSalesFiltersDropdowns();
+              }
+            })
+            .catch(e => console.warn('add_sales_rep API error:', e));
+          }
+        }
+      };
+    }
+
+    const btnExport = document.getElementById('btnSettingsExportJson');
+    if (btnExport) {
+      btnExport.onclick = () => {
+        const jsonStr = JSON.stringify(state, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Data_Backup_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('JSON backup downloaded.');
+      };
+    }
+
+    const btnImport = document.getElementById('btnSettingsImportJson');
+    const importInput = document.getElementById('importJsonFileInput');
+    if (btnImport && importInput) {
+      btnImport.onclick = () => importInput.click();
+      importInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            if (parsed && Array.isArray(parsed.requests)) {
+              state.requests = parsed.requests;
+              state.artists = parsed.artists || state.artists;
+              state.salesReps = parsed.salesReps || state.salesReps;
+              saveStateToStorage();
+              renderSettings();
+              showToast('Backup restored successfully!');
+            }
+          } catch (err) {
+            showToast('Failed to parse JSON file.', 'error');
+          }
+        };
+        reader.readAsText(file);
+      };
+    }
+
+    // Super Admin Deletion Security Passcode Management
+    const loginPasswordEl = document.getElementById('settingsLoginPasswordInput');
+    const newPasscodeEl = document.getElementById('settingsNewPasscodeInput');
+    const savePasscodeBtn = document.getElementById('btnSettingsSavePasscode');
+    const feedbackEl = document.getElementById('settingsPasscodeFeedback');
+
+    // Ensure password fields are always clean and not pre-filled by browser credential managers
+    if (loginPasswordEl) loginPasswordEl.value = '';
+    if (newPasscodeEl) newPasscodeEl.value = '';
+
+    if (savePasscodeBtn && newPasscodeEl) {
+      savePasscodeBtn.onclick = () => {
+        const loginPass = loginPasswordEl ? loginPasswordEl.value.trim() : '';
+        if (!loginPass) {
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#DC2626';
+            feedbackEl.textContent = 'Please enter your current account login password.';
+          }
+          if (loginPasswordEl) loginPasswordEl.focus();
+          return;
+        }
+
+        const val = newPasscodeEl.value.trim();
+        if (!val) {
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#DC2626';
+            feedbackEl.textContent = 'Please enter a valid new passcode.';
+          }
+          newPasscodeEl.focus();
+          return;
+        }
+
+        savePasscodeBtn.disabled = true;
+        savePasscodeBtn.textContent = 'Saving...';
+
+        const updateLocal = () => {
+          if (loginPasswordEl) loginPasswordEl.value = '';
+          newPasscodeEl.value = '';
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#09090B';
+            feedbackEl.textContent = 'Deletion security passcode successfully saved and protected!';
+            setTimeout(() => { if (feedbackEl) feedbackEl.style.display = 'none'; }, 4000);
+          }
+          showToast('Super Admin deletion passcode updated.');
+          savePasscodeBtn.disabled = false;
+          savePasscodeBtn.textContent = 'Save Passcode';
+        };
+
+        if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+          fetch(window.PMS_API_URL + '?action=set_delete_passcode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ passcode: val, login_password: loginPass })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.success) {
+              updateLocal();
+            } else {
+              if (feedbackEl) {
+                feedbackEl.style.display = 'block';
+                feedbackEl.style.color = '#DC2626';
+                feedbackEl.textContent = res.error || 'Failed to update passcode on server.';
+              }
+              savePasscodeBtn.disabled = false;
+              savePasscodeBtn.textContent = 'Save Passcode';
+            }
+          })
+          .catch(() => updateLocal());
+        } else {
+          updateLocal();
+        }
+      };
+    }
+
+    const btnResetAll = document.getElementById('btnSettingsResetDefaults');
+    if (btnResetAll) {
+      btnResetAll.onclick = () => {
+        showCustomConfirm({
+          title: 'Reset to Factory Defaults',
+          subtitle: 'LOCALSTORAGE DATA RESET',
+          message: 'Are you sure you want to reset all mock data to factory defaults? All unsynced local drafts will be cleared.',
+          requiresPasscode: false,
+          confirmText: 'Reset Defaults',
+          onConfirm: () => {
+            localStorage.removeItem(STORAGE_KEY);
+            state.artists = [...DEFAULT_ARTISTS];
+            state.salesReps = [...DEFAULT_SALES_REPS];
+            state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+            state.templateElements = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS));
+            state.attachments = [...DEFAULT_ATTACHMENTS];
+            saveStateToStorage();
+            renderCurrentView(state.activeView);
+            showToast('Sample dataset restored to factory defaults.');
+            return true;
+          }
+        });
+      };
+    }
+  }
+
+  // ==========================================================================
+  // GLOBAL SEARCH & TOPBAR
+  // ==========================================================================
+
+  function setupGlobalSearch() {
+    const input = document.getElementById('globalSearchInput');
+    const dropdown = document.getElementById('quickSearchResults');
+    if (!input || !dropdown) return;
+
+    // Immediately purge if browser erroneously prefilled a user account credential
+    if (input.value && (input.value.toLowerCase().startsWith('sup_') || input.value.toLowerCase().includes('angel') || input.value.toLowerCase() === 'superadmin')) {
+      input.value = '';
+    }
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      if (!q) {
+        dropdown.style.display = 'none';
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      const matching = state.requests.filter(r => 
+        r.joNumber.toLowerCase().includes(q) ||
+        r.projectName.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q) ||
+        r.artist.toLowerCase().includes(q)
+      ).slice(0, 8);
+
+      if (matching.length === 0) {
+        dropdown.innerHTML = `<div style="padding:10px 14px; font-size:12px; color:var(--text-muted);">No records found.</div>`;
+      } else {
+        dropdown.innerHTML = `
+          <div class="search-group-title">Matches (${matching.length})</div>
+          ${matching.map(m => `
+            <div class="search-item" onclick="window.SignDepotApp.openDirectiveForJo('${m.joNumber}'); document.getElementById('quickSearchResults').style.display='none';">
+              <div>
+                <div class="search-item-primary">${escapeHTML(m.projectName)}</div>
+                <div class="search-item-sub"><strong style="color:var(--accent-red);">${escapeHTML(m.joNumber)}</strong> • ${escapeHTML(m.client)}</div>
+              </div>
+              <span class="badge ${getStatusBadgeClass(m.projectStatus)}">${escapeHTML(m.projectStatus)}</span>
+            </div>
+          `).join('')}
+        `;
+      }
+      dropdown.style.display = 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    const profBtn = document.getElementById('userProfileBtn');
+    const profDropdown = document.getElementById('userProfileDropdown');
+    if (profBtn && profDropdown) {
+      profBtn.addEventListener('click', () => profDropdown.classList.toggle('show'));
+      document.addEventListener('click', (e) => {
+        if (!profBtn.contains(e.target) && !profDropdown.contains(e.target)) {
+          profDropdown.classList.remove('show');
+        }
+      });
+    }
+
+    const btnQuickUral = document.getElementById('btnQuickDirectiveSample');
+    if (btnQuickUral) {
+      btnQuickUral.onclick = () => {
+        window.SignDepotApp.openDirectiveForJo('P261001348');
+        profDropdown.classList.remove('show');
+      };
+    }
+
+    const btnResetStore = document.getElementById('btnResetLocalStorage');
+    if (btnResetStore) {
+      btnResetStore.onclick = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+        saveStateToStorage();
+        renderCurrentView(state.activeView);
+        profDropdown.classList.remove('show');
+        showToast('Mock data reset.');
+      };
+    }
+
+    const btnGotoSettings = document.getElementById('btnGotoSettings');
+    if (btnGotoSettings) {
+      btnGotoSettings.onclick = () => {
+        if (document.getElementById('view-settings')) {
+          switchView('view-settings');
+        } else {
+          window.location.href = getPageUrl('settings.html');
+        }
+        profDropdown.classList.remove('show');
+      };
+    }
+
+    // Sidebar toggle is handled cleanly via delegated events with debounce in window.toggleDesktopSidebar
+
+    // Timeframe filters (Today | This Week | This Month | All Time)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.timeframe-btn');
+      if (!btn) return;
+      const tf = btn.getAttribute('data-timeframe') || 'all';
+      document.querySelectorAll('.timeframe-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-timeframe') === tf);
+      });
+      state.timeframe = tf;
+
+      // Sync dropdowns if present
+      const reportTfSelect = document.getElementById('reportTimeframe');
+      if (reportTfSelect) {
+        reportTfSelect.value = tf;
+      }
+
+      // Re-render corresponding views
+      if (document.getElementById('view-monthly-output') || state.activeView === 'view-monthly-output') {
+        renderMonthlyOutputReport(tf);
+      }
+      if (document.getElementById('view-reports') || state.activeView === 'view-reports') {
+        renderReports(tf);
+      }
+
+      const labelMap = { today: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' };
+      showToast(`Timeframe: ${labelMap[tf] || tf}`);
+    });
+
+    const reportTfSelect = document.getElementById('reportTimeframe');
+    if (reportTfSelect) {
+      reportTfSelect.addEventListener('change', () => {
+        const tf = reportTfSelect.value;
+        document.querySelectorAll('.timeframe-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-timeframe') === tf);
+        });
+        state.timeframe = tf;
+        renderReports(tf);
+        if (document.getElementById('view-monthly-output') || state.activeView === 'view-monthly-output') {
+          renderMonthlyOutputReport(tf);
+        }
+      });
+    }
+
+    const reportDeptSelect = document.getElementById('reportDepartment');
+    if (reportDeptSelect) {
+      reportDeptSelect.addEventListener('change', () => {
+        renderReports(state.timeframe || 'all');
+      });
+    }
+
+    setupOutputFilterToolbarEvents();
+    setupReportFilterToolbarEvents();
+  }
+
+  // ==========================================================================
+  // REQUEST ID AUTO-GENERATION & SEPARATOR DASH FORMATTING ENGINE
+  // ==========================================================================
+
+  function getNextRequestId() {
+    let maxSeq = 2103;
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    (state.requests || []).forEach(r => {
+      if (!r.requestId) return;
+      const match = String(r.requestId).match(/(?:LR-?\d{2}-?)?(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxSeq) {
+          maxSeq = num;
+        }
+      }
+    });
+    const nextSeq = maxSeq + 1;
+    return `LR-${curYear}-${nextSeq}`;
+  }
+
+  function getNextJoNumber() {
+    let maxJo = 1001357;
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    (state.requests || []).forEach(r => {
+      if (!r.joNumber) return;
+      const match = String(r.joNumber).match(/P\d{2}(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxJo) {
+          maxJo = num;
+        }
+      }
+    });
+    return `P${curYear}${maxJo + 1}`;
+  }
+
+  function formatRequestIdInput(val) {
+    if (!val) return '';
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    let str = String(val).trim().toUpperCase();
+
+    // Pure digits: "2104" or "2105" -> "LR-26-2104"
+    if (/^\d{4,5}$/.test(str)) {
+      return `LR-${curYear}-${str}`;
+    }
+    // "26-2104" or "262104" -> "LR-26-2104"
+    if (/^\d{2}-?\d{4,5}$/.test(str)) {
+      const clean = str.replace(/-/g, '');
+      return `LR-${clean.slice(0, 2)}-${clean.slice(2)}`;
+    }
+    // "LR2104" -> "LR-26-2104"
+    if (/^LR\d{4,5}$/.test(str)) {
+      return `LR-${curYear}-${str.slice(2)}`;
+    }
+    // "LR262104" -> "LR-26-2104"
+    if (/^LR\d{6,7}$/.test(str)) {
+      return `LR-${str.slice(2, 4)}-${str.slice(4)}`;
+    }
+    // "LR-262104" -> "LR-26-2104"
+    if (/^LR-\d{6,7}$/.test(str)) {
+      return `LR-${str.slice(3, 5)}-${str.slice(5)}`;
+    }
+    // Progressive typing formatting
+    if (str === 'LR') return 'LR-';
+    if (/^LR-\d{2}$/.test(str)) return `${str}-`;
+
+    return str;
+  }
+
+  function openNewSalesRequestModal() {
+    const form = document.getElementById('salesRequestForm');
+    if (form) {
+      form.reset();
+      form.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+    }
+    const idField = document.getElementById('salesFormId');
+    if (idField) idField.value = '';
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = 'New Sales Request';
+
+    // Auto-generate sequential Request ID with separator dash (e.g. LR-26-2104 / LR-26-2105)
+    const nextId = getNextRequestId();
+    const reqInput = document.getElementById('salesFormReqId');
+    if (reqInput) reqInput.value = nextId;
+
+    // Fetch live backend for latest ID if available to ensure perfect multi-client sync
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_next_request_id')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.nextRequestId && reqInput && (!reqInput.value || reqInput.value === nextId)) {
+            reqInput.value = res.nextRequestId;
+          }
+        })
+        .catch(() => {});
+    }
+
+    // No default JO number on the add request form
+    const joInput = document.getElementById('salesFormJo');
+    if (joInput) joInput.value = '';
+
+    const orderDateInput = document.getElementById('salesFormOrderDate');
+    if (orderDateInput) {
+      orderDateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    // Default design deadline (+3 days from today)
+    const deadlineInput = document.getElementById('salesFormDeadline');
+    if (deadlineInput && !deadlineInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 3);
+      deadlineInput.value = d.toISOString().split('T')[0];
+    }
+
+    // Default production due (+5 days from today)
+    const releasingInput = document.getElementById('salesFormReleasing');
+    if (releasingInput && !releasingInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 5);
+      releasingInput.value = d.toISOString().split('T')[0];
+    }
+
+    const locInput = document.getElementById('salesFormLocation');
+    if (locInput) locInput.value = 'Indoor';
+
+    const prioInput = document.getElementById('salesFormPriority');
+    if (prioInput) prioInput.value = 'Normal';
+
+    const appInput = document.getElementById('salesFormClientApproval');
+    if (appInput) appInput.value = 'Pending Approval';
+
+    const relModeInput = document.getElementById('salesFormRelMode');
+    if (relModeInput) relModeInput.value = 'Pickup';
+
+    const fileSentInput = document.getElementById('salesFormFileSent');
+    if (fileSentInput) fileSentInput.value = 'File Sent';
+
+    populateSalesFiltersDropdowns();
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => {
+        if (joInput) {
+          joInput.focus();
+        } else if (reqInput) {
+          reqInput.focus();
+        }
+      }, 100);
+    }
+  }
+  window.openNewSalesRequestModal = openNewSalesRequestModal;
+
+  function renderDraftCustomSelect(fieldName, currentValue, optionsList, elementId, styleWidth) {
+    const hasVal = currentValue && String(currentValue).trim() !== '' && String(currentValue).trim() !== 'N/A' && String(currentValue).trim() !== 'Blank';
+    const val = hasVal ? String(currentValue).trim() : '';
+    const badgeClass = hasVal ? getBadgeClassForValue(fieldName, val) : 'badge-neutral';
+    const safeLabel = hasVal ? escapeHTML(val) : '— Select —';
+    let options = Array.isArray(optionsList) ? [...optionsList] : [];
+    const safeOptions = JSON.stringify(options).replace(/"/g, '&quot;');
+    const widthStyle = styleWidth ? `style="width:${styleWidth};"` : '';
+
+    return `
+      <button type="button" class="custom-select-btn draft-custom-select ${badgeClass} ${!hasVal ? 'is-blank is-unselected' : ''}"
+        id="${elementId}"
+        ${widthStyle}
+        data-is-draft="true"
+        data-field="${fieldName}"
+        data-current="${escapeHTML(val)}"
+        data-options="${safeOptions}"
+        title="Click to select ${fieldName}"
+        onclick="window.SignDepotApp.openCustomDropdown(this, event)">
+        <span class="custom-select-label">${safeLabel}</span>
+        <svg class="custom-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    `;
+  }
+
+  function renderDraftSalesRowHTML(d) {
+    const orderDateVal = d.orderDate || '';
+    const deadlineVal = d.designDeadline || '';
+    const releasingVal = d.releasingDate || '';
+
+    return `
+      <tr class="table-draft-row" id="draftSalesRow">
+        <td><input type="text" class="draft-cell-input" id="draftReqId" value="${escapeHTML(d.requestId)}" style="color:var(--primary-green); font-weight:700; width:95px;" placeholder="Req ID" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftJoNumber" value="${escapeHTML(d.joNumber || '')}" placeholder="JO # (e.g. P26...)" style="color:var(--accent-red); font-weight:700; width:110px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="date" class="draft-cell-input" id="draftOrderDate" value="${escapeHTML(orderDateVal)}" style="width:125px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('salesRep', d.salesRep, state.salesReps, 'draftSalesRep', '120px')}</td>
+        <td><input type="text" class="draft-cell-input" id="draftClient" value="${escapeHTML(d.client || '')}" placeholder="Client name..." style="width:140px;" required autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftProjectName" value="${escapeHTML(d.projectName || '')}" placeholder="Project name..." style="width:170px; font-weight:600;" required autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('artist', d.artist, state.artists, 'draftArtist', '120px')}</td>
+        <td><input type="date" class="draft-cell-input" id="draftDeadline" value="${escapeHTML(deadlineVal)}" style="width:125px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="date" class="draft-cell-input" id="draftReleasing" value="${escapeHTML(releasingVal)}" style="width:125px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('fileSent', d.fileSent, FILE_STATUS_LEVELS, 'draftFileSent', '100px')}</td>
+        <td><input type="text" class="draft-cell-input" id="draftAddress" value="${escapeHTML(d.completeAddress || '')}" placeholder="Full address..." style="width:190px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('location', d.location, PLACEMENT_OPTIONS, 'draftLocation', '115px')}</td>
+        <td>${renderDraftCustomSelect('releasingMode', d.releasingMode, RELEASING_MODES, 'draftRelMode', '100px')}</td>
+        <td><input type="text" class="draft-cell-input" id="draftContactPerson" value="${escapeHTML(d.contactPerson || '')}" placeholder="Contact person..." style="width:130px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftContactNumber" value="${escapeHTML(d.contactNumber || '')}" placeholder="Phone number..." style="width:120px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('clientApproval', d.clientApproval || 'Pending Approval', APPROVAL_LEVELS, 'draftClientApproval', '125px')}</td>
+        <td>${renderDraftCustomSelect('priority', d.priority || 'Normal', PRIORITY_LEVELS, 'draftPriority', '95px')}</td>
+        <td class="draft-actions-cell">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button type="button" class="btn btn-save-draft" id="btnSaveDraftRequest" onclick="if(window.SignDepotApp && window.SignDepotApp.saveDraftSalesRequest){window.SignDepotApp.saveDraftSalesRequest();}else{saveDraftSalesRequest();}" title="Save Request (✓)" aria-label="Save Request">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button type="button" class="btn btn-cancel-draft" id="btnCancelDraftRequest" onclick="if(window.SignDepotApp && window.SignDepotApp.cancelDraftSalesRequest){window.SignDepotApp.cancelDraftSalesRequest();}else{cancelDraftSalesRequest();}" title="Cancel (✕)" aria-label="Cancel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function addNewSalesRequestRow() {
+    openNewSalesRequestModal();
+  }
+  window.addNewSalesRequestRow = addNewSalesRequestRow;
+
+  function saveDraftSalesRequest() {
+    if (!state.draftSalesRequest) return;
+
+    const draftRow = document.getElementById('draftSalesRow');
+    if (draftRow) {
+      draftRow.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+    }
+
+    const getDraftSelectVal = (elemId, fieldName) => {
+      const el = document.getElementById(elemId);
+      if (el) {
+        const cur = el.getAttribute('data-current');
+        if (cur !== null && cur !== undefined && cur !== '' && cur !== 'N/A' && cur !== 'Blank') return cur.trim();
+        if (el.value !== undefined && el.value !== '' && el.value !== 'N/A') return el.value.trim();
+      }
+      const st = state.draftSalesRequest && state.draftSalesRequest[fieldName];
+      return (st && st !== 'N/A' && st !== 'Blank') ? String(st).trim() : '';
+    };
+
+    const reqIdInput = document.getElementById('draftReqId');
+    const reqId = (reqIdInput && reqIdInput.value.trim()) || '';
+    const joNumber = document.getElementById('draftJoNumber') ? document.getElementById('draftJoNumber').value.trim() : '';
+    const orderDate = document.getElementById('draftOrderDate') ? document.getElementById('draftOrderDate').value.trim() : '';
+    const projectName = document.getElementById('draftProjectName') ? document.getElementById('draftProjectName').value.trim() : '';
+    const client = document.getElementById('draftClient') ? document.getElementById('draftClient').value.trim() : '';
+    const salesRep = getDraftSelectVal('draftSalesRep', 'salesRep');
+    const artist = getDraftSelectVal('draftArtist', 'artist');
+    const location = getDraftSelectVal('draftLocation', 'location');
+    const releasingMode = getDraftSelectVal('draftRelMode', 'releasingMode');
+    const designDeadline = document.getElementById('draftDeadline') ? document.getElementById('draftDeadline').value.trim() : '';
+    const releasingDate = document.getElementById('draftReleasing') ? document.getElementById('draftReleasing').value.trim() : '';
+    const fileSent = getDraftSelectVal('draftFileSent', 'fileSent');
+    const clientApproval = getDraftSelectVal('draftClientApproval', 'clientApproval');
+    const priority = getDraftSelectVal('draftPriority', 'priority');
+    const contactPerson = document.getElementById('draftContactPerson') ? document.getElementById('draftContactPerson').value.trim() : '';
+    const contactNumber = document.getElementById('draftContactNumber') ? document.getElementById('draftContactNumber').value.trim() : '';
+    const completeAddress = document.getElementById('draftAddress') ? document.getElementById('draftAddress').value.trim() : '';
+
+    const checks = [
+      { val: reqId, id: 'draftReqId', name: 'Request ID' },
+      { val: joNumber, id: 'draftJoNumber', name: 'JO Number' },
+      { val: orderDate, id: 'draftOrderDate', name: 'Timestamp (Date Encoded)' },
+      { val: salesRep, id: 'draftSalesRep', name: 'Sales Representative' },
+      { val: client, id: 'draftClient', name: 'Client' },
+      { val: projectName, id: 'draftProjectName', name: 'Project Name' },
+      { val: artist, id: 'draftArtist', name: 'Artist' },
+      { val: designDeadline, id: 'draftDeadline', name: 'Design Deadline' },
+      { val: releasingDate, id: 'draftReleasing', name: 'Production Due' },
+      { val: fileSent, id: 'draftFileSent', name: 'File Status' },
+      { val: completeAddress, id: 'draftAddress', name: 'Address' },
+      { val: location, id: 'draftLocation', name: 'Placement' },
+      { val: releasingMode, id: 'draftRelMode', name: 'Mode of Releasing' },
+      { val: contactPerson, id: 'draftContactPerson', name: 'Contact Person' },
+      { val: contactNumber, id: 'draftContactNumber', name: 'Contact Number' },
+      { val: clientApproval, id: 'draftClientApproval', name: 'Client Approval' },
+      { val: priority, id: 'draftPriority', name: 'Priority Level' }
+    ];
+
+    const missing = [];
+    checks.forEach(c => {
+      if (!c.val) {
+        missing.push(c.name);
+        const el = document.getElementById(c.id);
+        if (el) {
+          el.classList.add('is-invalid-detail');
+          const cleanUp = () => {
+            el.classList.remove('is-invalid-detail');
+            el.removeEventListener('input', cleanUp);
+            el.removeEventListener('change', cleanUp);
+          };
+          el.addEventListener('input', cleanUp);
+          el.addEventListener('change', cleanUp);
+        }
+      }
+    });
+
+    if (missing.length > 0) {
+      showToast(`Cannot save: All sales request details are required. Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? ' (+' + (missing.length - 3) + ' more)' : ''}.`, 'error');
+      const firstInvalid = draftRow ? draftRow.querySelector('.is-invalid-detail') : null;
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (typeof firstInvalid.focus === 'function') firstInvalid.focus();
+      }
+      return;
+    }
+
+    const finalId = reqId.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const nowStamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+    const newRecord = {
+      id: finalId,
+      requestId: reqId,
+      joNumber: joNumber,
+      orderDate: orderDate || nowStamp.substring(0, 10),
+      salesRep: salesRep,
+      client: client,
+      projectName: projectName,
+      artist: artist,
+      designDeadline: designDeadline,
+      releasingDate: releasingDate,
+      fileSent: fileSent,
+      completeAddress: completeAddress,
+      location: location,
+      releasingMode: releasingMode,
+      contactPerson: contactPerson,
+      contactNumber: contactNumber,
+      projectStatus: 'On-going',
+      clientApproval: clientApproval || 'Pending Approval',
+      priority: priority || 'Normal',
+      headApproval: 'Pending',
+      countStandard: 0,
+      countSpecial: 0,
+      countPrinting: 0,
+      designStatus: 'On Queue',
+      revisionCount: 0,
+      remarks: 'N/A',
+      timestamp: orderDate || nowStamp.substring(0, 10),
+      dateUpdated: nowStamp
+    };
+
+    // Clear draft state so draft row vanishes
+    state.draftSalesRequest = null;
+
+    // Add to requests list and save state locally
+    state.requests.unshift(newRecord);
+    saveStateToStorage();
+
+    // Persist to MySQL backend
+    const apiUrl = window.PMS_API_URL || (window.location.pathname.includes('/pages/') ? '../api.php' : './api.php');
+    fetch(apiUrl + '?action=create_request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res && res.success) {
+        if (window.PmsCache) window.PmsCache.invalidate();
+        if (res.id) newRecord.id = res.id;
+        if (res.requestId && res.requestId !== newRecord.requestId) {
+          newRecord.requestId = res.requestId;
+          renderSalesRequests();
+        }
+      }
+    })
+    .catch(err => console.warn('MySQL save failed:', err));
+
+    // Re-render table with newly committed row
+    renderSalesRequests();
+
+    // Smooth scroll and green glow animation on newly saved row
+    setTimeout(() => {
+      const row = document.querySelector(`tr[data-req-id="${newRecord.id}"]`);
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        row.classList.add('table-row-new-entry');
+      }
+    }, 80);
+
+    showToast(`Request ${reqId} saved successfully!`, 'success');
+  }
+  window.saveDraftSalesRequest = saveDraftSalesRequest;
+
+  function cancelDraftSalesRequest() {
+    state.draftSalesRequest = null;
+    renderSalesRequests();
+    showToast('New request row cancelled.', 'info');
+  }
+  window.cancelDraftSalesRequest = cancelDraftSalesRequest;
+
+  function handleDraftKey(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveDraftSalesRequest();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelDraftSalesRequest();
+    }
+  }
+  window.handleDraftKey = handleDraftKey;
+
+  function editSalesRequest(id) {
+    const rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) return;
+
+    const form = document.getElementById('salesRequestForm');
+    if (form) form.reset();
+
+    const setVal = (elemId, val) => {
+      const el = document.getElementById(elemId);
+      if (el) el.value = (val !== undefined && val !== null) ? val : '';
+    };
+
+    setVal('salesFormId', rec.id || '');
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = `Edit Sales Request — ${rec.requestId}`;
+
+    setVal('salesFormReqId', rec.requestId);
+    setVal('salesFormJo', rec.joNumber);
+    setVal('salesFormOrderDate', rec.orderDate || rec.timestamp || '');
+    setVal('salesFormProject', rec.projectName);
+    setVal('salesFormClient', rec.client);
+    setVal('salesFormLocation', rec.location || 'Indoor');
+    setVal('salesFormArtist', rec.artist);
+    setVal('salesFormSalesRep', rec.salesRep);
+    setVal('salesFormDeadline', rec.designDeadline);
+    setVal('salesFormReleasing', rec.releasingDate || rec.designDeadline);
+    setVal('salesFormPriority', rec.priority || 'Normal');
+    setVal('salesFormRelMode', rec.releasingMode || 'Pickup');
+    setVal('salesFormFileSent', rec.fileSent || 'Pending');
+    setVal('salesFormContactPerson', rec.contactPerson || '');
+    setVal('salesFormContactNumber', rec.contactNumber || '');
+    setVal('salesFormAddress', rec.completeAddress || '');
+
+    populateSalesFiltersDropdowns();
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) modal.classList.add('show');
+  }
+  window.editSalesRequest = editSalesRequest;
+
+  function showCustomConfirm(options) {
+    const modal = document.getElementById('customConfirmModal');
+    if (!modal) {
+      if (confirm(options.message || 'Are you sure?')) {
+        if (options.onConfirm) options.onConfirm('', () => {});
+      }
+      return;
+    }
+
+    const titleEl = document.getElementById('confirmModalTitle');
+    const subtitleEl = document.getElementById('confirmModalSubtitle');
+    const msgEl = document.getElementById('confirmModalMessage');
+    const recordCard = document.getElementById('confirmModalRecordCard');
+    const passcodeSection = document.getElementById('confirmPasscodeSection');
+    const passcodeInput = document.getElementById('confirmDeletePasscode');
+    const passcodeError = document.getElementById('confirmPasscodeError');
+    const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
+    const submitBtn = document.getElementById('btnExecuteCustomConfirm');
+    const submitLabel = document.getElementById('confirmModalSubmitLabel');
+    const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
+
+    if (titleEl) titleEl.textContent = options.title || 'Permanent Data Deletion';
+    if (subtitleEl) subtitleEl.textContent = options.subtitle || (options.requiresPasscode ? 'SUPER ADMIN SECURITY PASSCODE REQUIRED' : 'CONFIRM ACTION');
+    if (msgEl) msgEl.innerHTML = options.message || 'Are you sure you want to proceed?';
+    if (submitLabel) submitLabel.textContent = options.confirmText || 'Permanently Delete';
+
+    if (passcodeError) {
+      passcodeError.style.display = 'none';
+      passcodeError.textContent = '';
+    }
+    if (setupDrawer) setupDrawer.style.display = 'none';
+    if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
+
+    const loginPassModalInput = document.getElementById('confirmLoginPasswordInput');
+    const newPasscodeModalInput = document.getElementById('confirmNewPasscodeInput');
+    const newPasscodeFeedback = document.getElementById('confirmNewPasscodeFeedback');
+    if (loginPassModalInput) loginPassModalInput.value = '';
+    if (newPasscodeModalInput) newPasscodeModalInput.value = '';
+    if (newPasscodeFeedback) {
+      newPasscodeFeedback.style.display = 'none';
+      newPasscodeFeedback.textContent = '';
+    }
+
+    if (recordCard && options.record) {
+      recordCard.style.display = 'block';
+      const reqIdEl = document.getElementById('confirmRecordRequestId');
+      const joEl = document.getElementById('confirmRecordJoNumber');
+      const projEl = document.getElementById('confirmRecordProjectName');
+      const clientEl = document.getElementById('confirmRecordClient');
+      if (reqIdEl) reqIdEl.textContent = options.record.requestId || '-';
+      if (joEl) joEl.textContent = options.record.joNumber || 'Unassigned';
+      if (projEl) projEl.textContent = options.record.projectName || '-';
+      if (clientEl) clientEl.textContent = options.record.client || '-';
+    } else if (recordCard) {
+      recordCard.style.display = 'none';
+    }
+
+    if (passcodeSection) {
+      passcodeSection.style.display = options.requiresPasscode ? 'block' : 'none';
+      if (passcodeInput) {
+        passcodeInput.value = '';
+        passcodeInput.classList.remove('input-shake');
+        passcodeInput.style.borderColor = '#D4D4D8';
+      }
+    }
+
+    modal.classList.add('show');
+    if (options.requiresPasscode && passcodeInput) {
+      setTimeout(() => passcodeInput.focus(), 150);
+    }
+
+    const handleSubmit = async () => {
+      const enteredPasscode = passcodeInput ? passcodeInput.value.trim() : '';
+
+      if (options.requiresPasscode) {
+        if (!enteredPasscode) {
+          if (passcodeError) {
+            passcodeError.style.display = 'block';
+            passcodeError.textContent = 'Please enter the Super Admin permission passcode.';
+          }
+          if (passcodeInput) {
+            passcodeInput.style.borderColor = '#DC2626';
+            passcodeInput.classList.add('input-shake');
+            setTimeout(() => passcodeInput.classList.remove('input-shake'), 400);
+            passcodeInput.focus();
+          }
+          return;
+        }
+      }
+
+      if (typeof options.onConfirm === 'function') {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        try {
+          const success = await options.onConfirm(enteredPasscode, () => modal.classList.remove('show'));
+          if (success) {
+            modal.classList.remove('show');
+          }
+        } catch (err) {
+          if (passcodeError) {
+            passcodeError.style.display = 'block';
+            passcodeError.textContent = err.message || 'Operation failed.';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+        }
+      } else {
+        modal.classList.remove('show');
+      }
+    };
+
+    submitBtn.onclick = handleSubmit;
+    if (passcodeInput) {
+      passcodeInput.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSubmit();
+        }
+      };
+    }
+  }
+  window.showCustomConfirm = showCustomConfirm;
+
+  function deleteSalesRequest(id) {
+    if (!isCurrentUserSuperAdmin()) {
+      showToast('Permission Denied: Only Super Admin can delete records.', 'error');
+      return;
+    }
+
+    let rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) {
+      rec = { id: id, requestId: id, projectName: 'Sales Request', client: '' };
+    }
+
+    const reqLabel = rec.requestId || id;
+
+    showCustomConfirm({
+      title: 'Permanent Data Deletion',
+      subtitle: 'SUPER ADMIN SECURITY PASSCODE REQUIRED',
+      message: `Are you sure you want to permanently delete <strong>${escapeHTML(reqLabel)}</strong>? This action will permanently remove it from both your local workspace and the live MySQL database.`,
+      record: {
+        requestId: rec.requestId,
+        joNumber: rec.joNumber,
+        projectName: rec.projectName,
+        client: rec.client
+      },
+      requiresPasscode: true,
+      confirmText: 'Permanently Delete',
+      onConfirm: async (passcode, closeModal) => {
+        if (window.PMS_API_URL) {
+          try {
+            const res = await fetch(window.PMS_API_URL + '?action=delete_request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: rec.id || id,
+                requestId: rec.requestId,
+                passcode: passcode
+              })
+            }).then(r => r.json());
+
+            if (res && res.success) {
+              if (window.PmsCache) window.PmsCache.invalidate();
+              state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+              saveStateToStorage();
+              renderCurrentView(state.activeView);
+              updateDashboardKPIs();
+              updateDeadlineAlertCenter();
+              showToast(`Request ${reqLabel} deleted successfully.`);
+              return true;
+            } else {
+              const passcodeError = document.getElementById('confirmPasscodeError');
+              const passcodeInput = document.getElementById('confirmDeletePasscode');
+              if (passcodeError) {
+                passcodeError.style.display = 'block';
+                passcodeError.textContent = res.error || 'Invalid permission passcode. Deletion rejected.';
+              }
+              if (passcodeInput) {
+                passcodeInput.style.borderColor = '#DC2626';
+                passcodeInput.classList.add('input-shake');
+                setTimeout(() => passcodeInput.classList.remove('input-shake'), 400);
+                passcodeInput.focus();
+                passcodeInput.select();
+              }
+              return false;
+            }
+          } catch (err) {
+            console.warn('MySQL delete error:', err);
+            state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+            saveStateToStorage();
+            renderCurrentView(state.activeView);
+            updateDashboardKPIs();
+            updateDeadlineAlertCenter();
+            showToast(`Deleted ${reqLabel} locally.`, 'info');
+            return true;
+          }
+        } else {
+          state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+          saveStateToStorage();
+          renderCurrentView(state.activeView);
+          updateDashboardKPIs();
+          updateDeadlineAlertCenter();
+          showToast(`Request ${reqLabel} deleted successfully.`);
+          return true;
+        }
+      }
+    });
+  }
+  window.deleteSalesRequest = deleteSalesRequest;
+
+  // ==========================================================================
+  // MODALS
+  // ==========================================================================
+
+  function setupModals() {
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modalId = btn.getAttribute('data-close-modal');
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.remove('show');
+      });
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('show');
+      });
+
+      // Custom Confirm & Passcode Modal Controls Setup
+      const confirmPasscodeInput = document.getElementById('confirmDeletePasscode');
+      const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
+      const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
+      if (toggleSetupBtn && setupDrawer) {
+        toggleSetupBtn.onclick = () => {
+          const isHidden = setupDrawer.style.display === 'none' || !setupDrawer.style.display;
+          setupDrawer.style.display = isHidden ? 'block' : 'none';
+          toggleSetupBtn.textContent = isHidden ? 'Close Setup' : 'Change Passcode';
+        };
+      }
+
+      const saveInsideModalBtn = document.getElementById('btnSaveNewPasscodeInsideModal');
+      const loginPasswordInsideModalInput = document.getElementById('confirmLoginPasswordInput');
+      const newPasscodeInsideModalInput = document.getElementById('confirmNewPasscodeInput');
+      const newPasscodeFeedback = document.getElementById('confirmNewPasscodeFeedback');
+      if (saveInsideModalBtn && newPasscodeInsideModalInput) {
+        saveInsideModalBtn.onclick = () => {
+          const loginPass = loginPasswordInsideModalInput ? loginPasswordInsideModalInput.value.trim() : '';
+          if (!loginPass) {
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#DC2626';
+              newPasscodeFeedback.textContent = 'Please enter your current account login password.';
+            }
+            if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.focus();
+            return;
+          }
+
+          const val = newPasscodeInsideModalInput.value.trim();
+          if (!val) {
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#DC2626';
+              newPasscodeFeedback.textContent = 'Please enter a valid passcode.';
+            }
+            newPasscodeInsideModalInput.focus();
+            return;
+          }
+
+          saveInsideModalBtn.disabled = true;
+          saveInsideModalBtn.textContent = 'Updating...';
+
+          const onSaved = () => {
+            if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.value = '';
+            if (newPasscodeInsideModalInput) newPasscodeInsideModalInput.value = '';
+            if (confirmPasscodeInput) {
+              confirmPasscodeInput.value = '';
+              confirmPasscodeInput.style.borderColor = '#D4D4D8';
+            }
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#09090B';
+              newPasscodeFeedback.textContent = 'Passcode updated successfully! Enter it above to confirm deletion.';
+            }
+            setTimeout(() => {
+              if (setupDrawer) setupDrawer.style.display = 'none';
+              if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
+            }, 1800);
+            showToast('Super Admin deletion passcode updated.');
+            saveInsideModalBtn.disabled = false;
+            saveInsideModalBtn.textContent = 'Update';
+          };
+
+          if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+            fetch(window.PMS_API_URL + '?action=set_delete_passcode', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ passcode: val, login_password: loginPass })
+            })
+            .then(r => r.json())
+            .then(res => {
+              if (res && res.success) {
+                onSaved();
+              } else {
+                if (newPasscodeFeedback) {
+                  newPasscodeFeedback.style.display = 'block';
+                  newPasscodeFeedback.style.color = '#DC2626';
+                  newPasscodeFeedback.textContent = res.error || 'Failed to update passcode.';
+                }
+                saveInsideModalBtn.disabled = false;
+                saveInsideModalBtn.textContent = 'Update';
+              }
+            })
+            .catch(() => onSaved());
+          } else {
+            onSaved();
+          }
+        };
+      }
+
+      // Automatically upgrade and sync all form selects whenever any modal becomes visible
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.attributeName === 'class' && modal.classList.contains('show')) {
+            upgradeAllFormSelects();
+            syncAllFormDropdowns();
+          }
+        });
+      });
+      observer.observe(modal, { attributes: true });
+    });
+
+    // Automatically sync dropdown button labels when forms are reset
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('reset', () => {
+        setTimeout(() => syncAllFormDropdowns(), 20);
+      });
+    });
+
+    const salesForm = document.getElementById('salesRequestForm');
+    if (salesForm) {
+      salesForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        salesForm.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+
+        const id = document.getElementById('salesFormId').value;
+        const rawReqId = document.getElementById('salesFormReqId').value.trim();
+        const reqId = formatRequestIdInput(rawReqId) || getNextRequestId();
+        const jo = document.getElementById('salesFormJo').value.trim();
+        const project = document.getElementById('salesFormProject').value.trim();
+        const client = document.getElementById('salesFormClient').value.trim();
+        const artist = document.getElementById('salesFormArtist').value;
+        const salesRep = toTitleCase(document.getElementById('salesFormSalesRep').value);
+        const deadline = document.getElementById('salesFormDeadline').value;
+        const releasingDate = (document.getElementById('salesFormReleasingDate') || document.getElementById('salesFormReleasing'))?.value || '';
+        const fileSentRaw = document.getElementById('salesFormFileSent')?.value || '';
+        const fileSent = (fileSentRaw === 'Blank' || fileSentRaw === 'N/A' || !fileSentRaw) ? '' : fileSentRaw;
+        const clientApproval = document.getElementById('salesFormClientApproval')?.value || '';
+        const priority = document.getElementById('salesFormPriority')?.value || '';
+        const relModeRaw = (document.getElementById('salesFormRelMode') || document.getElementById('salesFormReleasingMode'))?.value || '';
+        const mode = (relModeRaw === 'Blank' || relModeRaw === 'N/A' || !relModeRaw) ? '' : relModeRaw;
+        const locRaw = document.getElementById('salesFormLocation')?.value || '';
+        const location = (locRaw === 'Blank' || locRaw === 'N/A' || !locRaw) ? '' : locRaw;
+        const contactPerson = document.getElementById('salesFormContactPerson').value.trim();
+        const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
+        const address = document.getElementById('salesFormAddress').value.trim();
+        const nowStamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+        const orderDateEl = document.getElementById('salesFormOrderDate');
+        const orderDate = (orderDateEl && orderDateEl.value) ? orderDateEl.value.trim() : nowStamp.substring(0, 10);
+
+        const requiredChecks = [
+          { val: reqId, id: 'salesFormReqId', name: 'Request ID' },
+          { val: jo, id: 'salesFormJo', name: 'JO Number' },
+          ...(orderDateEl ? [{ val: orderDate, id: 'salesFormOrderDate', name: 'Date Encoded' }] : []),
+          { val: salesRep, id: 'salesFormSalesRep', name: 'Sales Representative' },
+          { val: client, id: 'salesFormClient', name: 'Client Name' },
+          { val: project, id: 'salesFormProject', name: 'Project Name' },
+          { val: deadline, id: 'salesFormDeadline', name: 'Design Deadline' },
+          { val: releasingDate, id: 'salesFormReleasing', name: 'Production Due' },
+          { val: artist, id: 'salesFormArtist', name: 'Assigned Artist' },
+          { val: priority, id: 'salesFormPriority', name: 'Priority Level' },
+          { val: mode, id: 'salesFormRelMode', name: 'Mode of Releasing' },
+          { val: location, id: 'salesFormLocation', name: 'Placement' },
+          { val: fileSent, id: 'salesFormFileSent', name: 'File Status' },
+          { val: clientApproval, id: 'salesFormClientApproval', name: 'Client Approval' },
+          { val: contactPerson, id: 'salesFormContactPerson', name: 'Contact Person' },
+          { val: contactNumber, id: 'salesFormContactNumber', name: 'Contact Number' },
+          { val: address, id: 'salesFormAddress', name: 'Complete Address' }
+        ];
+
+        const missingModal = [];
+        requiredChecks.forEach(c => {
+          if (!c.val) {
+            missingModal.push(c.name);
+            const el = document.getElementById(c.id);
+            const customBtn = el && el._formDropdownBtn;
+            const target = customBtn || el;
+            if (target) {
+              target.classList.add('is-invalid-detail');
+              const cleanUp = () => {
+                target.classList.remove('is-invalid-detail');
+                if (el) {
+                  el.removeEventListener('input', cleanUp);
+                  el.removeEventListener('change', cleanUp);
+                }
+              };
+              if (el) {
+                el.addEventListener('input', cleanUp);
+                el.addEventListener('change', cleanUp);
+              }
+            }
+          }
+        });
+
+        if (missingModal.length > 0) {
+          showToast(`Cannot save: All sales request details are required. Please fill in: ${missingModal.slice(0, 3).join(', ')}${missingModal.length > 3 ? ' (+' + (missingModal.length - 3) + ' more)' : ''}.`, 'error');
+          const firstInvalid = salesForm.querySelector('.is-invalid-detail');
+          if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof firstInvalid.focus === 'function') firstInvalid.focus();
+          }
+          return;
+        }
+
+        let newRec = null;
+        if (id) {
+          const rec = state.requests.find(r => r.id === id);
+          if (rec) {
+            rec.requestId = reqId;
+            rec.joNumber = jo || 'N/A';
+            rec.orderDate = orderDate || rec.orderDate;
+            rec.projectName = project || 'N/A';
+            rec.client = client || 'N/A';
+            rec.artist = artist || 'N/A';
+            rec.salesRep = salesRep || 'N/A';
+            rec.designDeadline = deadline || 'N/A';
+            rec.releasingDate = releasingDate || deadline || 'N/A';
+            rec.fileSent = fileSent;
+            rec.location = location;
+            rec.clientApproval = clientApproval;
+            rec.priority = priority;
+            rec.releasingMode = mode;
+            rec.contactPerson = contactPerson;
+            rec.contactNumber = contactNumber;
+            rec.completeAddress = address;
+            rec.dateUpdated = nowStamp;
+            rec.timestamp = orderDate || rec.timestamp;
+            showToast(`Sales request ${reqId} updated.`);
+            if (window.PMS_API_URL) {
+              fetch(window.PMS_API_URL + '?action=update_request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rec)
+              }).catch(err => console.warn('MySQL update sync:', err));
+            }
+          }
+        } else {
+          newRec = {
+            id: `req-${Date.now()}`,
+            requestId: reqId,
+            joNumber: jo || 'N/A',
+            projectName: project || 'N/A',
+            client: client || 'N/A',
+            artist: artist || 'N/A',
+            salesRep: salesRep || 'N/A',
+            inCharge: toTitleCase(salesRep),
+            drawnBy: toTitleCase(artist),
+            orderDate: orderDate || nowStamp.substring(0, 10),
+            designDeadline: deadline || 'N/A',
+            releasingDate: releasingDate || deadline || 'N/A',
+            releasingMode: mode,
+            location: location,
+            completeAddress: address,
+            contactPerson: contactPerson,
+            contactNumber: contactNumber,
+            clientApproval: clientApproval,
+            priority: priority,
+            fileSent: fileSent,
+            installers: '2 Installers',
+            duration: '1 Day',
+            notes: 'N/A',
+            projectStatus: clientApproval === 'Approved' ? 'Completed' : 'On-going',
+            designStatus: 'On Queue',
+            headApproval: 'Pending',
+            countStandard: 0,
+            countPrinting: 0,
+            countSpecial: 0,
+            revisionCount: 0,
+            remarks: 'N/A',
+            month: 'October 2026',
+            completionDate: null,
+            timestamp: orderDate || nowStamp.substring(0, 10),
+            dateUpdated: nowStamp
+          };
+          state.requests.unshift(newRec);
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=create_request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newRec)
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success) {
+                if (res.id) newRec.id = res.id;
+                if (res.requestId && res.requestId !== newRec.requestId) {
+                  newRec.requestId = res.requestId;
+                  if (document.getElementById('salesRequestsTableBody')) {
+                    renderSalesRequests();
+                  }
+                }
+              }
+            })
+            .catch(err => console.warn('MySQL create sync:', err));
+          }
+          showToast(`Request ${reqId} created successfully!`, 'success');
+        }
+
+        saveStateToStorage();
+        document.getElementById('salesModal').classList.remove('show');
+        renderCurrentView(state.activeView);
+        if (document.getElementById('salesRequestsTableBody')) {
+          renderSalesRequests();
+          setTimeout(() => {
+            const targetId = id || (newRec && newRec.id);
+            if (targetId) {
+              const row = document.querySelector(`tr[data-req-id="${targetId}"]`);
+              if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                row.classList.add('table-row-new-entry');
+              }
+            }
+          }, 120);
+        }
+      });
+    }
+
+    const trackerForm = document.getElementById('trackerTaskForm');
+    if (trackerForm) {
+      trackerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('trackerFormId').value;
+        const rec = state.requests.find(r => r.id === id);
+        if (rec) {
+          rec.artist = document.getElementById('trackerFormArtist').value || 'N/A';
+          rec.projectName = document.getElementById('trackerFormProject').value.trim() || 'N/A';
+          rec.designDeadline = document.getElementById('trackerFormDeadline').value || 'N/A';
+          rec.headApproval = document.getElementById('trackerFormHeadApproval').value || 'Pending';
+          rec.projectStatus = document.getElementById('trackerFormProjectStatus').value || 'On-going';
+          rec.designStatus = document.getElementById('trackerFormDesignStatus').value || 'On Queue';
+          rec.countStandard = parseInt(document.getElementById('trackerFormStd').value, 10) || 0;
+          rec.countSpecial = parseInt(document.getElementById('trackerFormSpc').value, 10) || 0;
+          rec.countPrinting = parseInt(document.getElementById('trackerFormPrt').value, 10) || 0;
+          rec.revisionCount = parseInt(document.getElementById('trackerFormRev').value, 10) || 0;
+          rec.remarks = document.getElementById('trackerFormRemarks').value.trim() || 'N/A';
+          rec.dateUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+          if (rec.projectStatus === 'Completed' && !rec.completionDate) {
+            rec.completionDate = '2026-10-23';
+          }
+
+          saveStateToStorage();
+          showToast(`Task ${rec.requestId} updated.`);
+        }
+        document.getElementById('trackerModal').classList.remove('show');
+        renderCurrentView(state.activeView);
+      });
+    }
+  }
+
+  // ==========================================================================
+  // DEADLINE REMINDER ALERTS & NOTIFICATION CENTER ENGINE
+  // ==========================================================================
+
+  let currentAlertTab = 'all';
+
+  function updateDeadlineAlertCenter() {
+    const requests = state.requests || [];
+    
+    // Categorize active requests
+    const overdueList = [];
+    const todayList = [];
+    const soonList = [];
+
+    requests.forEach(r => {
+      if (r.projectStatus === 'Completed') return;
+      const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+      if (alertInfo.status === 'overdue') {
+        overdueList.push({ request: r, alert: alertInfo });
+      } else if (alertInfo.status === 'today') {
+        todayList.push({ request: r, alert: alertInfo });
+      } else if (alertInfo.status === 'soon') {
+        soonList.push({ request: r, alert: alertInfo });
+      }
+    });
+
+    const allAlerts = [...overdueList, ...todayList, ...soonList];
+    const totalCount = allAlerts.length;
+
+    // 1. Update Topbar Bell Badge
+    const badgeEl = document.getElementById('deadlineAlertBadge');
+    if (badgeEl) {
+      badgeEl.textContent = totalCount;
+      if (totalCount > 0) {
+        badgeEl.style.display = 'inline-flex';
+        badgeEl.className = 'deadline-alert-badge has-alerts' + (overdueList.length > 0 ? ' badge-overdue' : '');
+      } else {
+        badgeEl.style.display = 'none';
+      }
+    }
+
+    // 2. Update Dropdown Header & Tab Counts
+    const totalPill = document.getElementById('deadlineAlertTotalPill');
+    if (totalPill) {
+      totalPill.textContent = `${totalCount} Alert${totalCount === 1 ? '' : 's'}`;
+      totalPill.className = 'deadline-alert-total-pill' + (overdueList.length > 0 ? ' pill-overdue' : '');
+    }
+
+    const countTabAll = document.getElementById('countTabAll');
+    if (countTabAll) countTabAll.textContent = totalCount;
+
+    const countTabOverdue = document.getElementById('countTabOverdue');
+    if (countTabOverdue) countTabOverdue.textContent = overdueList.length;
+
+    const countTabToday = document.getElementById('countTabToday');
+    if (countTabToday) countTabToday.textContent = todayList.length;
+
+    const countTabSoon = document.getElementById('countTabSoon');
+    if (countTabSoon) countTabSoon.textContent = soonList.length;
+
+    // 3. Render Dropdown Alert Items
+    renderAlertDrawerItems(allAlerts, overdueList, todayList, soonList);
+
+    // 4. Update Dashboard Widget (if on index / dashboard)
+    const widgetOverdue = document.getElementById('widgetCountOverdue');
+    if (widgetOverdue) {
+      widgetOverdue.textContent = overdueList.length;
+      const subOverdue = document.getElementById('widgetSubOverdue');
+      if (subOverdue) subOverdue.textContent = overdueList.length > 0 ? `${overdueList.length} past deadline` : 'No overdue projects';
+    }
+
+    const widgetToday = document.getElementById('widgetCountToday');
+    if (widgetToday) {
+      widgetToday.textContent = todayList.length;
+      const subToday = document.getElementById('widgetSubToday');
+      if (subToday) subToday.textContent = todayList.length > 0 ? `${todayList.length} due today` : 'None due today';
+    }
+
+    const widgetSoon = document.getElementById('widgetCountSoon');
+    if (widgetSoon) {
+      widgetSoon.textContent = soonList.length;
+      const subSoon = document.getElementById('widgetSubSoon');
+      if (subSoon) subSoon.textContent = soonList.length > 0 ? `${soonList.length} due in next 48h` : 'None in next 48h';
+    }
+
+    const widgetTotalPill = document.getElementById('widgetTotalAlertsPill');
+    if (widgetTotalPill) {
+      if (totalCount > 0) {
+        widgetTotalPill.textContent = `${totalCount} Action Required`;
+        widgetTotalPill.className = 'deadline-pill ' + (overdueList.length > 0 ? 'deadline-pill-overdue' : 'deadline-pill-today');
+      } else {
+        widgetTotalPill.textContent = `All On Track`;
+        widgetTotalPill.className = 'deadline-pill deadline-pill-ontrack';
+      }
+    }
+  }
+
+  function renderAlertDrawerItems(allAlerts, overdueList, todayList, soonList) {
+    const listEl = document.getElementById('deadlineAlertList');
+    if (!listEl) return;
+
+    let itemsToRender = [];
+    if (currentAlertTab === 'overdue') itemsToRender = overdueList;
+    else if (currentAlertTab === 'today') itemsToRender = todayList;
+    else if (currentAlertTab === 'soon') itemsToRender = soonList;
+    else itemsToRender = allAlerts;
+
+    if (itemsToRender.length === 0) {
+      listEl.innerHTML = `
+        <div class="deadline-empty-state">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <div class="empty-state-title">No Pending Alerts</div>
+          <p class="empty-state-desc">All project milestones for this category are on schedule.</p>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = itemsToRender.map(item => {
+      const r = item.request;
+      const a = item.alert;
+      const sevClass = a.status === 'overdue' ? 'sev-overdue' : (a.status === 'today' ? 'sev-today' : 'sev-soon');
+      const pillClass = a.status === 'overdue' ? 'deadline-pill-overdue' : (a.status === 'today' ? 'deadline-pill-today' : 'deadline-pill-soon');
+
+      return `
+        <div class="deadline-alert-item ${sevClass}" data-req-id="${r.id}">
+          <div class="alert-item-header">
+            <div class="alert-item-left">
+              <div class="alert-item-topline">
+                <span class="alert-jo-badge">${escapeHTML(r.requestId || r.joNumber || r.id)}</span>
+                <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:1px 6px;">${escapeHTML(r.projectStatus)}</span>
+              </div>
+              <h4 class="alert-project-title" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</h4>
+            </div>
+            <span class="deadline-pill ${pillClass}">${escapeHTML(a.diffText)}</span>
+          </div>
+
+          <div class="alert-item-meta">
+            <span class="alert-meta-point">Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+            <span class="alert-meta-point">Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+          </div>
+
+          <div class="alert-item-actions">
+            <button class="alert-action-btn btn-view-table" onclick="window.SignDepotApp.filterByDeadlineProject('${r.id}')" title="Find and highlight in table">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>View in Table</span>
+            </button>
+            <button class="alert-action-btn btn-view-directive" onclick="window.SignDepotApp.openDirectiveForRequest('${r.id}')" title="Open Job Order Blueprint">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
+              <span>Directive</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ==========================================================================
+  // PUBLIC API (Exposed on window.SignDepotApp)
+  // ==========================================================================
+
+  window.SignDepotApp = {
+    openEnvOptionMenu: openEnvOptionMenu,
+    setDirectiveEnvType: setDirectiveEnvType,
+    setActivityFilter: (f) => renderRecentActivityFeed(f),
+    refreshRecentActivity: () => renderRecentActivityFeed(currentActivityFilter, true),
+    clearTrackerKpiFilter: () => {
+      state.trackerKpiFilter = 'all';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.designStatus = '';
+      state.trackerFilter.artist = '';
+      state.trackerFilter.overdue = '';
+      state.trackerFilter.search = '';
+      state.trackerFilter.page = 1;
+      const statusSel = document.getElementById('trackerFilterProjectStatus');
+      if (statusSel) statusSel.value = '';
+      const overdueSel = document.getElementById('trackerFilterOverdue');
+      if (overdueSel) overdueSel.value = '';
+      const searchInput = document.getElementById('trackerSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderCreativesTracker();
+      showToast('Showing all tasks in Creatives Tracker', 'info');
+    },
+    switchTrackerAcceptanceTab: (tabKey) => {
+      state.trackerAcceptanceTab = tabKey || 'accepted';
+      state.trackerFilter.page = 1;
+      renderCreativesTracker();
+      const labels = {
+        accepted: 'Accepted Projects',
+        pending: 'Pending Projects (To be Accepted)',
+        all: 'All Projects'
+      };
+      showToast('Viewing ' + (labels[tabKey] || 'Accepted Projects'), 'info');
+    },
+    acceptArtistProject: (id) => {
+      if (!id) return;
+      const rec = (state.requests || []).find(r => String(r.id) === String(id) || String(r.requestId) === String(id));
+      if (!rec) {
+        showToast('Task not found', 'error');
+        return;
+      }
+      const todayStr = (new Date()).toISOString().slice(0, 10);
+      rec.artistAccepted = 'Accepted';
+      rec.artistAcceptedDate = todayStr;
+      if (rec.designStatus === 'On Queue' || rec.designStatus === 'Not Started' || !rec.designStatus) {
+        rec.designStatus = 'Ongoing';
+      }
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=accept_artist_project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: rec.id })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && window.PmsCache) window.PmsCache.invalidate();
+        })
+        .catch(err => console.error('Accept project network error:', err));
+      }
+      renderCreativesTracker();
+      updateDashboardKPIs();
+      showToast('Project ' + rec.requestId + ' accepted! Moved to Accepted Projects.', 'success');
+    },
+    handleKpiCardClick: (type) => {
+      if (state.dashboardKpiFilter === type && type !== 'all') {
+        state.dashboardKpiFilter = 'all';
+      } else {
+        state.dashboardKpiFilter = type;
+      }
+      const statusSelect = document.getElementById('dashboardFilterStatus');
+      if (statusSelect) statusSelect.value = '';
+      state.dashboardStatus = '';
+      const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+      if (deadlineSelect && type !== 'overdue') {
+        deadlineSelect.value = '';
+        state.dashboardDeadline = '';
+      }
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+    openKpiQuickView: (type) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (!modal) return;
+      const titleEl = document.getElementById('kpiQuickViewTitle');
+      const countEl = document.getElementById('kpiQuickViewCount');
+      const descEl = document.getElementById('kpiQuickViewDesc');
+      const content = document.getElementById('kpiQuickViewContent');
+      const filterBtn = document.getElementById('btnKpiModalFilterTable');
+      const titles = {
+        all: { title: 'Total Production Requests', desc: 'All active and historical sales orders logged in system' },
+        pending: { title: 'Pending Approval Tasks', desc: 'Awaiting creative lead or client design approval' },
+        working: { title: 'Active Production / On-going', desc: 'Currently being actively designed and fabricated' },
+        approved: { title: 'Approved Creative Directives', desc: 'Directives that have passed final approval' },
+        revising: { title: 'Revisions in Progress', desc: 'Design directives under customer-requested revisions' },
+        overdue: { title: 'Overdue Directives', desc: 'Active tasks past their specified deadline target date' }
+      };
+      const meta = titles[type] || titles.all;
+      if (titleEl) titleEl.textContent = meta.title;
+      if (descEl) descEl.textContent = meta.desc;
+      const items = (typeof getKpiFilteredRequests === 'function') ? getKpiFilteredRequests(type) : [];
+      if (countEl) countEl.textContent = '(' + items.length + ' items)';
+      if (content) {
+        if (items.length === 0) {
+          content.innerHTML = '<div style="text-align:center; padding:32px 16px; color:var(--text-muted); font-size:13px;">There are currently no active projects matching this category.</div>';
+        } else {
+          content.innerHTML = items.map(r => `
+            <div class="kpi-modal-item">
+              <div class="kpi-modal-item-left">
+                <div class="kpi-modal-item-title-row">
+                  <span class="kpi-modal-req">${escapeHTML(r.requestId)}</span>
+                  <span class="kpi-modal-jo">${escapeHTML(r.joNumber)}</span>
+                  <span class="kpi-modal-name" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+                </div>
+                <div class="kpi-modal-meta">
+                  <span>Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+                  <span>Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+                  <span>Sales: <strong>${escapeHTML(r.salesRep || '-')}</strong></span>
+                  <span>Status: <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
+                </div>
+              </div>
+              <div class="kpi-modal-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.viewProjectInQueue('${r.id}')" title="Find in Live Table">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  Table
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
+                  Directive
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+      if (filterBtn) {
+        filterBtn.onclick = () => {
+          modal.classList.remove('show');
+          window.SignDepotApp.navigateToPageTable(type);
+        };
+        filterBtn.textContent = 'Open in Tracker Table (' + items.length + ') ↗';
+      }
+      modal.classList.add('show');
+    },
+    viewProjectInQueue: (reqId) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (modal) modal.classList.remove('show');
+      window.SignDepotApp.filterByDeadlineProject(reqId);
+    },
+    setAlertTab: (tab) => {
+      currentAlertTab = tab;
+      document.querySelectorAll('.deadline-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-alert-tab') === tab);
+      });
+      updateDeadlineAlertCenter();
+    },
+    toggleDeadlineAlertDrawer: (force) => {
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (!dropdown) return;
+      if (typeof force === 'boolean') {
+        dropdown.classList.toggle('show', force);
+      } else {
+        dropdown.classList.toggle('show');
+      }
+    },
+    filterDashboardDeadlines: (type) => {
+      const select = document.getElementById('dashboardFilterDeadline');
+      const cards = {
+        overdue: document.getElementById('cardFilterOverdue'),
+        today: document.getElementById('cardFilterToday'),
+        soon: document.getElementById('cardFilterSoon')
+      };
+      if (state.dashboardDeadline === type) {
+        state.dashboardDeadline = '';
+        if (select) select.value = '';
+        Object.values(cards).forEach(c => c && c.classList.remove('active'));
+      } else {
+        state.dashboardDeadline = type;
+        if (select) select.value = type;
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === type);
+        });
+      }
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+    switchView: switchView,
+    renderSalesRequests: renderSalesRequests,
+    renderCreativesTracker: renderCreativesTracker,
+    renderDashboardRecentProjectsTable: renderDashboardRecentProjectsTable,
+    canUserEditField: canUserEditField,
+    canUserAccessTab: canUserAccessTab,
+    getCurrentUserPermissions: getCurrentUserPermissions,
+    openNewSalesRequestModal: openNewSalesRequestModal,
+    editSalesRequest: editSalesRequest,
+    deleteSalesRequest: deleteSalesRequest,
+    formatRequestIdInput: formatRequestIdInput,
+    getNextRequestId: getNextRequestId,
+    showCustomConfirm: showCustomConfirm,
+    resetSalesFilters: resetSalesRequestsFilters,
+    resetTrackerFilters: resetCreativesTrackerFilters,
+    renderProgressTimeline: renderProgressTimeline,
+    renderRecentActivityFeed: renderRecentActivityFeed,
+    refreshRecentActivity: () => renderRecentActivityFeed(currentActivityFilter),
+    showTimelineTooltip: showTimelineTooltip,
+    hideTimelineTooltip: hideTimelineTooltip,
+    getState: () => state,
+
+    // KPI Cards Clickable & Viewable Public API (SPA + Multi-Page Aware)
+    navigateToPageTable: (type) => {
+      // 1. In Single-Page App mode (GAS or single page with view-panels in DOM):
+      const creativesPanel = document.getElementById('view-creatives-tracker');
+      const isGas = typeof google !== 'undefined' && google.script;
+      if (creativesPanel || isGas) {
+        if (typeof switchView === 'function') {
+          switchView('view-creatives-tracker');
+        }
+        if (typeof window.SignDepotApp.applyKpiFilterToCreativesTracker === 'function') {
+          window.SignDepotApp.applyKpiFilterToCreativesTracker(type);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // 2. Multi-page fallback for standalone static HTML pages
+      sessionStorage.setItem('SIGN_DEPOT_ACTIVE_KPI', type);
+      const currentPath = window.location.pathname.replace(/\\/g, '/');
+      const isInsidePagesFolder = currentPath.toLowerCase().includes('/pages/');
+      const isPhp = window.location.pathname.endsWith('.php') || typeof window.PMS_API_URL !== 'undefined';
+      const ext = isPhp ? '.php' : '.html';
+      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-production' + ext + '?kpi=' + encodeURIComponent(type);
+      window.location.href = targetUrl;
+    },
+
+    applyKpiFilterToCreativesTracker: (type) => {
+      if (state.trackerKpiFilter === type && type !== 'all') {
+        state.trackerKpiFilter = 'all';
+      } else {
+        state.trackerKpiFilter = type || 'all';
+      }
+
+      state.trackerFilter.page = 1;
+
+      // Reset dropdown inputs to match cleanly
+      const statusSelect = document.getElementById('trackerFilterProjectStatus');
+      const overdueSelect = document.getElementById('trackerFilterOverdue');
+      if (statusSelect) statusSelect.value = '';
+      if (overdueSelect) overdueSelect.value = '';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.overdue = '';
+
+      renderCreativesTracker();
+
+      const labels = {
+        all: 'All Requests',
+        pending: 'Pending Approval',
+        working: 'Working / On-Going',
+        approved: 'Approved',
+        revising: 'Revising',
+        overdue: 'Overdue'
+      };
+      showToast(`Showing ${labels[state.trackerKpiFilter] || 'All'} in Creatives Tracker`, 'info');
+    },
+
+    clearTrackerKpiFilter: () => {
+      state.trackerKpiFilter = 'all';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.designStatus = '';
+      state.trackerFilter.artist = '';
+      state.trackerFilter.overdue = '';
+      state.trackerFilter.search = '';
+      state.trackerFilter.page = 1;
+      const statusSel = document.getElementById('trackerFilterProjectStatus');
+      if (statusSel) statusSel.value = '';
+      const overdueSel = document.getElementById('trackerFilterOverdue');
+      if (overdueSel) overdueSel.value = '';
+      const searchInput = document.getElementById('trackerSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderCreativesTracker();
+      showToast('Showing all tasks in Creatives Tracker', 'info');
+    },
+
+    switchTrackerAcceptanceTab: (tabKey) => {
+      state.trackerAcceptanceTab = tabKey || 'accepted';
+      state.trackerFilter.page = 1;
+      renderCreativesTracker();
+      const labels = {
+        accepted: 'Accepted Projects',
+        pending: 'Pending Projects (To be Accepted)',
+        all: 'All Projects'
+      };
+      showToast(`Viewing ${labels[tabKey] || 'Accepted Projects'}`, 'info');
+    },
+
+    acceptArtistProject: (id) => {
+      if (!id) return;
+      const rec = (state.requests || []).find(r => String(r.id) === String(id) || String(r.requestId) === String(id));
+      if (!rec) {
+        showToast('Task not found', 'error');
+        return;
+      }
+
+      const todayStr = (new Date()).toISOString().slice(0, 10);
+      rec.artistAccepted = 'Accepted';
+      rec.artistAcceptedDate = todayStr;
+      if (rec.designStatus === 'On Queue' || rec.designStatus === 'Not Started' || !rec.designStatus) {
+        rec.designStatus = 'Ongoing';
+      }
+
+      // Sync to backend MySQL
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=accept_artist_project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: rec.id })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success) {
+            if (window.PmsCache) window.PmsCache.invalidate();
+          } else if (!res || !res.success) {
+            console.warn('Backend sync response:', res);
+          }
+        })
+        .catch(err => console.error('Accept project network error:', err));
+      }
+
+      renderCreativesTracker();
+      updateDashboardKPIs();
+      showToast(`Project ${rec.requestId} accepted! Moved to Accepted Projects.`, 'success');
+    },
+
+    handleKpiCardClick: (type) => {
+      if (state.dashboardKpiFilter === type && type !== 'all') {
+        state.dashboardKpiFilter = 'all';
+      } else {
+        state.dashboardKpiFilter = type;
+      }
+
+      // Reset specific conflicting filters if any
+      const statusSelect = document.getElementById('dashboardFilterStatus');
+      if (statusSelect) statusSelect.value = '';
+      state.dashboardStatus = '';
+      
+      const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+      if (deadlineSelect && type !== 'overdue') {
+        deadlineSelect.value = '';
+        state.dashboardDeadline = '';
+      }
+
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+
+      // Smooth scroll to table
+      const queueSection = document.getElementById('liveProductionQueueCard');
+      if (queueSection) {
+        queueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      const labels = {
+        all: 'All Requests',
+        pending: 'Pending Approval',
+        working: 'Working / On-Going',
+        completed: 'Completed',
+        revising: 'Revising',
+        overdue: 'Overdue'
+      };
+      showToast(`Showing ${labels[state.dashboardKpiFilter] || 'All'} in Production Queue`, 'info');
+    },
+
+    openKpiQuickView: (type) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      const content = document.getElementById('kpiModalContent');
+      const title = document.getElementById('kpiModalTitle');
+      const badge = document.getElementById('kpiModalBadge');
+      const footerCount = document.getElementById('kpiModalFooterCount');
+      const filterBtn = document.getElementById('btnKpiModalFilterTable');
+      if (!modal || !content) return;
+
+      const items = getKpiFilteredRequests(type);
+
+      const metaMap = {
+        all: { title: 'Total Active Requests', badge: 'All Records', badgeClass: 'badge-ongoing' },
+        pending: { title: 'Pending Approval Queue', badge: 'Queue', badgeClass: 'badge-pending' },
+        working: { title: 'Working & On-Going Projects', badge: 'In Progress', badgeClass: 'badge-ongoing' },
+        approved: { title: 'Approved Projects', badge: 'Approved', badgeClass: 'badge-approved' },
+        completed: { title: 'Approved Projects', badge: 'Approved', badgeClass: 'badge-approved' },
+        revising: { title: 'Client Revision Requests', badge: 'Feedback', badgeClass: 'badge-revising' },
+        overdue: { title: 'Past Due / Overdue Projects', badge: 'Past Due', badgeClass: 'badge-priority-rush' }
+      };
+
+      const meta = metaMap[type] || metaMap['all'];
+      if (title) title.textContent = meta.title;
+      if (badge) {
+        badge.textContent = meta.badge;
+        badge.className = `badge ${meta.badgeClass}`;
+      }
+      if (footerCount) {
+        footerCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'project' : 'projects'}`;
+      }
+
+      if (items.length === 0) {
+        content.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 8px;">
+              <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div style="font-size: 15px; font-weight: 700; color: #1E293B;">No Projects in this Category</div>
+            <p style="font-size: 13px; margin-top: 4px;">There are currently no active projects matching "${meta.title}".</p>
+          </div>
+        `;
+      } else {
+        content.innerHTML = items.map(r => {
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          let deadlinePill = '';
+          if (alertInfo.status === 'overdue') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-overdue">${alertInfo.pillText}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-today">Today</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-soon">${alertInfo.pillText}</span>`;
+          }
+
+          return `
+            <div class="kpi-modal-item">
+              <div class="kpi-modal-item-left">
+                <div class="kpi-modal-item-title-row">
+                  <span class="kpi-modal-req">${escapeHTML(r.requestId)}</span>
+                  <span class="kpi-modal-jo">${escapeHTML(r.joNumber)}</span>
+                  <span class="kpi-modal-name" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+                  ${deadlinePill}
+                </div>
+                <div class="kpi-modal-meta">
+                  <span>Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+                  <span>Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+                  <span>Sales: <strong>${escapeHTML(r.salesRep || '-')}</strong></span>
+                  <span>Status: <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
+                </div>
+              </div>
+              <div class="kpi-modal-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.viewProjectInQueue('${r.id}')" title="Find in Live Table">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  Table
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
+                  Directive
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (filterBtn) {
+        filterBtn.onclick = () => {
+          modal.classList.remove('show');
+          window.SignDepotApp.navigateToPageTable(type);
+        };
+        filterBtn.textContent = `Open in Tracker Table (${items.length}) â†—`;
+      }
+
+      modal.classList.add('show');
+    },
+
+    viewProjectInQueue: (reqId) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (modal) modal.classList.remove('show');
+      window.SignDepotApp.filterByDeadlineProject(reqId);
+    },
+
+    // Deadline Alert Center Public API
+    setAlertTab: (tab) => {
+      currentAlertTab = tab;
+      document.querySelectorAll('.deadline-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-alert-tab') === tab);
+      });
+      updateDeadlineAlertCenter();
+    },
+
+    toggleDeadlineAlertDrawer: (force) => {
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (!dropdown) return;
+      if (typeof force === 'boolean') {
+        dropdown.classList.toggle('show', force);
+      } else {
+        dropdown.classList.toggle('show');
+      }
+    },
+
+    filterDashboardDeadlines: (type) => {
+      const select = document.getElementById('dashboardFilterDeadline');
+      const cards = {
+        overdue: document.getElementById('cardFilterOverdue'),
+        today: document.getElementById('cardFilterToday'),
+        soon: document.getElementById('cardFilterSoon')
+      };
+
+      if (state.dashboardDeadline === type) {
+        state.dashboardDeadline = '';
+        if (select) select.value = '';
+        Object.values(cards).forEach(c => c && c.classList.remove('active'));
+      } else {
+        state.dashboardDeadline = type;
+        if (select) select.value = type;
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === type);
+        });
+      }
+
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+
+    filterByDeadlineProject: (reqId) => {
+      const rec = state.requests.find(r => r.id === reqId);
+      if (!rec) return;
+
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (dropdown) dropdown.classList.remove('show');
+
+      const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+
+      const isGas = typeof google !== 'undefined' && google.script;
+      if ((state.activeView === 'view-dashboard') || currentFile === 'index.html' || currentFile === '' || isGas) {
+        state.dashboardSearch = rec.requestId;
+        state.dashboardStatus = '';
+        state.dashboardDeadline = '';
+        const searchInput = document.getElementById('dashboardSearchInput');
+        if (searchInput) searchInput.value = rec.requestId;
+        const statusSelect = document.getElementById('dashboardFilterStatus');
+        if (statusSelect) statusSelect.value = '';
+        const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+        if (deadlineSelect) deadlineSelect.value = '';
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+
+        setTimeout(() => {
+          const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+          if (row) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            row.classList.add('table-row-highlight');
+            setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+          }
+        }, 150);
+        showToast(`Viewing ${rec.requestId} - ${rec.projectName}`, 'info');
+      } else {
+        if (document.getElementById('trackerSearchInput')) {
+          state.trackerFilter.search = rec.requestId;
+          state.trackerFilter.projectStatus = '';
+          state.trackerFilter.designStatus = '';
+          state.trackerFilter.artist = '';
+          state.trackerFilter.overdue = '';
+          state.trackerFilter.page = 1;
+          const tSearch = document.getElementById('trackerSearchInput');
+          if (tSearch) tSearch.value = rec.requestId;
+          renderCreativesTracker();
+          setTimeout(() => {
+            const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('table-row-highlight');
+              setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+            }
+          }, 150);
+          showToast(`Viewing ${rec.requestId} in Creatives Tracker`, 'info');
+        } else if (document.getElementById('salesSearchInput')) {
+          state.salesFilter.search = rec.requestId;
+          state.salesFilter.priority = '';
+          state.salesFilter.approval = '';
+          state.salesFilter.fileSent = '';
+          state.salesFilter.salesRep = '';
+          state.salesFilter.deadline = '';
+          state.salesFilter.page = 1;
+          const sSearch = document.getElementById('salesSearchInput');
+          if (sSearch) sSearch.value = rec.requestId;
+          renderSalesRequests();
+          setTimeout(() => {
+            const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('table-row-highlight');
+              setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+            }
+          }, 150);
+          showToast(`Viewing ${rec.requestId} in Sales Requests`, 'info');
+        } else {
+          window.SignDepotApp.openDirectiveForJo(rec.joNumber);
+        }
+      }
+    },
+
+    openDirectiveForRequest: (reqId) => {
+      const rec = state.requests.find(r => r.id === reqId);
+      if (rec && rec.joNumber) {
+        const dropdown = document.getElementById('deadlineAlertDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+        window.SignDepotApp.openDirectiveForJo(rec.joNumber);
+      }
+    },
+
+    updateDeadlineAlertCenter: () => updateDeadlineAlertCenter(),
+    openCustomDropdown: (btn, ev) => openCustomDropdown(btn, ev),
+    closeCustomDropdown: () => closeCustomDropdown(),
+    upgradeAllFormSelects: () => upgradeAllFormSelects(),
+    syncAllFormDropdowns: () => syncAllFormDropdowns(),
+
+    addNewSalesRequestRow: () => addNewSalesRequestRow(),
+    saveDraftSalesRequest: () => saveDraftSalesRequest(),
+    cancelDraftSalesRequest: () => cancelDraftSalesRequest(),
+    handleDraftKey: (e) => handleDraftKey(e),
+
+    // Direct Inline Editing Handlers
+    handleInlineTextBlur: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      const text = el.innerText;
+      updateRequestField(reqId, field, text, el);
+    },
+    handleInlineTextKey: (e, el) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el.blur();
+      } else if (e.key === 'Tab') {
+        const row = el.closest('tr');
+        if (row) {
+          const cells = Array.from(row.querySelectorAll('.editable-cell, .custom-select-btn:not(.is-readonly), .inline-date-input:not([disabled])'));
+          const idx = cells.indexOf(el);
+          if (idx !== -1) {
+            const next = e.shiftKey ? cells[idx - 1] : cells[idx + 1];
+            if (next) {
+              e.preventDefault();
+              el.blur();
+              next.focus();
+            }
+          }
+        }
+      }
+    },
+    handleInlineSelectChange: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      updateRequestField(reqId, field, el.value, el);
+      showToast(`Updated ${field} to ${el.value}.`);
+    },
+    handleInlineDateChange: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      updateRequestField(reqId, field, el.value, el);
+      showToast(`Deadline updated to ${formatDate(el.value)}.`);
+    },
+    handleInlineNumberChange: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      updateRequestField(reqId, field, el.value, el);
+    },
+    toggleTaskCompletion: (id) => {
+      const rec = state.requests.find(r => r.id === id);
+      if (rec) {
+        if (rec.projectStatus === 'Completed') {
+          rec.projectStatus = 'On-going';
+          rec.designStatus = 'In Progress';
+          rec.completionDate = null;
+          showToast(`Task ${rec.requestId} marked in progress.`);
+        } else {
+          rec.projectStatus = 'Completed';
+          rec.designStatus = 'Submitted';
+          rec.completionDate = '2026-10-23';
+          showToast(`Task ${rec.requestId} marked as Completed!`);
+        }
+        saveStateToStorage();
+        renderDashboard();
+      }
+    },
+
+    openDirectiveForJo: (jo, reqId, id) => {
+      const identifier = (reqId && String(reqId).trim()) ? String(reqId).trim() :
+                         ((jo && String(jo).trim()) ? String(jo).trim() :
+                         ((id !== undefined && id !== null && String(id).trim()) ? String(id).trim() : ''));
+      state.currentDirectiveJo = identifier;
+      try { sessionStorage.setItem('SIGN_DEPOT_CURRENT_DIRECTIVE', identifier); } catch (e) {}
+      saveStateToStorage();
+      if (document.getElementById('view-directives-details')) {
+        switchView('view-directives-details');
+        renderDirectivePreview(identifier);
+      } else {
+        window.location.href = getPageUrl('directives-details.html') + '?id=' + encodeURIComponent(identifier);
+      }
+    },
+    selectAutocompleteJo: (joOrReq) => {
+      const box = document.getElementById('directiveAutocompleteBox');
+      if (box) box.classList.remove('show');
+      renderDirectivePreview(joOrReq);
+      showToast(`Loaded directive for ${joOrReq}.`);
+    },
+
+    setSalesPage: (p) => {
+      state.salesFilter.page = p;
+      renderSalesRequests();
+    },
+    setSalesApprovalTab: (tab) => {
+      state.salesFilter.approvalTab = tab || '';
+      state.salesFilter.page = 1;
+      renderSalesRequests();
+    },
+    setSalesPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.salesFilter.perPage = val;
+        state.salesFilter.page = 1;
+        setStoredRowsPerPage(val);
+        renderSalesRequests();
+      }
+    },
+
+    setTrackerPage: (p) => {
+      state.trackerFilter.page = p;
+      renderCreativesTracker();
+    },
+    setTrackerPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.trackerFilter.perPage = val;
+        state.trackerFilter.page = 1;
+        setStoredRowsPerPage(val);
+        renderCreativesTracker();
+      }
+    },
+
+    setPendingSalesPage: (p) => {
+      state.pendingSalesPage = p;
+      renderPendingSalesQueue();
+    },
+    setPendingSalesPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.pendingSalesPerPage = val;
+        state.pendingSalesPage = 1;
+        setStoredRowsPerPage(val);
+        renderPendingSalesQueue();
+      }
+    },
+
+    setPendingArtistPage: (p) => {
+      state.pendingArtistPage = p;
+      renderPendingArtistQueue();
+    },
+    setPendingArtistPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.pendingArtistPerPage = val;
+        state.pendingArtistPage = 1;
+        setStoredRowsPerPage(val);
+        renderPendingArtistQueue();
+      }
+    },
+
+    setWorkloadPage: (p) => {
+      state.workloadPage = p;
+      renderWorkloadDetailsTable();
+    },
+    setWorkloadPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.workloadPerPage = val;
+        state.workloadPage = 1;
+        setStoredRowsPerPage(val);
+        renderWorkloadDetailsTable();
+      }
+    },
+
+    setDashboardPage: (p) => {
+      state.dashboardPage = p;
+      renderDashboardRecentProjectsTable();
+    },
+    setDashboardPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.dashboardPerPage = val;
+        state.dashboardPage = 1;
+        setStoredRowsPerPage(val);
+        renderDashboardRecentProjectsTable();
+      }
+    },
+
+    setMonthlyOutputTimeframe: (tf) => {
+      renderMonthlyOutputReport(tf);
+    },
+    renderMonthlyOutputReport: (tf) => {
+      renderMonthlyOutputReport(tf);
+    },
+    setMonthlyOutputFilter: (filterObj) => {
+      initOutputFilterState();
+      if (filterObj && typeof filterObj === 'object') {
+        Object.assign(state.outputFilter, filterObj);
+      }
+      renderMonthlyOutputReport();
+    },
+    setMonthlyOutputPage: (p) => {
+      state.monthlyOutputPage = p;
+      renderMonthlyOutputReport();
+    },
+    setMonthlyOutputPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.monthlyOutputPerPage = val;
+        state.monthlyOutputPage = 1;
+        setStoredRowsPerPage(val);
+        renderMonthlyOutputReport();
+      }
+    },
+    duplicateSalesRequest: (id) => {
+      const rec = state.requests.find(r => r.id === id);
+      if (!rec) return;
+
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const cloned = JSON.parse(JSON.stringify(rec));
+      cloned.id = `req-${Date.now()}`;
+      cloned.requestId = `LR-26-${randomNum}`;
+      cloned.joNumber = `P2607${randomNum}`;
+      cloned.projectName = `${rec.projectName} (Copy)`;
+      cloned.projectStatus = 'Pending';
+      cloned.designStatus = 'Not Started';
+      cloned.completionDate = null;
+
+      state.requests.unshift(cloned);
+      saveStateToStorage();
+      renderCurrentView(state.activeView);
+      showToast(`Cloned into ${cloned.requestId}`);
+    },
+
+    setTrackerPage: (p) => {
+      state.trackerFilter.page = p;
+      renderCreativesTracker();
+    },
+    resetTrackerFilters: () => {
+      resetCreativesTrackerFilters();
+    },
+
+    selectWorkloadArtist: (artist) => {
+      state.workloadFilter.selectedArtist = (state.workloadFilter.selectedArtist === artist) ? '' : artist;
+      renderWorkloadDetailsTable();
+    },
+
+    quickSalesApprove: (id) => {
+      const rec = state.requests.find(r => r.id === id);
+      if (rec) {
+        rec.clientApproval = 'Approved';
+        rec.projectStatus = 'Approved';
+        saveStateToStorage();
+        renderPendingSalesQueue();
+        showToast(`Project ${rec.requestId} approved.`);
+      }
+    },
+
+    previewAttachment: (id) => {
+      const att = state.attachments.find(a => a.id === id);
+      if (!att) return;
+      document.getElementById('attachmentModalTitle').textContent = att.name;
+      const resolvedUrl = resolveAttachmentUrl(att.url);
+      document.getElementById('attachmentModalImg').src = resolvedUrl;
+      document.getElementById('attachmentPreviewModal').classList.add('show');
+    },
+    deleteAttachment: (id) => {
+      state.attachments = state.attachments.filter(a => a.id !== id);
+      saveStateToStorage();
+      renderAttachmentsList();
+      showToast('Attachment deleted.');
+    },
+
+    removeArtist: (artist) => {
+      if (state.artists.length <= 1) {
+        showToast('Must have at least one artist.', 'error');
+        return;
+      }
+      state.artists = state.artists.filter(a => a !== artist && a.toLowerCase() !== artist.toLowerCase());
+      saveStateToStorage();
+      renderSettings();
+      populateSalesFiltersDropdowns();
+      populateTrackerFiltersDropdowns();
+      showToast(`Removed artist ${artist}.`);
+
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=delete_artist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: artist })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            state.artists = res.data;
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+            populateTrackerFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('delete_artist API error:', e));
+      }
+    },
+    removeSales: (rep) => {
+      if (state.salesReps.length <= 1) {
+        showToast('Must have at least one sales rep.', 'error');
+        return;
+      }
+      state.salesReps = state.salesReps.filter(s => s !== rep && s.toLowerCase() !== rep.toLowerCase());
+      saveStateToStorage();
+      renderSettings();
+      populateSalesFiltersDropdowns();
+      showToast(`Removed sales rep ${rep}.`);
+
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=delete_sales_rep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: rep })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            state.salesReps = res.data;
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('delete_sales_rep API error:', e));
+      }
+    }
+  };
+
+  // ==========================================================================
+  // EVENT LISTENERS INITIALIZATION
+  // ==========================================================================
+
+  function initEventListeners() {
+    // Sidebar Desktop Collapse Toggle & Mobile Offcanvas Drawer
+    function ensureMobileBackdrop() {
+      let backdrop = document.querySelector('.sidebar-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(backdrop);
+      }
+      return backdrop;
+    }
+
+    function closeMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      const backdrop = document.querySelector('.sidebar-backdrop');
+      if (appSidebar) appSidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+
+    function openMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      const backdrop = ensureMobileBackdrop();
+      if (appSidebar) appSidebar.classList.add('mobile-open');
+      if (backdrop) backdrop.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+
+    function toggleMobileSidebar() {
+      if (typeof window.toggleMobileSidebar === 'function' && window.toggleMobileSidebar !== toggleMobileSidebar) {
+        window.toggleMobileSidebar();
+        return;
+      }
+      const appSidebar = document.getElementById('appSidebar');
+      if (appSidebar && appSidebar.classList.contains('mobile-open')) {
+        closeMobileSidebar();
+      } else {
+        openMobileSidebar();
+      }
+    }
+
+    function toggleDesktopSidebar() {
+      if (typeof window.toggleDesktopSidebar === 'function' && window.toggleDesktopSidebar !== toggleDesktopSidebar) {
+        window.toggleDesktopSidebar();
+        return;
+      }
+      const appSidebar = document.getElementById('appSidebar');
+      if (!appSidebar) return;
+      const isCollapsed = appSidebar.classList.contains('collapsed');
+      appSidebar.classList.toggle('collapsed', !isCollapsed);
+      const activeTip = document.getElementById('sdGlobalTooltip');
+      if (activeTip) activeTip.classList.remove('show');
+      try {
+        localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', !isCollapsed ? '1' : '0');
+      } catch (err) {}
+    }
+
+    // Delegated click handler for 100% reliable clicks on buttons and child SVGs
+    document.addEventListener('click', (e) => {
+      // If modular components.js navigation is already active, prevent duplicate handling
+      if (window.SignDepotNav) return;
+
+      const mobileBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn');
+      if (mobileBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        toggleMobileSidebar();
+        return;
+      }
+
+      const closeBtn = e.target.closest('#sidebarCloseBtn, .sidebar-close-btn');
+      if (closeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        closeMobileSidebar();
+        return;
+      }
+
+      const collapseBtn = e.target.closest('#sidebarCollapseBtn, .sidebar-collapse-btn');
+      if (collapseBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if (window.innerWidth <= 992) {
+          closeMobileSidebar();
+        } else {
+          toggleDesktopSidebar();
+        }
+        return;
+      }
+
+      if (e.target.closest('.sidebar-backdrop')) {
+        closeMobileSidebar();
+        return;
+      }
+
+      if (e.target.closest('.sidebar-nav .nav-item') && window.innerWidth <= 992) {
+        closeMobileSidebar();
+      }
+    });
+
+    // Restore desktop collapsed preference
+    try {
+      if (window.innerWidth > 992 && localStorage.getItem('SIGN_DEPOT_SIDEBAR_COLLAPSED') === '1') {
+        const appSidebar = document.getElementById('appSidebar');
+        if (appSidebar) appSidebar.classList.add('collapsed');
+      }
+    } catch (err) {}
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMobileSidebar();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        closeMobileSidebar();
+      } else {
+        const appSidebar = document.getElementById('appSidebar');
+        if (appSidebar) appSidebar.classList.remove('collapsed');
+      }
+    });
+
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (window.innerWidth <= 992) {
+          closeMobileSidebar();
+        }
+        const href = item.getAttribute('href');
+        const viewId = item.getAttribute('data-view');
+
+        if (href && href !== '#' && !href.startsWith('javascript:')) {
+          const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+          const targetFile = (href.replace(/\\/g, '/').split('?')[0].split('/').pop() || 'index.html').toLowerCase();
+          if (targetFile !== currentFile) {
+            // Allow native browser navigation across distinct HTML pages
+            return;
+          }
+        }
+
+        e.preventDefault();
+        if (viewId) switchView(viewId);
+      });
+    });
+
+    const brandHomeLink = document.getElementById('brandHomeLink');
+    if (brandHomeLink && !brandHomeLink.getAttribute('href')?.includes('signdepot.ph')) {
+      brandHomeLink.addEventListener('click', (e) => {
+        if (document.getElementById('view-dashboard')) {
+          e.preventDefault();
+          switchView('view-dashboard');
+          return;
+        }
+        const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+        if (currentFile !== 'index.html') {
+          return;
+        }
+        e.preventDefault();
+        switchView('view-dashboard');
+      });
+    }
+
+    const handleNewRequestTrigger = (e) => {
+      if (e) e.preventDefault();
+      if (document.getElementById('salesModal')) {
+        openNewSalesRequestModal();
+      } else {
+        const pagesPrefix = window.location.pathname.includes('/pages/') ? './' : './pages/';
+        window.location.href = pagesPrefix + 'sales-requests.php?action=add_new';
+      }
+    };
+
+    const btnNewReqDash = document.getElementById('btnDashboardNewRequest');
+    if (btnNewReqDash) {
+      btnNewReqDash.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    const btnPanzeAdd = document.getElementById('btnPanzeAddTask');
+    if (btnPanzeAdd) {
+      btnPanzeAdd.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    const btnSalesNewReq = document.getElementById('btnSalesNewRequest');
+    if (btnSalesNewReq) {
+      btnSalesNewReq.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    // Delegated click handler for save (✓) and cancel (✕) buttons on the draft row
+    document.addEventListener('click', (e) => {
+      const saveBtn = e.target.closest && e.target.closest('.btn-save-draft');
+      if (saveBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        saveDraftSalesRequest();
+        return;
+      }
+      const cancelBtn = e.target.closest && e.target.closest('.btn-cancel-draft');
+      if (cancelBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        cancelDraftSalesRequest();
+        return;
+      }
+    });
+
+    // Auto-trigger new request modal if navigated from external page with ?action=add_new
+    if (window.location.search.includes('action=add_new')) {
+      setTimeout(() => {
+        openNewSalesRequestModal();
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 300);
+    }
+
+    // Automatic separator dash formatting on Request ID input
+    const reqIdInput = document.getElementById('salesFormReqId');
+    if (reqIdInput) {
+      reqIdInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        const formatted = formatRequestIdInput(raw);
+        if (formatted && formatted !== raw) {
+          const oldLen = raw.length;
+          e.target.value = formatted;
+          if (formatted.length > oldLen) {
+            e.target.setSelectionRange(formatted.length, formatted.length);
+          }
+        }
+      });
+      reqIdInput.addEventListener('blur', (e) => {
+        const formatted = formatRequestIdInput(e.target.value);
+        if (formatted) e.target.value = formatted;
+      });
+    }
+
+    const salesSearch = document.getElementById('salesSearchInput');
+    if (salesSearch) {
+      // Purge any errant autofill before binding
+      if (salesSearch.value && (salesSearch.value.toLowerCase().startsWith('sup_') || salesSearch.value.toLowerCase().includes('angel') || salesSearch.value.toLowerCase() === 'superadmin')) {
+        salesSearch.value = '';
+        state.salesFilter.search = '';
+      }
+
+      salesSearch.addEventListener('input', () => {
+        state.salesFilter.search = salesSearch.value.trim();
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    }
+
+    ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep', 'salesFilterLocation'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          if (id === 'salesFilterPriority') state.salesFilter.priority = el.value;
+          if (id === 'salesFilterApproval') {
+            state.salesFilter.approval = el.value;
+            state.salesFilter.approvalTab = el.value;
+          }
+          if (id === 'salesFilterFileSent') state.salesFilter.fileSent = el.value;
+          if (id === 'salesFilterSalesRep') state.salesFilter.salesRep = el.value;
+          if (id === 'salesFilterLocation') state.salesFilter.location = el.value;
+          state.salesFilter.page = 1;
+          renderSalesRequests();
+        });
+      }
+    });
+
+    // Client Approval Status Tabs listener
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabVal = btn.getAttribute('data-tab-approval') || '';
+        state.salesFilter.approvalTab = tabVal;
+        state.salesFilter.approval = tabVal;
+        const selApproval = document.getElementById('salesFilterApproval');
+        if (selApproval) {
+          selApproval.value = tabVal;
+          syncFilterSelectUI(selApproval);
+        }
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    });
+
+    const btnResetSales = document.getElementById('btnResetSalesFilters');
+    if (btnResetSales) {
+      btnResetSales.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetSalesRequestsFilters();
+      });
+    }
+
+    document.querySelectorAll('#view-sales-requests .data-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.getAttribute('data-sort');
+        if (state.salesFilter.sortField === field) {
+          state.salesFilter.sortDir = state.salesFilter.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.salesFilter.sortField = field;
+          state.salesFilter.sortDir = 'asc';
+        }
+        renderSalesRequests();
+      });
+    });
+
+    const btnTrackerNew = document.getElementById('btnTrackerNewTask');
+    if (btnTrackerNew) {
+      btnTrackerNew.addEventListener('click', () => {
+        const myArtist = getLoggedInArtist();
+        const candidateList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
+        const first = candidateList[0] || state.requests[0];
+        if (!first) return;
+        document.getElementById('trackerFormId').value = first.id;
+        document.getElementById('trackerFormReqId').value = first.requestId;
+        document.getElementById('trackerFormProject').value = first.projectName;
+        if (myArtist) {
+          const mArtist = document.getElementById('trackerFormArtist');
+          if (mArtist) mArtist.value = myArtist;
+        }
+        document.getElementById('trackerModalTitle').textContent = `Add Creative Task — ${first.requestId}`;
+        document.getElementById('trackerModal').classList.add('show');
+      });
+    }
+
+    const trackerSearch = document.getElementById('trackerSearchInput');
+    if (trackerSearch) {
+      trackerSearch.addEventListener('input', () => {
+        state.trackerFilter.search = trackerSearch.value.trim();
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterArtist', 'trackerFilterOverdue'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          if (id === 'trackerFilterProjectStatus') state.trackerFilter.projectStatus = el.value;
+          if (id === 'trackerFilterDesignStatus') state.trackerFilter.designStatus = el.value;
+          if (id === 'trackerFilterArtist') state.trackerFilter.artist = el.value;
+          if (id === 'trackerFilterOverdue') state.trackerFilter.overdue = el.value;
+          state.trackerFilter.page = 1;
+          renderCreativesTracker();
+        });
+      }
+    });
+
+    // Date filter listeners
+    const trackerDatePreset = document.getElementById('trackerFilterDatePreset');
+    const trackerDateCustom = document.getElementById('trackerFilterDateCustom');
+    const trackerDateColumn = document.getElementById('trackerFilterDateColumn');
+
+    if (trackerDatePreset) {
+      trackerDatePreset.addEventListener('change', () => {
+        state.trackerFilter.datePreset = trackerDatePreset.value;
+        if (trackerDatePreset.value === 'custom') {
+          if (trackerDateCustom) {
+            trackerDateCustom.style.display = 'inline-block';
+            trackerDateCustom.focus();
+          }
+        } else {
+          if (trackerDateCustom) {
+            trackerDateCustom.style.display = 'none';
+          }
+        }
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    if (trackerDateCustom) {
+      trackerDateCustom.addEventListener('change', () => {
+        state.trackerFilter.dateCustom = trackerDateCustom.value;
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    if (trackerDateColumn) {
+      trackerDateColumn.addEventListener('change', () => {
+        state.trackerFilter.dateColumn = trackerDateColumn.value;
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    // Sort Dropdown listener
+    const trackerSortEl = document.getElementById('trackerSortDropdown');
+    if (trackerSortEl) {
+      trackerSortEl.addEventListener('change', () => {
+        const parts = trackerSortEl.value.split('_');
+        if (parts.length === 2) {
+          state.trackerFilter.sortField = parts[0];
+          state.trackerFilter.sortDir = parts[1];
+          state.trackerFilter.page = 1;
+          renderCreativesTracker();
+        }
+      });
+    }
+
+    // Actual table header click-to-sort listeners for Creatives Tracker!
+    document.querySelectorAll('#view-creatives-tracker .data-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.getAttribute('data-sort');
+        if (state.trackerFilter.sortField === field) {
+          state.trackerFilter.sortDir = state.trackerFilter.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.trackerFilter.sortField = field;
+          if (field === 'requestId' || field === 'orderDate' || field === 'dateUpdated') {
+            state.trackerFilter.sortDir = 'desc';
+          } else {
+            state.trackerFilter.sortDir = 'asc';
+          }
+        }
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    });
+
+    const btnResetTracker = document.getElementById('btnResetTrackerFilters');
+    if (btnResetTracker) {
+      btnResetTracker.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetCreativesTrackerFilters();
+      });
+    }
+
+    const btnExportTrackerCSV = document.getElementById('btnQuickExportTrackerCSV');
+    if (btnExportTrackerCSV) {
+      btnExportTrackerCSV.addEventListener('click', () => exportTrackerCsv());
+    }
+
+    const btnExportOutputCSV = document.getElementById('btnExportMonthlyReportCSV');
+    if (btnExportOutputCSV) {
+      btnExportOutputCSV.addEventListener('click', () => exportMonthlyReportCsv());
+    }
+
+    const btnSampleUral = document.getElementById('btnDirectivesLoadSampleUral');
+    if (btnSampleUral) {
+      btnSampleUral.addEventListener('click', () => {
+        renderDirectivePreview('P261001348');
+        showToast('Sample directive for URAL loaded.');
+      });
+    }
+
+    const availFilter = document.getElementById('workloadFilterAvailability');
+    if (availFilter) {
+      availFilter.addEventListener('change', () => {
+        state.workloadFilter.availability = availFilter.value;
+        renderArtistWorkload();
+      });
+    }
+
+    const workloadTableSearch = document.getElementById('workloadTableSearch');
+    if (workloadTableSearch) {
+      workloadTableSearch.addEventListener('input', () => {
+        state.workloadFilter.search = workloadTableSearch.value.trim();
+        renderWorkloadDetailsTable();
+      });
+    }
+
+    const pendingArtistSelect = document.getElementById('pendingArtistSelect');
+    if (pendingArtistSelect) {
+      pendingArtistSelect.addEventListener('change', () => {
+        state.pendingArtistSelected = pendingArtistSelect.value;
+        renderPendingArtistQueue();
+      });
+    }
+
+    document.querySelectorAll('.sales-queue-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.sales-queue-tab').forEach(t => {
+          t.classList.remove('btn-primary');
+          t.classList.add('btn-secondary');
+        });
+        tab.classList.remove('btn-secondary');
+        tab.classList.add('btn-primary');
+
+        state.pendingSalesFilter = tab.getAttribute('data-queue');
+        renderPendingSalesQueue();
+      });
+    });
+
+    const pendingSalesSearch = document.getElementById('pendingSalesSearchInput');
+    if (pendingSalesSearch) {
+      pendingSalesSearch.addEventListener('input', () => {
+        state.pendingSalesSearch = pendingSalesSearch.value.trim();
+        state.pendingSalesPage = 1;
+        renderPendingSalesQueue();
+      });
+    }
+
+    // Rows Per Page event listeners for all tables
+    const bindRowsSelects = (ids, setter) => {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', () => setter(el.value));
+        }
+      });
+    };
+
+    bindRowsSelects(['salesFilterPerPage', 'salesPaginationPerPage'], window.SignDepotApp.setSalesPerPage);
+    bindRowsSelects(['trackerFilterPerPage', 'trackerPaginationPerPage'], window.SignDepotApp.setTrackerPerPage);
+    bindRowsSelects(['pendingSalesFilterPerPage', 'pendingSalesPaginationPerPage'], window.SignDepotApp.setPendingSalesPerPage);
+    bindRowsSelects(['pendingArtistFilterPerPage', 'pendingArtistPaginationPerPage'], window.SignDepotApp.setPendingArtistPerPage);
+    bindRowsSelects(['workloadFilterPerPage', 'workloadPaginationPerPage'], window.SignDepotApp.setWorkloadPerPage);
+    bindRowsSelects(['dashboardFilterPerPage', 'dashboardPaginationPerPage'], window.SignDepotApp.setDashboardPerPage);
+    bindRowsSelects(['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'], window.SignDepotApp.setMonthlyOutputPerPage);
+
+    // Dashboard Search & Status Filter listeners
+    const dashSearch = document.getElementById('dashboardSearchInput');
+    if (dashSearch) {
+      dashSearch.addEventListener('input', () => {
+        state.dashboardSearch = dashSearch.value.trim();
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    const dashStatus = document.getElementById('dashboardFilterStatus');
+    if (dashStatus) {
+      dashStatus.addEventListener('change', () => {
+        state.dashboardStatus = dashStatus.value;
+        if (state.dashboardStatus) state.dashboardKpiFilter = '';
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    // Dashboard Deadline Filter listener
+    const dashDeadline = document.getElementById('dashboardFilterDeadline');
+    if (dashDeadline) {
+      dashDeadline.addEventListener('change', () => {
+        state.dashboardDeadline = dashDeadline.value;
+        state.dashboardPage = 1;
+        const cards = {
+          overdue: document.getElementById('cardFilterOverdue'),
+          today: document.getElementById('cardFilterToday'),
+          soon: document.getElementById('cardFilterSoon')
+        };
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === state.dashboardDeadline);
+        });
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    // Sales Requests Deadline Filter listener
+    const salesDeadline = document.getElementById('salesFilterDeadline');
+    if (salesDeadline) {
+      salesDeadline.addEventListener('change', () => {
+        state.salesFilter.deadline = salesDeadline.value;
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    }
+
+    // Recent Activity Tabs & Timeline Options
+    document.addEventListener('click', (e) => {
+      const actBtn = e.target.closest('#activityFilterTabs [data-act-filter]');
+      if (actBtn) {
+        e.preventDefault();
+        const filter = actBtn.getAttribute('data-act-filter');
+        renderRecentActivityFeed(filter);
+        return;
+      }
+
+      const optBtn = e.target.closest('#btnTimelineOptions');
+      if (optBtn) {
+        e.preventDefault();
+        showToast('Timeline timeframe: Active Production Week (Oct 19–25, 2026)', 'info');
+        return;
+      }
+    });
+
+    // Topbar Deadline Alert Notification Drawer & Tab Switching
+    document.addEventListener('click', (e) => {
+      const bellBtn = e.target.closest('#deadlineAlertBtn, .deadline-alert-btn');
+      const alertDropdown = document.getElementById('deadlineAlertDropdown');
+
+      if (bellBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (alertDropdown) {
+          alertDropdown.classList.toggle('show');
+          const globalTip = document.getElementById('sdGlobalTooltip');
+          if (globalTip) globalTip.classList.remove('show');
+        }
+        return;
+      }
+
+      const tabBtn = e.target.closest('.deadline-tab-btn');
+      if (tabBtn && tabBtn.getAttribute('data-alert-tab')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const tab = tabBtn.getAttribute('data-alert-tab');
+        window.SignDepotApp.setAlertTab(tab);
+        return;
+      }
+
+      if (alertDropdown && alertDropdown.classList.contains('show') && !e.target.closest('#deadlineAlertContainer')) {
+        alertDropdown.classList.remove('show');
+      }
+    });
+  }
+
+  function exportTrackerCsv() {
+    const myArtist = getLoggedInArtist();
+    const headers = ['Request ID', 'JO Number', 'Artist', 'Project Name', 'Design Deadline', 'Head Approval', 'Standard', 'Printing', 'Special', 'Project Status', 'Design Status', 'Revisions', 'Remarks', 'Date', 'Sales', 'Month'];
+    const reqList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
+    const rows = reqList.map(r => [
+      r.requestId,
+      r.joNumber || '',
+      r.artist,
+      `"${(r.projectName || '').replace(/"/g, '""')}"`,
+      r.designDeadline,
+      r.headApproval,
+      r.countStandard,
+      r.countPrinting,
+      r.countSpecial,
+      r.projectStatus,
+      r.designStatus,
+      r.revisionCount,
+      `"${(r.remarks || '').replace(/"/g, '""')}"`,
+      r.orderDate,
+      r.salesRep,
+      r.month
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    downloadCsv(csvContent, `Sign_Depot_Creatives_Tracker_${myArtist ? myArtist + '_' : ''}${Date.now()}.csv`);
+    try {
+      fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action_type: 'EXPORT',
+          module: 'Creatives Tracker',
+          description: `Exported Creatives Tracker records to CSV (${reqList.length} rows)`
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function exportMonthlyReportCsv() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const matrix = {};
+    state.artists.forEach(a => matrix[a] = new Array(12).fill(0));
+
+    state.requests.forEach(r => {
+      if (r.projectStatus === 'Completed') {
+        let mIdx = -1;
+        if (r.completionDate) {
+          const mNum = parseInt(r.completionDate.split('-')[1], 10);
+          if (!isNaN(mNum) && mNum >= 1 && mNum <= 12) mIdx = mNum - 1;
+        } else if (r.month) {
+          const matchMonth = months.findIndex(m => r.month.toLowerCase().startsWith(m.toLowerCase()));
+          if (matchMonth !== -1) mIdx = matchMonth;
+        }
+        if (mIdx !== -1 && matrix[r.artist]) {
+          const count = Math.max((r.countStandard || 0) + (r.countPrinting || 0) + (r.countSpecial || 0), 1);
+          matrix[r.artist][mIdx] += count;
+        }
+      }
+    });
+
+    const headers = ['Artist', ...months, 'Annual Total'];
+    const rows = state.artists.map(a => {
+      const counts = matrix[a];
+      const sum = counts.reduce((acc, v) => acc + v, 0);
+      return [a, ...counts, sum];
+    });
+
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    downloadCsv(csvContent, `Sign_Depot_Monthly_Production_2026_${Date.now()}.csv`);
+    try {
+      fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action_type: 'EXPORT',
+          module: 'Monthly Output',
+          description: 'Exported Annual Production report to CSV'
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function downloadCsv(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast(`Downloaded ${filename}`);
+  }
+
+  // ==========================================================================
+  // FULL-PLEDGE VECTOR STUDIO EDITOR (CorelDRAW / Adobe Illustrator Mode)
+  // ==========================================================================
+
+  function initStudioVectorEditor() {
+    const inspector = document.getElementById('studioPropertyInspector');
+    if (!inspector) return;
+
+    const svg = document.getElementById('directiveExactSvg');
+    const artwrap = document.getElementById('studioArtboardWrap');
+    const transformBox = document.getElementById('studioTransformBox');
+    if (!svg || !artwrap || !transformBox) return;
+
+    let zoom = 1.25;
+    let activeFieldId = 'docFieldProjectName';
+    let isMoving = false;
+    let isResizing = false;
+    let activeHandle = null;
+    let dragStart = { x: 0, y: 0 };
+    let initBox = { x: 0, y: 0, w: 0, h: 0 };
+
+    const STUDIO_FIELDS = [
+      { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
+      { id: 'docFieldJoNumber', name: 'JO Number', defX: 58, defY: 2, defW: 164, defH: 29, defSz: 28, color: '#FFFFFF', align: 'start' },
+      { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 14, color: '#FFFFFF', align: 'middle' },
+      { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldInCharge', name: 'In-Charge', defX: 8, defY: 34, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },
+      { id: 'docFieldDrawnBy', name: 'Drawn By', defX: 8, defY: 55, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },
+      { id: 'docFieldAddress', name: 'Address', defX: 99, defY: 77, defW: 122, defH: 17, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactPerson', name: 'Contact Person', defX: 715, defY: 46, defW: 100, defH: 18, defSz: 13, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactNumber', name: 'Contact Number', defX: 715, defY: 73, defW: 100, defH: 18, defSz: 13, color: '#000000', align: 'middle' },
+      { id: 'docFieldInstallers', name: 'Installers', defX: 824, defY: 2, defW: 78, defH: 44, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldDuration', name: 'Duration', defX: 824, defY: 50, defW: 78, defH: 44, defSz: 14, color: '#000000', align: 'middle' }
+    ];
+
+    if (!state.customBoxPositions) state.customBoxPositions = {};
+    if (!state.customBoxSizes) state.customBoxSizes = {};
+    if (!state.customCellFonts) state.customCellFonts = {};
+
+    // 1. Zoom Engine
+    const applyZoom = (z) => {
+      zoom = Math.max(0.5, Math.min(3, z));
+      artwrap.style.transform = `scale(${zoom})`;
+      const zoomSel = document.getElementById('studioZoomSelect');
+      if (zoomSel) zoomSel.value = String(zoom);
+    };
+
+    const btnZoomIn = document.getElementById('studioZoomIn');
+    if (btnZoomIn) btnZoomIn.onclick = () => applyZoom(Math.round((zoom + 0.25) * 100) / 100);
+
+    const btnZoomOut = document.getElementById('studioZoomOut');
+    if (btnZoomOut) btnZoomOut.onclick = () => applyZoom(Math.round((zoom - 0.25) * 100) / 100);
+
+    const btnZoomReset = document.getElementById('studioZoomReset');
+    if (btnZoomReset) btnZoomReset.onclick = () => applyZoom(1);
+
+    const btnZoomFit = document.getElementById('studioZoomFit');
+    if (btnZoomFit) {
+      btnZoomFit.onclick = () => {
+        const viewport = document.getElementById('studioArtboardViewport');
+        if (viewport) {
+          const availW = viewport.clientWidth - 100;
+          const fitZ = Math.min(2, Math.max(0.75, Math.round((availW / 904) * 10) / 10));
+          applyZoom(fitZ);
+        }
+      };
+    }
+
+    const zoomSelect = document.getElementById('studioZoomSelect');
+    if (zoomSelect) {
+      zoomSelect.onchange = () => applyZoom(parseFloat(zoomSelect.value));
+    }
+
+    // 2. Field Selection & Transform Bounding Box
+    const getFieldData = (id) => {
+      const def = STUDIO_FIELDS.find(f => f.id === id) || STUDIO_FIELDS[0];
+      const pos = (state.customBoxPositions && state.customBoxPositions[id]) || { x: def.defX, y: def.defY };
+      const sz = (state.customBoxSizes && state.customBoxSizes[id]) || { w: def.defW, h: def.defH };
+      const fontSz = (state.customCellFonts && state.customCellFonts[id]) || def.defSz;
+      return {
+        id,
+        name: def.name,
+        x: pos.x !== undefined ? pos.x : def.defX,
+        y: pos.y !== undefined ? pos.y : def.defY,
+        w: sz.w !== undefined ? sz.w : def.defW,
+        h: sz.h !== undefined ? sz.h : def.defH,
+        fontSize: fontSz,
+        align: def.align,
+        color: def.color
+      };
+    };
+
+    const updateTransformBoxUI = (fieldId) => {
+      const data = getFieldData(fieldId);
+      transformBox.style.display = 'block';
+      transformBox.style.left = `${data.x}px`;
+      transformBox.style.top = `${data.y}px`;
+      transformBox.style.width = `${data.w}px`;
+      transformBox.style.height = `${data.h}px`;
+
+      // Update Inspector Inputs
+      const inpX = document.getElementById('propPosX');
+      const inpY = document.getElementById('propPosY');
+      const inpW = document.getElementById('propBoxW');
+      const inpH = document.getElementById('propBoxH');
+      const inpSz = document.getElementById('propFontSize');
+      const selField = document.getElementById('studioFieldSelect');
+      const textInput = document.getElementById('studioActiveTextInput');
+
+      if (inpX) inpX.value = Math.round(data.x);
+      if (inpY) inpY.value = Math.round(data.y);
+      if (inpW) inpW.value = Math.round(data.w);
+      if (inpH) inpH.value = Math.round(data.h);
+      if (inpSz) inpSz.value = Math.round(data.fontSize);
+      if (selField) selField.value = fieldId;
+
+      const el = document.getElementById(fieldId);
+      if (el && textInput) {
+        textInput.value = getFieldRawText(el);
+      }
+
+      // Update Layers List Active State
+      document.querySelectorAll('.sidebar-layers-list .layer-item').forEach(item => {
+        item.classList.toggle('active', item.getAttribute('data-field-id') === fieldId);
+      });
+    };
+
+    const selectStudioField = (fieldId) => {
+      activeFieldId = fieldId;
+      const el = document.getElementById(fieldId);
+      if (el) {
+        document.querySelectorAll('#directiveExactSvg .active-svg-cell').forEach(c => c.classList.remove('active-svg-cell'));
+        el.classList.add('active-svg-cell');
+      }
+      updateTransformBoxUI(fieldId);
+    };
+
+    // 3. Populate Layers List in Sidebar
+    const renderLayersList = () => {
+      const container = document.getElementById('studioLayersList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      STUDIO_FIELDS.forEach(f => {
+        const el = document.getElementById(f.id);
+        const rawText = el ? getFieldRawText(el) : '';
+        const item = document.createElement('div');
+        item.className = `layer-item ${f.id === activeFieldId ? 'active' : ''}`;
+        item.setAttribute('data-field-id', f.id);
+        item.innerHTML = `
+          <div class="layer-info">
+            <span class="layer-name">${escapeHTML(f.name)}</span>
+            <span class="layer-preview">${escapeHTML(rawText.replace(/\\n/g, ' ↵ ') || '—')}</span>
+          </div>
+          <span class="layer-badge">${Math.round(getCellCurrentFontSize(el))}px</span>
+        `;
+        item.onclick = () => selectStudioField(f.id);
+        container.appendChild(item);
+      });
+    };
+
+    // 4. Transform Box Mouse Handlers (Move & 8-Handle Resize in Artboard Coordinates)
+    const getArtboardCoords = (e) => {
+      const rect = svg.getBoundingClientRect();
+      const scaleX = 904 / rect.width;
+      const scaleY = 96 / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    };
+
+    const dragArea = transformBox.querySelector('.transform-drag-area');
+    if (dragArea) {
+      dragArea.addEventListener('mousedown', (e) => {
+        isMoving = true;
+        const cur = getFieldData(activeFieldId);
+        const mouse = getArtboardCoords(e);
+        dragStart = { x: mouse.x, y: mouse.y };
+        initBox = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    }
+
+    transformBox.querySelectorAll('.studio-transform-handle').forEach(handle => {
+      handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        activeHandle = handle.getAttribute('data-handle');
+        const cur = getFieldData(activeFieldId);
+        const mouse = getArtboardCoords(e);
+        dragStart = { x: mouse.x, y: mouse.y };
+        initBox = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMoving && !isResizing) return;
+      const mouse = getArtboardCoords(e);
+      const dx = mouse.x - dragStart.x;
+      const dy = mouse.y - dragStart.y;
+      const data = getFieldData(activeFieldId);
+
+      if (isMoving) {
+        let newX = Math.round(initBox.x + dx);
+        let newY = Math.round(initBox.y + dy);
+        newX = Math.max(0, Math.min(904 - initBox.w, newX));
+        newY = Math.max(0, Math.min(96 - initBox.h, newY));
+
+        data.x = newX;
+        data.y = newY;
+        state.customBoxPositions[activeFieldId] = { x: newX, y: newY };
+        saveStateToStorage();
+
+        // Update SVG text coordinates
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          const tspans = el.querySelectorAll('tspan');
+          if (tspans && tspans.length > 0) {
+            const fontSz = getCellCurrentFontSize(el);
+            const lh = Math.round(fontSz * 1.15 * 10) / 10;
+            const startY = Math.round(newY + fontSz);
+            tspans.forEach((t, i) => {
+              t.setAttribute('x', Math.round(newX + data.w / 2));
+              t.setAttribute('y', Math.round(startY + i * lh));
+            });
+          } else {
+            el.setAttribute('x', Math.round(newX + data.w / 2));
+            el.setAttribute('y', Math.round(newY + data.h * 0.75));
+          }
+        }
+        updateTransformBoxUI(activeFieldId);
+      } else if (isResizing) {
+        let { x, y, w, h } = initBox;
+
+        if (activeHandle.includes('e')) w = Math.max(20, initBox.w + dx);
+        if (activeHandle.includes('s')) h = Math.max(12, initBox.h + dy);
+        if (activeHandle.includes('w')) {
+          const maxDx = initBox.w - 20;
+          const appliedDx = Math.min(maxDx, dx);
+          x = initBox.x + appliedDx;
+          w = initBox.w - appliedDx;
+        }
+        if (activeHandle.includes('n')) {
+          const maxDy = initBox.h - 12;
+          const appliedDy = Math.min(maxDy, dy);
+          y = initBox.y + appliedDy;
+          h = initBox.h - appliedDy;
+        }
+
+        data.x = Math.round(x);
+        data.y = Math.round(y);
+        data.w = Math.round(w);
+        data.h = Math.round(h);
+
+        state.customBoxPositions[activeFieldId] = { x: data.x, y: data.y };
+        state.customBoxSizes[activeFieldId] = { w: data.w, h: data.h };
+        saveStateToStorage();
+
+        updateTransformBoxUI(activeFieldId);
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isMoving || isResizing) {
+        isMoving = false;
+        isResizing = false;
+        activeHandle = null;
+        renderLayersList();
+      }
+    });
+
+    // 5. Direct Artboard Click to Select Field
+    svg.addEventListener('click', (e) => {
+      const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
+      const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+      if (indoorTarget || outdoorTarget) {
+        const curState = state.directiveLocation || {
+          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+        };
+        if (indoorTarget) {
+          const nextIndoor = !curState.indoor;
+          setDirectiveLocation(nextIndoor, curState.outdoor);
+          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+        } else {
+          const nextOutdoor = !curState.outdoor;
+          setDirectiveLocation(curState.indoor, nextOutdoor);
+          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+        }
+        return;
+      }
+      const coords = getArtboardCoords(e);
+      if (coords.x >= 340 && coords.x <= 564 && coords.y <= 18) {
+        const isIndoorClick = coords.x <= 452;
+        const curState = state.directiveLocation || {
+          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+        };
+        if (isIndoorClick) {
+          const nextIndoor = !curState.indoor;
+          setDirectiveLocation(nextIndoor, curState.outdoor);
+          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+        } else {
+          const nextOutdoor = !curState.outdoor;
+          setDirectiveLocation(curState.indoor, nextOutdoor);
+          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+        }
+        return;
+      }
+      const targetCell = e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
+      if (targetCell && targetCell.id) {
+        selectStudioField(targetCell.id);
+        return;
+      }
+      const fieldId = getFieldIdAtSvgCoords(coords.x, coords.y);
+      if (fieldId) {
+        selectStudioField(fieldId);
+      }
+    });
+
+    // 6. Right Sidebar Textarea: Multi-line with Enter key support
+    const textInput = document.getElementById('studioActiveTextInput');
+    if (textInput) {
+      textInput.addEventListener('input', () => {
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          setFieldMultilineText(el, textInput.value);
+          syncControlValues(activeFieldId, textInput.value);
+          renderLayersList();
+          updateTransformBoxUI(activeFieldId);
+        }
+      });
+      textInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation(); // Next line supported naturally!
+        }
+      });
+    }
+
+    // 7. Inspector Toolbar Input Bindings
+    const selField = document.getElementById('studioFieldSelect');
+    if (selField) {
+      selField.addEventListener('change', () => selectStudioField(selField.value));
+    }
+
+    const inpSz = document.getElementById('propFontSize');
+    const btnSzDec = document.getElementById('propFontDec');
+    const btnSzInc = document.getElementById('propFontInc');
+
+    const changeFontSz = (deltaOrVal) => {
+      const el = document.getElementById(activeFieldId);
+      if (!el) return;
+      const cur = getCellCurrentFontSize(el);
+      const next = typeof deltaOrVal === 'number' ? Math.max(6, Math.min(72, deltaOrVal)) : Math.max(6, Math.min(72, cur + (deltaOrVal === 'dec' ? -1 : 1)));
+      setCellCustomFontSize(el, next);
+      if (inpSz) inpSz.value = Math.round(next);
+      updateTransformBoxUI(activeFieldId);
+      renderLayersList();
+    };
+
+    if (btnSzDec) btnSzDec.onclick = () => changeFontSz('dec');
+    if (btnSzInc) btnSzInc.onclick = () => changeFontSz('inc');
+    if (inpSz) inpSz.onchange = () => changeFontSz(parseFloat(inpSz.value));
+
+    // Position / Dimension Inputs
+    const inpX = document.getElementById('propPosX');
+    const inpY = document.getElementById('propPosY');
+    const inpW = document.getElementById('propBoxW');
+    const inpH = document.getElementById('propBoxH');
+
+    const updateManualTransform = () => {
+      const data = getFieldData(activeFieldId);
+      const newX = inpX ? parseFloat(inpX.value) : data.x;
+      const newY = inpY ? parseFloat(inpY.value) : data.y;
+      const newW = inpW ? parseFloat(inpW.value) : data.w;
+      const newH = inpH ? parseFloat(inpH.value) : data.h;
+
+      data.x = isNaN(newX) ? data.x : Math.max(0, Math.min(904, newX));
+      data.y = isNaN(newY) ? data.y : Math.max(0, Math.min(96, newY));
+      data.w = isNaN(newW) ? data.w : Math.max(20, Math.min(800, newW));
+      data.h = isNaN(newH) ? data.h : Math.max(10, Math.min(300, newH));
+
+      state.customBoxPositions[activeFieldId] = { x: data.x, y: data.y };
+      state.customBoxSizes[activeFieldId] = { w: data.w, h: data.h };
+      saveStateToStorage();
+      updateTransformBoxUI(activeFieldId);
+    };
+
+    [inpX, inpY, inpW, inpH].forEach(inp => {
+      if (inp) inp.addEventListener('change', updateManualTransform);
+    });
+
+    // Swatches
+    document.querySelectorAll('.inspector-swatches .swatch-btn').forEach(sw => {
+      sw.onclick = () => {
+        const color = sw.getAttribute('data-color');
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          el.setAttribute('fill', color);
+          el.style.fill = color;
+          showToast(`Set ${activeFieldId} color to ${color}`);
+        }
+      };
+    });
+
+    // 8. Studio Export Actions & Dropdown
+    const btnStudioExpDropdown = document.getElementById('btnStudioExportDropdown');
+    const studioExpMenu = document.getElementById('studioExportMenu');
+    if (btnStudioExpDropdown && studioExpMenu) {
+      btnStudioExpDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = studioExpMenu.classList.contains('show');
+        document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
+        if (!isOpen) {
+          studioExpMenu.classList.add('show');
+          btnStudioExpDropdown.setAttribute('aria-expanded', 'true');
+        } else {
+          btnStudioExpDropdown.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    const optStudioDownloadEMF = document.getElementById('optStudioDownloadEMF');
+    if (optStudioDownloadEMF) {
+      optStudioDownloadEMF.addEventListener('click', () => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        downloadDirectiveEMF();
+      });
+    }
+
+    const optStudioCopyPNG = document.getElementById('optStudioCopyPNG');
+    if (optStudioCopyPNG) {
+      optStudioCopyPNG.addEventListener('click', (e) => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        handleCopyImage4K(e);
+      });
+    }
+
+    const optStudioCopySVG = document.getElementById('optStudioCopySVG');
+    if (optStudioCopySVG) {
+      optStudioCopySVG.addEventListener('click', (e) => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        handleCopyVector(e);
+      });
+    }
+
+    const optStudioDownloadSVG = document.getElementById('optStudioDownloadSVG');
+    if (optStudioDownloadSVG) {
+      optStudioDownloadSVG.addEventListener('click', () => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgString = generateDirectiveSVG(cur);
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.');
+      });
+    }
+
+    const copySvgBtn = document.getElementById('studioCopySVG');
+    if (copySvgBtn) {
+      copySvgBtn.onclick = () => {
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgCode = generateDirectiveSVG(cur);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(svgCode).then(() => showToast('Vector SVG copied for Illustrator / CorelDRAW!'));
+        } else {
+          copyFallback(svgCode);
+          showToast('Vector SVG copied to clipboard!');
+        }
+      };
+    }
+
+    const copyPngBtn = document.getElementById('studioCopyPNG');
+    if (copyPngBtn) {
+      copyPngBtn.onclick = () => {
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgString = generateDirectiveSVG(cur);
+        const scale = 4;
+        const targetWidth = 904 * scale;
+        const targetHeight = 96 * scale;
+        const svg4K = svgString.replace(/width="[0-9]+"/, `width="${targetWidth}"`).replace(/height="[0-9]+"/, `height="${targetHeight}"`);
+
+        const img = new Image();
+        const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d', { alpha: false });
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob((blob) => {
+            if (blob && navigator.clipboard && window.ClipboardItem) {
+              navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                .then(() => showToast('Ultra HD 4K image copied to clipboard (Ctrl+V ready)!'))
+                .catch(() => showToast('4K image render completed.'));
+            }
+          }, 'image/png');
+        };
+        img.src = url;
+      };
+    }
+
+    const resetAllBtn = document.getElementById('studioResetAll');
+    if (resetAllBtn) {
+      resetAllBtn.onclick = () => {
+        state.customBoxPositions = {};
+        state.customBoxSizes = {};
+        state.customCellFonts = {};
+        if (typeof setDirectiveZoom === 'function') setDirectiveZoom(100);
+        if (typeof setDirectiveEnvType === 'function') setDirectiveEnvType('');
+        saveStateToStorage();
+        STUDIO_FIELDS.forEach(f => {
+          const el = document.getElementById(f.id);
+          if (el) {
+            el.removeAttribute('data-custom-size');
+            el.style.removeProperty('font-size');
+            el.setAttribute('font-size', f.defSz);
+            setFieldMultilineText(el, getFieldRawText(el));
+          }
+        });
+        selectStudioField(activeFieldId);
+        renderLayersList();
+        showToast('All text positions and sizes reset to defaults.');
+      };
+    }
+
+    // Initial Setup
+    renderLayersList();
+    selectStudioField('docFieldProjectName');
+    applyZoom(1.25);
+  }
+
+  function initApp() {
+    if (window.SignDepotNav && typeof window.SignDepotNav.renderComponents === 'function') {
+      window.SignDepotNav.renderComponents();
+    }
+    loadStateFromStorage();
+    initEventListeners();
+    setupDirectiveControlsSync();
+    setupDirectiveAutocomplete();
+    setupDirectiveActions();
+    setupDirectiveZoomControls();
+    setupGlobalSearch();
+    setupModals();
+
+    initCustomDropdownEngine();
+    upgradeAllFilterSelects();
+    upgradeAllFormSelects();
+    initCustomTooltipEngine();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const joParam = urlParams.get('id') || urlParams.get('jo') || urlParams.get('req') || urlParams.get('requestId') || window.__INITIAL_DIRECTIVE_KEY || sessionStorage.getItem('SIGN_DEPOT_CURRENT_DIRECTIVE');
+    if (joParam) {
+      state.currentDirectiveJo = joParam;
+    }
+
+    const kpiParam = urlParams.get('kpi') || sessionStorage.getItem('SIGN_DEPOT_ACTIVE_KPI');
+    if (kpiParam) {
+      sessionStorage.removeItem('SIGN_DEPOT_ACTIVE_KPI');
+      state.trackerKpiFilter = kpiParam;
+      state.dashboardKpiFilter = kpiParam;
+    }
+
+    const currentView = detectCurrentPage();
+    switchView(currentView);
+
+    if (currentView === 'view-directives-details') {
+      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+    }
+
+    // Initialize Dedicated Vector Studio Editor if on directive-editor.php
+    if (document.getElementById('studioPropertyInspector')) {
+      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      setTimeout(initStudioVectorEditor, 50);
+    }
+
+    updateDeadlineAlertCenter();
+
+    // Non-intrusive reminder alert on first login ONLY
+    const hasShownReminder = sessionStorage.getItem('PMS_DEADLINE_REMINDER_SHOWN');
+    const isFirstLogin = Boolean(window.PMS_JUST_LOGGED_IN) || (!hasShownReminder && !sessionStorage.getItem('PMS_SESSION_INITIALIZED'));
+    sessionStorage.setItem('PMS_SESSION_INITIALIZED', 'true');
+
+    if (!hasShownReminder && isFirstLogin) {
+      sessionStorage.setItem('PMS_DEADLINE_REMINDER_SHOWN', 'true');
+      setTimeout(() => {
+        const activeAlerts = (state.requests || []).filter(r => r.projectStatus !== 'Completed').map(r => getDeadlineAlertStatus(r.designDeadline, r.projectStatus));
+        const overdueCount = activeAlerts.filter(a => a.status === 'overdue').length;
+        const todayCount = activeAlerts.filter(a => a.status === 'today').length;
+        if (overdueCount > 0 || todayCount > 0) {
+          let msg = 'Deadline Reminder: ';
+          if (overdueCount > 0 && todayCount > 0) {
+            msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due & ${todayCount} due today!`;
+          } else if (overdueCount > 0) {
+            msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due requiring immediate attention!`;
+          } else {
+            msg += `${todayCount} project${todayCount > 1 ? 's' : ''} due today!`;
+          }
+          showToast(msg, overdueCount > 0 ? 'error' : 'info');
+        }
+      }, 1200);
+    }
+
+    // Run active autofill scrubbing to prevent browsers from placing credentials into search bars
+    purgeSearchAutofill();
+    [20, 80, 200, 500, 1000, 2000].forEach(delay => setTimeout(purgeSearchAutofill, delay));
+  }
+
+  // Guardian: Purges any errant browser credential autofill (e.g. 'sup_angel') from all search bars
+  function purgeSearchAutofill() {
+    const knownCredentials = ['sup_angel', 'superadmin', 'admin', 'angelica'];
+    const searchSelectors = [
+      '#globalSearchInput',
+      '#salesSearchInput',
+      '#pendingSalesSearchInput',
+      '#trackerSearchInput',
+      '#workloadTableSearch',
+      '#usersSearchInput',
+      '#auditSearchInput',
+      'input[type="search"]',
+      'input.global-search-input',
+      'input.filter-input'
+    ];
+    document.querySelectorAll(searchSelectors.join(',')).forEach(input => {
+      if (!input || input.type === 'password') return;
+      const val = (input.value || '').trim();
+      const lower = val.toLowerCase();
+      if (
+        knownCredentials.includes(lower) ||
+        lower.startsWith('sup_') ||
+        lower.startsWith('artist_') ||
+        lower.startsWith('sales_') ||
+        lower.includes('@')
+      ) {
+        input.value = '';
+        if (input.id === 'salesSearchInput' && state && state.salesFilter) {
+          state.salesFilter.search = '';
+          if (typeof renderSalesRequests === 'function') renderSalesRequests();
+        } else if (input.id === 'pendingSalesSearchInput' && state) {
+          state.pendingSalesSearch = '';
+          if (typeof renderSalesRequests === 'function') renderSalesRequests();
+        } else if (input.id === 'globalSearchInput') {
+          const dd = document.getElementById('quickSearchResults');
+          if (dd) dd.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  window.addEventListener('focus', purgeSearchAutofill);
+  window.addEventListener('pageshow', purgeSearchAutofill);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
+
+})();

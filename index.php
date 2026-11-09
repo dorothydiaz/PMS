@@ -22,18 +22,124 @@ $kpis = [
     'overdue' => 0
 ];
 
+$timelineData = null;
+$recentLogs = [];
+
 if ($pdo) {
     try {
         $today = date('Y-m-d');
         $kpis['total'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests")->fetchColumn();
-        $kpis['pending'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE client_approval = 'Pending' OR project_status = 'Pending'")->fetchColumn();
+        $kpis['pending'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE head_approval = 'Pending' OR project_status IN ('Pending', 'Pending Approval')")->fetchColumn();
         $kpis['working'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE project_status IN ('On-going', 'Ongoing', 'In Progress', 'Working')")->fetchColumn();
-        $kpis['approved'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE client_approval = 'Approved' OR project_status = 'Approved'")->fetchColumn();
+        $kpis['approved'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE head_approval = 'Approved' OR project_status = 'Approved'")->fetchColumn();
         $kpis['revising'] = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE project_status = 'Revising' OR design_status = 'Revising'")->fetchColumn();
         
         $overdueStmt = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE design_deadline != '' AND design_deadline < ? AND project_status NOT IN ('Completed', 'Approved')");
         $overdueStmt->execute([$today]);
         $kpis['overdue'] = (int)$overdueStmt->fetchColumn();
+
+        // 100% Real Progress Timeline computation
+        $todayObj = new DateTime();
+        $mondayObj = new DateTime();
+        $mondayObj->setISODate((int)$todayObj->format('o'), (int)$todayObj->format('W'), 1);
+        $mondayObj->setTime(0, 0, 0);
+
+        $startWeekStr = $mondayObj->format('Y-m-d');
+        $endWeekStr = (clone $mondayObj)->modify('+6 days')->format('Y-m-d');
+
+        $hasWeekData = (int)$pdo->query("SELECT COUNT(*) FROM sales_requests WHERE (order_date >= '$startWeekStr' AND order_date <= '$endWeekStr') OR (DATE(created_at) >= '$startWeekStr' AND DATE(created_at) <= '$endWeekStr')")->fetchColumn();
+
+        if ($hasWeekData === 0) {
+            $latestDate = $pdo->query("SELECT MAX(COALESCE(NULLIF(order_date, ''), DATE(created_at))) FROM sales_requests WHERE (order_date IS NOT NULL AND order_date != '') OR created_at IS NOT NULL")->fetchColumn();
+            if ($latestDate) {
+                $refDate = new DateTime($latestDate);
+                $mondayObj->setISODate((int)$refDate->format('o'), (int)$refDate->format('W'), 1);
+                $startWeekStr = $mondayObj->format('Y-m-d');
+                $endWeekStr = (clone $mondayObj)->modify('+6 days')->format('Y-m-d');
+            }
+        }
+
+        $timeline = [];
+        $dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+        $dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $xCoords = [48, 128, 208, 288, 368, 448, 518];
+
+        $maxCompleted = -1;
+        $peakDayName = 'Monday';
+        $totalCreated = 0;
+        $totalCompleted = 0;
+
+        for ($i = 0; $i < 7; $i++) {
+            $dayObj = (clone $mondayObj)->modify("+$i days");
+            $dayDate = $dayObj->format('Y-m-d');
+            $isToday = ($dayDate === $today);
+            $isFuture = ($dayObj > $todayObj);
+
+            $stmtC = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE order_date = :d OR DATE(created_at) = :d2");
+            $stmtC->execute([':d' => $dayDate, ':d2' => $dayDate]);
+            $created = (int)$stmtC->fetchColumn();
+
+            $stmtComp = $pdo->prepare("SELECT COUNT(*) FROM sales_requests WHERE project_status = 'Completed' AND (DATE(updated_at) = :d OR (updated_at IS NULL AND (order_date = :d2 OR DATE(created_at) = :d3)))");
+            $stmtComp->execute([':d' => $dayDate, ':d2' => $dayDate, ':d3' => $dayDate]);
+            $compReq = (int)$stmtComp->fetchColumn();
+
+            $stmtAudit = $pdo->prepare("SELECT COUNT(*) FROM audit_logs WHERE description LIKE '%Completed%' AND DATE(created_at) = :d");
+            $stmtAudit->execute([':d' => $dayDate]);
+            $compAudit = (int)$stmtAudit->fetchColumn();
+
+            $completed = max($compReq, $compAudit);
+
+            $totalCreated += $created;
+            $totalCompleted += $completed;
+
+            if ($completed > $maxCompleted) {
+                $maxCompleted = $completed;
+                $peakDayName = $dayNames[$i];
+            }
+
+            $timeline[] = [
+                'key' => $dayLetters[$i],
+                'name' => $dayNames[$i],
+                'date' => $dayDate,
+                'created' => $created,
+                'completed' => $completed,
+                'isCurrent' => $isToday,
+                'isProjected' => $isFuture,
+                'x' => $xCoords[$i]
+            ];
+        }
+
+        foreach ($timeline as &$td) {
+            if ($td['name'] === $peakDayName) {
+                $td['isPeak'] = true;
+            }
+        }
+        unset($td);
+
+        $peakTitle = "Peak productivity on $peakDayName";
+        if ($totalCompleted > 0) {
+            $peakSubtitle = "$totalCompleted project" . ($totalCompleted > 1 ? 's' : '') . " completed this week";
+        } elseif ($totalCreated > 0) {
+            $peakSubtitle = "$totalCreated new order" . ($totalCreated > 1 ? 's' : '') . " logged this week";
+        } else {
+            $peakSubtitle = "Focus shifted to task completion";
+        }
+
+        $timelineData = [
+            'weekStart' => $startWeekStr,
+            'weekEnd' => $endWeekStr,
+            'peakDay' => $peakDayName,
+            'peakTitle' => $peakTitle,
+            'peakSubtitle' => $peakSubtitle,
+            'totalCreated' => $totalCreated,
+            'totalCompleted' => $totalCompleted,
+            'timeline' => $timeline
+        ];
+
+        // Fetch 100% real database audit logs
+        $stmtLogs = $pdo->query("SELECT `id`, `user`, `role`, `action`, `module`, `description` AS `desc`, `status`, DATE_FORMAT(`created_at`, '%Y-%m-%d %H:%i:%s') AS `time` FROM audit_logs ORDER BY `created_at` DESC LIMIT 40");
+        $recentLogs = $stmtLogs->fetchAll(PDO::FETCH_ASSOC);
+
     } catch (Exception $e) {
         error_log("Dashboard query error: " . $e->getMessage());
     }
@@ -159,9 +265,9 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
             <div class="timeline-highlight-box">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span class="timeline-sparkle-icon">✨</span>
-                <span class="timeline-highlight-title" id="timelineHighlightTitle">Peak productivity on Wednesday</span>
+                <span class="timeline-highlight-title" id="timelineHighlightTitle"><?= htmlspecialchars($timelineData['peakTitle'] ?? 'Peak productivity on Monday') ?></span>
               </div>
-              <div class="timeline-highlight-subtitle" id="timelineHighlightSubtitle">Focus shifted to task completion</div>
+              <div class="timeline-highlight-subtitle" id="timelineHighlightSubtitle"><?= htmlspecialchars($timelineData['peakSubtitle'] ?? 'Focus shifted to task completion') ?></div>
             </div>
 
             <div class="timeline-legend">
@@ -224,10 +330,10 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
           </div>
 
           <div class="activity-filter-pills" id="activityFilterTabs" style="display: flex; gap: 6px; margin-bottom: 14px;">
-            <button class="timeframe-btn active" data-act-filter="all" style="font-size: 11px; padding: 3px 10px;">All</button>
-            <button class="timeframe-btn" data-act-filter="orders" style="font-size: 11px; padding: 3px 10px;">Orders</button>
-            <button class="timeframe-btn" data-act-filter="creatives" style="font-size: 11px; padding: 3px 10px;">Creatives</button>
-            <button class="timeframe-btn" data-act-filter="security" style="font-size: 11px; padding: 3px 10px;">Security</button>
+            <button class="timeframe-btn active" data-act-filter="all" onclick="window.SignDepotApp.setActivityFilter('all')" style="font-size: 11px; padding: 3px 10px;">All</button>
+            <button class="timeframe-btn" data-act-filter="orders" onclick="window.SignDepotApp.setActivityFilter('orders')" style="font-size: 11px; padding: 3px 10px;">Orders</button>
+            <button class="timeframe-btn" data-act-filter="creatives" onclick="window.SignDepotApp.setActivityFilter('creatives')" style="font-size: 11px; padding: 3px 10px;">Creatives</button>
+            <button class="timeframe-btn" data-act-filter="security" onclick="window.SignDepotApp.setActivityFilter('security')" style="font-size: 11px; padding: 3px 10px;">Security</button>
           </div>
 
           <div class="recent-activity-feed" id="recentActivityFeedList">
@@ -309,7 +415,7 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
                 <th>Location</th>
                 <th>Artist</th>
                 <th>Deadline</th>
-                <th>Project Status</th>
+                <th class="col-project-status">Project Status</th>
                 <th>Priority</th>
                 <th class="no-sort">Directive</th>
               </tr>
@@ -343,5 +449,10 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
     </section>
   </main>
 </div>
+
+<script>
+  window.__INITIAL_TIMELINE_DATA = <?= json_encode($timelineData) ?>;
+  window.__INITIAL_AUDIT_LOGS = <?= json_encode($recentLogs) ?>;
+</script>
 
 <?php require_once __DIR__ . '/pages/includes/footer.php'; ?>

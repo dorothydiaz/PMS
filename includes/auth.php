@@ -301,7 +301,7 @@ function canUserEditField($user, $field, $module = null) {
         'sales_rep' => 'salesRep', 'project_name' => 'projectName', 'design_deadline' => 'designDeadline',
         'releasing_date' => 'releasingDate', 'file_sent' => 'fileSent', 'complete_address' => 'completeAddress',
         'releasing_mode' => 'releasingMode', 'contact_person' => 'contactPerson', 'contact_number' => 'contactNumber',
-        'project_status' => 'projectStatus', 'client_approval' => 'clientApproval', 'head_approval' => 'headApproval',
+        'project_status' => 'projectStatus', 'head_approval' => 'headApproval',
         'count_standard' => 'countStandard', 'count_special' => 'countSpecial', 'count_printing' => 'countPrinting',
         'design_status' => 'designStatus', 'revision_count' => 'revisionCount', 'remarks' => 'remarks',
         'client' => 'client', 'location' => 'location'
