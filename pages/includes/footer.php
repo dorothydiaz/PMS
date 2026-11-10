@@ -27,5 +27,27 @@ if ($justLoggedIn) {
   <script src="<?= $base ?>assets/js/image-cropper.js?v=<?= time() ?>"></script>
   <script src="<?= $base ?>pages/includes/components.js?v=<?= time() ?>"></script>
   <script src="<?= $base ?>assets/js/script.js?v=<?= time() ?>"></script>
+
+  <!-- Page-Specific JavaScript Modules -->
+  <?php
+    $pageScriptMap = [
+        'dashboard' => 'dashboard.js',
+        'sales-requests' => 'sales-requests.js',
+        'creatives-tracker' => 'creatives-tracker.js',
+        'creatives-production' => 'creatives-tracker.js',
+        'artist-workload' => 'artist-workload.js',
+        'directives-details' => 'directives.js',
+        'directive-editor' => 'directives.js',
+        'monthly-output' => 'monthly-output.js',
+        'reports' => 'reports.js',
+        'settings' => 'settings.js',
+        'access-control' => 'settings.js',
+        'audit-trail' => 'settings.js',
+    ];
+    $targetScript = isset($currentPage) && isset($pageScriptMap[$currentPage]) ? $pageScriptMap[$currentPage] : null;
+  ?>
+  <?php if ($targetScript): ?>
+    <script src="<?= $base ?>assets/js/pages/<?= $targetScript ?>?v=<?= time() ?>"></script>
+  <?php endif; ?>
 </body>
 </html>

@@ -1,0 +1,12142 @@
+/**
+ * Sign Depot — Sales & Creative Production Tracker
+ * Frontend Application Engine (Vanilla JS, Local Persistence)
+ * With Panze Studio Aesthetic & Direct Inline Editable Tables
+ */
+
+(function () {
+  'use strict';
+
+  // ==========================================================================
+  // STORAGE & DEFAULT DATA STRUCTURES
+  // ==========================================================================
+
+  const STORAGE_KEY = 'SIGN_DEPOT_OPS_DATA_V4';
+
+  const DEFAULT_ARTISTS = ['Bob', 'Dorothy', 'Glen', 'Goodrich', 'Jules', 'Raven', 'Rodel', 'Tim'];
+
+  const DEFAULT_SALES_REPS = [
+    'Aj', 'Alvic', 'Anna', 'Dave', 'Dona', 'Ed', 'Flora', 'Jade', 'Janet',
+    'Jasmin', 'Jastine', 'Jay', 'Jen', 'Joana', 'Joie', 'Joyce', 'Kate',
+    'Kim', 'Levi', 'Mae', 'Mariel', 'Mike', 'Pia', 'Seven', 'Sheena',
+    'Shella', 'Sol'
+  ];
+
+  const PROJECT_STATUSES = [
+    'On-going', 'For Review', 'Revising', 'Pending Approval', 'Approved', 'Completed', 'On-hold', 'Incomplete Details/Files', 'Cancelled'
+  ];
+
+  const DESIGN_STATUSES = [
+    'On Queue', 'On-hold', 'Incomplete Details', 'Ongoing', 'For Approval Design', 'Design Approved', 'Sent to AE', 'Sent to Prod', 'Cancelled', 'Revising', 'Completed'
+  ];
+
+  const PRIORITY_LEVELS = ['Low', 'Normal', 'Rush'];
+  const APPROVAL_LEVELS = [
+    'On-going', 'For Review', 'Revising', 'Completed', 'Released', 'Incomplete Details/Files', 'Onhold', 'Pending Approval', 'Approved'
+  ];
+  const FILE_STATUS_LEVELS = ['N/A', 'File Sent', 'To Follow', 'Incomplete'];
+  const FILE_SENT_LEVELS = FILE_STATUS_LEVELS;
+  const PLACEMENT_OPTIONS = ['N/A', 'Indoor', 'Outdoor', 'Indoor & Outdoor'];
+  const RELEASING_MODES = ['N/A', 'Install', 'Deliver', 'Pickup'];
+  const HEAD_APPROVAL_LEVELS = ['Approved', 'Pending', 'Rejected'];
+
+  function toTitleCase(str) {
+    if (!str) return '';
+    return String(str)
+      .toLowerCase()
+      .split(' ')
+      .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : '')
+      .join(' ');
+  }
+
+  function normalizeReleasingMode(mode) {
+    if (!mode) return 'Pickup';
+    const m = String(mode).trim().toUpperCase();
+    if (m.startsWith('INST')) return 'Install';
+    if (m.startsWith('DELIV')) return 'Deliver';
+    if (m.startsWith('PICK')) return 'Pickup';
+    return 'Pickup';
+  }
+
+  // Comprehensive Shared Mock Dataset (25+ real-world Sign Depot projects)
+  // Live Spreadsheet Database Orders (LR-26-2102 to LR-26-1950 from 1Uwm-SjFgMgo62S8YY2IonJkmy9BfCmcIvZ7Txvp09Pg)
+  const DEFAULT_REQUESTS = [];
+
+  // Default Template Layout Elements
+  const DEFAULT_TEMPLATE_ELEMENTS = [
+    { id: 'el-req', label: 'REQUEST ID', content: 'LR-26-2100', x: 20, y: 15, w: 140, h: 42, fontSize: 13, align: 'center', color: '#DC2626' },
+    { id: 'el-jo', label: 'JO NUMBER', content: 'P261001348', x: 180, y: 15, w: 180, h: 42, fontSize: 16, align: 'center', color: '#DC2626' },
+    { id: 'el-due', label: 'DUE DATE', content: 'JULY 30, 2026', x: 380, y: 15, w: 160, h: 42, fontSize: 12, align: 'center', color: '#DC2626' },
+    { id: 'el-proj', label: 'PROJECT NAME', content: 'LACOST & SMH & MK', x: 20, y: 75, w: 420, h: 50, fontSize: 22, align: 'center', color: '#1F2937' },
+    { id: 'el-client', label: 'CLIENT NAME', content: 'DECALPRO PRINTING SERVICES', x: 20, y: 135, w: 420, h: 45, fontSize: 20, align: 'center', color: '#1F2937' },
+    { id: 'el-incharge', label: 'IN-CHARGE', content: 'DONA', x: 20, y: 195, w: 200, h: 44, fontSize: 12, align: 'center', color: '#1F2937' },
+    { id: 'el-drawnby', label: 'DRAWN BY', content: 'GLEN', x: 240, y: 195, w: 200, h: 44, fontSize: 12, align: 'center', color: '#1F2937' },
+    { id: 'el-contact', label: 'CONTACT NUMBER', content: '639178805364', x: 460, y: 75, w: 220, h: 40, fontSize: 12, align: 'left', color: '#1F2937' },
+    { id: 'el-orderdate', label: 'ORDER DATE', content: '23/10/2026', x: 460, y: 125, w: 220, h: 40, fontSize: 12, align: 'left', color: '#1F2937' },
+    { id: 'el-releasing', label: 'RELEASING DATE', content: 'JULY 30, 2026', x: 460, y: 175, w: 220, h: 40, fontSize: 12, align: 'left', color: '#1F2937' },
+    { id: 'el-mode', label: 'RELEASING MODE', content: 'PICKUP', x: 460, y: 225, w: 220, h: 40, fontSize: 12, align: 'left', color: '#1F2937' },
+    { id: 'el-installers', label: 'INSTALLERS', content: '2 Installers', x: 700, y: 75, w: 170, h: 90, fontSize: 13, align: 'center', color: '#1F2937' },
+    { id: 'el-duration', label: 'DURATION', content: '1 Day (4 Hours)', x: 700, y: 175, w: 170, h: 90, fontSize: 13, align: 'center', color: '#1F2937' },
+    { id: 'el-address', label: 'DELIVERY ADDRESS', content: 'Block 14 Lot 3, Ortigas Ave Extension, Pasig City', x: 20, y: 250, w: 420, h: 45, fontSize: 11, align: 'left', color: '#1F2937' }
+  ];
+
+  // Default Mock Attachments
+  const DEFAULT_ATTACHMENTS = [
+    {
+      id: 'att-1',
+      name: 'Sign_Depot_Vector_Spec_URAL.png',
+      type: 'Vector Blueprint',
+      size: '1.4 MB',
+      dateAdded: '2026-10-23',
+      storageType: 'Local Spec',
+      url: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20240%22%20width%3D%22400%22%20height%3D%22240%22%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22%230B132B%22%2F%3E%3Cdefs%3E%3Cpattern%20id%3D%22grid%22%20width%3D%2220%22%20height%3D%2220%22%20patternUnits%3D%22userSpaceOnUse%22%3E%3Cpath%20d%3D%22M%2020%200%20L%200%200%200%2020%22%20fill%3D%22none%22%20stroke%3D%22%231C2541%22%20stroke-width%3D%220.8%22%2F%3E%3C%2Fpattern%3E%3C%2Fdefs%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22url%28%23grid%29%22%2F%3E%3Crect%20x%3D%2225%22%20y%3D%2225%22%20width%3D%22350%22%20height%3D%22190%22%20fill%3D%22none%22%20stroke%3D%22%233A86FF%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%224%2C2%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2245%22%20width%3D%22320%22%20height%3D%2290%22%20rx%3D%228%22%20fill%3D%22%231C2541%22%20stroke%3D%22%2348CAE4%22%20stroke-width%3D%221.5%22%2F%3E%3Cpolygon%20points%3D%2260%2C60%20180%2C60%20160%2C115%2040%2C115%22%20fill%3D%22%23DC2626%22%2F%3E%3Ctext%20x%3D%2270%22%20y%3D%2298%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2222%22%20fill%3D%22%23FFFFFF%22%20font-style%3D%22italic%22%3ESIGN%20DEPOT%3C%2Ftext%3E%3Ctext%20x%3D%22195%22%20y%3D%2280%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2213%22%20fill%3D%22%23FFFFFF%22%3E3D%20ACRYLIC%20CHANNEL%3C%2Ftext%3E%3Ctext%20x%3D%22195%22%20y%3D%22100%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22500%22%20font-size%3D%2210.5%22%20fill%3D%22%2348CAE4%22%3ELED%20BACKLIT%20%E2%80%A2%203000K%20WARM%3C%2Ftext%3E%3Ctext%20x%3D%22195%22%20y%3D%22118%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22500%22%20font-size%3D%229.5%22%20fill%3D%22%2394A3B8%22%3ESCALE%201%3A20%20%E2%80%A2%203400%20x%20950%20MM%3C%2Ftext%3E%3Cline%20x1%3D%2240%22%20y1%3D%22150%22%20x2%3D%22360%22%20y2%3D%22150%22%20stroke%3D%22%2300B4D8%22%20stroke-width%3D%221.2%22%2F%3E%3Cpolygon%20points%3D%2240%2C150%2048%2C147%2048%2C153%22%20fill%3D%22%2300B4D8%22%2F%3E%3Cpolygon%20points%3D%22360%2C150%20352%2C147%20352%2C153%22%20fill%3D%22%2300B4D8%22%2F%3E%3Ctext%20x%3D%22200%22%20y%3D%22146%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2211%22%20fill%3D%22%2300B4D8%22%20text-anchor%3D%22middle%22%3EW%3A%203400%20mm%3C%2Ftext%3E%3Crect%20x%3D%2225%22%20y%3D%22185%22%20width%3D%22350%22%20height%3D%2230%22%20fill%3D%22%230D1B2A%22%2F%3E%3Ctext%20x%3D%2235%22%20y%3D%22204%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2210%22%20fill%3D%22%23FFFFFF%22%3ESIGN%20DEPOT%20VECTOR%20SPEC%20%E2%80%94%20URAL%3C%2Ftext%3E%3Ctext%20x%3D%22365%22%20y%3D%22204%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229%22%20fill%3D%22%2306D6A0%22%20text-anchor%3D%22end%22%3EAPPROVED%20FOR%20PRODUCTION%3C%2Ftext%3E%3C%2Fsvg%3E'
+    },
+    {
+      id: 'att-2',
+      name: 'Client_Approved_Facade_Render_PauAcilac.png',
+      type: 'Proof Render',
+      size: '2.8 MB',
+      dateAdded: '2026-10-23',
+      storageType: 'Local Render',
+      url: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20240%22%20width%3D%22400%22%20height%3D%22240%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%220%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F172A%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231E293B%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22glow%22%20cx%3D%2250%25%22%20cy%3D%2250%25%22%20r%3D%2250%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23EF4444%22%20stop-opacity%3D%220.45%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23EF4444%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22url%28%23sky%29%22%2F%3E%3Crect%20x%3D%2230%22%20y%3D%2230%22%20width%3D%22340%22%20height%3D%22210%22%20fill%3D%22%23334155%22%20stroke%3D%22%23475569%22%20stroke-width%3D%221.5%22%2F%3E%3Crect%20x%3D%2250%22%20y%3D%22110%22%20width%3D%22300%22%20height%3D%22120%22%20fill%3D%22%231E293B%22%20opacity%3D%220.9%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22150%22%20y1%3D%22110%22%20x2%3D%22150%22%20y2%3D%22230%22%20stroke%3D%22%23475569%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22250%22%20y1%3D%22110%22%20x2%3D%22250%22%20y2%3D%22230%22%20stroke%3D%22%23475569%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2245%22%20width%3D%22320%22%20height%3D%2260%22%20rx%3D%224%22%20fill%3D%22%2309090B%22%20stroke%3D%22%23DC2626%22%20stroke-width%3D%222%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2245%22%20width%3D%22320%22%20height%3D%2260%22%20fill%3D%22url%28%23glow%29%22%2F%3E%3Cpolygon%20points%3D%2265%2C58%20175%2C58%20155%2C95%2045%2C95%22%20fill%3D%22%23DC2626%22%2F%3E%3Ctext%20x%3D%2275%22%20y%3D%2284%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2218%22%20fill%3D%22%23FFFFFF%22%20font-style%3D%22italic%22%3ESIGN%20DEPOT%3C%2Ftext%3E%3Ctext%20x%3D%22185%22%20y%3D%2276%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22800%22%20font-size%3D%2213%22%20fill%3D%22%23FFFFFF%22%3EPAU%20ACILAC%20STORE%3C%2Ftext%3E%3Ctext%20x%3D%22185%22%20y%3D%2293%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229.5%22%20fill%3D%22%23FCA5A5%22%3EFACADE%20NIGHT%20RENDER%203D%3C%2Ftext%3E%3Crect%20x%3D%22250%22%20y%3D%22195%22%20width%3D%22110%22%20height%3D%2226%22%20rx%3D%224%22%20fill%3D%22%23065F46%22%20opacity%3D%220.9%22%2F%3E%3Ctext%20x%3D%22305%22%20y%3D%22212%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%229.5%22%20fill%3D%22%23A7F3D0%22%20text-anchor%3D%22middle%22%3E%E2%9C%93%20CLIENT%20APPROVED%3C%2Ftext%3E%3C%2Fsvg%3E'
+    },
+    {
+      id: 'att-3',
+      name: 'Engineering_Electrical_Wiring_Diagram.png',
+      type: 'Technical Drawing',
+      size: '890 KB',
+      dateAdded: '2026-10-23',
+      storageType: 'Local Schematic',
+      url: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20240%22%20width%3D%22400%22%20height%3D%22240%22%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22%230B131E%22%2F%3E%3Cdefs%3E%3Cpattern%20id%3D%22elecGrid%22%20width%3D%2216%22%20height%3D%2216%22%20patternUnits%3D%22userSpaceOnUse%22%3E%3Cpath%20d%3D%22M%2016%200%20L%200%200%200%2016%22%20fill%3D%22none%22%20stroke%3D%22%23152238%22%20stroke-width%3D%220.7%22%2F%3E%3C%2Fpattern%3E%3C%2Fdefs%3E%3Crect%20width%3D%22400%22%20height%3D%22240%22%20fill%3D%22url%28%23elecGrid%29%22%2F%3E%3Crect%20x%3D%2220%22%20y%3D%2215%22%20width%3D%22360%22%20height%3D%2230%22%20fill%3D%22%23132338%22%20stroke%3D%22%231E3A5F%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2234%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2210.5%22%20fill%3D%22%2338BDF8%22%3EELECTRICAL%20%26%20LED%20WIRING%20SCHEMATIC%20%E2%80%94%20220V%20AC%20%2F%2012V%20DC%3C%2Ftext%3E%3Crect%20x%3D%2235%22%20y%3D%2270%22%20width%3D%2290%22%20height%3D%2280%22%20rx%3D%224%22%20fill%3D%22%231E293B%22%20stroke%3D%22%23F59E0B%22%20stroke-width%3D%221.5%22%2F%3E%3Ctext%20x%3D%2280%22%20y%3D%22100%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2210%22%20fill%3D%22%23FBBF24%22%20text-anchor%3D%22middle%22%3EMEANWELL%3C%2Ftext%3E%3Ctext%20x%3D%2280%22%20y%3D%22115%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229%22%20fill%3D%22%23E2E8F0%22%20text-anchor%3D%22middle%22%3ELRS-350-12%3C%2Ftext%3E%3Ctext%20x%3D%2280%22%20y%3D%22130%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22500%22%20font-size%3D%228%22%20fill%3D%22%2394A3B8%22%20text-anchor%3D%22middle%22%3E29A%20%E2%80%A2%2012V%20350W%3C%2Ftext%3E%3Cline%20x1%3D%2215%22%20y1%3D%2295%22%20x2%3D%2235%22%20y2%3D%2295%22%20stroke%3D%22%23EF4444%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%2215%22%20y1%3D%22125%22%20x2%3D%2235%22%20y2%3D%22125%22%20stroke%3D%22%233B82F6%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%2218%22%20y%3D%2290%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%23EF4444%22%3EL%20%28220V%29%3C%2Ftext%3E%3Cline%20x1%3D%22125%22%20y1%3D%22100%22%20x2%3D%22180%22%20y2%3D%22100%22%20stroke%3D%22%23DC2626%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20x1%3D%22125%22%20y1%3D%22120%22%20x2%3D%22180%22%20y2%3D%22120%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%222.5%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%2294%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%23DC2626%22%3E%2B12V%3C%2Ftext%3E%3Crect%20x%3D%22180%22%20y%3D%2265%22%20width%3D%22185%22%20height%3D%2242%22%20rx%3D%224%22%20fill%3D%22%231E293B%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%221.2%22%2F%3E%3Ctext%20x%3D%22272%22%20y%3D%2285%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%229%22%20fill%3D%22%2334D399%22%20text-anchor%3D%22middle%22%3ELED%20STRING%20A%20%2818%20pcs%20x%201.5W%29%3C%2Ftext%3E%3Ctext%20x%3D%22272%22%20y%3D%2298%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%2394A3B8%22%20text-anchor%3D%22middle%22%3ESAMSUNG%20CHIP%20%E2%80%A2%20IP67%3C%2Ftext%3E%3Crect%20x%3D%22180%22%20y%3D%22120%22%20width%3D%22185%22%20height%3D%2242%22%20rx%3D%224%22%20fill%3D%22%231E293B%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%221.2%22%2F%3E%3Ctext%20x%3D%22272%22%20y%3D%22140%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%20font-size%3D%229%22%20fill%3D%22%2334D399%22%20text-anchor%3D%22middle%22%3ELED%20STRING%20B%20%2818%20pcs%20x%201.5W%29%3C%2Ftext%3E%3Ctext%20x%3D%22272%22%20y%3D%22153%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%2394A3B8%22%20text-anchor%3D%22middle%22%3ESAMSUNG%20CHIP%20%E2%80%A2%20IP67%3C%2Ftext%3E%3Cline%20x1%3D%2280%22%20y1%3D%22150%22%20x2%3D%2280%22%20y2%3D%22190%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%223%2C2%22%2F%3E%3Ctext%20x%3D%2285%22%20y%3D%22185%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%228%22%20fill%3D%22%2310B981%22%3EEARTH%20GROUND%3C%2Ftext%3E%3Crect%20x%3D%2220%22%20y%3D%22195%22%20width%3D%22360%22%20height%3D%2230%22%20fill%3D%22%230D1622%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%22214%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22600%22%20font-size%3D%229%22%20fill%3D%22%2394A3B8%22%3EENGINEERING%20DWG%20REV%202.4%20%E2%80%A2%20APPROVED%20FOR%20INSTALLATION%3C%2Ftext%3E%3C%2Fsvg%3E'
+    }
+  ];
+
+  // ==========================================================================
+  // STATE STORE (Unified Central State with LocalStorage Sync)
+  // ==========================================================================
+
+  const ROWS_PER_PAGE_KEY = 'SIGN_DEPOT_DEFAULT_PER_PAGE';
+
+  function getStoredRowsPerPage() {
+    try {
+      const saved = localStorage.getItem(ROWS_PER_PAGE_KEY);
+      if (saved) {
+        const n = parseInt(saved, 10);
+        if ([10, 15, 20, 25, 30].includes(n)) return n;
+      }
+    } catch (e) {}
+    return 10;
+  }
+
+  function setStoredRowsPerPage(n) {
+    try {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        localStorage.setItem(ROWS_PER_PAGE_KEY, String(val));
+      }
+    } catch (e) {}
+  }
+
+  const initialRowsPerPage = getStoredRowsPerPage();
+
+  let state = {
+    artists: [...DEFAULT_ARTISTS],
+    salesReps: [...DEFAULT_SALES_REPS],
+    requests: JSON.parse(JSON.stringify(DEFAULT_REQUESTS)).map(r => ({ ...r, releasingMode: normalizeReleasingMode(r.releasingMode) })),
+    templateElements: JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS)),
+    attachments: [...DEFAULT_ATTACHMENTS],
+    activeView: 'view-dashboard',
+    currentDirectiveJo: 'P261001348',
+    salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', deadline: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
+    trackerFilter: { search: '', headApproval: '', projectStatus: '', designStatus: '', artist: '', overdue: '', datePreset: '', dateCustom: '', dateColumn: 'orderDate', sortField: 'requestId', sortDir: 'desc', page: 1, perPage: initialRowsPerPage },
+    trackerAcceptanceTab: 'accepted',
+    pendingSalesFilter: 'all',
+    pendingSalesSearch: '',
+    pendingSalesPage: 1,
+    pendingSalesPerPage: initialRowsPerPage,
+    pendingArtistSelected: 'Glen',
+    pendingArtistPage: 1,
+    pendingArtistPerPage: initialRowsPerPage,
+    workloadFilter: { availability: '', search: '', selectedArtist: '' },
+    workloadPage: 1,
+    workloadPerPage: initialRowsPerPage,
+    dashboardSearch: '',
+    dashboardStatus: '',
+    dashboardDeadline: '',
+    dashboardKpiFilter: '',
+    dashboardPage: 1,
+    trackerKpiFilter: 'all',
+    dashboardPerPage: initialRowsPerPage,
+    monthlyOutputPage: 1,
+    monthlyOutputPerPage: initialRowsPerPage,
+    selectedTemplateElemId: null,
+    customCellFonts: {},
+    directiveZoom: 100,
+    directiveEnvType: '',
+    draftSalesRequest: null
+  };
+
+  function normalizeRequestItem(r) {
+    if (!r) return;
+
+    // Normalize projectStatus: (Completed, On-going)
+    if (!r.projectStatus || typeof r.projectStatus !== 'string' || !r.projectStatus.trim() || r.projectStatus === '[object Object]') {
+      r.projectStatus = 'On-going';
+    } else {
+      const ps = r.projectStatus.trim().toLowerCase();
+      r.projectStatus = (ps === 'completed') ? 'Completed' : 'On-going';
+    }
+
+    // Normalize designStatus: (On Queue, On-hold, Incomplete Details, Ongoing, For Approval Design, Design Approved, Sent to AE, Sent to Prod, Cancelled, Revising, Completed)
+    if (!r.designStatus || typeof r.designStatus !== 'string' || !r.designStatus.trim() || r.designStatus === '[object Object]' || r.designStatus === '{}') {
+      r.designStatus = (r.projectStatus === 'Completed') ? 'Completed' : 'On Queue';
+    } else {
+      let ds = r.designStatus.trim();
+      const dsLower = ds.toLowerCase();
+      if (dsLower === 'in progress' || dsLower === 'ongoing') ds = 'Ongoing';
+      else if (dsLower === 'not started' || dsLower === 'queue' || dsLower === 'on queue') ds = 'On Queue';
+      else if (dsLower === 'submitted') ds = (r.projectStatus === 'Completed') ? 'Completed' : 'Sent to AE';
+      else if (dsLower === 'for review') ds = 'For Approval Design';
+      else if (dsLower === 'approved') ds = 'Design Approved';
+      else if (dsLower === 'on hold' || dsLower === 'on-hold') ds = 'On-hold';
+      else if (dsLower === 'incomplete' || dsLower === 'incomplete details') ds = 'Incomplete Details';
+      else if (dsLower === 'revising') ds = 'Revising';
+      else if (dsLower === 'cancelled') ds = 'Cancelled';
+      else if (dsLower === 'sent to prod') ds = 'Sent to Prod';
+      else if (dsLower === 'sent to ae') ds = 'Sent to AE';
+      else if (dsLower === 'completed') ds = 'Completed';
+      else if (DESIGN_STATUSES.includes(ds)) r.designStatus = ds;
+      else ds = (r.projectStatus === 'Completed') ? 'Completed' : 'On Queue';
+      r.designStatus = ds;
+    }
+
+    // Normalize headApproval: (Approved, Pending, Rejected)
+    if (!r.headApproval || typeof r.headApproval !== 'string' || !r.headApproval.trim()) {
+      r.headApproval = 'Pending';
+    } else {
+      const ha = r.headApproval.trim().toLowerCase();
+      if (ha.includes('appr')) r.headApproval = 'Approved';
+      else if (ha.includes('rej')) r.headApproval = 'Rejected';
+      else r.headApproval = 'Pending';
+    }
+
+    // Normalize clientApproval: (On-going, For Review, Revising, Completed, Released, Incomplete Details/Files, Onhold, Pending Approval, Approved)
+    if (!r.clientApproval || typeof r.clientApproval !== 'string' || !r.clientApproval.trim()) {
+      r.clientApproval = 'Pending Approval';
+    } else {
+      const ca = r.clientApproval.trim().toLowerCase();
+      if (ca === 'approved') r.clientApproval = 'Approved';
+      else if (ca === 'pending' || ca === 'pending approval') r.clientApproval = 'Pending Approval';
+      else if (ca.includes('revision') || ca === 'revising') r.clientApproval = 'Revising';
+      else if (ca === 'completed') r.clientApproval = 'Completed';
+      else if (ca === 'on-going' || ca === 'ongoing') r.clientApproval = 'On-going';
+      else if (ca === 'for review') r.clientApproval = 'For Review';
+      else if (ca === 'released') r.clientApproval = 'Released';
+      else if (ca.includes('incomplete')) r.clientApproval = 'Incomplete Details/Files';
+      else if (ca.includes('hold')) r.clientApproval = 'Onhold';
+      else if (!APPROVAL_LEVELS.includes(r.clientApproval)) r.clientApproval = 'Pending Approval';
+    }
+
+    // Normalize priority level: (Low, Normal, Rush)
+    if (!r.priority || typeof r.priority !== 'string' || !r.priority.trim()) {
+      r.priority = 'Normal';
+    } else {
+      const p = r.priority.trim().toLowerCase();
+      if (p === 'rush') r.priority = 'Rush';
+      else if (p === 'low') r.priority = 'Low';
+      else r.priority = 'Normal';
+    }
+
+    // Normalize file status: (blank/N/A, file sent, to follow, incomplete)
+    if (!r.fileSent || typeof r.fileSent !== 'string' || !r.fileSent.trim()) {
+      r.fileSent = 'N/A';
+    } else {
+      const fs = r.fileSent.trim().toLowerCase();
+      if (fs === 'file sent' || fs === 'sent' || fs === 'filesent') r.fileSent = 'File Sent';
+      else if (fs === 'to follow' || fs === 'tofollow') r.fileSent = 'To Follow';
+      else if (fs === 'incomplete') r.fileSent = 'Incomplete';
+      else r.fileSent = 'N/A';
+    }
+
+    // Normalize placement: (Blank/N/A, Indoor, Outdoor, Indoor & Outdoor)
+    if (!r.location || typeof r.location !== 'string' || !r.location.trim() || r.location === 'Blank') {
+      r.location = 'N/A';
+    } else {
+      const loc = r.location.trim().toLowerCase();
+      if (loc.includes('&') || (loc.includes('indoor') && loc.includes('outdoor'))) r.location = 'Indoor & Outdoor';
+      else if (loc.includes('outdoor')) r.location = 'Outdoor';
+      else if (loc.includes('indoor')) r.location = 'Indoor';
+      else r.location = 'N/A';
+    }
+
+    // Normalize mode of releasing: (Blank/N/A, Install, Deliver, Pickup)
+    if (!r.releasingMode || typeof r.releasingMode !== 'string' || !r.releasingMode.trim() || r.releasingMode === 'Blank') {
+      r.releasingMode = 'N/A';
+    } else {
+      const rm = r.releasingMode.trim().toLowerCase();
+      if (rm.includes('inst')) r.releasingMode = 'Install';
+      else if (rm.includes('deliv')) r.releasingMode = 'Deliver';
+      else if (rm.includes('pick')) r.releasingMode = 'Pickup';
+      else r.releasingMode = 'N/A';
+    }
+
+    if (r.salesRep && typeof r.salesRep === 'string') r.salesRep = toTitleCase(r.salesRep);
+    if (r.artist && typeof r.artist === 'string') r.artist = toTitleCase(r.artist);
+
+    // Timestamps
+    if (!r.timestamp || r.timestamp === '') r.timestamp = r.orderDate || 'N/A';
+    if (!r.dateUpdated || r.dateUpdated === '') r.dateUpdated = r.orderDate || 'N/A';
+
+    // Blank field defaults
+    if (!r.completeAddress || r.completeAddress.trim() === '') r.completeAddress = 'N/A';
+    if (!r.contactPerson || r.contactPerson.trim() === '') r.contactPerson = 'N/A';
+    if (!r.contactNumber || r.contactNumber.trim() === '') r.contactNumber = 'N/A';
+    if (!r.remarks || r.remarks.trim() === '') r.remarks = 'N/A';
+  }
+
+  function loadStateFromStorage() {
+    let hydratedFromCache = false;
+    // 1. Check localStorage, but PURGE if it contains old fictional mock data
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.requests) && parsed.requests.length > 0) {
+          // Check if this is old dummy mock data or a partial cached slice (< 2100 records)
+          const isStaleMockData = (parsed.requests.length < 2100) || parsed.requests.some(r => r.id === 'req-001' || r.id === 'mock-001');
+          if (isStaleMockData) {
+            console.log('Purging stale/partial (' + parsed.requests.length + ' rows) cache from localStorage, loading live full dataset...');
+            localStorage.removeItem(STORAGE_KEY);
+          } else {
+            parsed.requests.forEach(normalizeRequestItem);
+            state.requests = parsed.requests;
+            saveStateToStorage();
+            if (parsed.artists) {
+              state.artists = parsed.artists
+                .filter(a => a !== 'Seven' && a !== 'Edrian')
+                .map(toTitleCase);
+              if (!state.artists.includes('Dorothy')) {
+                state.artists.push('Dorothy');
+              }
+              state.artists.sort();
+            } else {
+              state.artists = [...DEFAULT_ARTISTS];
+            }
+            if (parsed.salesReps && Array.isArray(parsed.salesReps) && parsed.salesReps.length > 0) {
+              state.salesReps = parsed.salesReps
+                .filter(s => s && s.toLowerCase() !== 'shela' && s.toLowerCase() !== 'tim')
+                .map(toTitleCase);
+              state.salesReps.sort();
+            } else {
+              state.salesReps = [...DEFAULT_SALES_REPS];
+            }
+            if (!state.salesReps.includes('Jastine')) {
+              state.salesReps.push('Jastine');
+              state.salesReps.sort();
+            }
+            // Sanitize requests to replace typo Shela with Shella
+            if (state.requests && Array.isArray(state.requests)) {
+              state.requests.forEach(r => {
+                if (r && r.salesRep && r.salesRep.toLowerCase() === 'shela') {
+                  r.salesRep = 'Shella';
+                }
+              });
+            }
+            if (parsed.directiveZoom) state.directiveZoom = parsed.directiveZoom;
+            if (parsed.directiveEnvType !== undefined) state.directiveEnvType = parsed.directiveEnvType;
+            if (parsed.artistWorkloadFromSheet) state.artistWorkloadFromSheet = parsed.artistWorkloadFromSheet;
+            if (parsed.attachments && Array.isArray(parsed.attachments) && parsed.attachments.length > 0) {
+              state.attachments = parsed.attachments;
+            }
+            
+            const storedRows = getStoredRowsPerPage();
+            if (state.salesFilter) state.salesFilter.perPage = storedRows;
+            if (state.trackerFilter) state.trackerFilter.perPage = storedRows;
+            state.pendingSalesPerPage = storedRows;
+            state.pendingArtistPerPage = storedRows;
+            state.workloadPerPage = storedRows;
+            state.dashboardPerPage = storedRows;
+            state.monthlyOutputPerPage = storedRows;
+            hydratedFromCache = true;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
+
+    // 2. Fallback to cached requests or default dataset if not hydrated from local storage
+    if (!hydratedFromCache) {
+      if (window.PmsCache && window.PmsCache.isCachePermitted()) {
+        const cached = window.PmsCache.getCachedRequests();
+        if (cached && Array.isArray(cached) && cached.length > 0) {
+          cached.forEach(normalizeRequestItem);
+          state.requests = cached;
+          hydratedFromCache = true;
+        }
+      }
+      if (!hydratedFromCache) {
+        state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+        state.requests.forEach(normalizeRequestItem);
+      }
+      state.artists = DEFAULT_ARTISTS.map(toTitleCase);
+      state.salesReps = DEFAULT_SALES_REPS.map(toTitleCase);
+      saveStateToStorage();
+    }
+
+    // 3. If running in PHP environment with live MySQL backend, sync live records
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_artists')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            state.artists = res.data
+              .map(a => toTitleCase(a.name || a))
+              .filter(a => a !== 'Seven' && a !== 'Edrian')
+              .sort();
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+            populateTrackerFiltersDropdowns();
+            if (state.activeView === 'view-artist-workload') {
+              renderArtistWorkload();
+            } else if (state.activeView === 'view-settings') {
+              renderSettings();
+            }
+          }
+        })
+        .catch(e => console.warn('MySQL live artists fetch:', e));
+
+      fetch(window.PMS_API_URL + '?action=get_sales_reps')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const reps = res.data
+              .filter(s => s && s.toLowerCase() !== 'shela' && s.toLowerCase() !== 'tim')
+              .map(toTitleCase);
+            state.salesReps = reps.sort();
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+            if (state.activeView === 'view-settings') {
+              renderSettings();
+            }
+          }
+        })
+        .catch(e => console.warn('MySQL live sales reps fetch:', e));
+
+      fetch(window.PMS_API_URL + '?action=get_all_requests')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.data)) {
+            res.data.forEach(normalizeRequestItem);
+            state.requests = res.data;
+            saveStateToStorage();
+            if (window.PmsCache && window.PmsCache.isCachePermitted()) {
+              window.PmsCache.setCachedRequests(res.data);
+            }
+            updateDashboardKPIs();
+            renderCurrentView(state.activeView);
+          } else if (res && !res.success) {
+            console.error('MySQL live requests fetch failed:', res.error);
+            showToast('⚠️ Database Notice: ' + (res.error || 'Could not connect to database. Check config.php.'), 'error');
+            // Gracefully render default dataset so page is never empty
+            renderCurrentView(state.activeView);
+          }
+        })
+        .catch(e => {
+          console.warn('MySQL live requests fetch error:', e);
+          // Gracefully render default dataset so page is never empty
+          renderCurrentView(state.activeView);
+        });
+    }
+  }
+
+  function saveStateToStorage() {
+    // Respect user privacy: only save cache/localStorage if permitted!
+    if (window.PmsCache && !window.PmsCache.isCachePermitted()) {
+      return;
+    }
+    try {
+      const dataToSave = {
+        artists: state.artists,
+        salesReps: state.salesReps,
+        requests: state.requests,
+        templateElements: state.templateElements,
+        attachments: state.attachments,
+        customCellFonts: state.customCellFonts || {},
+        directiveZoom: state.directiveZoom || 100,
+        directiveEnvType: state.directiveEnvType || ''
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+      if (window.PmsCache) {
+        window.PmsCache.setCachedRequests(state.requests);
+      }
+      pulseAutoSaveIndicator();
+    } catch (e) {
+      console.warn('Could not save to localStorage.', e);
+    }
+  }
+
+  function pulseAutoSaveIndicator() {
+    const pill = document.querySelector('.auto-save-pill');
+    if (pill) {
+      pill.style.transform = 'scale(1.08)';
+      pill.style.background = '#D1FAE5';
+      setTimeout(() => {
+        pill.style.transform = 'scale(1)';
+        pill.style.background = '#ECFDF5';
+      }, 350);
+    }
+  }
+
+  // ==========================================================================
+  // GRANULAR PERMISSION ENGINE (Module, Tab, Table & Column Level)
+  // ==========================================================================
+
+  function getCurrentUserPermissions() {
+    if (window.PMS_CURRENT_USER && window.PMS_CURRENT_USER.permissions) {
+      let p = window.PMS_CURRENT_USER.permissions;
+      if (typeof p === 'string') {
+        try { p = JSON.parse(p); } catch (e) { p = {}; }
+      }
+      return p;
+    }
+    return null;
+  }
+
+  function isCurrentUserSuperAdmin() {
+    return window.PMS_CURRENT_USER && (window.PMS_CURRENT_USER.role === 'super_admin');
+  }
+
+  function getModuleForCurrentView() {
+    const view = state.activeView || detectCurrentPage();
+    const map = {
+      'view-sales-requests': 'sales-requests',
+      'view-pending-sales': 'sales-requests',
+      'view-creatives-tracker': 'creatives-tracker',
+      'view-artist-workload': 'artist-workload',
+      'view-directives-details': 'directives-details',
+      'view-dashboard': 'dashboard',
+      'view-monthly-output': 'monthly-output',
+      'view-reports': 'reports',
+      'view-access-control': 'access-control',
+      'view-audit-trail': 'audit-trail',
+      'view-settings': 'settings'
+    };
+    return map[view] || 'sales-requests';
+  }
+
+  function canUserEditField(module, fieldName) {
+    if (!window.PMS_CURRENT_USER) return true; // Standalone demo fallback
+    if (isCurrentUserSuperAdmin()) return true;
+
+    const perms = getCurrentUserPermissions();
+    if (!perms) return true;
+
+    const mod = module || getModuleForCurrentView();
+
+    // 1. Check if user has general update (u) permission for this module/table
+    if (!perms[mod] || !perms[mod].u) {
+      return false;
+    }
+
+    // 2. Check if specific columns are restricted
+    const editableCols = perms[mod].editable_columns;
+    if (editableCols === undefined || editableCols === null || editableCols === '*' || (Array.isArray(editableCols) && (editableCols.length === 0 || editableCols.includes('*')))) {
+      return true; // All columns editable
+    }
+
+    if (Array.isArray(editableCols)) {
+      return editableCols.includes(fieldName);
+    }
+
+    return false;
+  }
+
+  function canUserAccessTab(module, tabKey) {
+    if (!window.PMS_CURRENT_USER) return true;
+    if (isCurrentUserSuperAdmin()) return true;
+    const perms = getCurrentUserPermissions();
+    if (!perms || !perms[module]) return true;
+    if (perms[module].tabs && typeof perms[module].tabs[tabKey] !== 'undefined') {
+      return Boolean(perms[module].tabs[tabKey]);
+    }
+    return true;
+  }
+
+  // ==========================================================================
+  // DIRECT INLINE TABLE EDITING ENGINE
+  // ==========================================================================
+
+  // Updates any field on a request directly, recalculates dependent views and persists
+  function updateRequestField(requestId, fieldName, newValue, domElement) {
+    const currentMod = getModuleForCurrentView();
+
+    // Enforce column-level permissions
+    if (!canUserEditField(currentMod, fieldName)) {
+      showToast(`Editing Locked: You do not have permission to edit the '${fieldName}' column on this table.`, 'error');
+      if (domElement && domElement.isContentEditable) {
+        const existing = state.requests.find(r => r.id === requestId);
+        domElement.textContent = existing ? (existing[fieldName] || '') : '';
+      }
+      return;
+    }
+
+    const rec = state.requests.find(r => r.id === requestId);
+    if (!rec) return;
+
+    if (currentMod === 'sales-requests' && typeof newValue === 'string' && newValue.trim() === '') {
+      showToast(`This detail cannot be left empty on sales requests.`, 'error');
+      if (domElement && domElement.isContentEditable) {
+        domElement.textContent = rec[fieldName] || '';
+        domElement.classList.add('is-invalid-detail');
+        setTimeout(() => domElement.classList.remove('is-invalid-detail'), 1500);
+      }
+      return;
+    }
+
+    // Parse numbers if applicable
+    if (['countStandard', 'countPrinting', 'countSpecial', 'revisionCount'].includes(fieldName)) {
+      rec[fieldName] = Math.max(0, parseInt(newValue, 10) || 0);
+    } else {
+      rec[fieldName] = (typeof newValue === 'string') ? newValue.trim() : newValue;
+    }
+
+    // Auto update completion date if status is marked Completed
+    if (fieldName === 'projectStatus') {
+      if (rec.projectStatus === 'Completed' && !rec.completionDate) {
+        rec.completionDate = '2026-10-23';
+      }
+      if (rec.projectStatus !== 'Completed') {
+        rec.completionDate = null;
+      }
+    }
+
+    // Track Date Updated
+    rec.dateUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+    // Visual feedback
+    if (domElement) {
+      domElement.classList.add('cell-just-saved');
+      setTimeout(() => domElement.classList.remove('cell-just-saved'), 1000);
+    }
+
+    saveStateToStorage();
+
+    // Live MySQL Database Sync
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=update_field', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: rec.id || requestId,
+          field: fieldName,
+          value: rec[fieldName],
+          module: currentMod
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && !res.success) {
+          showToast(res.error || 'Server rejected update.', 'error');
+        } else if (res && res.success) {
+          if (window.PmsCache) window.PmsCache.invalidate();
+        }
+      })
+      .catch(err => console.warn('MySQL update sync failed:', err));
+    }
+
+    updateDeadlineAlertCenter();
+
+    // Dynamically refresh dependent views if on Dashboard, Workload or Output
+    if (state.activeView === 'view-dashboard') {
+      updateDashboardKPIs();
+      renderPanzeDonutChart();
+      renderPanzeTaskCards();
+    } else if (state.activeView === 'view-artist-workload') {
+      renderArtistWorkload();
+    } else if (state.activeView === 'view-monthly-output') {
+      renderMonthlyOutputReport();
+    } else if (state.activeView === 'view-sales-requests' || currentMod === 'sales-requests') {
+      if (fieldName === 'clientApproval') {
+        renderSalesRequests();
+      }
+    }
+  }
+
+  // Generates directly editable text cell HTML (or locked read-only span)
+  function renderEditableCell(reqId, fieldName, currentValue, extraClass = '', extraStyle = '') {
+    const canEdit = canUserEditField(null, fieldName);
+    const styleAttr = extraStyle ? ` style="${extraStyle}"` : '';
+    const hasVal = currentValue !== null && currentValue !== undefined && String(currentValue).trim() !== '' && String(currentValue).trim() !== '—';
+    const displayVal = hasVal ? String(currentValue).trim() : 'N/A';
+    const isNA = displayVal === 'N/A';
+    const naClass = isNA ? ' is-na-default' : '';
+
+    if (!canEdit) {
+      return `<span class="read-only-cell ${extraClass}${naClass}" data-req-id="${reqId}" data-field="${fieldName}" title="Editing locked: Read-only for your role"${styleAttr}>${escapeHTML(displayVal)}</span>`;
+    }
+
+    const placeholderMap = {
+      projectName: 'Enter project name...',
+      client: 'Enter client name...',
+      joNumber: 'Enter JO #...',
+      contactPerson: 'Contact name...',
+      contactNumber: 'Phone #...',
+      completeAddress: 'Enter full address...',
+      remarks: 'Add remarks...'
+    };
+    const ph = placeholderMap[fieldName] || 'N/A';
+
+    return `<span class="editable-cell ${extraClass}${naClass}" contenteditable="true"${styleAttr} 
+      data-req-id="${reqId}" data-field="${fieldName}" data-placeholder="${ph}"
+      onfocus="if(this.textContent.trim()==='N/A'){this.textContent='';this.classList.remove('is-na-default');}"
+      onblur="window.SignDepotApp.handleInlineTextBlur(this)" 
+      onkeydown="window.SignDepotApp.handleInlineTextKey(event, this)">${escapeHTML(displayVal)}</span>`;
+  }
+
+  // Badge styling resolver for custom dropdown pills
+  function getBadgeClassForValue(fieldName, val) {
+    if (!val || val === 'N/A' || val === 'Blank') return 'badge-neutral';
+    const v = String(val).toLowerCase();
+    if (fieldName === 'location') {
+      if (v.includes('&') || (v.includes('indoor') && v.includes('outdoor'))) return 'badge-location-both';
+      if (v.includes('outdoor')) return 'badge-location-outdoor';
+      if (v.includes('indoor')) return 'badge-location-indoor';
+      return 'badge-location-indoor';
+    }
+    if (fieldName === 'artist') return 'badge-artist';
+    if (fieldName === 'salesRep') return 'badge-sales';
+    if (['completed', 'approved', 'design approved', 'sent to prod', 'file sent'].includes(v)) return 'badge-completed';
+    if (['in progress', 'on-going', 'ongoing', 'sent to ae', 'working'].includes(v)) return 'badge-ongoing';
+    if (['pending', 'pending approval', 'for review', 'for approval design', 'on queue', 'queue', 'needs revision', 'to follow'].includes(v)) return 'badge-pending';
+    if (['revising'].includes(v)) return 'badge-revising';
+    if (['released'].includes(v)) return 'badge-released';
+    if (['rush', 'high', 'rejected', 'incomplete details/files', 'incomplete', 'cancelled'].includes(v)) return 'badge-priority-rush';
+    if (['medium', 'med', 'normal'].includes(v)) return 'badge-priority-med';
+    if (['not started', 'draft', 'low', 'on-hold', 'onhold'].includes(v)) return 'badge-not-started';
+    return 'badge-neutral';
+  }
+
+  // Dot indicator styling resolver for dropdown options
+  function getIndicatorClass(fieldName, val) {
+    if (!val || val === 'N/A' || val === 'Blank') return 'indicator-neutral';
+    const v = String(val).toLowerCase();
+    if (v === 'overdue' || v.includes('past due')) return 'indicator-rush';
+    if (v === 'today' || v.includes('due today')) return 'indicator-pending';
+    if (v === 'soon' || v.includes('almost due')) return 'indicator-warning';
+    if (v === 'ontrack' || v === 'ontime' || v.includes('on track')) return 'indicator-completed';
+    if (fieldName === 'location' || fieldName === 'salesFormLocation' || fieldName === 'salesFilterLocation') {
+      if (v.includes('&') || (v.includes('indoor') && v.includes('outdoor'))) return 'indicator-location-both';
+      if (v.includes('outdoor')) return 'indicator-location-outdoor';
+      if (v.includes('indoor')) return 'indicator-location-indoor';
+      return 'indicator-location-indoor';
+    }
+    if (fieldName === 'artist' || fieldName === 'salesFormArtist' || fieldName === 'trackerFormArtist' || fieldName === 'trackerFilterArtist') return 'indicator-artist';
+    if (fieldName === 'salesRep' || fieldName === 'salesFormSalesRep' || fieldName === 'salesFilterSalesRep') return 'indicator-sales';
+    if (['completed', 'approved', 'design approved', 'sent to prod', 'released', 'file sent'].includes(v)) return 'indicator-completed';
+    if (['in progress', 'on-going', 'ongoing', 'working', 'sent to ae', 'install', 'deliver'].includes(v)) return 'indicator-ongoing';
+    if (['pending', 'pending approval', 'for review', 'for approval design', 'on queue', 'revising', 'needs revision', 'queue', 'to follow'].includes(v)) return 'indicator-pending';
+    if (['rush', 'high', 'rejected', 'incomplete', 'incomplete details/files', 'cancelled'].includes(v)) return 'indicator-rush';
+    return 'indicator-neutral';
+  }
+
+  // Generates directly editable custom themed dropdown trigger HTML (or locked read-only badge)
+  function renderInlineSelect(reqId, fieldName, currentValue, optionsList) {
+    if (typeof currentValue === 'object' || currentValue === null || currentValue === undefined || currentValue === '[object Object]') {
+      currentValue = '';
+    }
+    const canEdit = canUserEditField(null, fieldName);
+    const hasVal = currentValue && String(currentValue).trim() !== '' && String(currentValue).trim() !== 'Blank';
+    const displayVal = hasVal ? String(currentValue).trim() : 'N/A';
+    const isNA = displayVal === 'N/A';
+    const badgeClass = !isNA ? getBadgeClassForValue(fieldName, displayVal) : 'badge-neutral';
+    const safeVal = escapeHTML(displayVal);
+
+    if (!canEdit) {
+      return `
+        <span class="custom-select-btn is-readonly ${badgeClass}${isNA ? ' is-na-default' : ''}"
+          data-req-id="${reqId}"
+          data-field="${fieldName}"
+          title="Editing locked: Read-only for your role">
+          <span class="custom-select-label">${safeVal}</span>
+        </span>
+      `;
+    }
+
+    let options = Array.isArray(optionsList) ? [...optionsList] : [];
+    if (!options.includes('N/A')) {
+      options = ['N/A', ...options.filter(o => o !== '' && o !== 'Blank')];
+    }
+    const safeOptions = JSON.stringify(options).replace(/"/g, '&quot;');
+    return `
+      <button type="button" class="custom-select-btn ${badgeClass} ${isNA ? 'is-na-default is-blank' : ''}"
+        data-req-id="${reqId}"
+        data-field="${fieldName}"
+        data-current="${escapeHTML(displayVal)}"
+        data-options="${safeOptions}"
+        data-tooltip="Click to change ${fieldName}"
+        onclick="window.SignDepotApp.openCustomDropdown(this, event)">
+        <span class="custom-select-label">${safeVal}</span>
+        <svg class="custom-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    `;
+  }
+
+  // ==========================================================================
+  // CUSTOM THEMED DROPDOWN ENGINE (Floating Popover with Drop Shadows & Search)
+  // ==========================================================================
+
+  let activeDropdownTrigger = null;
+
+  function closeCustomDropdown() {
+    const popover = document.getElementById('sdCustomDropdownMenu');
+    if (popover) {
+      popover.classList.remove('show');
+      popover.style.display = 'none';
+      popover.style.minWidth = '';
+      popover.style.maxWidth = '';
+    }
+    if (activeDropdownTrigger) {
+      activeDropdownTrigger.classList.remove('is-active');
+      activeDropdownTrigger = null;
+    }
+  }
+
+  function openCustomDropdown(triggerBtn, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!triggerBtn || triggerBtn.classList.contains('is-readonly')) {
+      return;
+    }
+
+    const fld = triggerBtn.getAttribute('data-field');
+    const isDraft = triggerBtn.getAttribute('data-is-draft') === 'true' || (triggerBtn.id && triggerBtn.id.startsWith('draft'));
+    if (!isDraft && !canUserEditField(null, fld)) {
+      showToast(`Editing Locked: You do not have permission to edit the '${fld}' column.`, 'error');
+      return;
+    }
+
+    if (activeDropdownTrigger === triggerBtn) {
+      closeCustomDropdown();
+      return;
+    }
+
+    closeCustomDropdown();
+
+    let popover = document.getElementById('sdCustomDropdownMenu');
+    if (!popover) {
+      popover = document.createElement('div');
+      popover.id = 'sdCustomDropdownMenu';
+      popover.className = 'sd-custom-dropdown-popover';
+      popover.innerHTML = `
+        <div class="sd-dropdown-header" id="sdDropdownHeader" style="display: none;">
+          <input type="text" class="sd-dropdown-search" id="sdDropdownSearch" placeholder="Filter options..." autocomplete="off">
+        </div>
+        <div class="sd-dropdown-options" id="sdDropdownOptions"></div>
+      `;
+      document.body.appendChild(popover);
+    }
+
+    const optionsContainer = document.getElementById('sdDropdownOptions');
+    const headerContainer = document.getElementById('sdDropdownHeader');
+    const searchInput = document.getElementById('sdDropdownSearch');
+
+    let optionsList = [];
+    try {
+      optionsList = JSON.parse(triggerBtn.getAttribute('data-options') || '[]');
+    } catch (err) {
+      optionsList = [];
+    }
+
+    const fieldName = triggerBtn.getAttribute('data-field') || '';
+    const currentVal = triggerBtn.getAttribute('data-current') || '';
+    const reqId = triggerBtn.getAttribute('data-req-id') || '';
+
+    // Show search filter if 6 or more items (e.g. for artists or long lists)
+    if (optionsList.length >= 6) {
+      headerContainer.style.display = 'block';
+      searchInput.value = '';
+      setTimeout(() => searchInput.focus(), 60);
+    } else {
+      headerContainer.style.display = 'none';
+    }
+
+    const renderOptions = (filterText = '') => {
+      const q = filterText.toLowerCase();
+      const filtered = optionsList.filter(opt => {
+        const label = typeof opt === 'object' ? opt.label : String(opt);
+        return label.toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        optionsContainer.innerHTML = '<div style="padding: 10px; font-size: 11.5px; color: var(--text-muted); text-align: center;">No matches found</div>';
+        return;
+      }
+
+      optionsContainer.innerHTML = filtered.map(opt => {
+        const val = typeof opt === 'object' ? opt.value : String(opt);
+        const label = typeof opt === 'object' ? opt.label : String(opt);
+        const isSelected = String(val) === String(currentVal);
+        const indicator = getIndicatorClass(fieldName, val);
+        const displayLabel = label || '— Blank —';
+        return `
+          <div class="custom-dropdown-opt ${isSelected ? 'selected' : ''}" data-val="${escapeHTML(val)}" data-label="${escapeHTML(label)}">
+            <span class="opt-indicator ${indicator}"></span>
+            <span class="opt-label">${escapeHTML(displayLabel)}</span>
+            ${isSelected ? '<svg class="opt-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      optionsContainer.querySelectorAll('.custom-dropdown-opt').forEach(optEl => {
+        optEl.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const selectedVal = optEl.getAttribute('data-val');
+          const selectedLabel = optEl.getAttribute('data-label');
+          selectCustomDropdownValue(triggerBtn, reqId, fieldName, selectedVal, selectedLabel);
+        });
+      });
+    };
+
+    renderOptions();
+
+    if (searchInput) {
+      searchInput.oninput = () => renderOptions(searchInput.value.trim());
+      searchInput.onkeydown = (ev) => {
+        if (ev.key === 'Escape') closeCustomDropdown();
+        if (ev.key === 'Enter') {
+          const first = optionsContainer.querySelector('.custom-dropdown-opt');
+          if (first) {
+            const val = first.getAttribute('data-val');
+            const lbl = first.getAttribute('data-label');
+            selectCustomDropdownValue(triggerBtn, reqId, fieldName, val, lbl);
+          }
+        }
+      };
+    }
+
+    activeDropdownTrigger = triggerBtn;
+    triggerBtn.classList.add('is-active');
+
+    popover.style.display = 'block';
+    popover.classList.add('show');
+
+    // Precision positioning relative to document
+    const rect = triggerBtn.getBoundingClientRect();
+    const isFormDropdown = triggerBtn.classList.contains('custom-form-dropdown-btn');
+    if (isFormDropdown) {
+      popover.style.minWidth = `${rect.width}px`;
+      popover.style.maxWidth = `${Math.max(rect.width, 320)}px`;
+    } else {
+      popover.style.minWidth = '';
+      popover.style.maxWidth = '';
+    }
+
+    const popoverRect = popover.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+    let top = rect.bottom + scrollTop + 4;
+    let left = rect.left + scrollLeft;
+
+    if (rect.bottom + popoverRect.height + 10 > window.innerHeight && rect.top - popoverRect.height > 0) {
+      top = rect.top + scrollTop - popoverRect.height - 4;
+    }
+
+    if (rect.left + popoverRect.width > window.innerWidth - 10) {
+      left = rect.right + scrollLeft - popoverRect.width;
+    }
+
+    popover.style.top = `${Math.max(10, top)}px`;
+    popover.style.left = `${Math.max(10, left)}px`;
+  }
+
+  function selectCustomDropdownValue(triggerBtn, reqId, fieldName, selectedVal, selectedLabel) {
+    closeCustomDropdown();
+    if (!triggerBtn) return;
+
+    const finalVal = selectedVal || '';
+    triggerBtn.setAttribute('data-current', finalVal);
+    const labelSpan = triggerBtn.querySelector('.custom-select-label');
+    if (labelSpan) {
+      labelSpan.textContent = finalVal ? (selectedLabel || finalVal) : '';
+    }
+
+    const isDraft = triggerBtn.getAttribute('data-is-draft') === 'true' || (triggerBtn.id && triggerBtn.id.startsWith('draft'));
+    if (isDraft) {
+      const badgeClass = finalVal ? getBadgeClassForValue(fieldName, finalVal) : '';
+      triggerBtn.className = `custom-select-btn draft-custom-select ${badgeClass} ${!finalVal ? 'is-blank' : ''}`;
+      if (state.draftSalesRequest) {
+        state.draftSalesRequest[fieldName] = finalVal;
+      }
+      return;
+    }
+
+    if (reqId) {
+      triggerBtn.className = `custom-select-btn ${getBadgeClassForValue(fieldName, finalVal)} cell-just-saved`;
+      updateRequestField(reqId, fieldName, finalVal, triggerBtn);
+      showToast(`Updated ${fieldName} to ${finalVal}.`);
+    } else if (triggerBtn._nativeSelect) {
+      triggerBtn._nativeSelect.value = finalVal;
+      triggerBtn._nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      if (finalVal) {
+        triggerBtn.classList.add('has-value');
+      } else {
+        triggerBtn.classList.remove('has-value');
+      }
+    }
+  }
+
+  function initCustomDropdownEngine() {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#sdCustomDropdownMenu') && 
+          !e.target.closest('.custom-select-btn') && 
+          !e.target.closest('.custom-filter-dropdown-btn') && 
+          !e.target.closest('.custom-form-dropdown-btn')) {
+        closeCustomDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCustomDropdown();
+    });
+  }
+
+  // Upgrades toolbar filter <select> elements into sleek custom dropdown buttons
+  function upgradeAllFilterSelects() {
+    const selects = document.querySelectorAll('select.filter-input');
+    selects.forEach(sel => {
+      if (sel._customUpgraded) return;
+      sel._customUpgraded = true;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'custom-filter-dropdown-btn';
+      if (sel.id) {
+        btn.classList.add(`filter-btn-${sel.id}`);
+        btn.id = `${sel.id}_customBtn`;
+      }
+      if (sel.value) btn.classList.add('has-value');
+
+      const currentText = sel.options[sel.selectedIndex]?.text || 'Filter';
+      btn.innerHTML = `
+        <span class="custom-select-label">${escapeHTML(currentText)}</span>
+        <svg class="custom-select-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      `;
+
+      btn._nativeSelect = sel;
+
+      const getOptionsArray = () => {
+        return Array.from(sel.options).map(o => ({ value: o.value, label: o.text }));
+      };
+
+      btn.addEventListener('click', (e) => {
+        const opts = getOptionsArray();
+        btn.setAttribute('data-options', JSON.stringify(opts));
+        btn.setAttribute('data-current', sel.value);
+        btn.setAttribute('data-field', sel.id);
+        openCustomDropdown(btn, e);
+      });
+
+      sel.style.display = 'none';
+      sel.parentNode.insertBefore(btn, sel.nextSibling);
+
+      sel.addEventListener('change', () => {
+        const txt = sel.options[sel.selectedIndex]?.text || 'Filter';
+        const lbl = btn.querySelector('.custom-select-label');
+        if (lbl) lbl.textContent = txt;
+        btn.setAttribute('data-current', sel.value || '');
+        if (sel.value) {
+          btn.classList.add('has-value');
+        } else {
+          btn.classList.remove('has-value');
+        }
+      });
+    });
+  }
+
+  // Synchronizes the custom filter dropdown button UI with its underlying native select element
+  function syncFilterSelectUI(selectEl) {
+    if (!selectEl) return;
+    const btn = (selectEl.nextElementSibling && selectEl.nextElementSibling.classList.contains('custom-filter-dropdown-btn'))
+      ? selectEl.nextElementSibling
+      : (selectEl.id ? document.getElementById(`${selectEl.id}_customBtn`) : null);
+    if (btn) {
+      const txt = selectEl.options[selectEl.selectedIndex]?.text || 'Filter';
+      const lbl = btn.querySelector('.custom-select-label');
+      if (lbl) lbl.textContent = txt;
+      btn.setAttribute('data-current', selectEl.value || '');
+      if (selectEl.value) {
+        btn.classList.add('has-value');
+      } else {
+        btn.classList.remove('has-value');
+      }
+    }
+  }
+
+  // Upgrades form <select class="form-control"> elements into sleek custom studio dropdowns
+  function upgradeAllFormSelects() {
+    const selects = document.querySelectorAll('select.form-control');
+    selects.forEach(sel => {
+      // Normalize option text to Title Case if it's all uppercase
+      Array.from(sel.options).forEach(opt => {
+        let txt = opt.textContent || opt.value || '';
+        if (txt && txt === txt.toUpperCase() && txt.length > 1) {
+          opt.textContent = toTitleCase(txt);
+        }
+      });
+
+      if (sel._customFormUpgraded && sel._formDropdownBtn) {
+        syncFormDropdownBtn(sel);
+        return;
+      }
+      sel._customFormUpgraded = true;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'custom-form-dropdown-btn';
+      if (sel.id) btn.id = `btnDropdown_${sel.id}`;
+      sel._formDropdownBtn = btn;
+      btn._nativeSelect = sel;
+
+      sel.style.display = 'none';
+      sel.parentNode.insertBefore(btn, sel.nextSibling);
+
+      syncFormDropdownBtn(sel);
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Refresh options in case they were dynamically populated
+        const opts = Array.from(sel.options).map(o => {
+          let label = o.text || o.value;
+          if (label && label === label.toUpperCase() && label.length > 1) {
+            label = toTitleCase(label);
+          }
+          return { value: o.value, label: label };
+        });
+
+        btn.setAttribute('data-options', JSON.stringify(opts));
+        btn.setAttribute('data-current', sel.value);
+        btn.setAttribute('data-field', sel.id);
+        openCustomDropdown(btn, e);
+      });
+
+      sel.addEventListener('change', () => {
+        syncFormDropdownBtn(sel);
+      });
+    });
+  }
+
+  function syncFormDropdownBtn(sel) {
+    if (!sel || !sel._formDropdownBtn) return;
+    const btn = sel._formDropdownBtn;
+    const selectedOpt = sel.options[sel.selectedIndex];
+    let label = selectedOpt ? (selectedOpt.text || selectedOpt.value) : (sel.value || '-- Select --');
+    if (label && label === label.toUpperCase() && label.length > 1) {
+      label = toTitleCase(label);
+    }
+    btn.innerHTML = `
+      <span class="custom-select-label">${escapeHTML(label || '-- Select --')}</span>
+      <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    `;
+    if (sel.value) {
+      btn.classList.add('has-value');
+    } else {
+      btn.classList.remove('has-value');
+    }
+  }
+
+  function syncAllFormDropdowns() {
+    document.querySelectorAll('select.form-control').forEach(sel => {
+      syncFormDropdownBtn(sel);
+    });
+  }
+
+  // ==========================================================================
+  // CUSTOM THEMED TOOLTIP ENGINE (Instant Smooth Minimalist Tooltips)
+  // ==========================================================================
+
+  function initCustomTooltipEngine() {
+    let tooltip = document.getElementById('sdGlobalTooltip');
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.id = 'sdGlobalTooltip';
+      tooltip.className = 'sd-custom-tooltip';
+      tooltip.setAttribute('role', 'tooltip');
+      document.body.appendChild(tooltip);
+    }
+
+    const convertTitles = () => {
+      document.querySelectorAll('[title]').forEach(el => {
+        const t = el.getAttribute('title');
+        if (t && t.trim()) {
+          el.setAttribute('data-tooltip', t.trim());
+          el.removeAttribute('title');
+        }
+      });
+    };
+
+    convertTitles();
+
+    const observer = new MutationObserver(() => convertTitles());
+    observer.observe(document.body, { childList: true, subtree: true, attributeFilter: ['title'] });
+
+    document.addEventListener('mouseover', (e) => {
+      // Suppress tooltips if deadline alert dropdown or any modal is open
+      const alertDd = document.getElementById('deadlineAlertDropdown');
+      if (alertDd && alertDd.classList.contains('show')) {
+        tooltip.classList.remove('show');
+        return;
+      }
+      if (e.target.closest('#deadlineAlertContainer, .deadline-alert-dropdown, .deadline-alert-btn')) {
+        tooltip.classList.remove('show');
+        return;
+      }
+
+      const target = e.target.closest('[data-tooltip]');
+      if (!target) {
+        tooltip.classList.remove('show');
+        return;
+      }
+
+      // Suppress/hide tooltips when the sidebar is toggled open (expanded)
+      const sidebarEl = target.closest('#appSidebar, .sidebar');
+      if (sidebarEl && !sidebarEl.classList.contains('collapsed')) {
+        tooltip.classList.remove('show');
+        return;
+      }
+
+      const text = target.getAttribute('data-tooltip');
+      if (!text || !text.trim()) return;
+
+      tooltip.textContent = text;
+      tooltip.className = 'sd-custom-tooltip';
+
+      const rect = target.getBoundingClientRect();
+      const tipRect = tooltip.getBoundingClientRect();
+
+      let top = rect.top - 30;
+      let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+
+      if (top < 10) {
+        top = rect.bottom + 8;
+        tooltip.classList.add('pos-bottom');
+      }
+      if (left < 8) left = 8;
+      if (left + tipRect.width > window.innerWidth - 8) {
+        left = window.innerWidth - tipRect.width - 8;
+      }
+
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+      tooltip.classList.add('show');
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const target = e.target.closest('[data-tooltip]');
+      if (target) {
+        tooltip.classList.remove('show');
+      }
+    });
+
+    window.addEventListener('scroll', () => tooltip.classList.remove('show'), { passive: true });
+  }
+
+  // Generates directly editable date picker HTML (or locked read-only date)
+  function renderInlineDate(reqId, fieldName, currentDateValue, projectStatus) {
+    const canEdit = canUserEditField(null, fieldName);
+    if (!canEdit) {
+      return `
+        <div class="inline-date-cell-wrap" style="opacity: 0.85;">
+          <input type="date" class="inline-date-input is-readonly" value="${currentDateValue || ''}" disabled title="Editing locked: Read-only for your role" style="cursor: default;">
+        </div>
+      `;
+    }
+
+    return `
+      <div class="inline-date-cell-wrap">
+        <input type="date" class="inline-date-input" value="${currentDateValue || ''}"
+          data-req-id="${reqId}" data-field="${fieldName}"
+          onchange="window.SignDepotApp.handleInlineDateChange(this)">
+      </div>
+    `;
+  }
+
+  // Generates directly editable number input HTML (or locked read-only number)
+  function renderInlineNumber(reqId, fieldName, currentNumValue) {
+    const canEdit = canUserEditField(null, fieldName);
+    if (!canEdit) {
+      return `
+        <input type="number" class="inline-num-input is-readonly" min="0" value="${currentNumValue || 0}" disabled title="Editing locked: Read-only for your role" style="cursor: default; opacity: 0.85;">
+      `;
+    }
+
+    return `
+      <input type="number" class="inline-num-input" min="0" value="${currentNumValue || 0}"
+        data-req-id="${reqId}" data-field="${fieldName}"
+        onchange="window.SignDepotApp.handleInlineNumberChange(this)">
+    `;
+  }
+
+  // ==========================================================================
+  // UTILITIES & HELPERS
+  // ==========================================================================
+
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#176B55" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    } else if (type === 'error') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+    } else {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    }
+
+    toast.innerHTML = `${iconSvg}<span>${escapeHTML(message)}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.transition = 'all 0.3s ease';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(20px)';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
+
+  window.showToast = showToast;
+
+  function getLoggedInArtist() {
+    const u = window.PMS_CURRENT_USER;
+    if (!u) return null;
+    if (u.role === 'artist' || u.assigned_artist) {
+      if (u.assigned_artist) return u.assigned_artist;
+      // Auto-fallback from username/full_name if role is artist
+      if (u.role === 'artist') {
+        const known = ['Glen', 'Jules', 'Raven', 'Bob', 'Tim', 'Goodrich', 'Rodel', 'Dorothy', 'Russel', 'Gilbert', 'Benjie'];
+        for (const k of known) {
+          if ((u.username && u.username.toLowerCase().includes(k.toLowerCase())) ||
+              (u.full_name && u.full_name.toLowerCase().includes(k.toLowerCase()))) {
+            return k;
+          }
+        }
+        if ((u.username && u.username.toLowerCase().includes('dorothy')) ||
+            (u.full_name && u.full_name.toLowerCase().includes('dorothy'))) {
+          return 'Dorothy';
+        }
+      }
+    }
+    return null;
+  }
+
+  function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    if (typeof str === 'object') return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    if (dateStr.includes('-') && dateStr.length === 10) {
+      const parts = dateStr.split('-');
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+  }
+
+  function formatReadableDate(dateStr) {
+    if (!dateStr) return '-';
+    if (dateStr.length === 10 && dateStr.includes('-')) {
+      const d = new Date(dateStr + 'T00:00:00');
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+      }
+    }
+    return dateStr.toUpperCase();
+  }
+
+  function isProjectArtistAccepted(valOrObj) {
+    if (valOrObj === null || valOrObj === undefined) return true; // all existing projects assumed accepted!
+    if (typeof valOrObj === 'object') {
+      const st = valOrObj.artistAccepted ?? valOrObj.artist_accepted;
+      if (st === 'Pending' || st === 'pending' || st === false) return false;
+      return true;
+    }
+    if (valOrObj === 'Pending' || valOrObj === 'pending' || valOrObj === false) return false;
+    return true;
+  }
+
+  // Real-time Deadline Alert Calculation based on user local date vs artist acceptance
+  function getDeadlineAlertStatus(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate) {
+    // Support passing full request record as first argument
+    if (typeof deadlineStr === 'object' && deadlineStr !== null) {
+      const r = deadlineStr;
+      deadlineStr = r.designDeadline || r.design_deadline;
+      projectStatus = r.projectStatus || r.project_status;
+      artistAccepted = r.artistAccepted ?? r.artist_accepted;
+      acceptedDate = r.artistAcceptedDate ?? r.artist_accepted_date;
+      orderDate = r.orderDate ?? r.order_date;
+    }
+
+    if (projectStatus === 'Completed') {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    // If pending acceptance by artist: not overdue, awaiting acceptance
+    if (!isProjectArtistAccepted(artistAccepted)) {
+      return {
+        status: 'pending_accept',
+        label: 'Pending Acceptance',
+        diffDays: null,
+        diffText: 'Pending Acceptance',
+        pillText: 'Pending Accept'
+      };
+    }
+
+    if (!deadlineStr) {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    const parts = String(deadlineStr).trim().split('-');
+    if (parts.length < 3) {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    const dYear = parseInt(parts[0], 10);
+    const dMonth = parseInt(parts[1], 10) - 1;
+    const dDay = parseInt(parts[2], 10);
+    if (isNaN(dYear) || isNaN(dMonth) || isNaN(dDay)) {
+      return { status: 'none', label: 'On Track', diffDays: null, diffText: '', pillText: '' };
+    }
+
+    let targetDate = new Date(dYear, dMonth, dDay);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const msPerDay = 1000 * 60 * 60 * 24;
+
+    // Overdue indicator based on the day project was accepted by artist vs design deadline
+    if (acceptedDate) {
+      const aParts = String(acceptedDate).trim().split('-');
+      if (aParts.length >= 3) {
+        const aYear = parseInt(aParts[0], 10);
+        const aMonth = parseInt(aParts[1], 10) - 1;
+        const aDay = parseInt(aParts[2], 10);
+        if (!isNaN(aYear) && !isNaN(aMonth) && !isNaN(aDay)) {
+          const accDate = new Date(aYear, aMonth, aDay);
+          // If project was accepted after the original deadline date:
+          // Preserve expected turnaround duration starting from the day it was accepted
+          if (accDate.getTime() > targetDate.getTime()) {
+            let turnaroundDays = 1;
+            if (orderDate) {
+              const oParts = String(orderDate).trim().split('-');
+              if (oParts.length >= 3) {
+                const oDate = new Date(parseInt(oParts[0], 10), parseInt(oParts[1], 10) - 1, parseInt(oParts[2], 10));
+                if (!isNaN(oDate.getTime()) && targetDate.getTime() > oDate.getTime()) {
+                  turnaroundDays = Math.max(1, Math.round((targetDate.getTime() - oDate.getTime()) / msPerDay));
+                }
+              }
+            }
+            targetDate = new Date(accDate.getTime() + (turnaroundDays * msPerDay));
+          }
+        }
+      }
+    }
+
+    const diffDays = Math.round((targetDate.getTime() - today.getTime()) / msPerDay);
+
+    if (diffDays < 0) {
+      const daysAgo = Math.abs(diffDays);
+      return {
+        status: 'overdue',
+        label: 'Past Due',
+        diffDays,
+        diffText: daysAgo === 1 ? '1 day past due' : `${daysAgo} days past due`,
+        pillText: daysAgo === 1 ? '1d overdue' : `${daysAgo}d overdue`
+      };
+    } else if (diffDays === 0) {
+      return {
+        status: 'today',
+        label: 'Due Today',
+        diffDays,
+        diffText: 'Due today',
+        pillText: 'Today'
+      };
+    } else if (diffDays <= 2) {
+      const daysLeft = diffDays;
+      return {
+        status: 'soon',
+        label: 'Almost Due',
+        diffDays,
+        diffText: daysLeft === 1 ? 'Due tomorrow' : `Due in ${daysLeft} days`,
+        pillText: daysLeft === 1 ? 'Tomorrow' : `In ${daysLeft}d`
+      };
+    } else {
+      return {
+        status: 'ontrack',
+        label: 'On Track',
+        diffDays,
+        diffText: `Due in ${diffDays} days`,
+        pillText: `${diffDays}d`
+      };
+    }
+  }
+
+  function isOverdue(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate) {
+    return getDeadlineAlertStatus(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate).status === 'overdue';
+  }
+
+  function getStatusBadgeClass(status) {
+    if (typeof status === 'object' || !status) return 'badge-not-started';
+    switch (status) {
+      case 'Pending': return 'badge-pending';
+      case 'On-going': return 'badge-ongoing';
+      case 'Approved': return 'badge-approved';
+      case 'For Review': return 'badge-for-review';
+      case 'Revising': return 'badge-revising';
+      case 'Completed': return 'badge-completed';
+      case 'Submitted': return 'badge-completed';
+      case 'On Hold': return 'badge-on-hold';
+      case 'Not Started': return 'badge-not-started';
+      case 'In Progress': return 'badge-ongoing';
+      default: return 'badge-not-started';
+    }
+  }
+
+  function getPriorityBadgeClass(priority) {
+    switch (priority) {
+      case 'Rush': return 'badge-priority-rush';
+      case 'High': return 'badge-priority-high';
+      case 'Medium': return 'badge-priority-med';
+      case 'Low': return 'badge-priority-low';
+      default: return 'badge-priority-low';
+    }
+  }
+
+  function getAvailabilityBadge(activeCount) {
+    if (activeCount <= 3) return { text: 'Available', class: 'badge-avail-available', colorClass: 'bar-green' };
+    if (activeCount <= 7) return { text: 'Moderate', class: 'badge-avail-moderate', colorClass: 'bar-teal' };
+    if (activeCount <= 9) return { text: 'Near Capacity', class: 'badge-avail-near', colorClass: 'bar-amber' };
+    return { text: 'Full', class: 'badge-avail-full', colorClass: 'bar-red' };
+  }
+
+  // ==========================================================================
+  // NAVIGATION & MULTI-PAGE VIEW ROUTER
+  // ==========================================================================
+
+  const PAGE_MAP = {
+    'view-dashboard': 'index.html',
+    'view-sales-requests': 'sales-requests.html',
+    'view-creatives-tracker': 'creatives-production.html',
+    'view-artist-workload': 'artist-workload.html',
+    'view-directives-details': 'directives-details.html',
+    'view-pending-sales': 'sales-requests.html',
+    'view-monthly-output': 'monthly-output.html',
+    'view-reports': 'reports.html',
+    'view-access-control': 'access-control.html',
+    'view-audit-trail': 'audit-trail.html',
+    'view-settings': 'settings.html'
+  };
+
+  function isInsidePagesDir() {
+    const p = window.location.pathname.toLowerCase().replace(/\\/g, '/');
+    return p.includes('/pages/') || p.endsWith('/pages');
+  }
+
+  function isPhpEnv() {
+    return window.location.pathname.toLowerCase().endsWith('.php') || 
+           window.location.href.toLowerCase().includes('.php') || 
+           typeof window.PMS_API_URL !== 'undefined';
+  }
+
+  function getPageUrl(filename) {
+    let target = filename;
+    if (isPhpEnv()) {
+      target = target.replace(/\.html$/i, '.php');
+    }
+    const inside = isInsidePagesDir();
+    if (target === 'index.html' || target === 'index.php') {
+      return inside ? '../' + target : target;
+    }
+    return inside ? target : 'pages/' + target;
+  }
+
+  function detectCurrentPage() {
+    const bodyPage = document.body.getAttribute('data-page');
+    if (bodyPage && (PAGE_MAP[bodyPage] || document.getElementById(bodyPage))) return bodyPage;
+
+    const path = window.location.pathname.toLowerCase().replace(/\\/g, '/');
+    const rawFile = path.split('/').pop() || 'index.php';
+    const filename = rawFile.replace(/\.(html|php)$/i, '');
+    for (const [viewId, pageFile] of Object.entries(PAGE_MAP)) {
+      const pageBase = pageFile.toLowerCase().replace(/\.(html|php)$/i, '');
+      if (filename === pageBase) return viewId;
+    }
+    if (document.getElementById('view-' + filename)) {
+      return 'view-' + filename;
+    }
+    return 'view-dashboard';
+  }
+
+  function switchView(viewId) {
+    state.activeView = viewId;
+
+    // Check if the target view panel exists on the current page
+    const targetPanel = document.getElementById(viewId);
+    if (!targetPanel) {
+      const targetPage = PAGE_MAP[viewId];
+      if (targetPage) {
+        const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.php').toLowerCase();
+        const destFile = (targetPage.replace(/\\/g, '/').split('/').pop() || '').toLowerCase().replace(/\.html$/i, isPhpEnv() ? '.php' : '.html');
+        if (currentFile !== destFile) {
+          window.location.href = getPageUrl(targetPage);
+          return;
+        }
+      }
+    }
+
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+      if (item.getAttribute('data-view') === viewId) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+
+    document.querySelectorAll('.view-panel').forEach(panel => {
+      if (panel.id === viewId) {
+        panel.classList.add('active');
+      } else {
+        panel.classList.remove('active');
+      }
+    });
+
+    const moduleTitles = {
+      'view-dashboard': { title: 'Project Dashboard', badge: 'Live Operations' },
+      'view-sales-requests': { title: 'Sales Requests', badge: 'Order Management' },
+      'view-creatives-tracker': { title: 'Creatives Tracker', badge: 'Production Queue' },
+      'view-artist-workload': { title: 'Artist Workload', badge: 'Capacity & Assignments' },
+      'view-directives-details': { title: 'Directives Details', badge: 'Printable Job Orders' },
+      'view-pending-sales': { title: 'Pending Projects — Sales', badge: 'Sales Actions' },
+      'view-monthly-output': { title: 'Monthly Production Output', badge: 'Verified 2026 Metrics' },
+      'view-reports': { title: 'Reports & Analytics', badge: 'Performance Intelligence' },
+      'view-access-control': { title: 'Access Control & Users', badge: 'RBAC Administration' },
+      'view-audit-trail': { title: 'Audit Trail', badge: 'Security Logs' },
+      'view-settings': { title: 'System Settings', badge: 'Configuration' }
+    };
+
+    const titleInfo = moduleTitles[viewId] || { title: 'Sign Depot Operations', badge: 'System' };
+    const titleEl = document.getElementById('moduleTitle');
+    if (titleEl) {
+      titleEl.innerHTML = `${titleInfo.title} <span class="module-badge" id="moduleCategoryBadge">${titleInfo.badge}</span>`;
+    }
+
+    const sidebar = document.getElementById('appSidebar');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+
+    const isTableFitView = (viewId === 'view-sales-requests' || viewId === 'view-creatives-tracker');
+    const mainWrapper = document.querySelector('.main-wrapper');
+    if (mainWrapper) {
+      mainWrapper.classList.toggle('layout-table-fit', isTableFitView);
+    }
+    document.body.classList.toggle('layout-table-fit', isTableFitView);
+
+    renderCurrentView(viewId);
+  }
+
+  function renderCurrentView(viewId) {
+    switch (viewId) {
+      case 'view-dashboard':
+        renderDashboard();
+        break;
+      case 'view-sales-requests':
+        renderSalesRequests();
+        break;
+      case 'view-creatives-tracker':
+        renderCreativesTracker();
+        break;
+      case 'view-artist-workload':
+        renderArtistWorkload();
+        break;
+      case 'view-directives-details':
+        renderDirectivePreview();
+        break;
+      case 'view-pending-sales':
+        renderPendingSalesQueue();
+        break;
+      case 'view-monthly-output':
+        renderMonthlyOutputReport(state.timeframe || 'all');
+        break;
+      case 'view-reports':
+        renderReports(state.timeframe || 'all');
+        break;
+      case 'view-access-control':
+        if (typeof loadUsersList === 'function') {
+          loadUsersList();
+        }
+        break;
+      case 'view-settings':
+        renderSettings();
+        break;
+    }
+
+    // Sync in-page Timeframe Pills if on monthly-output or reports
+    const curTf = state.timeframe || 'month';
+    document.querySelectorAll('#outputTimeframeTabs .timeframe-btn, #reportTimeframeTabs .timeframe-btn').forEach(b => {
+      const bTf = b.getAttribute('data-timeframe');
+      b.classList.toggle('active', bTf === curTf);
+    });
+
+    // Ensure all filter and form selects in the active view are upgraded to custom themed buttons
+    upgradeAllFilterSelects();
+    upgradeAllFormSelects();
+  }
+
+  // ==========================================================================
+  // MODULE 1: DASHBOARD ENGINE (Panze Studio Layout + Live Inline Editable)
+  // ==========================================================================
+
+  function renderDashboard() {
+    updateDashboardKPIs();
+    renderProgressTimeline();
+    renderRecentActivityFeed();
+    renderPanzeDonutChart();
+    renderDashboardWorkloadSnapshot();
+    renderDashboardRecentProjectsTable();
+  }
+
+  function getKpiFilteredRequests(type) {
+    const reqs = state.requests || [];
+    if (type === 'pending') {
+      return reqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
+    }
+    if (type === 'working') {
+      return reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
+    }
+    if (type === 'approved' || type === 'completed') {
+      return reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved');
+    }
+    if (type === 'revising') {
+      return reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
+    }
+    if (type === 'overdue') {
+      return reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate));
+    }
+    return reqs; // 'all'
+  }
+
+  function updateDashboardKPIs() {
+    const reqs = state.requests;
+    const totalRequests = reqs.length;
+    const pendingApproval = reqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
+    const working = reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
+    const approved = reqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
+    const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
+    const overdue = reqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
+
+    // Creatives Tracker KPI scoping for logged-in artist
+    const myArtist = getLoggedInArtist();
+    const trackerReqs = myArtist ? reqs.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : reqs;
+    const trkTotal = trackerReqs.length;
+    const trkPending = trackerReqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
+    const trkWorking = trackerReqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
+    const trkApproved = trackerReqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
+    const trkRevising = trackerReqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
+    const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
+
+    // Dashboard elements
+    const elTot = document.getElementById('kpiTotalRequests');
+    const elPend = document.getElementById('kpiPendingApproval');
+    const elWork = document.getElementById('kpiWorking');
+    const elAppr = document.getElementById('kpiApproved');
+    const elComp = document.getElementById('kpiCompleted');
+    const elRev = document.getElementById('kpiRevising');
+    const elOver = document.getElementById('kpiOverdue');
+
+    // Creatives Tracker KPI elements
+    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = Number(trkTotal).toLocaleString();
+    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = Number(trkPending).toLocaleString();
+    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = Number(trkWorking).toLocaleString();
+    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = Number(trkApproved).toLocaleString();
+    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = Number(trkRevising).toLocaleString();
+    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = Number(trkOverdue).toLocaleString();
+
+    // Live MySQL real-time KPI sync when backend is available
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_stats')
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.stats) {
+            const s = res.stats;
+            if (elTot && s.total !== undefined) elTot.textContent = Number(s.total).toLocaleString();
+            if (elPend && s.pending !== undefined) elPend.textContent = Number(s.pending).toLocaleString();
+            if (elWork && s.ongoing !== undefined) elWork.textContent = Number(s.ongoing).toLocaleString();
+            if (elAppr && s.approved !== undefined) elAppr.textContent = Number(s.approved).toLocaleString();
+            if (elComp && s.approved !== undefined) elComp.textContent = Number(s.approved).toLocaleString();
+            if (elRev && s.revising !== undefined) elRev.textContent = Number(s.revising).toLocaleString();
+            if (elOver && s.overdue !== undefined) elOver.textContent = Number(s.overdue).toLocaleString();
+          }
+        })
+        .catch(() => {});
+    } else {
+      // Pure offline fallback
+      if (elTot) elTot.textContent = Number(totalRequests).toLocaleString();
+      if (elPend) elPend.textContent = Number(pendingApproval).toLocaleString();
+      if (elWork) elWork.textContent = Number(working).toLocaleString();
+      if (elAppr) elAppr.textContent = Number(approved).toLocaleString();
+      if (elComp) elComp.textContent = Number(approved).toLocaleString();
+      if (elRev) elRev.textContent = Number(revising).toLocaleString();
+      if (elOver) elOver.textContent = Number(overdue).toLocaleString();
+    }
+  }
+
+  // ==========================================================================
+  // PROGRESS TIMELINE RENDERER (100% Real Database Queries)
+  // ==========================================================================
+  function renderProgressTimeline(timelinePayload) {
+    const container = document.getElementById('progressTimelineChartContainer');
+    if (!container) return;
+
+    const data = timelinePayload || window.__TIMELINE_DATA_CACHE || window.__INITIAL_TIMELINE_DATA;
+    if (!data && window.PMS_API_URL && !container._fetchingTimeline) {
+      container._fetchingTimeline = true;
+      fetch(window.PMS_API_URL + '?action=get_progress_timeline')
+        .then(r => r.json())
+        .then(res => {
+          container._fetchingTimeline = false;
+          if (res && res.success) {
+            window.__TIMELINE_DATA_CACHE = res;
+            renderProgressTimeline(res);
+          }
+        })
+        .catch(() => {
+          container._fetchingTimeline = false;
+        });
+      return;
+    }
+
+    const days = (data && Array.isArray(data.timeline) && data.timeline.length === 7) 
+      ? data.timeline 
+      : [
+          { key: 'M', name: 'Monday', created: 0, completed: 0, x: 48 },
+          { key: 'T', name: 'Tuesday', created: 0, completed: 0, x: 128 },
+          { key: 'W', name: 'Wednesday', created: 0, completed: 0, x: 208 },
+          { key: 'T', name: 'Thursday', created: 0, completed: 0, x: 288 },
+          { key: 'F', name: 'Friday', created: 0, completed: 0, x: 368 },
+          { key: 'S', name: 'Saturday', created: 0, completed: 0, x: 448 },
+          { key: 'S', name: 'Sunday', created: 0, completed: 0, x: 518 }
+        ];
+
+    // Peak & Subtitle headers from real database metrics
+    const titleEl = document.getElementById('timelineHighlightTitle');
+    if (titleEl && data && data.peakTitle) {
+      titleEl.textContent = data.peakTitle;
+    }
+    const subtitleEl = document.getElementById('timelineHighlightSubtitle');
+    if (subtitleEl && data && data.peakSubtitle) {
+      subtitleEl.textContent = data.peakSubtitle;
+    }
+
+    const chartW = 560;
+    const chartH = 160;
+    const axisY = 132;
+    
+    // Scale max value dynamically according to real database data
+    const maxDataVal = Math.max(
+      ...days.map(d => Math.max(Number(d.created) || 0, Number(d.completed) || 0)),
+      1
+    );
+    const maxVal = Math.max(5, Math.ceil(maxDataVal * 1.25));
+
+    const getY = (val) => {
+      const plotH = 96;
+      const num = Number(val) || 0;
+      return Math.round(axisY - (num / maxVal) * plotH);
+    };
+
+    // Smooth cardinal/cubic Bezier spline generator (high subpixel precision)
+    const getSmoothSpline = (pts, tension = 0.22) => {
+      if (!pts || pts.length === 0) return '';
+      if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+      let path = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = i > 0 ? pts[i - 1] : pts[i];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = i < pts.length - 2 ? pts[i + 2] : p2;
+        const cp1x = p1.x + (p2.x - p0.x) * tension;
+        const cp1y = p1.y + (p2.y - p0.y) * tension;
+        const cp2x = p2.x - (p3.x - p1.x) * tension;
+        const cp2y = p2.y - (p3.y - p1.y) * tension;
+        path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+      }
+      return path;
+    };
+
+    // Find current active day index or default to today's weekday
+    let currentDayIndex = days.findIndex(d => d.isCurrent);
+    if (currentDayIndex === -1) {
+      currentDayIndex = 4; // Default Friday
+    }
+    const activeDaysCount = Math.min(Math.max(currentDayIndex + 1, 1), 7);
+
+    // Active completed curve (Mon up to active day)
+    const activeCompletedDays = days.slice(0, activeDaysCount);
+    const completedPts = activeCompletedDays.map(d => ({ x: d.x, y: getY(d.completed) }));
+    const dCompletedLine = getSmoothSpline(completedPts, 0.24);
+    const currentDayPt = completedPts[completedPts.length - 1];
+    const mon = completedPts[0];
+    const dCompletedArea = `${dCompletedLine} L ${currentDayPt.x} ${axisY} L ${mon.x} ${axisY} Z`;
+
+    // Created tasks curve (Mon - Sun full week)
+    const createdPts = days.map(d => ({ x: d.x, y: getY(d.created) }));
+    const dCreated = getSmoothSpline(createdPts, 0.20);
+
+    container.innerHTML = `
+      <svg class="timeline-chart-svg" viewBox="0 0 ${chartW} ${chartH}" shape-rendering="geometricPrecision">
+        <!-- Vertical Day Grid Lines -->
+        ${days.map(d => `<line class="timeline-grid-line" x1="${d.x}" y1="18" x2="${d.x}" y2="${axisY}" shape-rendering="geometricPrecision" />`).join('')}
+
+        <!-- Bottom Axis -->
+        <line class="timeline-axis-line" x1="24" y1="${axisY}" x2="${chartW - 24}" y2="${axisY}" shape-rendering="geometricPrecision" />
+
+        <!-- Day Tick Marks -->
+        ${days.map(d => `<line class="timeline-tick-line" x1="${d.x}" y1="${axisY - 4}" x2="${d.x}" y2="${axisY + 3}" stroke-linecap="round" shape-rendering="geometricPrecision" />`).join('')}
+
+        <!-- Day Labels (M, T, W, T, F, S, S) -->
+        ${days.map(d => `<text class="timeline-day-label" x="${d.x}" y="${axisY + 18}">${d.key}</text>`).join('')}
+
+        <!-- Task Created Path (Smooth Dashed Gray Line) -->
+        <path class="timeline-path-created" d="${dCreated}" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" />
+
+        <!-- Task Completed Area Fill (Soft Translucent Tint) -->
+        <path class="timeline-area-completed" fill="rgba(79, 70, 229, 0.08)" d="${dCompletedArea}" shape-rendering="geometricPrecision" />
+
+        <!-- Task Completed Path (Smooth Solid Indigo Wave) -->
+        <path class="timeline-path-completed" d="${dCompletedLine}" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" />
+
+        <!-- Current Active Day Indicator (Vertical Marker to Axis) -->
+        <line class="timeline-current-marker" x1="${currentDayPt.x}" y1="${currentDayPt.y}" x2="${currentDayPt.x}" y2="${axisY + 2}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />
+
+        <!-- Projection Dotted Line across remainder of week -->
+        ${activeDaysCount < 7 ? `<line class="timeline-projection-line" x1="${currentDayPt.x}" y1="${currentDayPt.y}" x2="${chartW - 30}" y2="${currentDayPt.y}" vector-effect="non-scaling-stroke" stroke-linecap="round" shape-rendering="geometricPrecision" />` : ''}
+
+        <!-- Interactive Data Points on Active Days -->
+        ${activeCompletedDays.map(d => `
+          <circle class="timeline-data-point" cx="${d.x}" cy="${getY(d.completed)}" r="${d.isPeak ? 5.5 : 4}"
+            data-day="${escapeHTML(d.name)}" data-completed="${d.completed}" data-created="${d.created}"
+            vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision"
+            onmouseenter="window.SignDepotApp.showTimelineTooltip(event, '${d.name}', ${d.completed}, ${d.created})"
+            onmouseleave="window.SignDepotApp.hideTimelineTooltip()" />
+        `).join('')}
+      </svg>
+      <div id="timelineTooltipEl" class="timeline-tooltip"></div>
+    `;
+  }
+
+  function showTimelineTooltip(e, dayName, completed, created) {
+    const tip = document.getElementById('timelineTooltipEl');
+    if (!tip) return;
+    tip.innerHTML = `<strong>${escapeHTML(dayName)}</strong>: <span style="color:#818CF8; font-weight:700;">${completed} Completed</span> • <span style="color:#94A3B8;">${created} Created</span>`;
+    const rect = e.target.getBoundingClientRect();
+    const parent = e.target.closest('.timeline-chart-wrap');
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+    tip.style.left = `${rect.left - parentRect.left + rect.width / 2}px`;
+    tip.style.top = `${rect.top - parentRect.top}px`;
+    tip.classList.add('visible');
+  }
+
+  function hideTimelineTooltip() {
+    const tip = document.getElementById('timelineTooltipEl');
+    if (tip) tip.classList.remove('visible');
+  }
+
+  // ==========================================================================
+  // RECENT ACTIVITY & UPDATES FEED RENDERER (100% Real Database Logs)
+  // ==========================================================================
+  let currentActivityFilter = 'all';
+
+  function renderRecentActivityFeed(filter = currentActivityFilter, force = false) {
+    currentActivityFilter = filter;
+    const feed = document.getElementById('recentActivityFeedList');
+    if (!feed) return;
+
+    // Sync filter pills
+    document.querySelectorAll('#activityFilterTabs [data-act-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-act-filter') === filter);
+    });
+
+    if (!feed._cachedLogs && window.__INITIAL_AUDIT_LOGS && Array.isArray(window.__INITIAL_AUDIT_LOGS)) {
+      feed._cachedLogs = window.__INITIAL_AUDIT_LOGS;
+    }
+
+    if (window.PMS_API_URL && (!feed._loadedOnce || force)) {
+      feed._loadedOnce = true;
+      fetch(window.PMS_API_URL + '?action=get_recent_activity')
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.logs)) {
+            feed._cachedLogs = res.logs;
+          }
+          buildActivityFeedDOM(filter);
+        })
+        .catch(() => {
+          buildActivityFeedDOM(filter);
+        });
+      return;
+    }
+
+    buildActivityFeedDOM(filter);
+  }
+
+  function buildActivityFeedDOM(filter) {
+    const feed = document.getElementById('recentActivityFeedList');
+    if (!feed) return;
+
+    const cachedLogs = feed._cachedLogs || window.__INITIAL_AUDIT_LOGS || [];
+    let items = [];
+
+    // Map 100% REAL audit logs from database
+    cachedLogs.forEach(l => {
+      let type = 'general';
+      const m = (l.module || '').toLowerCase();
+      if (m.includes('sales')) type = 'orders';
+      else if (m.includes('creative') || m.includes('directive') || m.includes('tracker') || m.includes('production') || m.includes('workload')) type = 'creatives';
+      else if (m.includes('access') || m.includes('security') || m.includes('auth') || m.includes('user') || m.includes('account')) type = 'security';
+
+      let roleType = 'system';
+      const r = (l.role || '').toLowerCase();
+      if (r.includes('sales')) roleType = 'sales';
+      else if (r.includes('artist')) roleType = 'artist';
+      else if (r.includes('admin')) roleType = 'admin';
+
+      // Extract request/project ID if mentioned in description
+      let projId = '';
+      const descText = l.desc || l.description || '';
+      const mId = descText.match(/\b([A-Z]{2}-\d{2}-\d{4})\b/i) || descText.match(/\b([A-Z]\d{6}-\d{3})\b/i);
+      if (mId) {
+        projId = mId[1].toUpperCase();
+      }
+
+      items.push({
+        user: l.user || 'System',
+        roleType: roleType,
+        action: l.action || 'UPDATE',
+        module: l.module || 'System',
+        desc: escapeHTML(descText),
+        projectId: projId,
+        time: l.time ? formatRelativeTime(l.time) : 'Recently',
+        type: type,
+        timestamp: l.time ? (new Date(String(l.time).replace(/-/g, '/')).getTime() || Date.now()) : Date.now()
+      });
+    });
+
+    // NOTE: Removed synthetic mock requests loop completely so ONLY real database records are shown.
+
+    // Sort descending by recency
+    items.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Apply category filter
+    if (filter !== 'all') {
+      items = items.filter(it => it.type === filter);
+    }
+
+    if (items.length === 0) {
+      feed.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:12px;">No activity logged for this category.</div>`;
+      return;
+    }
+
+    feed.innerHTML = items.slice(0, 15).map(it => {
+      const avatarInitial = (it.user || 'S').substring(0, 1).toUpperCase();
+      const avatarClass = `activity-avatar-${it.roleType}`;
+      const projectPill = it.projectId ? `
+        <span class="activity-project-pill" onclick="window.SignDepotApp.filterByDeadlineProject('${it.projectId}')" title="Highlight in table">
+          ${escapeHTML(it.projectId)}
+        </span>
+      ` : '';
+
+      return `
+        <div class="activity-feed-item">
+          <div class="activity-avatar ${avatarClass}">
+            ${escapeHTML(avatarInitial)}
+          </div>
+          <div class="activity-details">
+            <div class="activity-header-line">
+              <span class="activity-user-name">${escapeHTML(it.user)}</span>
+              <span class="activity-time-ago">${escapeHTML(it.time)}</span>
+            </div>
+            <div class="activity-desc-text">
+              ${it.desc}
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="activity-module-tag">${escapeHTML(it.module)}</span>
+              ${projectPill}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function formatRelativeTime(dateStr) {
+    if (!dateStr) return 'Recently';
+    try {
+      const s = String(dateStr).trim().replace(/-/g, '/');
+      const date = new Date(s);
+      if (isNaN(date.getTime())) return 'Recently';
+      const diffMs = Date.now() - date.getTime();
+      const diffSec = Math.floor(diffMs / 1000);
+      if (diffSec < 60) return 'Just now';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      const diffDays = Math.floor(diffHr / 24);
+      if (diffDays === 1) return 'Yesterday';
+      return `${diffDays}d ago`;
+    } catch (e) {
+      return 'Recently';
+    }
+  }
+
+  // Panze Middle Column: Donut Chart
+  function renderPanzeDonutChart() {
+    const container = document.getElementById('panzeDonutChartSvgContainer');
+    const legend = document.getElementById('panzeDonutLegend');
+    if (!container || !legend) return;
+
+    const reqs = state.requests;
+    const completed = reqs.filter(r => r.projectStatus === 'Completed').length;
+    const inProgress = reqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
+    const pending = reqs.filter(r => r.projectStatus === 'Pending').length;
+    const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
+
+    const total = completed + inProgress + pending + revising || 1;
+
+    // Donut SVG Parameters
+    const size = 200;
+    const center = size / 2;
+    const radius = 70;
+    const strokeWidth = 24;
+    const circumference = 2 * Math.PI * radius;
+
+    const segCompleted = (completed / total) * circumference;
+    const segInProgress = (inProgress / total) * circumference;
+    const segPending = (pending / total) * circumference;
+    const segRevising = (revising / total) * circumference;
+
+    const offsetCompleted = 0;
+    const offsetInProgress = -segCompleted;
+    const offsetPending = -(segCompleted + segInProgress);
+    const offsetRevising = -(segCompleted + segInProgress + segPending);
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${size} ${size}">
+        <!-- Completed (Green) -->
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent"
+          stroke="#10B981" stroke-width="${strokeWidth}"
+          stroke-dasharray="${segCompleted} ${circumference}"
+          stroke-dashoffset="${offsetCompleted}" />
+        <!-- In Progress (Orange / Blue) -->
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent"
+          stroke="#F97316" stroke-width="${strokeWidth}"
+          stroke-dasharray="${segInProgress} ${circumference}"
+          stroke-dashoffset="${offsetInProgress}" />
+        <!-- Pending (Sky Blue) -->
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent"
+          stroke="#0284C7" stroke-width="${strokeWidth}"
+          stroke-dasharray="${segPending} ${circumference}"
+          stroke-dashoffset="${offsetPending}" />
+        <!-- Revising (Purple) -->
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent"
+          stroke="#8B5CF6" stroke-width="${strokeWidth}"
+          stroke-dasharray="${segRevising} ${circumference}"
+          stroke-dashoffset="${offsetRevising}" />
+        <text x="${center}" y="${center + 5}" text-anchor="middle" font-size="22" font-weight="800" fill="#0F172A">${total}</text>
+        <text x="${center}" y="${center + 22}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748B">PROJECTS</text>
+      </svg>
+    `;
+
+    legend.innerHTML = `
+      <div class="legend-item"><span class="legend-dot" style="background:#10B981;"></span> Completed: ${completed}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span> In Progress: ${inProgress}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#0284C7;"></span> Pending: ${pending}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6;"></span> Revising: ${revising}</div>
+    `;
+  }
+
+  // Panze Right Column: Artist Capacity
+  function renderDashboardWorkloadSnapshot() {
+    const listEl = document.getElementById('dashboardWorkloadSummaryList');
+    if (!listEl) return;
+
+    const reqs = state.requests;
+    const summaries = state.artists.slice(0, 5).map(artist => {
+      const activeTasks = reqs.filter(r => r.artist === artist && r.projectStatus !== 'Completed').length;
+      const capacity = 10;
+      const pct = Math.min(Math.round((activeTasks / capacity) * 100), 100);
+      const avail = getAvailabilityBadge(activeTasks);
+      return { artist, activeTasks, pct, avail };
+    });
+
+    listEl.innerHTML = summaries.map(item => `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #F1F5F9; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px; min-width:110px;">
+          <div class="user-avatar" style="width:28px; height:28px; font-size:10px;">${escapeHTML(item.artist.substring(0, 2).toUpperCase())}</div>
+          <span style="font-weight:700; font-size:13px;">${escapeHTML(item.artist)}</span>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; font-weight:600;">
+            <span>${item.activeTasks} Active</span>
+            <span>${item.pct}%</span>
+          </div>
+          <div style="height:6px; background:#F1F5F9; border-radius:99px; overflow:hidden;">
+            <div style="height:100%; width:${item.pct}%; background:${item.pct >= 80 ? 'var(--accent-red)' : item.pct >= 50 ? '#F59E0B' : 'var(--primary-green)'};"></div>
+          </div>
+        </div>
+        <span class="badge ${item.avail.class}" style="font-size:9.5px;">${item.avail.text}</span>
+      </div>
+    `).join('');
+  }
+
+  // ==========================================================================
+  // UNIFIED PAGINATION & ROWS-PER-PAGE RENDERER
+  // ==========================================================================
+
+  function renderPagination(opts) {
+    const {
+      infoId,
+      controlsId,
+      selectIds = [],
+      currentPage = 1,
+      perPage = 10,
+      totalItems = 0,
+      onPageChange = '',
+      itemLabel = 'items'
+    } = opts;
+
+    const totalPages = Math.max(Math.ceil(totalItems / perPage), 1);
+    const validPage = Math.min(Math.max(currentPage, 1), totalPages);
+    const startIndex = (validPage - 1) * perPage;
+    const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
+    const endDisplay = Math.min(startIndex + perPage, totalItems);
+
+    // Sync Info label
+    const infoEl = document.getElementById(infoId);
+    if (infoEl) {
+      infoEl.textContent = `Showing ${startDisplay}-${endDisplay} of ${totalItems} ${itemLabel}`;
+    }
+
+    // Sync all rows-per-page select dropdowns
+    selectIds.forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel && sel.value !== String(perPage)) {
+        sel.value = String(perPage);
+        const customBtn = sel.nextElementSibling;
+        if (customBtn && customBtn.classList.contains('custom-filter-dropdown-btn')) {
+          const lbl = customBtn.querySelector('.custom-select-label');
+          if (lbl) lbl.textContent = sel.options[sel.selectedIndex]?.text || `${perPage} rows`;
+        }
+      }
+    });
+
+    // Render Controls
+    const controlsEl = document.getElementById(controlsId);
+    if (controlsEl) {
+      if (totalPages <= 1) {
+        controlsEl.innerHTML = '';
+        return { validPage, startIndex, totalPages };
+      }
+
+      let btnsHTML = `
+        <button class="page-btn" ${validPage === 1 ? 'disabled' : ''} onclick="${onPageChange}(${validPage - 1})" aria-label="Previous Page" title="Previous Page">&laquo;</button>
+      `;
+
+      if (totalPages <= 7) {
+        for (let p = 1; p <= totalPages; p++) {
+          btnsHTML += `<button class="page-btn ${p === validPage ? 'active' : ''}" onclick="${onPageChange}(${p})">${p}</button>`;
+        }
+      } else {
+        btnsHTML += `<button class="page-btn ${validPage === 1 ? 'active' : ''}" onclick="${onPageChange}(1)">1</button>`;
+        const startP = Math.max(2, validPage - 1);
+        const endP = Math.min(totalPages - 1, validPage + 1);
+
+        if (startP > 2) {
+          btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+        }
+        for (let p = startP; p <= endP; p++) {
+          btnsHTML += `<button class="page-btn ${p === validPage ? 'active' : ''}" onclick="${onPageChange}(${p})">${p}</button>`;
+        }
+        if (endP < totalPages - 1) {
+          btnsHTML += `<span style="font-size:12px; padding:0 3px; color:var(--text-muted);">&hellip;</span>`;
+        }
+        btnsHTML += `<button class="page-btn ${validPage === totalPages ? 'active' : ''}" onclick="${onPageChange}(${totalPages})">${totalPages}</button>`;
+      }
+
+      btnsHTML += `
+        <button class="page-btn ${validPage === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${validPage + 1})" aria-label="Next Page" title="Next Page">&raquo;</button>
+      `;
+
+      controlsEl.innerHTML = btnsHTML;
+    }
+
+    return { validPage, startIndex, totalPages };
+  }
+  window.renderPagination = renderPagination;
+
+  // Bottom Recent Projects: DIRECT INLINE EDITABLE TABLE
+  function renderDashboardRecentProjectsTable() {
+    const tbody = document.getElementById('dashboardRecentProjectsBody');
+    if (!tbody) return;
+
+    let list = [...state.requests];
+    const search = (state.dashboardSearch || '').toLowerCase();
+    const status = state.dashboardStatus || '';
+
+    if (search) {
+      list = list.filter(r =>
+        r.requestId.toLowerCase().includes(search) ||
+        r.joNumber.toLowerCase().includes(search) ||
+        r.projectName.toLowerCase().includes(search) ||
+        r.client.toLowerCase().includes(search)
+      );
+    }
+    if (status) {
+      list = list.filter(r => r.projectStatus === status);
+    }
+    const deadlineFilter = state.dashboardDeadline || '';
+    if (deadlineFilter) {
+      list = list.filter(r => {
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+        if (deadlineFilter === 'overdue') return info.status === 'overdue';
+        if (deadlineFilter === 'today') return info.status === 'today';
+        if (deadlineFilter === 'soon') return info.status === 'soon';
+        return true;
+      });
+    }
+
+    if (state.dashboardKpiFilter && state.dashboardKpiFilter !== 'all') {
+      const kf = state.dashboardKpiFilter;
+      if (kf === 'pending') {
+        list = list.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
+      } else if (kf === 'working') {
+        list = list.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
+      } else if (kf === 'completed') {
+        list = list.filter(r => r.projectStatus === 'Completed');
+      } else if (kf === 'revising') {
+        list = list.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
+      } else if (kf === 'overdue') {
+        list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+      }
+    }
+
+    // Sync active KPI filter banner & card highlights
+    const kpiBanner = document.getElementById('activeKpiFilterBanner');
+    if (kpiBanner) {
+      if (state.dashboardKpiFilter && state.dashboardKpiFilter !== 'all') {
+        const labels = {
+          pending: 'Pending Approval',
+          working: 'Working / On-Going',
+          completed: 'Completed',
+          revising: 'Revising',
+          overdue: 'Overdue'
+        };
+        const label = labels[state.dashboardKpiFilter] || state.dashboardKpiFilter;
+        kpiBanner.style.display = 'inline-flex';
+        kpiBanner.innerHTML = `
+          <span>Filtered by: <strong>${escapeHTML(label)}</strong> (${list.length} records)</span>
+          <button class="clear-kpi-btn" title="Clear filter" onclick="window.SignDepotApp.handleKpiCardClick('all')">&times;</button>
+        `;
+      } else {
+        kpiBanner.style.display = 'none';
+        kpiBanner.innerHTML = '';
+      }
+    }
+
+    const kpiCardMap = {
+      all: document.getElementById('kpiCardTotal'),
+      pending: document.getElementById('kpiCardPending'),
+      working: document.getElementById('kpiCardWorking'),
+      completed: document.getElementById('kpiCardCompleted'),
+      revising: document.getElementById('kpiCardRevising'),
+      overdue: document.getElementById('kpiCardOverdue')
+    };
+    Object.entries(kpiCardMap).forEach(([k, card]) => {
+      if (!card) return;
+      const isAct = (state.dashboardKpiFilter || 'all') === k;
+      card.classList.toggle('active', isAct);
+    });
+
+    const page = state.dashboardPage || 1;
+    const perPage = state.dashboardPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'dashboardPaginationInfo',
+      controlsId: 'dashboardPaginationControls',
+      selectIds: ['dashboardFilterPerPage', 'dashboardPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems: list.length,
+      onPageChange: 'window.SignDepotApp.setDashboardPage',
+      itemLabel: 'projects'
+    });
+
+    state.dashboardPage = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
+    if (pagedList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted);">No projects match current filters.</td></tr>`;
+      return;
+    }
+
+    const isSuper = isCurrentUserSuperAdmin();
+    tbody.innerHTML = pagedList.map(r => `
+      <tr data-req-id="${r.id}">
+        <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700; white-space:nowrap;')}</td>
+        <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700; white-space:nowrap;')}</td>
+        <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
+        <td>${renderEditableCell(r.id, 'client', r.client)}</td>
+        <td>${renderInlineSelect(r.id, 'location', r.location || 'Indoor', ['Indoor', 'Outdoor', 'Indoor & Outdoor'])}</td>
+        <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
+        <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
+        <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
+        <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
+        <td>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">
+              Directive
+            </button>
+            ${isSuper ? `
+              <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Project (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            ` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ==========================================================================
+  // MODULE 2: SALES REQUESTS ENGINE (Direct Inline Editable Table)
+  // ==========================================================================
+
+  function renderSalesRequests() {
+    populateSalesFiltersDropdowns();
+
+    // Live Client Approval Status Tab Counts
+    const statusCounts = {
+      all: state.requests.length,
+      ongoing: 0,
+      forReview: 0,
+      revising: 0,
+      completed: 0,
+      released: 0,
+      incomplete: 0,
+      onhold: 0,
+      pendingApproval: 0,
+      approved: 0
+    };
+
+    state.requests.forEach(r => {
+      const ca = (r.clientApproval || '').trim();
+      const caLower = ca.toLowerCase();
+      if (ca === 'On-going' || caLower === 'ongoing' || caLower === 'on-going') statusCounts.ongoing++;
+      else if (ca === 'For Review' || caLower === 'for review') statusCounts.forReview++;
+      else if (ca === 'Revising' || caLower === 'revising' || caLower.includes('revision')) statusCounts.revising++;
+      else if (ca === 'Completed' || caLower === 'completed') statusCounts.completed++;
+      else if (ca === 'Released' || caLower === 'released') statusCounts.released++;
+      else if (ca === 'Incomplete Details/Files' || caLower.includes('incomplete')) statusCounts.incomplete++;
+      else if (ca === 'Onhold' || caLower.includes('hold')) statusCounts.onhold++;
+      else if (ca === 'Pending Approval' || caLower === 'pending approval' || caLower === 'pending') statusCounts.pendingApproval++;
+      else if (ca === 'Approved' || caLower === 'approved') statusCounts.approved++;
+      else statusCounts.pendingApproval++;
+    });
+
+    const updateBadge = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    updateBadge('badgeCountAll', statusCounts.all);
+    updateBadge('badgeCountOngoing', statusCounts.ongoing);
+    updateBadge('badgeCountForReview', statusCounts.forReview);
+    updateBadge('badgeCountRevising', statusCounts.revising);
+    updateBadge('badgeCountCompleted', statusCounts.completed);
+    updateBadge('badgeCountReleased', statusCounts.released);
+    updateBadge('badgeCountIncomplete', statusCounts.incomplete);
+    updateBadge('badgeCountOnhold', statusCounts.onhold);
+    updateBadge('badgeCountPendingApproval', statusCounts.pendingApproval);
+    updateBadge('badgeCountApproved', statusCounts.approved);
+    // Legacy fallback IDs
+    updateBadge('badgeCountPending', statusCounts.pendingApproval);
+    updateBadge('badgeCountRevision', statusCounts.revising);
+
+    // Sync active approval tab button respecting permissions
+    const tabKeyMap = {
+      '': 'all',
+      'On-going': 'ongoing',
+      'For Review': 'for_review',
+      'Revising': 'revising',
+      'Revision Requested': 'revising',
+      'Completed': 'completed',
+      'Released': 'released',
+      'Incomplete Details/Files': 'incomplete',
+      'Onhold': 'onhold',
+      'Pending Approval': 'pending_approval',
+      'Pending': 'pending_approval',
+      'Approved': 'approved'
+    };
+    let curTabKey = tabKeyMap[state.salesFilter.approvalTab || ''] || 'all';
+    if (!canUserAccessTab('sales-requests', curTabKey)) {
+      const allowedTabKey = ['all', 'ongoing', 'for_review', 'revising', 'completed', 'released', 'incomplete', 'onhold', 'pending_approval', 'approved'].find(k => canUserAccessTab('sales-requests', k));
+      if (allowedTabKey) {
+        const revMap = {
+          'all': '',
+          'ongoing': 'On-going',
+          'for_review': 'For Review',
+          'revising': 'Revising',
+          'completed': 'Completed',
+          'released': 'Released',
+          'incomplete': 'Incomplete Details/Files',
+          'onhold': 'Onhold',
+          'pending_approval': 'Pending Approval',
+          'approved': 'Approved'
+        };
+        state.salesFilter.approvalTab = revMap[allowedTabKey];
+      }
+    }
+    const activeApprovalTab = state.salesFilter.approvalTab || '';
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(tabBtn => {
+      const tabVal = tabBtn.getAttribute('data-tab-approval') || '';
+      const isAct = tabVal === activeApprovalTab;
+      tabBtn.classList.toggle('active', isAct);
+      tabBtn.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    });
+
+    // Keep salesFilterApproval select dropdown in sync with activeApprovalTab
+    const selApproval = document.getElementById('salesFilterApproval');
+    if (selApproval && selApproval.value !== activeApprovalTab) {
+      selApproval.value = activeApprovalTab;
+      syncFilterSelectUI(selApproval);
+    }
+
+    let list = [...state.requests];
+    const { search, priority, approval, fileSent, salesRep, location, sortField, sortDir, page, perPage } = state.salesFilter;
+
+    // Filter by approval tab or approval dropdown
+    const effectiveApproval = activeApprovalTab || approval || '';
+    if (effectiveApproval) {
+      list = list.filter(r => {
+        const ca = (r.clientApproval || '').trim();
+        const caLower = ca.toLowerCase();
+        const targetLower = effectiveApproval.toLowerCase();
+        if (targetLower === 'pending approval' || targetLower === 'pending') {
+          return caLower === 'pending approval' || caLower === 'pending';
+        }
+        if (targetLower === 'revising' || targetLower.includes('revision')) {
+          return caLower === 'revising' || caLower.includes('revision');
+        }
+        if (targetLower === 'on-going' || targetLower === 'ongoing') {
+          return caLower === 'on-going' || caLower === 'ongoing';
+        }
+        if (targetLower.includes('incomplete')) {
+          return caLower.includes('incomplete');
+        }
+        if (targetLower.includes('hold')) {
+          return caLower.includes('hold');
+        }
+        return ca === effectiveApproval || caLower === targetLower;
+      });
+    }
+
+    // Filters
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(r => 
+        r.requestId.toLowerCase().includes(q) ||
+        r.joNumber.toLowerCase().includes(q) ||
+        r.projectName.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q) ||
+        (r.location && r.location.toLowerCase().includes(q))
+      );
+    }
+    if (priority) list = list.filter(r => r.priority === priority);
+    if (approval) list = list.filter(r => r.clientApproval === approval);
+    if (fileSent) list = list.filter(r => r.fileSent === fileSent);
+    if (salesRep) list = list.filter(r => r.salesRep === salesRep);
+    if (location) list = list.filter(r => (r.location || 'Indoor').toLowerCase() === location.toLowerCase());
+    if (state.salesFilter.deadline) {
+      list = list.filter(r => {
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+        if (state.salesFilter.deadline === 'overdue') return info.status === 'overdue';
+        if (state.salesFilter.deadline === 'today') return info.status === 'today';
+        if (state.salesFilter.deadline === 'soon') return info.status === 'soon';
+        return true;
+      });
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      let valA = a[sortField] || '';
+      let valB = b[sortField] || '';
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    const totalItems = list.length;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'salesPaginationInfo',
+      controlsId: 'salesPaginationControls',
+      selectIds: ['salesFilterPerPage', 'salesPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setSalesPage',
+      itemLabel: 'requests'
+    });
+
+    state.salesFilter.page = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
+    const tbody = document.getElementById('salesRequestsTableBody');
+    if (tbody) {
+      const draftHTML = state.draftSalesRequest ? renderDraftSalesRowHTML(state.draftSalesRequest) : '';
+
+      if (pagedList.length === 0 && !draftHTML) {
+        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:32px 20px; color:var(--text-muted); font-size:13px;">No sales requests match the current filters. Click <strong>+ Add Request</strong> above to create a new sales request!</td></tr>`;
+      } else {
+        const isSuper = isCurrentUserSuperAdmin();
+        const rowsHTML = pagedList.map(r => `
+          <tr data-req-id="${r.id}">
+            <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color: var(--primary-green); font-weight: 700; min-width: 95px;')}</td>
+            <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color: var(--accent-red); font-weight: 700; min-width: 105px;')}</td>
+            <td>${renderInlineDate(r.id, 'orderDate', r.orderDate)}</td>
+            <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
+            <td>${renderEditableCell(r.id, 'client', r.client, '', 'min-width: 140px;')}</td>
+            <td>${renderEditableCell(r.id, 'projectName', r.projectName, '', 'min-width: 170px; font-weight: 600;')}</td>
+            <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
+            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
+            <td>${renderInlineDate(r.id, 'releasingDate', r.releasingDate)}</td>
+            <td>${renderInlineSelect(r.id, 'fileSent', r.fileSent || 'N/A', FILE_STATUS_LEVELS)}</td>
+            <td>${renderEditableCell(r.id, 'completeAddress', r.completeAddress, '', 'min-width: 190px;')}</td>
+            <td>${renderInlineSelect(r.id, 'location', r.location || 'N/A', PLACEMENT_OPTIONS)}</td>
+            <td>${renderInlineSelect(r.id, 'releasingMode', r.releasingMode || 'N/A', RELEASING_MODES)}</td>
+            <td>${renderEditableCell(r.id, 'contactPerson', r.contactPerson, '', 'min-width: 130px;')}</td>
+            <td>${renderEditableCell(r.id, 'contactNumber', r.contactNumber, '', 'min-width: 120px;')}</td>
+            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval || 'Pending Approval', APPROVAL_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'priority', r.priority || 'Normal', PRIORITY_LEVELS)}</td>
+            <td>
+              <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
+                  Directive
+                </button>
+                <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.editSalesRequest('${r.id}')" title="Edit Full Details">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                ${isSuper ? `
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Request (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        tbody.innerHTML = draftHTML + rowsHTML;
+      }
+    }
+  }
+
+  function populateSalesFiltersDropdowns() {
+    state.salesReps = state.salesReps.filter(s => s && s.toLowerCase() !== 'shela');
+    const repSelect = document.getElementById('salesFilterSalesRep');
+    if (repSelect) {
+      const curVal = repSelect.value;
+      repSelect.innerHTML = '<option value="">All Sales Reps</option>';
+      state.salesReps.forEach(rep => {
+        const titleRep = toTitleCase(rep);
+        const opt = document.createElement('option');
+        opt.value = titleRep;
+        opt.textContent = titleRep;
+        repSelect.appendChild(opt);
+      });
+      if (curVal && curVal.toLowerCase() !== 'shela') repSelect.value = curVal;
+    }
+
+    const modalArtistSelect = document.getElementById('salesFormArtist');
+    if (modalArtistSelect) {
+      const curArtist = modalArtistSelect.value;
+      modalArtistSelect.innerHTML = '<option value="">Select Artist...</option>';
+      state.artists.forEach(a => {
+        const titleA = toTitleCase(a);
+        const opt = document.createElement('option');
+        opt.value = titleA;
+        opt.textContent = titleA;
+        modalArtistSelect.appendChild(opt);
+      });
+      if (curArtist) modalArtistSelect.value = curArtist;
+    }
+
+    const modalSalesSelect = document.getElementById('salesFormSalesRep');
+    if (modalSalesSelect) {
+      const curRep = modalSalesSelect.value;
+      modalSalesSelect.innerHTML = '<option value="">Select Sales Rep...</option>';
+      state.salesReps.forEach(s => {
+        const titleS = toTitleCase(s);
+        const opt = document.createElement('option');
+        opt.value = titleS;
+        opt.textContent = titleS;
+        modalSalesSelect.appendChild(opt);
+      });
+      if (curRep && curRep.toLowerCase() !== 'shela') {
+        modalSalesSelect.value = curRep;
+      } else if (curRep && curRep.toLowerCase() === 'shela') {
+        modalSalesSelect.value = 'Shella';
+      }
+    }
+
+    upgradeAllFormSelects();
+  }
+
+  function resetSalesRequestsFilters() {
+    state.salesFilter = {
+      search: '',
+      priority: '',
+      approval: '',
+      fileSent: '',
+      salesRep: '',
+      location: '',
+      deadline: '',
+      sortField: 'orderDate',
+      sortDir: 'desc',
+      page: 1,
+      perPage: getStoredRowsPerPage(),
+      approvalTab: ''
+    };
+
+    const salesSearch = document.getElementById('salesSearchInput');
+    if (salesSearch) salesSearch.value = '';
+
+    const filterIds = [
+      'salesFilterPriority',
+      'salesFilterApproval',
+      'salesFilterLocation',
+      'salesFilterFileSent',
+      'salesFilterSalesRep',
+      'salesFilterDeadline'
+    ];
+
+    filterIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        syncFilterSelectUI(el);
+      }
+    });
+
+    // Reset approval tab buttons to All
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(tab => {
+      const isAll = !tab.getAttribute('data-tab-approval');
+      tab.classList.toggle('active', isAll);
+      tab.setAttribute('aria-selected', isAll ? 'true' : 'false');
+    });
+
+    renderSalesRequests();
+    showToast('Sales filters have been reset.');
+  }
+
+  // ==========================================================================
+  // MODULE 3: CREATIVES TRACKER (Google Sheets Replica with Inline Editing)
+  // ==========================================================================
+
+  function matchesTrackerDateFilter(r, filter) {
+    if (!filter) return true;
+    const { datePreset, dateCustom, dateColumn } = filter;
+    if (!datePreset && !dateCustom) return true;
+
+    let targetDates = [];
+    if (dateColumn === 'any') {
+      targetDates = [r.orderDate, r.designDeadline, r.dateUpdated, r.timestamp].filter(Boolean);
+    } else if (dateColumn === 'designDeadline') {
+      targetDates = [r.designDeadline].filter(Boolean);
+    } else if (dateColumn === 'dateUpdated') {
+      targetDates = [r.dateUpdated].filter(Boolean);
+    } else {
+      targetDates = [r.orderDate, r.timestamp].filter(Boolean);
+    }
+
+    if (targetDates.length === 0) return false;
+
+    const itemDateStrs = targetDates.map(d => {
+      const m = String(d).match(/\d{4}-\d{2}-\d{2}/);
+      return m ? m[0] : '';
+    }).filter(Boolean);
+
+    if (itemDateStrs.length === 0) return false;
+
+    const now = new Date();
+    const formatYMD = (dt) => {
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const d = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    const todayStr = formatYMD(now);
+
+    if (datePreset === 'today') {
+      return itemDateStrs.some(ds => ds === todayStr);
+    }
+
+    if (datePreset === 'yesterday') {
+      const yest = new Date(now);
+      yest.setDate(yest.getDate() - 1);
+      const yestStr = formatYMD(yest);
+      return itemDateStrs.some(ds => ds === yestStr);
+    }
+
+    if (datePreset === 'this_week') {
+      const day = now.getDay();
+      const diffToMonday = (day === 0 ? -6 : 1) - day;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + diffToMonday);
+      monday.setHours(0, 0, 0, 0);
+
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+
+      const monStr = formatYMD(monday);
+      const sunStr = formatYMD(sunday);
+      return itemDateStrs.some(ds => ds >= monStr && ds <= sunStr);
+    }
+
+    if (datePreset === 'this_month') {
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const prefix = `${y}-${m}`;
+      return itemDateStrs.some(ds => ds.startsWith(prefix));
+    }
+
+    if (datePreset === 'custom' || (!datePreset && dateCustom)) {
+      if (!dateCustom) return true;
+      return itemDateStrs.some(ds => ds === dateCustom);
+    }
+
+    return true;
+  }
+
+  function renderCreativesTracker() {
+    populateTrackerFiltersDropdowns();
+    updateDashboardKPIs();
+
+    const myArtist = getLoggedInArtist();
+    let list = [...state.requests];
+
+    // Artist-scoped filter: if logged in as an artist, show ONLY their assigned tasks!
+    if (myArtist) {
+      list = list.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase());
+
+      // Show artist banner on tracker header
+      const titleWrap = document.querySelector('#view-creatives-tracker .section-title-wrap');
+      if (titleWrap && !document.getElementById('artistScopedTrackerBanner')) {
+        const banner = document.createElement('div');
+        banner.id = 'artistScopedTrackerBanner';
+        banner.style.cssText = 'display:inline-flex; align-items:center; gap:6px; background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; margin-top:6px;';
+        banner.innerHTML = `<span>🎨 Filtered to Your Assigned Tasks: <strong>${escapeHTML(myArtist)}</strong></span>`;
+        titleWrap.appendChild(banner);
+      }
+    }
+
+    // Calculate Artist Acceptance stream counts
+    const countAccepted = list.filter(r => isProjectArtistAccepted(r)).length;
+    const countPending = list.filter(r => !isProjectArtistAccepted(r)).length;
+    const countAll = list.length;
+
+    const elBadgeAcc = document.getElementById('trackerBadgeCountAccepted');
+    if (elBadgeAcc) elBadgeAcc.textContent = countAccepted.toLocaleString();
+    const elBadgePend = document.getElementById('trackerBadgeCountPending');
+    if (elBadgePend) elBadgePend.textContent = countPending.toLocaleString();
+    const elBadgeAll = document.getElementById('trackerBadgeCountAll');
+    if (elBadgeAll) elBadgeAll.textContent = countAll.toLocaleString();
+
+    // Sync active acceptance tab styling
+    const curAcceptanceTab = state.trackerAcceptanceTab || 'accepted';
+    document.querySelectorAll('.tracker-acceptance-tabs .tracker-acceptance-tab').forEach(btn => {
+      const tabKey = btn.getAttribute('data-tracker-tab');
+      const isAct = (tabKey === curAcceptanceTab);
+      btn.classList.toggle('active', isAct);
+      btn.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    });
+
+    // Apply acceptance tab stream filter
+    if (curAcceptanceTab === 'accepted') {
+      list = list.filter(r => isProjectArtistAccepted(r));
+    } else if (curAcceptanceTab === 'pending') {
+      list = list.filter(r => !isProjectArtistAccepted(r));
+    }
+
+    const { search, projectStatus, designStatus, artist, overdue, sortField, sortDir, page, perPage } = state.trackerFilter;
+
+    // Apply KPI filter if active on Creatives Tracker
+    if (state.trackerKpiFilter && state.trackerKpiFilter !== 'all') {
+      const kf = state.trackerKpiFilter;
+      if (kf === 'pending') {
+        list = list.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending');
+      } else if (kf === 'working') {
+        list = list.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress');
+      } else if (kf === 'approved') {
+        list = list.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved');
+      } else if (kf === 'revising') {
+        list = list.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising');
+      } else if (kf === 'overdue') {
+        list = list.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate));
+      }
+    }
+
+    // Sync active KPI filter banner & card highlights on Creatives Tracker
+    const kpiBanner = document.getElementById('trackerKpiFilterBanner');
+    if (kpiBanner) {
+      if (state.trackerKpiFilter && state.trackerKpiFilter !== 'all') {
+        const labels = {
+          pending: 'Pending Approval',
+          working: 'Working / On-Going',
+          approved: 'Approved',
+          revising: 'Revising',
+          overdue: 'Overdue'
+        };
+        const label = labels[state.trackerKpiFilter] || state.trackerKpiFilter;
+        kpiBanner.style.display = 'inline-flex';
+        kpiBanner.innerHTML = `
+          <span>Filtered: <strong>${escapeHTML(label)}</strong> (${list.length} tasks)</span>
+          <button class="clear-kpi-btn" title="Clear filter" onclick="window.SignDepotApp.applyKpiFilterToCreativesTracker('all')">&times; Show All</button>
+        `;
+      } else {
+        kpiBanner.style.display = 'none';
+        kpiBanner.innerHTML = '';
+      }
+    }
+
+    const trackerKpiCardMap = {
+      all: document.getElementById('trackerKpiCardTotal'),
+      pending: document.getElementById('trackerKpiCardPending'),
+      working: document.getElementById('trackerKpiCardWorking'),
+      approved: document.getElementById('trackerKpiCardApproved'),
+      revising: document.getElementById('trackerKpiCardRevising'),
+      overdue: document.getElementById('trackerKpiCardOverdue')
+    };
+    Object.entries(trackerKpiCardMap).forEach(([k, card]) => {
+      if (!card) return;
+      const isAct = (state.trackerKpiFilter || 'all') === k;
+      card.classList.toggle('active', isAct);
+    });
+
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(r => 
+        r.requestId.toLowerCase().includes(q) ||
+        r.artist.toLowerCase().includes(q) ||
+        r.projectName.toLowerCase().includes(q) ||
+        r.remarks.toLowerCase().includes(q)
+      );
+    }
+    if (projectStatus) list = list.filter(r => r.projectStatus === projectStatus);
+    if (designStatus) list = list.filter(r => r.designStatus === designStatus);
+    if (!myArtist && artist) list = list.filter(r => r.artist === artist);
+    if (overdue) {
+      list = list.filter(r => {
+        const info = getDeadlineAlertStatus(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate);
+        if (overdue === 'overdue') return info.status === 'overdue';
+        if (overdue === 'today') return info.status === 'today';
+        if (overdue === 'soon') return info.status === 'soon';
+        if (overdue === 'ontime') return info.status === 'ontrack' || (!isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate) && info.status !== 'soon' && info.status !== 'today');
+        return true;
+      });
+    }
+
+    // Apply Date Filter
+    if (state.trackerFilter.datePreset || state.trackerFilter.dateCustom) {
+      list = list.filter(r => matchesTrackerDateFilter(r, state.trackerFilter));
+    }
+
+    // Sort Table Rows (Default: Latest to Old based on Request ID)
+    const effectiveSortField = sortField || 'requestId';
+    const effectiveSortDir = sortDir || 'desc';
+
+    list.sort((a, b) => {
+      let valA = a[effectiveSortField];
+      let valB = b[effectiveSortField];
+      if (valA === undefined || valA === null) valA = '';
+      if (valB === undefined || valB === null) valB = '';
+
+      // Natural Request ID sort (Latest to Old default)
+      if (effectiveSortField === 'requestId' || effectiveSortField === 'id') {
+        const cmp = String(valA).localeCompare(String(valB), undefined, { numeric: true, sensitivity: 'base' });
+        return effectiveSortDir === 'asc' ? cmp : -cmp;
+      }
+
+      // Numeric count columns
+      if (['countStandard', 'countSpecial', 'countPrinting', 'revisionCount'].includes(effectiveSortField)) {
+        const numA = Number(valA) || 0;
+        const numB = Number(valB) || 0;
+        return effectiveSortDir === 'asc' ? numA - numB : numB - numA;
+      }
+
+      // Date columns (chronological)
+      if (['designDeadline', 'orderDate', 'dateUpdated', 'timestamp'].includes(effectiveSortField)) {
+        const timeA = (valA && valA !== 'N/A') ? new Date(valA).getTime() : 0;
+        const timeB = (valB && valB !== 'N/A') ? new Date(valB).getTime() : 0;
+        if (timeA && timeB && !isNaN(timeA) && !isNaN(timeB)) {
+          return effectiveSortDir === 'asc' ? timeA - timeB : timeB - timeA;
+        }
+      }
+
+      // Overdue severity sort
+      if (effectiveSortField === 'deadlineStatus') {
+        const rank = { overdue: 4, today: 3, soon: 2, ontrack: 1, completed: 0, pending_accept: -1 };
+        const statusA = getDeadlineAlertStatus(a.designDeadline, a.projectStatus, a.artistAccepted, a.artistAcceptedDate, a.orderDate).status;
+        const statusB = getDeadlineAlertStatus(b.designDeadline, b.projectStatus, b.artistAccepted, b.artistAcceptedDate, b.orderDate).status;
+        const diff = (rank[statusA] || 0) - (rank[statusB] || 0);
+        return effectiveSortDir === 'asc' ? diff : -diff;
+      }
+
+      // Alphabetical sort (A-Z or Z-A)
+      const cmp = String(valA).trim().localeCompare(String(valB).trim(), undefined, { sensitivity: 'base' });
+      return effectiveSortDir === 'asc' ? cmp : -cmp;
+    });
+
+    // Update Interactive Sort Badges on Table Headers
+    document.querySelectorAll('#view-creatives-tracker .data-table th[data-sort]').forEach(th => {
+      const f = th.getAttribute('data-sort');
+      th.classList.remove('sort-asc', 'sort-desc');
+      const oldPill = th.querySelector('.sort-indicator-pill');
+      if (oldPill) oldPill.remove();
+
+      if (f === effectiveSortField) {
+        const isAsc = effectiveSortDir === 'asc';
+        th.classList.add(isAsc ? 'sort-asc' : 'sort-desc');
+        const pill = document.createElement('span');
+        pill.className = 'sort-indicator-pill';
+        if (f === 'requestId') {
+          pill.textContent = isAsc ? '↑ Oldest' : '↓ Latest';
+        } else if (['countStandard', 'countSpecial', 'countPrinting', 'revisionCount'].includes(f)) {
+          pill.textContent = isAsc ? '↑ 1-9' : '↓ 9-1';
+        } else if (['designDeadline', 'orderDate', 'dateUpdated'].includes(f)) {
+          pill.textContent = isAsc ? '↑ Earliest' : '↓ Newest';
+        } else {
+          pill.textContent = isAsc ? '↑ A-Z' : '↓ Z-A';
+        }
+        th.appendChild(pill);
+      }
+    });
+
+    // Sync sort dropdown in filter toolbar
+    const sortDropdown = document.getElementById('trackerSortDropdown');
+    if (sortDropdown) {
+      const targetVal = `${effectiveSortField}_${effectiveSortDir}`;
+      if (sortDropdown.querySelector(`option[value="${targetVal}"]`)) {
+        sortDropdown.value = targetVal;
+      }
+    }
+
+    const totalItems = list.length;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'trackerPaginationInfo',
+      controlsId: 'trackerPaginationControls',
+      selectIds: ['trackerFilterPerPage', 'trackerPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setTrackerPage',
+      itemLabel: 'tasks'
+    });
+
+    state.trackerFilter.page = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
+    const tbody = document.getElementById('creativesTrackerTableBody');
+    if (tbody) {
+      if (pagedList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:30px; color:var(--text-muted);">No tasks match the filters.</td></tr>`;
+      } else {
+        tbody.innerHTML = pagedList.map(r => {
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate);
+          let deadlineStatusBadge = '<span style="color:#10B981; font-weight:700; font-size:11px;">ON TRACK</span>';
+          if (alertInfo.status === 'pending_accept') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-pending">PENDING ACCEPTANCE</span>`;
+          } else if (alertInfo.status === 'overdue') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-overdue">${escapeHTML(alertInfo.diffText).toUpperCase()}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-today">DUE TODAY</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlineStatusBadge = `<span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText).toUpperCase()}</span>`;
+          }
+
+          const isSuper = isCurrentUserSuperAdmin();
+          const isAccepted = isProjectArtistAccepted(r);
+          return `
+            <tr data-req-id="${r.id}">
+              <td>${renderEditableCell(r.id, 'requestId', r.requestId, '', 'color:var(--primary-green); font-weight:700; white-space:nowrap;')}</td>
+              <td>${renderEditableCell(r.id, 'joNumber', r.joNumber, '', 'color:var(--accent-red); font-weight:700; white-space:nowrap;')}</td>
+              <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
+              <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
+              <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
+              <td>${renderInlineSelect(r.id, 'headApproval', r.headApproval || 'Pending', HEAD_APPROVAL_LEVELS)}</td>
+              <td style="text-align:center;">${renderInlineNumber(r.id, 'countStandard', r.countStandard)}</td>
+              <td style="text-align:center;">${renderInlineNumber(r.id, 'countSpecial', r.countSpecial)}</td>
+              <td style="text-align:center;">${renderInlineNumber(r.id, 'countPrinting', r.countPrinting)}</td>
+              <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus || 'On-going', PROJECT_STATUSES)}</td>
+              <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus || 'On Queue', DESIGN_STATUSES)}</td>
+              <td style="text-align:center;">
+                ${deadlineStatusBadge}
+              </td>
+              <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
+              <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
+              <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
+              <td style="font-size:12px; color:var(--text-secondary); white-space:nowrap;">${escapeHTML(r.orderDate || r.timestamp || 'N/A')}</td>
+              <td style="font-size:12px; color:var(--text-secondary); white-space:nowrap;">${escapeHTML(r.dateUpdated || r.orderDate || 'N/A')}</td>
+              <td>
+                <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
+                  ${!isAccepted ? `
+                    <button class="btn btn-primary btn-sm" onclick="window.SignDepotApp.acceptArtistProject('${r.id}')" title="Accept project and start drafting" style="font-weight:700; background:var(--primary-green); border-color:var(--primary-green); color:#fff; display:inline-flex; align-items:center; gap:4px; padding:3px 9px; font-size:11.5px; border-radius:6px; cursor:pointer;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      Accept
+                    </button>
+                  ` : ''}
+                  <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                  ${isSuper ? `
+                    <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  function populateTrackerFiltersDropdowns() {
+    const myArtist = getLoggedInArtist();
+    const artistSelect = document.getElementById('trackerFilterArtist');
+    if (artistSelect) {
+      if (myArtist) {
+        artistSelect.innerHTML = `<option value="${escapeHTML(myArtist)}" selected>🎨 ${escapeHTML(myArtist)} (You)</option>`;
+        artistSelect.disabled = true;
+        artistSelect.title = `Your account is linked to ${myArtist}. Only your assigned tasks are shown.`;
+        artistSelect.style.background = '#ECFDF5';
+        artistSelect.style.borderColor = '#10B981';
+        artistSelect.style.color = '#065F46';
+        artistSelect.style.fontWeight = '700';
+      } else {
+        const curVal = artistSelect.value;
+        artistSelect.innerHTML = '<option value="">All Artists</option>';
+        state.artists.forEach(a => {
+          const titleA = toTitleCase(a);
+          const opt = document.createElement('option');
+          opt.value = titleA;
+          opt.textContent = titleA;
+          artistSelect.appendChild(opt);
+        });
+        if (curVal) artistSelect.value = curVal;
+      }
+    }
+
+    const modalArtistSelect = document.getElementById('trackerFormArtist');
+    if (modalArtistSelect) {
+      const curModalArt = modalArtistSelect.value;
+      modalArtistSelect.innerHTML = '<option value="">Select Artist...</option>';
+      state.artists.forEach(a => {
+        const titleA = toTitleCase(a);
+        const opt = document.createElement('option');
+        opt.value = titleA;
+        opt.textContent = titleA;
+        modalArtistSelect.appendChild(opt);
+      });
+      if (myArtist) {
+        modalArtistSelect.value = toTitleCase(myArtist);
+      } else if (curModalArt) {
+        modalArtistSelect.value = curModalArt;
+      }
+    }
+
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+  }
+
+  function resetCreativesTrackerFilters() {
+    const myArtist = getLoggedInArtist();
+    state.trackerFilter = {
+      search: '',
+      projectStatus: '',
+      designStatus: '',
+      artist: myArtist || '',
+      overdue: '',
+      datePreset: '',
+      dateCustom: '',
+      dateColumn: 'orderDate',
+      sortField: 'requestId',
+      sortDir: 'desc',
+      page: 1,
+      perPage: getStoredRowsPerPage()
+    };
+    state.trackerKpiFilter = 'all';
+
+    const trackerSearch = document.getElementById('trackerSearchInput');
+    if (trackerSearch) trackerSearch.value = '';
+
+    ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterOverdue', 'trackerFilterDatePreset'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        syncFilterSelectUI(el);
+      }
+    });
+
+    const dateCol = document.getElementById('trackerFilterDateColumn');
+    if (dateCol) {
+      dateCol.value = 'orderDate';
+      syncFilterSelectUI(dateCol);
+    }
+
+    const dateCust = document.getElementById('trackerFilterDateCustom');
+    if (dateCust) {
+      dateCust.value = '';
+      dateCust.style.display = 'none';
+    }
+
+    const sortDropdown = document.getElementById('trackerSortDropdown');
+    if (sortDropdown) {
+      sortDropdown.value = 'requestId_desc';
+      syncFilterSelectUI(sortDropdown);
+    }
+
+    const artEl = document.getElementById('trackerFilterArtist');
+    if (artEl) {
+      artEl.value = myArtist || '';
+      syncFilterSelectUI(artEl);
+    }
+
+    // Reset KPI cards active state
+    document.querySelectorAll('#view-creatives-tracker .kpi-card').forEach(c => {
+      c.classList.remove('active');
+    });
+    const totalCard = document.getElementById('trackerKpiCardTotal');
+    if (totalCard) totalCard.classList.add('active');
+
+    renderCreativesTracker();
+    showToast('Tracker filters have been reset.');
+  }
+
+  // ==========================================================================
+  // MODULE 4: ARTIST WORKLOAD ENGINE
+  // ==========================================================================
+
+  function renderArtistWorkload() {
+    const grid = document.getElementById('artistWorkloadCardsGrid');
+    if (!grid) return;
+
+    const reqs = state.requests;
+    const filterAvail = state.workloadFilter.availability;
+
+    const artistData = state.artists.filter(a => a !== 'Rodel' && a !== 'Benjie' && a !== 'Seven' && a !== 'Edrian').map(artist => {
+      const activeAssignments = reqs.filter(r => r.artist === artist && r.projectStatus !== 'Completed');
+      let std = 0, prt = 0, spc = 0;
+      activeAssignments.forEach(a => {
+        std += (a.countStandard || 0);
+        prt += (a.countPrinting || 0);
+        spc += (a.countSpecial || 0);
+      });
+      const activeCount = activeAssignments.length;
+      const capacity = 10;
+      const avail = getAvailabilityBadge(activeCount);
+      const pct = Math.min(Math.round((activeCount / capacity) * 100), 100);
+
+      return {
+        artist,
+        activeAssignments,
+        activeCount,
+        std,
+        prt,
+        spc,
+        capacity,
+        avail,
+        pct
+      };
+    });
+
+    let filtered = artistData;
+    if (filterAvail) {
+      filtered = filtered.filter(a => a.avail.text === filterAvail);
+    }
+
+    grid.innerHTML = filtered.map(a => `
+      <div class="studio-card" style="cursor:pointer;" onclick="window.SignDepotApp.selectWorkloadArtist('${a.artist}')">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="user-avatar" style="width:36px; height:36px;">${escapeHTML(a.artist.substring(0, 2).toUpperCase())}</div>
+            <div>
+              <h4 style="font-size:15px; font-weight:800;">${escapeHTML(a.artist)}</h4>
+              <span style="font-size:11px; color:var(--text-secondary); font-weight:600;">${a.activeCount} Active Tasks</span>
+            </div>
+          </div>
+          <span class="badge ${a.avail.class}">${a.avail.text}</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#F8FAFC; border:1px solid var(--border-light); padding:8px 10px; border-radius:var(--radius-md); text-align:center; margin-bottom:12px;">
+          <div>
+            <div style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Standard</div>
+            <div style="font-size:14px; font-weight:800; color:var(--primary-green);">${a.std}</div>
+          </div>
+          <div>
+            <div style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Printing</div>
+            <div style="font-size:14px; font-weight:800; color:#3B82F6;">${a.prt}</div>
+          </div>
+          <div>
+            <div style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Special</div>
+            <div style="font-size:14px; font-weight:800; color:var(--accent-red);">${a.spc}</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; font-weight:600;">
+          <span>Capacity (${a.activeCount}/${a.capacity})</span>
+          <span>${a.pct}%</span>
+        </div>
+        <div style="height:6px; background:#F1F5F9; border-radius:99px; overflow:hidden;">
+          <div style="height:100%; width:${a.pct}%; background:${a.pct >= 80 ? 'var(--accent-red)' : a.pct >= 50 ? '#F59E0B' : 'var(--primary-green)'};"></div>
+        </div>
+      </div>
+    `).join('');
+
+    renderWorkloadDetailsTable();
+  }
+
+  function renderWorkloadDetailsTable() {
+    const selectedArtist = state.workloadFilter.selectedArtist;
+    const titleEl = document.getElementById('workloadSelectedArtistTitle');
+    if (titleEl) {
+      titleEl.textContent = selectedArtist ? `Active Assignments for ${selectedArtist}` : 'All Active Artist Assignments';
+    }
+
+    let list = state.requests.filter(r => r.projectStatus !== 'Completed' && r.artist !== 'Rodel' && r.artist !== 'Benjie');
+    if (selectedArtist) {
+      list = list.filter(r => r.artist === selectedArtist);
+    }
+
+    const search = state.workloadFilter.search;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(r => r.projectName.toLowerCase().includes(q) || r.requestId.toLowerCase().includes(q));
+    }
+
+    const totalItems = list.length;
+    const page = state.workloadPage || 1;
+    const perPage = state.workloadPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'workloadPaginationInfo',
+      controlsId: 'workloadPaginationControls',
+      selectIds: ['workloadFilterPerPage', 'workloadPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setWorkloadPage',
+      itemLabel: 'assignments'
+    });
+
+    state.workloadPage = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
+    const tbody = document.getElementById('artistWorkloadDetailsTableBody');
+    if (tbody) {
+      if (pagedList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">No active tasks for selected artist.</td></tr>`;
+      } else {
+        tbody.innerHTML = pagedList.map(r => {
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          let deadlineBadge = '';
+          if (alertInfo.status === 'overdue') {
+            deadlineBadge = ` <span class="deadline-pill deadline-pill-overdue">${escapeHTML(alertInfo.diffText)}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlineBadge = ` <span class="deadline-pill deadline-pill-today">Due Today</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlineBadge = ` <span class="deadline-pill deadline-pill-soon">${escapeHTML(alertInfo.diffText)}</span>`;
+          }
+
+          const categoryBadge = r.countSpecial > 0 
+            ? '<span class="badge badge-priority-high">Special</span>' 
+            : (r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-not-started">Standard</span>');
+
+          const pStatus = (typeof r.projectStatus === 'string' && r.projectStatus.trim()) ? r.projectStatus.trim() : 'Pending';
+          const dStatus = (typeof r.designStatus === 'string' && r.designStatus.trim() && r.designStatus !== '[object Object]') 
+            ? r.designStatus.trim() 
+            : (pStatus === 'Completed' ? 'Submitted' : (pStatus === 'On-going' ? 'In Progress' : 'Not Started'));
+
+          return `
+            <tr>
+              <td><strong style="color:var(--primary-green); font-weight:700;">${escapeHTML(r.requestId)}</strong></td>
+              <td><span class="badge badge-artist" style="font-weight:700;">${escapeHTML(r.artist || '-')}</span></td>
+              <td><span style="font-weight:600; color:var(--text-main);">${escapeHTML(r.projectName || '-')}</span></td>
+              <td>${categoryBadge}</td>
+              <td style="white-space:nowrap;">
+                <span>${escapeHTML(r.designDeadline || '-')}</span>${deadlineBadge}
+              </td>
+              <td><span class="badge ${getStatusBadgeClass(pStatus)}">${escapeHTML(pStatus)}</span></td>
+              <td><span class="badge ${getStatusBadgeClass(dStatus)}">${escapeHTML(dStatus)}</span></td>
+              <td style="text-align:center;"><span style="font-weight:700; color:var(--text-secondary);">${r.revisionCount || 0}</span></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="View Blueprint Directive">
+                  Directive
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  // ==========================================================================
+  // MODULE 5: DIRECTIVES DETAILS (The Star Module)
+  // ==========================================================================
+
+  function getDirectiveRecord(joOrReq) {
+    if (!joOrReq || !state.requests || state.requests.length === 0) return null;
+    const clean = String(joOrReq).trim().toLowerCase();
+    if (!clean) return null;
+
+    // 1. Exact match by requestId (e.g. "LR-26-2102")
+    let match = state.requests.find(r => r.requestId && String(r.requestId).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 2. Exact match by id (e.g. 15, "15", "lr-26-2102")
+    match = state.requests.find(r => r.id !== undefined && r.id !== null && String(r.id).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 3. Exact match by joNumber (e.g. "P261001356")
+    match = state.requests.find(r => r.joNumber && String(r.joNumber).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 4. Exact match by projectName
+    match = state.requests.find(r => r.projectName && String(r.projectName).trim().toLowerCase() === clean);
+    if (match) return match;
+
+    // 5. Fuzzy substring match by projectName
+    match = state.requests.find(r => r.projectName && String(r.projectName).trim().toLowerCase().includes(clean));
+    if (match) return match;
+
+    return null;
+  }
+
+  // ==========================================================================
+  // CUSTOMIZED PER-CELL FONT SIZE ENGINE (Customized per individual cell, not everything!)
+  // ==========================================================================
+
+  let activeDirectiveCell = null;
+
+  function getCellFriendlyName(cell) {
+    if (!cell) return 'Select Any Cell';
+    if (cell.id === 'docFieldJoLabel' || cell.classList.contains('doc-jo-lbl')) return 'JO# Label';
+    if (cell.id === 'docFieldJoNumber' || cell.classList.contains('doc-jo-val')) return 'JO Number';
+    if (cell.id === 'docFieldProjectName' || cell.classList.contains('doc-proj-cell')) return 'Project Name';
+    if (cell.id === 'docFieldClientName' || cell.classList.contains('doc-client-cell')) return 'Client Name';
+    if (cell.id === 'docFieldDueDate' || cell.classList.contains('doc-date-val')) return 'Due Date';
+    if (cell.id === 'docFieldDueDateLabel') return 'Due Date Label';
+    if (cell.id === 'docFieldLocation') return 'Location';
+    if (cell.id === 'docFieldLocationLabel') return 'Location Label';
+    if (cell.id === 'docFieldContactPerson') return 'Contact Person';
+    if (cell.id === 'docFieldContactPersonLabel') return 'Contact Person Label';
+    if (cell.id === 'docFieldContactNumber') return 'Contact Number';
+    if (cell.id === 'docFieldContactNumberLabel') return 'Contact Number Label';
+    if (cell.id === 'docFieldOrderDate') return 'Order Date';
+    if (cell.id === 'docFieldOrderDateLabel') return 'Order Date Label';
+    if (cell.id === 'docFieldReleasingDate') return 'Releasing Date';
+    if (cell.id === 'docFieldReleasingDateLabel') return 'Releasing Date Label';
+    if (cell.id === 'docFieldReleasingMode') return 'Releasing Mode';
+    if (cell.id === 'docFieldReleasingModeLabel') return 'Releasing Mode Label';
+    if (cell.id === 'docFieldInstallers') return 'Installers';
+    if (cell.id === 'docFieldInstallersLabel') return 'Installers Label';
+    if (cell.id === 'docFieldDuration') return 'Duration';
+    if (cell.id === 'docFieldDurationLabel') return 'Duration Label';
+    if (cell.id === 'docFieldAddress') return 'Address';
+    if (cell.id === 'docFieldAddressLabel') return 'Address Label';
+    if (cell.id === 'docFieldInCharge') return 'In-Charge';
+    if (cell.id === 'docFieldInChargeLabel') return 'In-Charge Label';
+    if (cell.id === 'docFieldDrawnBy') return 'Drawn By';
+    if (cell.id === 'docFieldDrawnByLabel') return 'Drawn By Label';
+    return (cell.textContent || 'Selected Cell').trim().slice(0, 16);
+  }
+
+  function getCellDefaultFontSize(cell) {
+    if (!cell) return 13;
+    if (cell.id && DIRECTIVE_FIELD_BOXES[cell.id]) return DIRECTIVE_FIELD_BOXES[cell.id].defaultSz;
+    if (cell.id === 'docFieldJoLabel' || cell.classList.contains('doc-jo-lbl')) return 28;
+    if (cell.classList.contains('doc-jo-val')) return 28;
+    if (cell.classList.contains('doc-proj-cell')) return 30;
+    if (cell.classList.contains('doc-client-cell')) return 26;
+    if (cell.classList.contains('doc-date-val')) return 14.5;
+    if (cell.classList.contains('doc-person-val')) return 15;
+    if (cell.classList.contains('doc-box-val')) return 14;
+    if (cell.classList.contains('doc-label-cell')) return 13.5;
+    return 13;
+  }
+
+  function getCellCurrentFontSize(cell) {
+    if (!cell) return 13;
+    const custom = cell.getAttribute('data-custom-size');
+    if (custom) return parseFloat(custom);
+    if (window.SVGElement && cell instanceof SVGElement) {
+      const attrSize = cell.getAttribute('font-size');
+      if (attrSize) return parseFloat(attrSize);
+    }
+    const inline = cell.style.fontSize;
+    if (inline) return parseFloat(inline);
+    const computed = window.getComputedStyle(cell).fontSize;
+    return parseFloat(computed) || getCellDefaultFontSize(cell);
+  }
+
+  // DIRECTIVE EXACT CELL COORDINATES & PROPERTIES FOR IN-PLACE DIRECT EDITING (PURE REGULAR BEBAS KAI)
+  const DIRECTIVE_FIELD_BOXES = {
+    docFieldJoNumber: { x: 58, y: 2, w: 164, h: 29, color: '#FFFFFF', bg: '#000000', align: 'left', defaultSz: 28, weight: 'normal', name: 'JO Number' },
+    docFieldInCharge: { x: 104, y: 35, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 15, weight: 'normal', name: 'In-Charge' },
+    docFieldDrawnBy: { x: 104, y: 56, w: 118, h: 17, color: '#000000', bg: '#FFFFFF', align: 'right', defaultSz: 15, weight: 'normal', name: 'Drawn By' },
+    docFieldAddress: { x: 99, y: 77, w: 122, h: 17, color: '#000000', bg: '#E8EBED', align: 'right', defaultSz: 12, weight: 'normal', name: 'Address' },
+    docFieldOrderDate: { x: 227, y: 16, w: 111, h: 15, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Order Date' },
+    docFieldDueDate: { x: 227, y: 47, w: 111, h: 16, color: '#FFFFFF', bg: '#000000', align: 'center', defaultSz: 14, weight: 'normal', name: 'Due Date' },
+    docFieldReleasingDate: { x: 227, y: 78, w: 111, h: 16, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Release Date' },
+    docFieldClientName: { x: 342, y: 20, w: 220, h: 28, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 22, weight: 'normal', name: 'Client Name' },
+    docFieldProjectName: { x: 342, y: 52, w: 220, h: 19, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 12, weight: 'normal', name: 'Project Name' },
+    docFieldContactPerson: { x: 715, y: 46, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 13, weight: 'normal', name: 'Contact Person' },
+    docFieldContactNumber: { x: 715, y: 73, w: 100, h: 18, color: '#000000', bg: '#E8EBED', align: 'center', defaultSz: 13, weight: 'normal', name: 'Contact Number' },
+    docFieldInstallers: { x: 824, y: 24, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Installers' },
+    docFieldDuration: { x: 824, y: 72, w: 78, h: 22, color: '#000000', bg: '#FFFFFF', align: 'center', defaultSz: 14, weight: 'normal', name: 'Duration' }
+  };
+
+  let activeDirectEditor = null;
+
+  function getFieldRawText(idOrEl) {
+    const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+    if (!el) return '';
+
+    const ctrlMap = {
+      docFieldInstallers: 'ctrlInstallers',
+      docFieldDuration: 'ctrlDuration',
+      docFieldAddress: 'ctrlAddress',
+      docFieldOrderDate: 'ctrlOrderDate',
+      docFieldDueDate: 'ctrlDueDate',
+      docFieldReleasingDate: 'ctrlReleasingDate',
+      docFieldInCharge: 'ctrlInCharge',
+      docFieldDrawnBy: 'ctrlDrawnBy'
+    };
+    if (el.id && ctrlMap[el.id]) {
+      const c = document.getElementById(ctrlMap[el.id]);
+      if (c && c.value !== undefined && c.value !== null && c.value.trim() !== '') {
+        return c.value.trim();
+      }
+    }
+
+    if (el.hasAttribute('data-raw-text')) {
+      const rawAttr = el.getAttribute('data-raw-text');
+      if (rawAttr !== undefined && rawAttr !== null && rawAttr.trim() !== '') {
+        return rawAttr;
+      }
+    }
+    const tspans = el.querySelectorAll('tspan:not(.chinese)');
+    if (tspans && tspans.length > 0) {
+      const text = Array.from(tspans).map(t => t.textContent).join('\n').trim();
+      if (text !== '') return text;
+    }
+    const textContent = (el.textContent || '').trim();
+    if (textContent !== '') return textContent;
+
+    if (el.id && ctrlMap[el.id]) {
+      const c = document.getElementById(ctrlMap[el.id]);
+      if (c && c.value) return c.value.trim();
+    }
+    return '';
+  }
+
+  function estimateBebasKaiWidth(text, fontSize, letterSpacing = 0.8) {
+    if (!text) return 0;
+    const str = String(text).toUpperCase();
+    let total = 0;
+    const ls = parseFloat(letterSpacing) || 0;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      let ratio = 0.56;
+      if (ch === ' ' || ch === '.' || ch === ',' || ch === ':' || ch === ';' || ch === '!' || ch === '\'' || ch === '|') {
+        ratio = (ch === ' ') ? 0.28 : 0.24;
+      } else if (ch === 'I') {
+        ratio = 0.26;
+      } else if (ch === 'M' || ch === 'W') {
+        ratio = 0.78;
+      } else if (ch === 'J' || ch === 'L') {
+        ratio = 0.44;
+      } else if (ch === '-' || ch === '(' || ch === ')') {
+        ratio = 0.32;
+      }
+      total += ratio * fontSize + ls;
+    }
+    return total;
+  }
+
+  let _measureCanvas = null;
+  function getSvgTextWidth(text, fontSize, letterSpacing = 0.8) {
+    if (!text) return 0;
+    try {
+      if (typeof document !== 'undefined') {
+        if (!_measureCanvas) _measureCanvas = document.createElement('canvas');
+        const ctx = _measureCanvas.getContext('2d');
+        if (ctx) {
+          ctx.font = `${fontSize}px 'Bebas Kai', 'BebasKai', 'Oswald', sans-serif`;
+          const m = ctx.measureText(text);
+          const ls = parseFloat(letterSpacing) || 0;
+          const w = m.width + (ls ? text.length * ls : 0);
+          if (w > 0) return w;
+        }
+      }
+    } catch (e) {}
+    return estimateBebasKaiWidth(text, fontSize, letterSpacing);
+  }
+
+  function greedyWrapTwoLines(text, fontSize, maxW = 210, letterSpacing = 0.8) {
+    const wAll = getSvgTextWidth(text, fontSize, letterSpacing);
+    if (wAll <= maxW) {
+      return { fits: true, lines: [text], single: true };
+    }
+    const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+    if (words.length <= 1) {
+      return { fits: false, lines: [text], single: true };
+    }
+    let line1 = words[0];
+    if (getSvgTextWidth(line1, fontSize, letterSpacing) > maxW) {
+      return { fits: false, lines: [text], single: false };
+    }
+    let splitIdx = 1;
+    for (let i = 1; i < words.length; i++) {
+      const test = line1 + ' ' + words[i];
+      if (getSvgTextWidth(test, fontSize, letterSpacing) <= maxW) {
+        line1 = test;
+        splitIdx = i + 1;
+      } else {
+        break;
+      }
+    }
+    if (splitIdx >= words.length) {
+      return { fits: true, lines: [line1], single: true };
+    }
+    const line2 = words.slice(splitIdx).join(' ');
+    const w2 = getSvgTextWidth(line2, fontSize, letterSpacing);
+    return {
+      fits: w2 <= maxW,
+      lines: [line1, line2],
+      single: false
+    };
+  }
+
+  function fitDirectiveClientName(rawText, userBaseSize) {
+    const MAX_W = 210;
+    const raw = String(rawText !== undefined && rawText !== null ? rawText : '').trim().replace(/\r\n/g, '\n');
+    if (!raw) {
+      return {
+        lines: [''],
+        fontSize: 22,
+        isMultiline: false,
+        baseY: 44,
+        startY: 44,
+        lastLineY: 44,
+        lineHeight: 25,
+        divY: 50,
+        projY: 65,
+        widestLineWidth: 40
+      };
+    }
+
+    let lines = raw.split('\n');
+
+    // If explicit newlines provided by user (>= 2 lines)
+    if (lines.length > 1) {
+      let sz = userBaseSize ? parseFloat(userBaseSize) : 18;
+      if (isNaN(sz) || sz <= 0) sz = 18;
+      if (!userBaseSize) sz = Math.min(18, sz);
+      while (sz > 11) {
+        const maxW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+        if (maxW <= MAX_W) break;
+        sz = Math.round((sz - 0.5) * 10) / 10;
+      }
+      const maxW = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+      const lh = Math.max(14, Math.round(sz * 0.95 * 10) / 10);
+      const startY = 32.5;
+      const lastLineY = Math.round((startY + (lines.length - 1) * lh) * 10) / 10;
+      const divY = Math.min(54, Math.round(lastLineY + 4));
+      const projY = Math.min(67, Math.round(divY + 13));
+      return {
+        lines,
+        fontSize: sz,
+        isMultiline: true,
+        startY,
+        lastLineY,
+        lineHeight: lh,
+        divY,
+        projY,
+        widestLineWidth: maxW
+      };
+    }
+
+    // Single line text: first test if it fits on 1 line at userBaseSize or 22px
+    let baseSz = userBaseSize ? parseFloat(userBaseSize) : 22;
+    if (isNaN(baseSz) || baseSz <= 0) baseSz = 22;
+
+    if (getSvgTextWidth(raw, baseSz, 0.8) <= MAX_W) {
+      return {
+        lines: [raw],
+        fontSize: baseSz,
+        isMultiline: false,
+        baseY: 44,
+        startY: 44,
+        lastLineY: 44,
+        lineHeight: Math.round(baseSz * 1.15 * 10) / 10,
+        divY: 50,
+        projY: 65,
+        widestLineWidth: getSvgTextWidth(raw, baseSz, 0.8)
+      };
+    }
+
+    // Does not fit on 1 line: greedy-wrap into 2 lines, filling the upper line first!
+    // Start at 18px (or userBaseSize if lower than 18) to ensure vertical clearance
+    let sz = userBaseSize ? Math.min(18, parseFloat(userBaseSize)) : 18;
+    if (isNaN(sz) || sz <= 0) sz = 18;
+    const minSz = 11;
+
+    let bestResult = null;
+    while (sz >= minSz) {
+      const wrapRes = greedyWrapTwoLines(raw, sz, MAX_W, 0.8);
+      if (wrapRes.fits) {
+        bestResult = { lines: wrapRes.lines, fontSize: sz };
+        break;
+      }
+      sz = Math.round((sz - 0.5) * 10) / 10;
+    }
+
+    if (!bestResult) {
+      const fallbackWrap = greedyWrapTwoLines(raw, minSz, MAX_W, 0.8);
+      bestResult = { lines: fallbackWrap.lines, fontSize: minSz };
+    }
+
+    const resLines = bestResult.lines;
+    const resSz = bestResult.fontSize;
+    const maxW = Math.max(...resLines.map(l => getSvgTextWidth(l, resSz, 0.8)));
+
+    if (resLines.length > 1) {
+      const lh = Math.max(14, Math.round(resSz * 0.95 * 10) / 10);
+      const startY = 32.5;
+      const lastLineY = Math.round((startY + lh) * 10) / 10;
+      const divY = Math.min(54, Math.round(lastLineY + 4));
+      const projY = Math.min(67, Math.round(divY + 13));
+
+      return {
+        lines: resLines,
+        fontSize: resSz,
+        isMultiline: true,
+        startY,
+        lastLineY,
+        lineHeight: lh,
+        divY,
+        projY,
+        widestLineWidth: maxW
+      };
+    }
+
+    return {
+      lines: resLines,
+      fontSize: resSz,
+      isMultiline: false,
+      baseY: 44,
+      startY: 44,
+      lastLineY: 44,
+      lineHeight: Math.round(resSz * 1.15 * 10) / 10,
+      divY: 50,
+      projY: 65,
+      widestLineWidth: maxW
+    };
+  }
+
+  function setFieldMultilineText(el, text, customBaseY) {
+    if (!el) return;
+    const raw = String(text !== undefined && text !== null ? text : '').replace(/\r\n/g, '\n');
+    el.setAttribute('data-raw-text', raw);
+
+    if (el.id === 'docFieldJoNumber') {
+      const clean = raw.replace(/^JO#:\s*/i, '').trim();
+      let joSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : 28;
+      if (clean.length > 12 && !el.getAttribute('data-custom-size')) {
+        joSz = Math.max(18, Math.round(28 * (12 / clean.length) * 10) / 10);
+      }
+      const joNumX = Math.round(10 + joSz * 1.78);
+      el.setAttribute('font-size', joSz);
+      el.style.setProperty('font-size', joSz + 'px', 'important');
+      el.setAttribute('x', joNumX);
+      el.setAttribute('y', 26.5);
+      el.textContent = clean;
+      return;
+    }
+
+    if (el.id === 'docFieldClientName') {
+      const customSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : (state.customCellFonts?.['docFieldClientName'] || null);
+      const fit = fitDirectiveClientName(raw, customSz);
+
+      el.setAttribute('x', '452');
+      el.setAttribute('font-size', fit.fontSize);
+      el.style.setProperty('font-size', fit.fontSize + 'px', 'important');
+
+      if (!fit.isMultiline) {
+        el.removeAttribute('data-multiline');
+        el.setAttribute('x', '452');
+        el.setAttribute('y', fit.baseY || 44);
+        el.textContent = fit.lines[0] || '';
+      } else {
+        el.setAttribute('data-multiline', 'true');
+        el.textContent = '';
+        el.setAttribute('x', '452');
+        el.removeAttribute('y');
+
+        fit.lines.forEach((line, idx) => {
+          const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+          tspan.setAttribute('x', '452');
+          tspan.setAttribute('y', Math.round((fit.startY + idx * fit.lineHeight) * 10) / 10);
+          tspan.textContent = line || '\u00A0';
+          el.appendChild(tspan);
+        });
+      }
+
+      updateProjDividerLine();
+      return;
+    }
+
+    if (el.id === 'docFieldProjectName') {
+      const customSz = el.getAttribute('data-custom-size') ? parseFloat(el.getAttribute('data-custom-size')) : (state.customCellFonts?.['docFieldProjectName'] || null);
+      let sz = customSz || 12;
+      const MAX_W = 210;
+      while (sz > 8.5 && getSvgTextWidth(raw, sz, 0.5) > MAX_W) {
+        sz = Math.round((sz - 0.5) * 10) / 10;
+      }
+      el.setAttribute('font-size', sz);
+      el.style.setProperty('font-size', sz + 'px', 'important');
+      el.setAttribute('x', '452');
+
+      const lines = raw.split('\n');
+      if (lines.length <= 1) {
+        el.removeAttribute('data-multiline');
+        const curY = el.getAttribute('data-base-y') || el.getAttribute('y') || '65';
+        el.setAttribute('x', '452');
+        el.setAttribute('y', curY);
+        el.textContent = lines[0] || '';
+        return;
+      }
+
+      el.setAttribute('data-multiline', 'true');
+      el.textContent = '';
+      el.setAttribute('x', '452');
+      el.removeAttribute('y');
+      const lh = Math.round(sz * 1.15 * 10) / 10;
+      const curBaseY = parseFloat(el.getAttribute('data-base-y')) || 65;
+      const startY = Math.round((curBaseY - ((lines.length - 1) * lh) / 2) * 10) / 10;
+      lines.forEach((line, idx) => {
+        const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+        tspan.setAttribute('x', '452');
+        tspan.setAttribute('y', Math.round((startY + idx * lh) * 10) / 10);
+        tspan.textContent = line || '\u00A0';
+        el.appendChild(tspan);
+      });
+      return;
+    }
+
+    let baseY = customBaseY !== undefined ? customBaseY : parseFloat(el.getAttribute('data-base-y'));
+    if (isNaN(baseY)) {
+      baseY = parseFloat(el.getAttribute('y') || el.querySelector('tspan')?.getAttribute('y') || 0);
+      el.setAttribute('data-base-y', baseY);
+    }
+
+    let xAttr = el.getAttribute('x') || el.querySelector('tspan')?.getAttribute('x');
+    if (!xAttr && el.getAttribute('data-base-x')) xAttr = el.getAttribute('data-base-x');
+    if (!xAttr) xAttr = '0';
+    el.setAttribute('data-base-x', xAttr);
+    const sz = getCellCurrentFontSize(el);
+    const lines = raw.split('\n');
+
+    if (lines.length <= 1) {
+      el.removeAttribute('data-multiline');
+      el.setAttribute('x', xAttr);
+      el.setAttribute('y', baseY);
+      el.textContent = lines[0] || '';
+      updateProjDividerLine();
+      return;
+    }
+
+    el.setAttribute('data-multiline', 'true');
+    el.textContent = '';
+    el.setAttribute('x', xAttr);
+    el.removeAttribute('y');
+
+    const lh = Math.round(sz * 1.15 * 10) / 10;
+    const startY = Math.round((baseY - ((lines.length - 1) * lh) / 2) * 10) / 10;
+
+    lines.forEach((line, idx) => {
+      const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      tspan.setAttribute('x', xAttr);
+      tspan.setAttribute('y', Math.round((startY + idx * lh) * 10) / 10);
+      tspan.textContent = line || '\u00A0';
+      el.appendChild(tspan);
+    });
+
+    updateProjDividerLine();
+  }
+
+  function updateProjDividerLine() {
+    const divider = document.getElementById('docProjDividerLine');
+    const clientEl = document.getElementById('docFieldClientName');
+    const projEl = document.getElementById('docFieldProjectName');
+    if (!divider || !clientEl) return;
+
+    // Underline width must exactly match Client Name width!
+    let clientWidth = 0;
+    try {
+      if (typeof clientEl.getComputedTextLength === 'function') {
+        const tspans = clientEl.querySelectorAll('tspan');
+        if (tspans && tspans.length > 0) {
+          tspans.forEach(t => {
+            const w = t.getComputedTextLength();
+            if (w > clientWidth) clientWidth = w;
+          });
+        } else {
+          clientWidth = clientEl.getComputedTextLength();
+        }
+      } else if (typeof clientEl.getBBox === 'function') {
+        clientWidth = clientEl.getBBox().width;
+      }
+    } catch (e) {}
+
+    // Fallback approximation if DOM not rendered yet
+    if (!clientWidth || isNaN(clientWidth) || clientWidth < 5) {
+      const text = getFieldRawText(clientEl) || '';
+      const lines = text.split('\n');
+      const sz = getCellCurrentFontSize(clientEl) || 22;
+      clientWidth = Math.max(...lines.map(l => getSvgTextWidth(l, sz, 0.8)));
+      if (!clientWidth || clientWidth < 5) clientWidth = 40;
+    }
+
+    const finalWidth = Math.min(214, Math.max(16, clientWidth));
+    const centerX = 452;
+    const halfW = Math.round((finalWidth / 2) * 10) / 10;
+    const x1 = Math.round((centerX - halfW) * 10) / 10;
+    const x2 = Math.round((centerX + halfW) * 10) / 10;
+    divider.setAttribute('x1', x1);
+    divider.setAttribute('x2', x2);
+
+    // Vertical positioning: underline sits directly under Client Name
+    const tspans = clientEl.querySelectorAll('tspan');
+    if (tspans && tspans.length > 1) {
+      const lastTspan = tspans[tspans.length - 1];
+      const lastY = parseFloat(lastTspan.getAttribute('y') || 49.5);
+      const divY = Math.min(54, Math.round(lastY + 4));
+      divider.setAttribute('y1', divY);
+      divider.setAttribute('y2', divY);
+      if (projEl && !projEl.hasAttribute('data-multiline')) {
+        const projY = Math.min(67, Math.round(divY + 13));
+        projEl.setAttribute('y', projY);
+      }
+    } else {
+      divider.setAttribute('y1', '50');
+      divider.setAttribute('y2', '50');
+      if (projEl && !projEl.hasAttribute('data-multiline')) {
+        projEl.setAttribute('y', '65');
+      }
+    }
+  }
+
+  function syncControlValues(fieldId, val) {
+    if (fieldId === 'docFieldInCharge') {
+      const c = document.getElementById('ctrlInCharge');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldDrawnBy') {
+      const c = document.getElementById('ctrlDrawnBy');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldInstallers') {
+      const c = document.getElementById('ctrlInstallers');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldDuration') {
+      const c = document.getElementById('ctrlDuration');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldJoNumber') {
+      const inp = document.getElementById('directiveLookupInput');
+      if (inp) inp.value = val.split('\n')[0];
+    } else if (fieldId === 'docFieldAddress') {
+      const c = document.getElementById('ctrlAddress');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldOrderDate') {
+      const c = document.getElementById('ctrlOrderDate');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldDueDate') {
+      const c = document.getElementById('ctrlDueDate');
+      if (c) c.value = val;
+    } else if (fieldId === 'docFieldReleasingDate') {
+      const c = document.getElementById('ctrlReleasingDate');
+      if (c) c.value = val;
+    }
+  }
+
+  function getFieldIdAtSvgCoords(x, y) {
+    if (x >= 0 && x <= 225) {
+      if (y >= 0 && y <= 33) return 'docFieldJoNumber';
+      if (y > 33 && y <= 54) return 'docFieldInCharge';
+      if (y > 54 && y <= 75) return 'docFieldDrawnBy';
+      if (y > 75 && y <= 96) return 'docFieldAddress';
+    } else if (x > 225 && x <= 340) {
+      if (y >= 0 && y <= 33) return 'docFieldOrderDate';
+      if (y > 33 && y <= 65) return 'docFieldDueDate';
+      if (y > 65 && y <= 96) return 'docFieldReleasingDate';
+    } else if (x > 340 && x <= 564) {
+      if (y >= 18 && y <= 50) return 'docFieldClientName';
+      if (y > 50 && y <= 73) return 'docFieldProjectName';
+    } else if (x > 564 && x <= 822) {
+      if (y > 43 && y <= 70) return 'docFieldContactPerson';
+      if (y > 70 && y <= 96) return 'docFieldContactNumber';
+    } else if (x > 822 && x <= 904) {
+      if (y >= 0 && y <= 48) return 'docFieldInstallers';
+      if (y > 48 && y <= 96) return 'docFieldDuration';
+    }
+    return null;
+  }
+
+  function syncToolbarBoxInputs(cell) {
+    if (!cell) return;
+    const curSize = Math.round(getCellCurrentFontSize(cell));
+
+    const badge = document.getElementById('fontCtrlCellBadge') || document.getElementById('selectedCellBadge');
+    if (badge) badge.textContent = `${getCellFriendlyName(cell)}: ${curSize}px`;
+
+    const inpSz = document.getElementById('cellFontSizeInput');
+    if (inpSz) inpSz.value = curSize;
+  }
+
+  function setCellCustomBoxSize(cell, wPx, hPx) {
+    if (!cell) cell = getActiveOrTargetCell();
+    if (!cell) return;
+    const cellId = cell.id;
+    if (!state.customBoxSizes) state.customBoxSizes = {};
+    const boxDef = DIRECTIVE_FIELD_BOXES[cellId] || { w: 100, h: 20 };
+    const cur = state.customBoxSizes[cellId] || { w: boxDef.w, h: boxDef.h };
+    const newW = wPx !== undefined ? Math.max(30, Math.min(800, Math.round(wPx))) : cur.w;
+    const newH = hPx !== undefined ? Math.max(15, Math.min(300, Math.round(hPx))) : cur.h;
+    state.customBoxSizes[cellId] = { w: newW, h: newH };
+    saveStateToStorage();
+
+    syncToolbarBoxInputs(cell);
+
+    if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
+      const svg = document.getElementById('directiveExactSvg');
+      const svgRect = svg ? svg.getBoundingClientRect() : { width: 904, height: 96 };
+      const scaleX = svgRect.width / 904;
+      const scaleY = svgRect.height / 96;
+      activeDirectEditor.style.width = Math.round(newW * scaleX) + 'px';
+      activeDirectEditor.style.height = Math.round(newH * scaleY) + 'px';
+    }
+  }
+
+  function openDirectiveDirectEditor(cell) {
+    if (!cell) return;
+    const cellId = cell.id;
+    const boxDef = DIRECTIVE_FIELD_BOXES[cellId];
+    const wrap = document.getElementById('directiveGridTable');
+    const svg = document.getElementById('directiveExactSvg');
+    if (!wrap || !svg) return;
+
+    if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
+      activeDirectEditor.focus();
+      return;
+    }
+    closeDirectiveDirectEditor(true);
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+    const scaleX = svgRect.width / 904;
+    const scaleY = svgRect.height / 96;
+    const offsetX = svgRect.left - wrapRect.left;
+    const offsetY = svgRect.top - wrapRect.top;
+
+    let box = boxDef;
+    if (!box) {
+      const cRect = cell.getBoundingClientRect();
+      box = {
+        x: (cRect.left - svgRect.left) / scaleX,
+        y: (cRect.top - svgRect.top) / scaleY,
+        w: cRect.width / scaleX,
+        h: cRect.height / scaleY,
+        color: cell.getAttribute('fill') || '#000000',
+        bg: '#FFFFFF',
+        align: cell.getAttribute('text-anchor') === 'middle' ? 'center' : (cell.getAttribute('text-anchor') === 'end' ? 'right' : 'left'),
+        defaultSz: parseFloat(cell.getAttribute('font-size') || 12),
+        weight: 'normal'
+      };
+    }
+
+    const curSize = getCellCurrentFontSize(cell);
+    const rawVal = getFieldRawText(cell);
+
+    const savedBox = (state.customBoxSizes && state.customBoxSizes[cellId]) || {};
+    const boxW = savedBox.w || box.w;
+    const linesCount = (rawVal.match(/\n/g) || []).length + 1;
+    const autoH = Math.max(box.h, (linesCount * curSize * 1.15) + 6);
+    const boxH = savedBox.h || autoH;
+    const boxY = linesCount > 1 ? Math.max(0, box.y - ((linesCount - 1) * curSize * 0.45)) : box.y;
+
+    const editor = document.createElement('textarea');
+    editor.id = 'directiveDirectEditor';
+    editor.className = 'directive-direct-editor';
+    editor.__targetCell = cell;
+    editor.value = rawVal;
+    editor.spellcheck = false;
+
+    editor.style.left = Math.round(offsetX + box.x * scaleX) + 'px';
+    editor.style.top = Math.round(offsetY + boxY * scaleY) + 'px';
+    editor.style.width = Math.round(boxW * scaleX) + 'px';
+    editor.style.height = Math.round(boxH * scaleY) + 'px';
+    editor.style.minHeight = Math.round(box.h * scaleY) + 'px';
+    editor.style.fontSize = Math.round(curSize * scaleY) + 'px';
+    editor.style.textAlign = box.align;
+    editor.style.fontWeight = 'normal';
+    editor.style.color = box.color;
+    editor.style.background = box.bg === '#000000' ? 'rgba(0,0,0,0.92)' : (box.bg === '#E8EBED' ? '#E8EBED' : 'rgba(255,255,255,0.96)');
+
+    wrap.appendChild(editor);
+    activeDirectEditor = editor;
+
+    editor.focus();
+    editor.select();
+
+    syncToolbarBoxInputs(cell);
+
+    const updateLayout = () => {
+      const val = editor.value;
+      setFieldMultilineText(cell, val);
+      syncControlValues(cellId, val);
+
+      if (!state.customBoxSizes || !state.customBoxSizes[cellId] || !state.customBoxSizes[cellId].h) {
+        const lines = (val.match(/\n/g) || []).length + 1;
+        const dynH = Math.max(box.h, (lines * curSize * 1.15) + 6);
+        const dynY = lines > 1 ? Math.max(0, box.y - ((lines - 1) * curSize * 0.45)) : box.y;
+        editor.style.top = Math.round(offsetY + dynY * scaleY) + 'px';
+        editor.style.height = Math.round(dynH * scaleY) + 'px';
+        const inpH = document.getElementById('cellBoxHeightInput');
+        if (inpH) inpH.value = Math.round(dynH);
+      }
+    };
+
+    editor.addEventListener('input', updateLayout);
+
+    // Track user drag-resizing of the textbox
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        if (!activeDirectEditor || activeDirectEditor !== editor) return;
+        const curW = Math.round(editor.offsetWidth / scaleX);
+        const curH = Math.round(editor.offsetHeight / scaleY);
+        if (!state.customBoxSizes) state.customBoxSizes = {};
+        state.customBoxSizes[cellId] = { w: curW, h: curH };
+        saveStateToStorage();
+        syncToolbarBoxInputs(cell);
+      });
+      ro.observe(editor);
+      editor.__resizeObserver = ro;
+    }
+
+    editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        // Support next line when user enters!
+        e.stopPropagation();
+        setTimeout(updateLayout, 10);
+        return;
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        closeDirectiveDirectEditor(true);
+        const keys = Object.keys(DIRECTIVE_FIELD_BOXES);
+        const idx = keys.indexOf(cellId);
+        const nextId = keys[(idx + (e.shiftKey ? -1 : 1) + keys.length) % keys.length];
+        const nextEl = document.getElementById(nextId);
+        if (nextEl) selectDirectiveCell(nextEl, true);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDirectiveDirectEditor(true);
+      } else if (e.ctrlKey && (e.key === '[' || e.key === ']')) {
+        e.preventDefault();
+        const step = e.key === '[' ? -1 : 1;
+        const current = getCellCurrentFontSize(cell);
+        const next = Math.max(6, Math.min(72, current + step));
+        setCellCustomFontSize(cell, next);
+        editor.style.fontSize = Math.round(next * scaleY) + 'px';
+        updateLayout();
+      }
+    });
+  }
+
+  function closeDirectiveDirectEditor(commit = true) {
+    if (!activeDirectEditor) return;
+    const editor = activeDirectEditor;
+    const cell = editor.__targetCell;
+    if (editor.__resizeObserver) {
+      editor.__resizeObserver.disconnect();
+      delete editor.__resizeObserver;
+    }
+    activeDirectEditor = null;
+    if (commit && cell) {
+      cell.setAttribute('data-raw-text', editor.value);
+      setFieldMultilineText(cell, editor.value);
+      syncControlValues(cell.id, editor.value);
+    }
+    if (editor.parentNode) {
+      editor.parentNode.removeChild(editor);
+    }
+  }
+
+  function selectDirectiveCell(cell, shouldOpenEditor = true) {
+    if (!cell) return;
+    const table = document.getElementById('directiveGridTable');
+    if (table) {
+      table.querySelectorAll('.directive-active-cell, .active-svg-cell').forEach(c => {
+        c.classList.remove('directive-active-cell');
+        c.classList.remove('active-svg-cell');
+      });
+    }
+    activeDirectiveCell = cell;
+    cell.classList.add('directive-active-cell');
+    if (window.SVGElement && cell instanceof SVGElement) {
+      cell.classList.add('active-svg-cell');
+    }
+
+    syncToolbarBoxInputs(cell);
+
+    if (shouldOpenEditor && (window.SVGElement && cell instanceof SVGElement)) {
+      openDirectiveDirectEditor(cell);
+    }
+  }
+
+  function setCellCustomFontSize(cell, sizePx) {
+    if (!cell) {
+      cell = document.getElementById('docFieldProjectName') || document.querySelector('.interactive-field') || document.querySelector('.doc-proj-cell');
+      if (cell) selectDirectiveCell(cell, false);
+    }
+    if (!cell) return;
+
+    const clamped = Math.max(6, Math.min(72, Math.round(sizePx * 10) / 10));
+    cell.setAttribute('data-custom-size', clamped);
+    if (window.SVGElement && cell instanceof SVGElement) {
+      cell.setAttribute('font-size', clamped);
+    }
+    cell.style.setProperty('font-size', clamped + 'px', 'important');
+
+    // Recalculate multiline tspans with new font size
+    if (cell.id && DIRECTIVE_FIELD_BOXES[cell.id]) {
+      setFieldMultilineText(cell, getFieldRawText(cell));
+    }
+
+    if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
+      const svg = document.getElementById('directiveExactSvg');
+      const scaleY = svg ? (svg.getBoundingClientRect().height / 96) : 1;
+      activeDirectEditor.style.fontSize = Math.round(clamped * scaleY) + 'px';
+    }
+
+    syncToolbarBoxInputs(cell);
+
+    if (!state.customCellFonts) state.customCellFonts = {};
+    const key = cell.id || cell.className;
+    state.customCellFonts[key] = clamped;
+    saveStateToStorage();
+  }
+
+  function autoFitCellText(cell) {
+    if (!cell || (window.SVGElement && cell instanceof SVGElement)) return;
+    const baseSizeAttr = cell.getAttribute('data-base-size');
+    let baseSize = baseSizeAttr ? parseFloat(baseSizeAttr) : null;
+    if (!baseSize) {
+      baseSize = getCellDefaultFontSize(cell);
+      cell.setAttribute('data-base-size', baseSize);
+    }
+
+    // If customized for this specific cell, prioritize the customized font size!
+    const customSizeAttr = cell.getAttribute('data-custom-size');
+    if (customSizeAttr) {
+      cell.style.setProperty('font-size', customSizeAttr + 'px', 'important');
+      return;
+    }
+
+    const minSize = cell.classList.contains('doc-jo-val') ? 14 :
+                    cell.classList.contains('doc-proj-cell') ? 12 :
+                    cell.classList.contains('doc-client-cell') ? 11 :
+                    cell.classList.contains('doc-date-val') ? 9 : 8;
+
+    let targetSize = baseSize;
+    cell.style.setProperty('font-size', targetSize + 'px', 'important');
+
+    // Auto-shrink font size ONLY if text overflows cell bounds
+    let guard = 0;
+    while (guard < 35 && (cell.scrollWidth > cell.clientWidth || cell.scrollHeight > cell.clientHeight) && targetSize > minSize) {
+      targetSize = Math.max(minSize, Math.round((targetSize - 0.5) * 10) / 10);
+      cell.style.setProperty('font-size', targetSize + 'px', 'important');
+      guard++;
+    }
+  }
+
+  function autoFitDirectiveTexts() {
+    const table = document.getElementById('directiveGridTable');
+    if (!table) return;
+    const cells = table.querySelectorAll('td[contenteditable="true"], .doc-label-cell, .doc-value-cell, .doc-person-val');
+    cells.forEach(cell => autoFitCellText(cell));
+  }
+
+  function renderDirectivePreview(joToLoad) {
+    const jo = joToLoad || state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || (state.requests && state.requests[0] ? (state.requests[0].requestId || state.requests[0].joNumber) : '');
+    let rec = getDirectiveRecord(jo);
+
+    if (!rec && jo && window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_request&id=' + encodeURIComponent(jo))
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            normalizeRequestItem(res.data);
+            if (!state.requests) state.requests = [];
+            const idx = state.requests.findIndex(r => r.id == res.data.id || r.requestId == res.data.requestId);
+            if (idx >= 0) {
+              state.requests[idx] = res.data;
+            } else {
+              state.requests.unshift(res.data);
+            }
+            renderDirectivePreview(res.data.requestId || res.data.joNumber);
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (!rec) {
+      rec = (state.requests && state.requests.length > 0) ? state.requests[0] : null;
+    }
+    if (!rec) return;
+
+    state.currentDirectiveJo = rec.requestId || rec.joNumber || rec.id;
+    try { sessionStorage.setItem('SIGN_DEPOT_CURRENT_DIRECTIVE', state.currentDirectiveJo); } catch (e) {}
+
+    const btnOpenEditor = document.getElementById('btnOpenFullEditor');
+    if (btnOpenEditor) {
+      btnOpenEditor.href = `directive-editor.php?id=${encodeURIComponent(state.currentDirectiveJo)}`;
+    }
+
+    const input = document.getElementById('directiveLookupInput');
+    if (input) input.value = rec.joNumber || rec.requestId || rec.projectName || '';
+
+    const setTxt = (id, val, fallback = '—') => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const textVal = (val !== undefined && val !== null && String(val).trim() !== '') ? String(val) : fallback;
+      setFieldMultilineText(el, textVal);
+    };
+
+    const toDotDate = (val) => {
+      if (!val || val === '—' || val === '-' || val === '0000-00-00') return '00.00.0000';
+      if (/^\d{2}\.\d{2}\.\d{4}$/.test(val)) return val;
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return val;
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${mm}.${dd}.${yyyy}`;
+    };
+
+    setTxt('docFieldRequestId', rec.requestId || '—');
+    setTxt('docFieldJoNumber', rec.joNumber || rec.requestId || '—');
+    setTxt('docFieldDueDate', toDotDate(rec.designDeadline || rec.releasingDate));
+    setTxt('docFieldLocation', rec.location || '—');
+    setTxt('docFieldProjectName', rec.projectName || '—');
+    setTxt('docFieldClientName', rec.client || '—');
+    setTxt('docFieldInCharge', (rec.inCharge || rec.salesRep || '—').toUpperCase());
+    setTxt('docFieldDrawnBy', (rec.drawnBy || rec.artist || '—').toUpperCase());
+    setTxt('docFieldContactPerson', (rec.contactPerson && rec.contactPerson !== 'N/A') ? rec.contactPerson : '-');
+    setTxt('docFieldContactNumber', (rec.contactNumber && rec.contactNumber !== 'N/A') ? rec.contactNumber : '-');
+    setTxt('docFieldOrderDate', toDotDate(rec.orderDate));
+    setTxt('docFieldReleasingDate', toDotDate(rec.releasingDate));
+    setTxt('docFieldReleasingMode', normalizeReleasingMode(rec.releasingMode));
+    setTxt('docFieldAddress', (rec.completeAddress && rec.completeAddress !== 'N/A') ? rec.completeAddress : ((rec.location && rec.location !== 'N/A') ? rec.location : '-'));
+    setTxt('docFieldInstallers', rec.installers || '', '');
+    setTxt('docFieldDuration', rec.duration || '', '');
+    setDirectiveEnvType(rec.envType || rec.wallType || '');
+    const loc = String(rec.location || '').toLowerCase().trim();
+    const isIndoor = (loc !== '—' && loc !== '-' && loc !== '') && (loc.includes('indoor') || loc.includes('both'));
+    const isOutdoor = (loc !== '—' && loc !== '-' && loc !== '') && (loc.includes('outdoor') || loc.includes('both'));
+    setDirectiveLocation(isIndoor, isOutdoor);
+
+    // Sync Checkboxes (Install / Deliver / Pick up) - Filled with red when selected
+    const mode = (rec.releasingMode || 'Pickup').toLowerCase();
+    const isInstall = mode === 'install';
+    const isDeliver = mode === 'deliver';
+    const isPickup = mode === 'pickup' || !mode;
+
+    const boxI = document.getElementById('boxCheckInstall') || document.querySelector('#grpCheckInstall rect');
+    const boxD = document.getElementById('boxCheckDeliver') || document.querySelector('#grpCheckDeliver rect');
+    const boxP = document.getElementById('boxCheckPickup') || document.querySelector('#grpCheckPickup rect');
+    if (boxI) boxI.setAttribute('fill', isInstall ? '#E10600' : '#FFFFFF');
+    if (boxD) boxD.setAttribute('fill', isDeliver ? '#E10600' : '#FFFFFF');
+    if (boxP) boxP.setAttribute('fill', isPickup ? '#E10600' : '#FFFFFF');
+
+    const svgChkInstall = document.getElementById('docFieldCheckInstall');
+    const svgChkDeliver = document.getElementById('docFieldCheckDeliver');
+    const svgChkPickup = document.getElementById('docFieldCheckPickup');
+    if (svgChkInstall) svgChkInstall.textContent = '';
+    if (svgChkDeliver) svgChkDeliver.textContent = '';
+    if (svgChkPickup) svgChkPickup.textContent = '';
+
+    const chkInstall = document.querySelector('#dfCheckInstall .deh-check-mark');
+    const chkDeliver = document.querySelector('#dfCheckDeliver .deh-check-mark');
+    const chkPickup = document.querySelector('#dfCheckPickup .deh-check-mark');
+    if (chkInstall) { chkInstall.style.backgroundColor = isInstall ? '#E10600' : 'transparent'; chkInstall.textContent = ''; }
+    if (chkDeliver) { chkDeliver.style.backgroundColor = isDeliver ? '#E10600' : 'transparent'; chkDeliver.textContent = ''; }
+    if (chkPickup) { chkPickup.style.backgroundColor = isPickup ? '#E10600' : 'transparent'; chkPickup.textContent = ''; }
+
+    const priorityEl = document.getElementById('docFieldPriorityStatus');
+    if (priorityEl) {
+      priorityEl.innerHTML = `Priority: <strong>${escapeHTML(rec.priority || 'Normal')}</strong> | Status: <strong>${escapeHTML(rec.projectStatus || rec.status || 'Pending')}</strong>`;
+    }
+
+    const deliveryEl = document.getElementById('docFieldDeliveryAddress');
+    if (deliveryEl) {
+      const addr = rec.completeAddress || rec.location || '—';
+      deliveryEl.innerHTML = `<strong>DELIVERY / SITE ADDRESS:</strong> ${escapeHTML(addr)}`;
+    }
+
+    const ctrlInst = document.getElementById('ctrlInstallers');
+    const ctrlDur = document.getElementById('ctrlDuration');
+    const ctrlEnv = document.getElementById('ctrlEnvType');
+    if (ctrlEnv) {
+      ctrlEnv.addEventListener('change', () => {
+        setDirectiveEnvType(ctrlEnv.value);
+        showToast(ctrlEnv.value ? `Environment: ${ctrlEnv.options[ctrlEnv.selectedIndex]?.text}` : 'Environment cleared (Blank)');
+      });
+    }
+
+    const envContainer = document.getElementById('docFieldEnvOption');
+    if (envContainer) {
+      envContainer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEnvOptionMenu(envContainer);
+      });
+    }
+
+    const ctrlMode = document.getElementById('ctrlReleasingMode');
+    const ctrlNotes = document.getElementById('ctrlNotes');
+    const ctrlInCharge = document.getElementById('ctrlInCharge');
+    const ctrlDrawnBy = document.getElementById('ctrlDrawnBy');
+
+    if (ctrlInst) ctrlInst.value = rec.installers || '';
+    if (ctrlDur) ctrlDur.value = rec.duration || '';
+    if (ctrlMode) ctrlMode.value = normalizeReleasingMode(rec.releasingMode);
+    if (ctrlNotes) ctrlNotes.value = rec.notes || '';
+    if (ctrlInCharge) ctrlInCharge.value = rec.inCharge || rec.salesRep || '';
+    if (ctrlDrawnBy) ctrlDrawnBy.value = rec.drawnBy || rec.artist || '';
+    if (ctrlEnv) ctrlEnv.value = rec.envType || rec.wallType || '';
+    const ctrlAddr = document.getElementById('ctrlAddress');
+    if (ctrlAddr) ctrlAddr.value = (rec.completeAddress && rec.completeAddress !== 'N/A') ? rec.completeAddress : ((rec.location && rec.location !== 'N/A') ? rec.location : '-');
+    const ctrlOrder = document.getElementById('ctrlOrderDate');
+    if (ctrlOrder) ctrlOrder.value = toDotDate(rec.orderDate);
+    const ctrlDue = document.getElementById('ctrlDueDate');
+    if (ctrlDue) ctrlDue.value = toDotDate(rec.designDeadline || rec.releasingDate);
+    const ctrlRelease = document.getElementById('ctrlReleasingDate');
+    if (ctrlRelease) ctrlRelease.value = toDotDate(rec.releasingDate);
+
+    renderAttachmentsList();
+
+    // Re-apply saved customized cell font sizes
+    if (state.customCellFonts) {
+      Object.entries(state.customCellFonts).forEach(([key, size]) => {
+        const target = document.getElementById(key);
+        if (target && size > 0) {
+          target.setAttribute('data-custom-size', size);
+          if (window.SVGElement && target instanceof SVGElement) {
+            target.setAttribute('font-size', size);
+          }
+          target.style.setProperty('font-size', size + 'px', 'important');
+        }
+      });
+    }
+
+    setTimeout(() => {
+      autoFitDirectiveTexts();
+      updateProjDividerLine();
+    }, 20);
+  }
+
+  function setDirectiveLocation(indoor, outdoor) {
+    state.directiveLocation = { indoor: !!indoor, outdoor: !!outdoor };
+    const bgIndoor = document.getElementById('bgIndoor');
+    const lblIndoor = document.getElementById('lblIndoor');
+    const bgOutdoor = document.getElementById('bgOutdoor');
+    const lblOutdoor = document.getElementById('lblOutdoor');
+
+    if (bgIndoor) bgIndoor.setAttribute('fill', indoor ? '#E10600' : '#FFFFFF');
+    if (lblIndoor) lblIndoor.setAttribute('fill', indoor ? '#FFFFFF' : '#000000');
+    if (bgOutdoor) bgOutdoor.setAttribute('fill', outdoor ? '#E10600' : '#FFFFFF');
+    if (lblOutdoor) lblOutdoor.setAttribute('fill', outdoor ? '#FFFFFF' : '#000000');
+
+    const ctrlLoc = document.getElementById('ctrlLocation');
+    if (ctrlLoc) {
+      if (indoor && outdoor) ctrlLoc.value = 'Indoor & Outdoor';
+      else if (indoor) ctrlLoc.value = 'Indoor';
+      else if (outdoor) ctrlLoc.value = 'Outdoor';
+      else ctrlLoc.value = '';
+    }
+  }
+
+  function setupDirectiveControlsSync() {
+    const bindSync = (controlId, docFieldId, fallback) => {
+      const ctrl = document.getElementById(controlId);
+      const target = document.getElementById(docFieldId);
+      if (ctrl && target) {
+        ctrl.addEventListener('input', () => {
+          target.setAttribute('data-raw-text', ctrl.value);
+          setFieldMultilineText(target, ctrl.value || fallback);
+          autoFitCellText(target);
+        });
+      }
+    };
+
+    bindSync('ctrlInstallers', 'docFieldInstallers', '');
+    bindSync('ctrlDuration', 'docFieldDuration', '');
+    bindSync('ctrlInCharge', 'docFieldInCharge', 'DONA');
+    bindSync('ctrlDrawnBy', 'docFieldDrawnBy', 'GLEN');
+    bindSync('ctrlAddress', 'docFieldAddress', '-');
+    bindSync('ctrlOrderDate', 'docFieldOrderDate', '00.00.0000');
+    bindSync('ctrlDueDate', 'docFieldDueDate', '00.00.0000');
+    bindSync('ctrlReleasingDate', 'docFieldReleasingDate', '00.00.0000');
+
+    const ctrlEnv = document.getElementById('ctrlEnvType');
+    if (ctrlEnv) {
+      ctrlEnv.addEventListener('change', () => {
+        setDirectiveEnvType(ctrlEnv.value);
+        showToast(ctrlEnv.value ? `Environment: ${ctrlEnv.options[ctrlEnv.selectedIndex]?.text}` : 'Environment cleared (Blank)');
+      });
+    }
+
+    const envContainer = document.getElementById('docFieldEnvOption');
+    if (envContainer) {
+      envContainer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEnvOptionMenu(envContainer);
+      });
+    }
+
+    const ctrlLoc = document.getElementById('ctrlLocation');
+    if (ctrlLoc) {
+      ctrlLoc.addEventListener('change', () => {
+        const val = ctrlLoc.value;
+        const indoor = val.includes('Indoor');
+        const outdoor = val.includes('Outdoor');
+        setDirectiveLocation(indoor, outdoor);
+        showToast(`Location set to: ${val || 'None'}`);
+      });
+    }
+
+    const ctrlMode = document.getElementById('ctrlReleasingMode');
+    if (ctrlMode) {
+      ctrlMode.addEventListener('change', () => {
+        setMode(ctrlMode.value);
+        const target = document.getElementById('docFieldReleasingMode');
+        if (target) {
+          target.textContent = normalizeReleasingMode(ctrlMode.value);
+          autoFitCellText(target);
+        }
+      });
+    }
+
+    const editableInstallers = document.getElementById('docFieldInstallers');
+    if (editableInstallers) {
+      editableInstallers.addEventListener('input', () => {
+        const val = editableInstallers.textContent.trim();
+        editableInstallers.setAttribute('data-raw-text', val);
+        const ctrl = document.getElementById('ctrlInstallers');
+        if (ctrl) ctrl.value = val;
+        autoFitCellText(editableInstallers);
+      });
+    }
+
+    const editableDuration = document.getElementById('docFieldDuration');
+    if (editableDuration) {
+      editableDuration.addEventListener('input', () => {
+        const val = editableDuration.textContent.trim();
+        editableDuration.setAttribute('data-raw-text', val);
+        const ctrl = document.getElementById('ctrlDuration');
+        if (ctrl) ctrl.value = val;
+        autoFitCellText(editableDuration);
+      });
+    }
+  }
+
+  function setupDirectiveAutocomplete() {
+    const input = document.getElementById('directiveLookupInput');
+    const box = document.getElementById('directiveAutocompleteBox');
+    const statusEl = document.getElementById('directiveLookupStatus');
+    if (!input || !box) return;
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      if (!q) {
+        box.classList.remove('show');
+        box.innerHTML = '';
+        return;
+      }
+
+      const matches = state.requests.filter(r => 
+        r.joNumber.toLowerCase().includes(q) ||
+        r.projectName.toLowerCase().includes(q) ||
+        r.requestId.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q)
+      ).slice(0, 6);
+
+      if (matches.length === 0) {
+        box.innerHTML = `<div style="padding:10px 14px; font-size:12px; color:var(--text-muted);">No matching job orders found.</div>`;
+      } else {
+        box.innerHTML = matches.map(m => `
+          <div class="autocomplete-item" onclick="window.SignDepotApp.selectAutocompleteJo('${m.joNumber}')">
+            <div>
+              <span class="autocomplete-jo">${escapeHTML(m.joNumber)}</span>
+              <span style="font-weight:700; margin-left:8px;">${escapeHTML(m.projectName)}</span>
+            </div>
+            <span class="autocomplete-meta">${escapeHTML(m.requestId)} | ${escapeHTML(m.client)}</span>
+          </div>
+        `).join('');
+      }
+      box.classList.add('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !box.contains(e.target)) {
+        box.classList.remove('show');
+      }
+    });
+
+    const doSearch = (query) => {
+      const q = (query !== undefined ? query : input.value).trim();
+      if (!q) return;
+      if (statusEl) {
+        statusEl.textContent = 'Searching...';
+        statusEl.style.color = '#64748B';
+      }
+      box.classList.remove('show');
+
+      const found = getDirectiveRecord(q);
+      if (found) {
+        renderDirectivePreview(found.joNumber || found.requestId);
+        if (statusEl) {
+          statusEl.textContent = 'Loaded!';
+          statusEl.style.color = '#176B55';
+          setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+        }
+        showToast(`Directive for ${found.joNumber || found.requestId} loaded.`);
+        return;
+      }
+
+      // Query database via API
+      const apiUrl = window.PMS_API_URL || 'api.php';
+      fetch(apiUrl + '?action=get_request&id=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            normalizeRequestItem(res.data);
+            if (!state.requests) state.requests = [];
+            const idx = state.requests.findIndex(r => r.id == res.data.id || r.requestId == res.data.requestId || r.joNumber == res.data.joNumber);
+            if (idx >= 0) {
+              state.requests[idx] = res.data;
+            } else {
+              state.requests.unshift(res.data);
+            }
+            renderDirectivePreview(res.data.joNumber || res.data.requestId);
+            if (statusEl) {
+              statusEl.textContent = 'Loaded!';
+              statusEl.style.color = '#176B55';
+              setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+            }
+            showToast(`Directive for ${res.data.joNumber || res.data.requestId} loaded.`);
+          } else {
+            if (statusEl) {
+              statusEl.textContent = 'Not found';
+              statusEl.style.color = '#E53935';
+            }
+            showToast(`Job "${q}" not found.`, 'error');
+          }
+        })
+        .catch(err => {
+          if (statusEl) {
+            statusEl.textContent = 'Search error';
+            statusEl.style.color = '#E53935';
+          }
+          showToast(`Could not search server for "${q}".`, 'error');
+        });
+    };
+
+    const btnSearch = document.getElementById('btnDirectiveSearch');
+    if (btnSearch) {
+      btnSearch.addEventListener('click', () => doSearch());
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        doSearch();
+      }
+    });
+
+    const btnClear = document.getElementById('btnDirectiveClear');
+    if (btnClear) {
+      btnClear.addEventListener('click', () => {
+        input.value = '';
+        box.classList.remove('show');
+        if (statusEl) statusEl.textContent = '';
+      });
+    }
+  }
+
+  // ==========================================================================
+  // VECTOR SVG GENERATOR (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity)
+  // ==========================================================================
+
+    function generateDirectiveSVG(rec) {
+    if (!rec) {
+      rec = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+            (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : null) ||
+            {};
+    }
+
+    const toDot = (v) => {
+      if (!v || v === '—' || v === '-' || v === '0000-00-00') return '00.00.0000';
+      if (/^\d{2}\.\d{2}\.\d{4}$/.test(v)) return v;
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return v;
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${mm}.${dd}.${d.getFullYear()}`;
+    };
+
+    const joNumberVal = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec.joNumber || rec.requestId || 'SD261104-019';
+    const dueDateFormatted = document.getElementById('docFieldDueDate')?.textContent?.trim() || toDot(rec.designDeadline || rec.releasingDate);
+    const releasingDateFormatted = document.getElementById('docFieldReleasingDate')?.textContent?.trim() || toDot(rec.releasingDate);
+    const orderDateVal = document.getElementById('docFieldOrderDate')?.textContent?.trim() || toDot(rec.orderDate);
+    const inChargeVal = (document.getElementById('docFieldInCharge')?.textContent?.trim() || rec.inCharge || rec.salesRep || 'SOL').toUpperCase();
+    const drawnByVal = (document.getElementById('docFieldDrawnBy')?.textContent?.trim() || rec.drawnBy || rec.artist || 'DOROTHY').toUpperCase();
+    const releasingModeVal = (document.getElementById('ctrlReleasingMode')?.value || rec.releasingMode || 'Pickup').toLowerCase();
+    const envType = (document.getElementById('ctrlEnvType')?.value !== undefined ? document.getElementById('ctrlEnvType').value : (rec.envType || rec.wallType || state.directiveEnvType || '')).trim();
+    const envSvgContent = DIRECTIVE_WALL_SVGS[envType] || '';
+    let isIndoor = false;
+    let isOutdoor = false;
+    const bgIndoorEl = document.getElementById('bgIndoor');
+    const bgOutdoorEl = document.getElementById('bgOutdoor');
+    if (bgIndoorEl && bgOutdoorEl) {
+      isIndoor = bgIndoorEl.getAttribute('fill') === '#E10600';
+      isOutdoor = bgOutdoorEl.getAttribute('fill') === '#E10600';
+    } else if (state.directiveLocation) {
+      isIndoor = !!state.directiveLocation.indoor;
+      isOutdoor = !!state.directiveLocation.outdoor;
+    } else if (rec && rec.location) {
+      const locStr = String(rec.location || '').toLowerCase().trim();
+      isIndoor = (locStr !== '—' && locStr !== '-' && locStr !== '') && (locStr.includes('indoor') || locStr.includes('both'));
+      isOutdoor = (locStr !== '—' && locStr !== '-' && locStr !== '') && (locStr.includes('outdoor') || locStr.includes('both'));
+    }
+    const installersVal = document.getElementById('docFieldInstallers')?.textContent?.trim() || rec.installers || '';
+    const durationVal = document.getElementById('docFieldDuration')?.textContent?.trim() || rec.duration || '';
+    const addressVal = document.getElementById('docFieldAddress')?.textContent?.trim() || rec.completeAddress || rec.location || '-';
+    const projectNameVal = document.getElementById('docFieldProjectName')?.textContent?.trim() || rec.projectName || 'DTF FABRIC';
+    const clientVal = document.getElementById('docFieldClientName')?.textContent?.trim() || rec.client || 'DANIELA TAYANGONA';
+    const contactPersonVal = document.getElementById('docFieldContactPerson')?.textContent?.trim() || rec.contactPerson || '-';
+    const contactNumberVal = document.getElementById('docFieldContactNumber')?.textContent?.trim() || rec.contactNumber || '-';
+
+    const checkInstall = releasingModeVal === 'install' ? '✓' : '';
+    const checkDeliver = releasingModeVal === 'deliver' ? '✓' : '';
+    const checkPickup = (releasingModeVal === 'pickup' || !releasingModeVal) ? '✓' : '';
+
+    const getSz = (id, def) => (state.customCellFonts && state.customCellFonts[id]) ? state.customCellFonts[id] : def;
+    const bebasB64 = (typeof window !== 'undefined' && window.__BEBAS_KAI_B64) ? `url('data:font/otf;charset=utf-8;base64,${window.__BEBAS_KAI_B64}') format('opentype'), ` : '';
+
+    const makeSvgField = (id, x, defaultY, defaultSz, className, textAnchor = 'middle', letterSpacing = '', defaultFill = null) => {
+      const sz = getSz(id, defaultSz);
+      let raw = getFieldRawText(id);
+      if (!raw) {
+        if (id === 'docFieldInstallers') raw = document.getElementById('ctrlInstallers')?.value?.trim() || rec?.installers || '';
+        else if (id === 'docFieldDuration') raw = document.getElementById('ctrlDuration')?.value?.trim() || rec?.duration || '';
+        else if (id === 'docFieldAddress') raw = document.getElementById('ctrlAddress')?.value?.trim() || rec?.completeAddress || rec?.location || '-';
+        else if (id === 'docFieldOrderDate') raw = document.getElementById('ctrlOrderDate')?.value?.trim() || toDot(rec?.orderDate);
+        else if (id === 'docFieldDueDate') raw = document.getElementById('ctrlDueDate')?.value?.trim() || toDot(rec?.designDeadline || rec?.releasingDate);
+        else if (id === 'docFieldReleasingDate') raw = document.getElementById('ctrlReleasingDate')?.value?.trim() || toDot(rec?.releasingDate);
+        else if (id === 'docFieldJoNumber') raw = document.getElementById('docFieldJoNumber')?.textContent?.trim() || rec?.joNumber || rec?.requestId || '';
+      }
+      if (id === 'docFieldJoNumber' && raw) {
+        raw = raw.replace(/^JO#:\s*/i, '').trim();
+      }
+      const lines = raw ? raw.split('\n') : [''];
+      const anchorAttr = textAnchor !== 'start' ? `text-anchor="${textAnchor}"` : '';
+      const spacingAttr = letterSpacing ? `letter-spacing="${letterSpacing}"` : '';
+      const isWhiteText = (id === 'docFieldJoNumber' || id === 'docFieldDueDate');
+      const textFill = defaultFill || (isWhiteText ? '#FFFFFF' : '#000000');
+      const fillAttr = `fill="${textFill}"`;
+
+      if (lines.length <= 1) {
+        return `<text x="${x}" y="${defaultY}" ${fillAttr} font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr} id="${id}">${escapeHTML(lines[0] || '')}</text>`;
+      }
+
+      const lh = Math.round(sz * 1.05 * 10) / 10;
+      const startY = Math.round((defaultY - ((lines.length - 1) * lh) / 2) * 10) / 10;
+      const tspans = lines.map((line, idx) => {
+        const lineY = Math.round((startY + idx * lh) * 10) / 10;
+        return `<tspan x="${x}" y="${lineY}">${escapeHTML(line)}</tspan>`;
+      }).join('');
+      return `<text ${fillAttr} font-size="${sz}" class="${className}" ${anchorAttr} ${spacingAttr} id="${id}">${tspans}</text>`;
+    };
+
+    const clientRaw = getFieldRawText('docFieldClientName') || 'INTEGU PHILIPPINES, INC';
+    const clientCustomSz = (state.customCellFonts && state.customCellFonts['docFieldClientName']) ? state.customCellFonts['docFieldClientName'] : null;
+    const clientFit = fitDirectiveClientName(clientRaw, clientCustomSz);
+
+    const projRaw = getFieldRawText('docFieldProjectName') || 'DTF FABRIC';
+    let projAutoSz = getSz('docFieldProjectName', 12);
+    while (projAutoSz > 8.5 && getSvgTextWidth(projRaw, projAutoSz, 0.5) > 210) {
+      projAutoSz = Math.round((projAutoSz - 0.5) * 10) / 10;
+    }
+
+    let clientX1 = 412;
+    let clientX2 = 492;
+    const domLine = document.getElementById('docProjDividerLine');
+    if (domLine && domLine.getAttribute('x1') && domLine.getAttribute('x2')) {
+      clientX1 = parseFloat(domLine.getAttribute('x1'));
+      clientX2 = parseFloat(domLine.getAttribute('x2'));
+    } else {
+      const estW = Math.min(214, Math.max(16, clientFit.widestLineWidth));
+      clientX1 = Math.round((452 - estW / 2) * 10) / 10;
+      clientX2 = Math.round((452 + estW / 2) * 10) / 10;
+    }
+
+    const joRawVal = (getFieldRawText('docFieldJoNumber') || rec.joNumber || rec.requestId || 'SD261104-019').replace(/^JO#:\s*/i, '').trim();
+    let joSz = getSz('docFieldJoNumber', 28);
+    if (joRawVal.length > 12 && !state.customCellFonts?.['docFieldJoNumber']) {
+      joSz = Math.max(18, Math.round(28 * (12 / joRawVal.length) * 10) / 10);
+    }
+    const joNumX = Math.round(10 + joSz * 1.78);
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 904 96" width="3616" height="384" style="background:#FFFFFF;">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'Bebas Kai';
+        src: ${bebasB64}url('../fonts/BebasKai.otf') format('opentype'),
+             url('../fonts/BebasKai.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      text { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .cond-black { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .cond-bold { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .cond-semi { font-family:'Bebas Kai','BebasKai','Archivo','Oswald',sans-serif; font-weight: normal !important; }
+      .chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
+      tspan.chinese { font-family:'Microsoft YaHei','SimSun','PingFang SC','Noto Sans CJK SC',sans-serif; font-weight:bold; }
+      .center-txt { text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="904" height="96" fill="#FFFFFF"/>
+
+  <!-- Col 1 (x: 0 to 225) -->
+  <rect x="0" y="0" width="225" height="33" fill="#000000"/>
+  <text x="10" y="26.5" fill="#FFFFFF" font-size="${joSz}" class="cond-black" letter-spacing="0.5">JO#:</text>
+  ${makeSvgField('docFieldJoNumber', joNumX, 26.5, joSz, 'cond-black', 'start', '0.5', '#FFFFFF')}
+
+  <line x1="0" y1="33" x2="225" y2="33" stroke="#000000" stroke-width="1.5"/>
+  <text x="8" y="47" fill="#000000" font-size="13.5" class="cond-bold">IN CHARGE<tspan font-size="11.5" class="chinese">负责人</tspan>  :</text>
+  ${makeSvgField('docFieldInCharge', 218, 47, 15, 'cond-bold', 'end')}
+
+  <text x="8" y="68" fill="#000000" font-size="13.5" class="cond-bold">DRAWN BY <tspan font-size="11.5" class="chinese">通过绘制</tspan>  :</text>
+  ${makeSvgField('docFieldDrawnBy', 218, 68, 15, 'cond-bold', 'end')}
+
+  <g transform="translate(6, 80.7) scale(0.39)">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#000000"/>
+  </g>
+  <text x="16.5" y="89.5" fill="#000000" font-size="12" class="cond-bold">ADDRESS <tspan font-size="11" class="chinese">地址</tspan>  :</text>
+  <rect x="100" y="79" width="120" height="13.5" rx="2" fill="#E8EBED"/>
+  ${makeSvgField('docFieldAddress', 216, 89.5, 12, 'cond-bold', 'end')}
+
+  <line x1="225" y1="0" x2="225" y2="96" stroke="#000000" stroke-width="2"/>
+
+  <!-- Col 2 (x: 225 to 340) -->
+  <text x="282.5" y="13.5" fill="#000000" font-size="12" class="cond-bold center-txt">ORDER DATE <tspan font-size="10.5" class="chinese">订购日期</tspan></text>
+  ${makeSvgField('docFieldOrderDate', 282.5, 27.5, 14, 'cond-bold center-txt', 'middle')}
+
+  <line x1="225" y1="33" x2="340" y2="33" stroke="#000000" stroke-width="1.5"/>
+  <rect x="225" y="33" width="115" height="32" fill="#000000"/>
+  <text x="282.5" y="47" fill="#FFFFFF" font-size="13" class="cond-bold center-txt" letter-spacing="0.5">DUE DATE</text>
+  ${makeSvgField('docFieldDueDate', 282.5, 60, 14, 'cond-bold center-txt', 'middle', '', '#FFFFFF')}
+
+  <line x1="225" y1="65" x2="340" y2="65" stroke="#000000" stroke-width="1.5"/>
+  <text x="282.5" y="77" fill="#000000" font-size="11.5" class="cond-bold center-txt" letter-spacing="0.2">DATE TO BE RELEASE</text>
+  ${makeSvgField('docFieldReleasingDate', 282.5, 90, 14, 'cond-bold center-txt', 'middle')}
+
+  <line x1="340" y1="0" x2="340" y2="96" stroke="#000000" stroke-width="2"/>
+
+  <!-- Col 3 (x: 340 to 564) -->
+  <rect x="340" y="0" width="112" height="18" fill="${isIndoor ? '#E10600' : '#FFFFFF'}"/>
+  <rect x="452" y="0" width="112" height="18" fill="${isOutdoor ? '#E10600' : '#FFFFFF'}"/>
+  <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
+  <text x="396" y="14" fill="${isIndoor ? '#FFFFFF' : '#000000'}" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5">INDOOR</text>
+  <text x="508" y="14" fill="${isOutdoor ? '#FFFFFF' : '#000000'}" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5">OUTDOOR</text>
+
+  <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
+  ${clientFit.lines.length <= 1 ?
+    `<text x="452" y="44" font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${escapeHTML(clientFit.lines[0] || '')}</text>` :
+    `<text x="452" font-size="${clientFit.fontSize}" class="cond-black center-txt" text-anchor="middle" letter-spacing="0.8" id="docFieldClientName">${clientFit.lines.map((l, idx) => `<tspan x="452" y="${Math.round((clientFit.startY + idx * clientFit.lineHeight) * 10) / 10}">${escapeHTML(l)}</tspan>`).join('')}</text>`
+  }
+  <line x1="${clientX1}" y1="${clientFit.divY}" x2="${clientX2}" y2="${clientFit.divY}" stroke="#000000" stroke-width="1" id="docProjDividerLine"/>
+  ${makeSvgField('docFieldProjectName', 452, clientFit.projY, projAutoSz, 'cond-bold center-txt', 'middle', '0.5')}
+
+  <rect x="347" y="78.5" width="10" height="10" fill="${releasingModeVal === 'install' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckInstall"/>
+  <text x="361" y="87" fill="#000000" font-size="12" class="cond-bold">INSTALL <tspan font-size="10.5" class="chinese">安装</tspan></text>
+
+  <rect x="424" y="78.5" width="10" height="10" fill="${releasingModeVal === 'deliver' ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckDeliver"/>
+  <text x="438" y="87" fill="#000000" font-size="12" class="cond-bold">DELIVER <tspan font-size="10.5" class="chinese">送货</tspan></text>
+
+  <rect x="498" y="78.5" width="10" height="10" fill="${(releasingModeVal === 'pickup' || !releasingModeVal) ? '#E10600' : '#FFFFFF'}" stroke="#000000" stroke-width="1.2" id="boxCheckPickup"/>
+  <text x="512" y="87" fill="#000000" font-size="12" class="cond-bold">PICK UP <tspan font-size="10.5" class="chinese">自取</tspan></text>
+
+  <line x1="564" y1="0" x2="564" y2="96" stroke="#000000" stroke-width="2"/>
+
+  <!-- Col 4 (x: 564 to 822) -->
+  <rect x="564" y="0" width="97" height="43" fill="#000000"/>
+  <text x="612.5" y="13" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
+  <text x="612.5" y="24.5" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>
+  <text x="612.5" y="36.5" fill="#FFFFFF" font-size="10" class="chinese center-txt">现场安装环境选项</text>
+
+  <!-- Wall Option Container -->
+  <g id="docFieldEnvOption" data-env-type="${escapeHTML(envType)}">
+    <rect x="661" y="0" width="161" height="43" fill="#FFFFFF"/>
+    <svg id="docEnvSvg" x="661" y="0" width="161" height="43" viewBox="0 0 10572.6 3022.83" preserveAspectRatio="xMidYMid meet">
+      ${envSvgContent}
+    </svg>
+  </g>
+
+  <line x1="564" y1="43" x2="822" y2="43" stroke="#000000" stroke-width="1.5"/>
+  <text x="572" y="58" fill="#000000" font-size="12.5" class="cond-bold">CONTACT PERSON <tspan font-size="11" class="chinese">联络人</tspan>  :</text>
+  <rect x="716" y="47.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+  ${makeSvgField('docFieldContactPerson', 765, 59, 13, 'cond-bold center-txt', 'middle')}
+
+  <text x="572" y="85" fill="#000000" font-size="12.5" class="cond-bold">CONTACT NUMBER <tspan font-size="11" class="chinese">联系电话</tspan>  :</text>
+  <rect x="716" y="74.5" width="98" height="15" rx="2" fill="#E8EBED"/>
+  ${makeSvgField('docFieldContactNumber', 765, 86, 13, 'cond-bold center-txt', 'middle')}
+
+  <line x1="822" y1="0" x2="822" y2="96" stroke="#000000" stroke-width="2"/>
+
+  <!-- Col 5 (x: 822 to 904) -->
+  <rect x="822" y="0" width="82" height="22" fill="#000000"/>
+  <text x="863" y="11" fill="#FFFFFF" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">NUMBER OF INSTALLERS</text>
+  <text x="863" y="20" fill="#FFFFFF" font-size="9" class="chinese center-txt">安装人数</text>
+  ${makeSvgField('docFieldInstallers', 863, 38, 14, 'cond-bold center-txt', 'middle')}
+
+  <line x1="822" y1="48" x2="904" y2="48" stroke="#000000" stroke-width="1.5"/>
+  <rect x="822" y="48" width="82" height="22" fill="#000000"/>
+  <text x="863" y="59" fill="#FFFFFF" font-size="9.5" class="cond-bold center-txt" letter-spacing="0.2">INSTALLATION DURATION</text>
+  <text x="863" y="68" fill="#FFFFFF" font-size="9.5" class="chinese center-txt">安装时长</text>
+  ${makeSvgField('docFieldDuration', 863, 86, 14, 'cond-bold center-txt', 'middle')}
+
+  <rect x="0" y="0" width="904" height="96" fill="none" stroke="#000000" stroke-width="2"/>
+</svg>`;
+  }
+
+  function setupDirectiveActions() {
+    // COPY AS VECTOR GRAPHIC (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity Designer)
+    const handleCopyVector = async () => {
+      const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+      const cleanSvg = generateDirectiveSVG(cur).trim();
+      
+      // Standard HTML clipboard fragment for Windows CF_HTML (Photoshop Smart Object & Corel/Illustrator Vector parse)
+      const htmlPayload = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><!--StartFragment-->${cleanSvg}<!--EndFragment--></body></html>`;
+
+      let copySuccess = false;
+
+      // 1. Try modern Asynchronous Clipboard API with rich multi-MIME payload
+      if (navigator.clipboard && window.ClipboardItem) {
+        try {
+          const svgBlob = new Blob([cleanSvg], { type: 'image/svg+xml' });
+          const htmlBlob = new Blob([htmlPayload], { type: 'text/html' });
+          const textBlob = new Blob([cleanSvg], { type: 'text/plain' });
+
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/svg+xml': svgBlob,
+              'text/html': htmlBlob,
+              'text/plain': textBlob
+            })
+          ]);
+          copySuccess = true;
+        } catch (mimeErr) {
+          // If browser rejects image/svg+xml in write, write text/html (CF_HTML) and text/plain
+          try {
+            const htmlBlob = new Blob([htmlPayload], { type: 'text/html' });
+            const textBlob = new Blob([cleanSvg], { type: 'text/plain' });
+
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'text/html': htmlBlob,
+                'text/plain': textBlob
+              })
+            ]);
+            copySuccess = true;
+          } catch (writeErr) {
+            console.warn('Clipboard write fallback triggered', writeErr);
+          }
+        }
+      }
+
+      // 2. Synchronous Clipboard Event Fallback (sets CF_HTML and CF_UNICODETEXT on Windows)
+      if (!copySuccess) {
+        try {
+          const copyHandler = (e) => {
+            e.preventDefault();
+            e.clipboardData.setData('text/html', htmlPayload);
+            e.clipboardData.setData('text/plain', cleanSvg);
+            try {
+              e.clipboardData.setData('image/svg+xml', cleanSvg);
+            } catch (ignore) {}
+          };
+          document.addEventListener('copy', copyHandler, { once: true });
+          copySuccess = document.execCommand('copy');
+        } catch (e) {
+          copySuccess = false;
+        }
+      }
+
+      if (copySuccess) {
+        showToast('SVG vector code copied (for Illustrator / Figma). For CorelDRAW: Click "Download Vector" & drag into Corel, or use "Copy Image" for Ctrl+V.');
+      } else {
+        copyFallback(cleanSvg);
+      }
+    };
+
+    // Download EMF file converted for native CorelDRAW vector compatibility
+    async function downloadDirectiveEMF(record) {
+      const cur = record || (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+      const svgString = generateDirectiveSVG(cur);
+      const joRaw = cur && (cur.joNumber || cur.requestId || 'Header');
+      const joClean = String(joRaw).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `Directive-Header-${joClean}`;
+
+      showToast('Converting vector to CorelDRAW EMF format...', 'info');
+
+      try {
+        const formData = new FormData();
+        formData.append('svg', svgString);
+        formData.append('filename', filename);
+
+        const apiEndpoint = (window.PMS_API_URL || 'api.php') + '?action=convert_emf';
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          let msg = 'Conversion failed';
+          try {
+            const j = JSON.parse(errText);
+            if (j.error) msg = j.error;
+          } catch (e) {
+            if (errText) msg = errText;
+          }
+          throw new Error(msg);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.emf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('CorelDRAW EMF vector downloaded! Drag & drop directly into CorelDRAW or press Ctrl+I.', 'success');
+      } catch (err) {
+        console.error('EMF conversion error:', err);
+        showToast('Failed to convert EMF: ' + err.message, 'error');
+      }
+    }
+    window.downloadDirectiveEMF = downloadDirectiveEMF;
+
+    // Direct Copy Ultra-HD 4K Image (3616 × 384 px) for CorelDRAW, Photoshop, Affinity, Illustrator
+    function handleCopyImage4K(e, customRec) {
+      const cur = customRec || (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+      const svgString = generateDirectiveSVG(cur);
+      
+      const scale = 4;
+      const targetWidth = 904 * scale;  // 3616px
+      const targetHeight = 96 * scale;  // 384px
+
+      const svg4K = svgString
+        .replace(/width="[0-9]+"/, `width="${targetWidth}"`)
+        .replace(/height="[0-9]+"/, `height="${targetHeight}"`);
+
+      showToast('Rendering 4K ultra-sharp image for clipboard...', 'info');
+
+      const img = new Image();
+      const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d', { alpha: false });
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              showToast('Failed to generate 4K image data.', 'error');
+              return;
+            }
+
+            if (e && e.shiftKey) {
+              const dlUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(dlUrl);
+              showToast('4K Ultra-HD PNG downloaded (3616 × 384 px)!', 'success');
+              return;
+            }
+
+            try {
+              if (navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ 'image/png': blob })
+                ]);
+                showToast('Ultra-HD 4K image copied (3616 × 384 px)! Ready to paste (Ctrl+V) directly into CorelDRAW, PS, or Illustrator.', 'success');
+              } else {
+                throw new Error('Clipboard API unavailable');
+              }
+            } catch (err) {
+              const dlUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = `Directive-Header-4K-${cur.joNumber || 'Job'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(dlUrl);
+              showToast('Clipboard access restricted. Downloaded 4K PNG file instead.', 'info');
+            }
+          }, 'image/png', 1.0);
+        } catch (renderErr) {
+          URL.revokeObjectURL(url);
+          console.error('Canvas render error:', renderErr);
+          showToast('Failed to render 4K graphic: ' + renderErr.message, 'error');
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        showToast('Failed to render 4K graphic for clipboard.', 'error');
+      };
+      img.src = url;
+    }
+    window.handleCopyImage4K = handleCopyImage4K;
+
+    // Export Dropdown menu bindings (Directives Details page)
+    const btnExpDropdown = document.getElementById('btnDirectiveExportDropdown');
+    const expMenu = document.getElementById('directiveExportMenu');
+    if (btnExpDropdown && expMenu) {
+      btnExpDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = expMenu.classList.contains('show');
+        document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
+        if (!isOpen) {
+          const rect = btnExpDropdown.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          if (spaceBelow < 260 && spaceAbove > 220) {
+            expMenu.classList.add('open-on-top');
+          } else {
+            expMenu.classList.remove('open-on-top');
+          }
+          expMenu.classList.add('show');
+          btnExpDropdown.setAttribute('aria-expanded', 'true');
+        } else {
+          expMenu.classList.remove('show');
+          expMenu.classList.remove('open-on-top');
+          btnExpDropdown.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    if (!window.__directiveExportMenuGlobalListenerAttached) {
+      window.__directiveExportMenuGlobalListenerAttached = true;
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.directive-dropdown-container')) {
+          document.querySelectorAll('.directive-export-menu.show').forEach(m => {
+            m.classList.remove('show');
+            const btn = m.parentElement ? m.parentElement.querySelector('.directive-dropdown-btn') : null;
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+          });
+        }
+      });
+    }
+
+    const optDownloadEMF = document.getElementById('optDirectiveDownloadEMF');
+    if (optDownloadEMF) {
+      optDownloadEMF.addEventListener('click', () => {
+        if (expMenu) expMenu.classList.remove('show');
+        downloadDirectiveEMF();
+      });
+    }
+
+    const optCopyPNG = document.getElementById('optDirectiveCopyPNG');
+    if (optCopyPNG) {
+      optCopyPNG.addEventListener('click', (e) => {
+        if (expMenu) expMenu.classList.remove('show');
+        handleCopyImage4K(e);
+      });
+    }
+
+    const optCopySVG = document.getElementById('optDirectiveCopySVG');
+    if (optCopySVG) {
+      optCopySVG.addEventListener('click', (e) => {
+        if (expMenu) expMenu.classList.remove('show');
+        handleCopyVector(e);
+      });
+    }
+
+    const optDownloadSVG = document.getElementById('optDirectiveDownloadSVG');
+    if (optDownloadSVG) {
+      optDownloadSVG.addEventListener('click', () => {
+        if (expMenu) expMenu.classList.remove('show');
+        const legacyDl = document.getElementById('btnDirectiveDownloadSVG');
+        if (legacyDl) {
+          legacyDl.click();
+        } else {
+          const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                      (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+          const svgString = generateDirectiveSVG(cur);
+          const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.');
+        }
+      });
+    }
+
+    const btnCopySVG = document.getElementById('btnDirectiveCopySVG');
+    const btnQuickCopy = document.getElementById('btnQuickCopyVector');
+    if (btnCopySVG) btnCopySVG.addEventListener('click', handleCopyVector);
+    if (btnQuickCopy) btnQuickCopy.addEventListener('click', handleCopyVector);
+
+    const svgEl = document.getElementById('directiveExactSvg');
+    if (svgEl) {
+      svgEl.addEventListener('click', (e) => {
+        const textNode = e.target.closest('text.interactive-field');
+        if (!textNode) return;
+        const titleAttr = textNode.getAttribute('title') || '';
+        const fieldName = titleAttr.replace('Click to edit ', '') || textNode.id.replace('docField', '');
+        const currentVal = textNode.textContent.trim();
+        const newVal = prompt(`Edit ${fieldName}:`, (currentVal === '—' || currentVal === '-') ? '' : currentVal);
+        if (newVal !== null) {
+          const finalVal = newVal.trim() !== '' ? newVal.trim() : '—';
+          textNode.textContent = finalVal;
+          if (textNode.id === 'docFieldInstallers') {
+            const ctrl = document.getElementById('ctrlInstallers');
+            if (ctrl) ctrl.value = finalVal;
+          } else if (textNode.id === 'docFieldDuration') {
+            const ctrl = document.getElementById('ctrlDuration');
+            if (ctrl) ctrl.value = finalVal;
+          } else if (textNode.id === 'docFieldInCharge') {
+            const ctrl = document.getElementById('ctrlInCharge');
+            if (ctrl) ctrl.value = finalVal;
+          } else if (textNode.id === 'docFieldDrawnBy') {
+            const ctrl = document.getElementById('ctrlDrawnBy');
+            if (ctrl) ctrl.value = finalVal;
+          }
+          showToast(`Updated ${fieldName}`);
+        }
+      });
+    }
+
+    // COPY ULTRA-HD 4K IMAGE (Instant Ctrl+V for CorelDRAW, Photoshop, Affinity, Illustrator, Chat)
+    const btnCopyPNG = document.getElementById('btnDirectiveCopyPNG');
+    if (btnCopyPNG) {
+      btnCopyPNG.addEventListener('click', (e) => handleCopyImage4K(e));
+    }
+
+    // DOWNLOAD VECTOR SVG FILE (Direct 1-click for CorelDRAW Drag & Drop or Import)
+    const btnDownloadSVG = document.getElementById('btnDirectiveDownloadSVG');
+    if (btnDownloadSVG) {
+      btnDownloadSVG.addEventListener('click', () => {
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgString = generateDirectiveSVG(cur);
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(`Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.`);
+      });
+    }
+
+    const btnSave = document.getElementById('btnDirectiveSaveDraft');
+    if (btnSave) {
+      btnSave.addEventListener('click', () => {
+        const cur = state.requests.find(r => r.joNumber === state.currentDirectiveJo);
+        if (cur) {
+          cur.installers = document.getElementById('ctrlInstallers').value;
+          cur.duration = document.getElementById('ctrlDuration').value;
+          cur.releasingMode = normalizeReleasingMode(document.getElementById('ctrlReleasingMode').value);
+          cur.notes = document.getElementById('ctrlNotes') ? document.getElementById('ctrlNotes').value : (cur.notes || '');
+          cur.inCharge = document.getElementById('ctrlInCharge').value;
+          cur.drawnBy = document.getElementById('ctrlDrawnBy').value;
+          saveStateToStorage();
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=update_field', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: cur.id, field: 'releasingMode', value: cur.releasingMode, module: 'directives-details' })
+            }).catch(() => {});
+            fetch(window.PMS_API_URL + '?action=update_field', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: cur.id, field: 'remarks', value: cur.notes, module: 'directives-details' })
+            }).catch(() => {});
+          }
+          showToast(`Draft for ${cur.joNumber} saved to database.`);
+        }
+      });
+    }
+
+    const btnPrint = document.getElementById('btnDirectivePrint');
+    if (btnPrint) {
+      btnPrint.addEventListener('click', () => window.print());
+    }
+
+        // Background Clarity Switcher (Vector 4K vs Original Image)
+    const btnBgVec = document.getElementById('btnBgVector');
+    const btnBgOrig = document.getElementById('btnBgOriginal');
+    const headerBgImg = document.getElementById('directiveHeaderBg');
+
+    if (btnBgVec && btnBgOrig && headerBgImg) {
+      btnBgVec.onclick = () => {
+        headerBgImg.src = '../assets/img/directive-header-clear.svg?v=' + Date.now();
+        btnBgVec.style.background = '#0F172A';
+        btnBgVec.style.color = '#FFFFFF';
+        btnBgOrig.style.background = '#FFFFFF';
+        btnBgOrig.style.color = '#64748B';
+        showToast('Switched to Razor-Sharp Vector Background (4K)');
+      };
+
+      btnBgOrig.onclick = () => {
+        headerBgImg.src = '../assets/img/directive-header-template.png?v=' + Date.now();
+        btnBgOrig.style.background = '#0F172A';
+        btnBgOrig.style.color = '#FFFFFF';
+        btnBgVec.style.background = '#FFFFFF';
+        btnBgVec.style.color = '#64748B';
+        showToast('Switched to Original Template Image');
+      };
+    }
+
+    // Interactive Checkboxes for Releasing Mode (Install, Deliver, Pick up)
+    const setMode = (modeStr) => {
+      const ctrl = document.getElementById('ctrlReleasingMode');
+      if (ctrl) ctrl.value = modeStr;
+      const m = (modeStr || 'Pickup').toLowerCase();
+      const isInstall = m === 'install';
+      const isDeliver = m === 'deliver';
+      const isPickup = m === 'pickup' || !m;
+
+      const boxI = document.getElementById('boxCheckInstall') || document.querySelector('#grpCheckInstall rect');
+      const boxD = document.getElementById('boxCheckDeliver') || document.querySelector('#grpCheckDeliver rect');
+      const boxP = document.getElementById('boxCheckPickup') || document.querySelector('#grpCheckPickup rect');
+      if (boxI) boxI.setAttribute('fill', isInstall ? '#E10600' : '#FFFFFF');
+      if (boxD) boxD.setAttribute('fill', isDeliver ? '#E10600' : '#FFFFFF');
+      if (boxP) boxP.setAttribute('fill', isPickup ? '#E10600' : '#FFFFFF');
+
+      const svgChkInstall = document.getElementById('docFieldCheckInstall');
+      const svgChkDeliver = document.getElementById('docFieldCheckDeliver');
+      const svgChkPickup = document.getElementById('docFieldCheckPickup');
+      if (svgChkInstall) svgChkInstall.textContent = '';
+      if (svgChkDeliver) svgChkDeliver.textContent = '';
+      if (svgChkPickup) svgChkPickup.textContent = '';
+
+      const chkI = document.querySelector('#dfCheckInstall .deh-check-mark');
+      const chkD = document.querySelector('#dfCheckDeliver .deh-check-mark');
+      const chkP = document.querySelector('#dfCheckPickup .deh-check-mark');
+      if (chkI) { chkI.style.backgroundColor = isInstall ? '#E10600' : 'transparent'; chkI.textContent = ''; }
+      if (chkD) { chkD.style.backgroundColor = isDeliver ? '#E10600' : 'transparent'; chkD.textContent = ''; }
+      if (chkP) { chkP.style.backgroundColor = isPickup ? '#E10600' : 'transparent'; chkP.textContent = ''; }
+
+      showToast('Releasing Mode: ' + modeStr);
+    };
+
+    const elChkI = document.getElementById('dfCheckInstall') || document.getElementById('grpCheckInstall');
+    const elChkD = document.getElementById('dfCheckDeliver') || document.getElementById('grpCheckDeliver');
+    const elChkP = document.getElementById('dfCheckPickup') || document.getElementById('grpCheckPickup');
+    if (elChkI) elChkI.onclick = () => setMode('Install');
+    if (elChkD) elChkD.onclick = () => setMode('Deliver');
+    if (elChkP) elChkP.onclick = () => setMode('Pickup');
+
+    const btnReset = document.getElementById('btnDirectiveReset');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        state.customCellFonts = {};
+        if (typeof setDirectiveZoom === 'function') setDirectiveZoom(100);
+        if (typeof setDirectiveEnvType === 'function') setDirectiveEnvType('');
+        saveStateToStorage();
+        const table = document.getElementById('directiveGridTable');
+        if (table) {
+          table.querySelectorAll('td, text.interactive-field, text.bebas-field').forEach(c => {
+            c.removeAttribute('data-custom-size');
+            c.style.removeProperty('font-size');
+          });
+          const defaultSizes = {
+            docFieldJoNumber: 28,
+            docFieldDueDate: 14,
+            docFieldOrderDate: 14,
+            docFieldReleasingDate: 14,
+            docFieldClientName: 22,
+            docFieldProjectName: 12,
+            docFieldInCharge: 15,
+            docFieldDrawnBy: 15,
+            docFieldAddress: 12,
+            docFieldContactPerson: 13,
+            docFieldContactNumber: 13,
+            docFieldInstallers: 14,
+            docFieldDuration: 14
+          };
+          Object.entries(defaultSizes).forEach(([id, sz]) => {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('font-size', sz);
+          });
+        }
+        renderDirectivePreview(state.currentDirectiveJo);
+        showToast('All cell font sizes reset to standard defaults.');
+      });
+    }
+
+    // CUSTOMIZED PER-CELL FONT SIZE CONTROLS (Customized per individual cell, not everything!)
+    const getActiveOrTargetCell = () => {
+      if (activeDirectiveCell && document.body.contains(activeDirectiveCell)) {
+        return activeDirectiveCell;
+      }
+      const defaultCell = document.getElementById('docFieldProjectName') || document.querySelector('.doc-proj-cell') || document.querySelector('.interactive-field');
+      if (defaultCell) selectDirectiveCell(defaultCell);
+      return defaultCell;
+    };
+
+    const btnCellDec = document.getElementById('btnCellFontDec');
+    if (btnCellDec) {
+      btnCellDec.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const current = getCellCurrentFontSize(cell);
+          const next = Math.max(6, Math.round(current - 1));
+          setCellCustomFontSize(cell, next);
+          showToast(`Font size for ${getCellFriendlyName(cell)}: ${next}px`);
+        }
+      });
+    }
+
+    const btnCellInc = document.getElementById('btnCellFontInc');
+    if (btnCellInc) {
+      btnCellInc.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const current = getCellCurrentFontSize(cell);
+          const next = Math.min(72, Math.round(current + 1));
+          setCellCustomFontSize(cell, next);
+          showToast(`Font size for ${getCellFriendlyName(cell)}: ${next}px`);
+        }
+      });
+    }
+
+    const cellFontInput = document.getElementById('cellFontSizeInput');
+    if (cellFontInput) {
+      const handleCellFontChange = () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const val = parseFloat(cellFontInput.value);
+          if (!isNaN(val) && val >= 6 && val <= 72) {
+            setCellCustomFontSize(cell, val);
+          }
+        }
+      };
+      cellFontInput.addEventListener('input', handleCellFontChange);
+      cellFontInput.addEventListener('change', handleCellFontChange);
+    }
+
+    // Box Width Controls
+    const btnBoxWDec = document.getElementById('btnBoxWidthDec');
+    if (btnBoxWDec) {
+      btnBoxWDec.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { w: 100 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.w || boxDef.w;
+          setCellCustomBoxSize(cell, Math.max(30, cur - 10));
+        }
+      });
+    }
+
+    const btnBoxWInc = document.getElementById('btnBoxWidthInc');
+    if (btnBoxWInc) {
+      btnBoxWInc.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { w: 100 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.w || boxDef.w;
+          setCellCustomBoxSize(cell, Math.min(800, cur + 10));
+        }
+      });
+    }
+
+    const cellBoxWInput = document.getElementById('cellBoxWidthInput');
+    if (cellBoxWInput) {
+      const handleWChange = () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const val = parseFloat(cellBoxWInput.value);
+          if (!isNaN(val) && val >= 30 && val <= 800) {
+            setCellCustomBoxSize(cell, val);
+          }
+        }
+      };
+      cellBoxWInput.addEventListener('input', handleWChange);
+      cellBoxWInput.addEventListener('change', handleWChange);
+    }
+
+    // Box Height Controls
+    const btnBoxHDec = document.getElementById('btnBoxHeightDec');
+    if (btnBoxHDec) {
+      btnBoxHDec.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { h: 20 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.h || boxDef.h;
+          setCellCustomBoxSize(cell, undefined, Math.max(15, cur - 5));
+        }
+      });
+    }
+
+    const btnBoxHInc = document.getElementById('btnBoxHeightInc');
+    if (btnBoxHInc) {
+      btnBoxHInc.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const boxDef = DIRECTIVE_FIELD_BOXES[cell.id] || { h: 20 };
+          const saved = (state.customBoxSizes && state.customBoxSizes[cell.id]) || {};
+          const cur = saved.h || boxDef.h;
+          setCellCustomBoxSize(cell, undefined, Math.min(300, cur + 5));
+        }
+      });
+    }
+
+    const cellBoxHInput = document.getElementById('cellBoxHeightInput');
+    if (cellBoxHInput) {
+      const handleHChange = () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          const val = parseFloat(cellBoxHInput.value);
+          if (!isNaN(val) && val >= 15 && val <= 300) {
+            setCellCustomBoxSize(cell, undefined, val);
+          }
+        }
+      };
+      cellBoxHInput.addEventListener('input', handleHChange);
+      cellBoxHInput.addEventListener('change', handleHChange);
+    }
+
+    // Done editing button
+    const btnDone = document.getElementById('btnEditorDone');
+    if (btnDone) {
+      btnDone.addEventListener('click', () => {
+        closeDirectiveDirectEditor(true);
+        showToast('Directive edits committed.');
+      });
+    }
+
+    const btnCellReset = document.getElementById('btnCellFontReset');
+    if (btnCellReset) {
+      btnCellReset.addEventListener('click', () => {
+        const cell = getActiveOrTargetCell();
+        if (cell) {
+          cell.removeAttribute('data-custom-size');
+          cell.style.removeProperty('font-size');
+          const defaultSizes = {
+            docFieldJoNumber: 28,
+            docFieldDueDate: 14,
+            docFieldOrderDate: 14,
+            docFieldReleasingDate: 14,
+            docFieldClientName: 22,
+            docFieldProjectName: 12,
+            docFieldInCharge: 15,
+            docFieldDrawnBy: 15,
+            docFieldAddress: 12,
+            docFieldContactPerson: 13,
+            docFieldContactNumber: 13,
+            docFieldInstallers: 14,
+            docFieldDuration: 14
+          };
+          if (window.SVGElement && cell instanceof SVGElement && cell.id && defaultSizes[cell.id]) {
+            cell.setAttribute('font-size', defaultSizes[cell.id]);
+          }
+          if (state.customCellFonts && cell.id) {
+            delete state.customCellFonts[cell.id];
+          }
+          if (state.customBoxSizes && cell.id) {
+            delete state.customBoxSizes[cell.id];
+          }
+          saveStateToStorage();
+
+          setFieldMultilineText(cell, getFieldRawText(cell));
+          syncToolbarBoxInputs(cell);
+
+          if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
+            openDirectiveDirectEditor(cell);
+          }
+          showToast(`Reset font and box size for ${getCellFriendlyName(cell)} to default.`);
+        }
+      });
+    }
+
+    // Cell selection, direct editing & hotkey listeners on the directive CAD table
+    const gridTable = document.getElementById('directiveGridTable');
+    if (gridTable) {
+      gridTable.addEventListener('click', (e) => {
+        // If clicking inside active editor, allow typing/editing without closing
+        if (activeDirectEditor && (e.target === activeDirectEditor || activeDirectEditor.contains(e.target))) {
+          return;
+        }
+
+        // Check for releasing mode checkbox clicks
+        const checkGrp = e.target.closest('.deh-check-grp');
+        if (checkGrp) {
+          const m = checkGrp.getAttribute('data-mode');
+          if (m) {
+            setMode(m);
+            return;
+          }
+        }
+
+        // Check for Indoor / Outdoor toggle
+        const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
+        const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+        if (indoorTarget || outdoorTarget) {
+          const curState = state.directiveLocation || {
+            indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+            outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+          };
+          if (indoorTarget) {
+            const nextIndoor = !curState.indoor;
+            setDirectiveLocation(nextIndoor, curState.outdoor);
+            showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+          } else {
+            const nextOutdoor = !curState.outdoor;
+            setDirectiveLocation(curState.indoor, nextOutdoor);
+            showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+          }
+          return;
+        }
+
+        // Handle clicks on address gray pill or due date black box directly
+        if (e.target.id === 'bgFieldAddress' || e.target.closest('#bgFieldAddress')) {
+          const elAddr = document.getElementById('docFieldAddress');
+          if (elAddr) { selectDirectiveCell(elAddr, true); return; }
+        }
+        if (e.target.id === 'bgFieldDueDate' || e.target.closest('#bgFieldDueDate')) {
+          const elDue = document.getElementById('docFieldDueDate');
+          if (elDue) { selectDirectiveCell(elDue, true); return; }
+        }
+
+        // Direct editing target (if clicking directly on text or tspan)
+        const targetCell = e.target.closest('td') || e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
+        if (targetCell) {
+          selectDirectiveCell(targetCell, true);
+          return;
+        }
+
+        // Coordinate-based cell selection: click anywhere in the cell box!
+        const svg = document.getElementById('directiveExactSvg');
+        if (svg) {
+          const svgRect = svg.getBoundingClientRect();
+          if (svgRect.width > 0 && svgRect.height > 0) {
+            const scaleX = 904 / svgRect.width;
+            const scaleY = 96 / svgRect.height;
+            const svgX = (e.clientX - svgRect.left) * scaleX;
+            const svgY = (e.clientY - svgRect.top) * scaleY;
+
+            // Indoor / Outdoor header (row 1 of column 3, y <= 18)
+            if (svgX >= 340 && svgX <= 564 && svgY <= 18) {
+              const isIndoorClick = svgX <= 452;
+              const curState = state.directiveLocation || {
+                indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+                outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+              };
+              if (isIndoorClick) {
+                const nextIndoor = !curState.indoor;
+                setDirectiveLocation(nextIndoor, curState.outdoor);
+                showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+              } else {
+                const nextOutdoor = !curState.outdoor;
+                setDirectiveLocation(curState.indoor, nextOutdoor);
+                showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+              }
+              return;
+            }
+
+            // Releasing mode checkboxes (row 3 of column 3)
+            if (svgX >= 340 && svgX <= 564 && svgY > 73) {
+              if (svgX < 420) setMode('Install');
+              else if (svgX < 490) setMode('Deliver');
+              else setMode('Pickup');
+              return;
+            }
+
+            const fieldId = getFieldIdAtSvgCoords(svgX, svgY);
+            if (fieldId) {
+              const el = document.getElementById(fieldId);
+              if (el) {
+                selectDirectiveCell(el, true);
+                return;
+              }
+            }
+          }
+        }
+      });
+
+      gridTable.addEventListener('focusin', (e) => {
+        const targetCell = e.target.closest('td') || e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
+        if (targetCell) {
+          selectDirectiveCell(targetCell, false);
+        }
+      });
+
+      // Hotkeys: Ctrl+[ decreases active cell font, Ctrl+] increases active cell font
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && (e.key === '[' || e.key === ']')) {
+          const targetCell = getActiveOrTargetCell();
+          if (targetCell) {
+            e.preventDefault();
+            selectDirectiveCell(targetCell, false);
+            const current = getCellCurrentFontSize(targetCell);
+            const step = e.key === '[' ? -1 : 1;
+            const next = Math.max(6, Math.min(72, Math.round(current + step)));
+            setCellCustomFontSize(targetCell, next);
+            showToast(`${getCellFriendlyName(targetCell)} font: ${next}px`);
+          }
+        }
+      });
+
+      // Close editor when clicking outside
+      document.addEventListener('mousedown', (e) => {
+        if (activeDirectEditor) {
+          if (e.target === activeDirectEditor || activeDirectEditor.contains(e.target)) return;
+          if (e.target.closest && (e.target.closest('.doc-font-controls') || e.target.closest('.interactive-field') || e.target.closest('.bebas-field') || e.target.closest('#directiveGridTable'))) return;
+          closeDirectiveDirectEditor(true);
+        }
+      });
+
+      // Re-position editor on window resize
+      window.addEventListener('resize', () => {
+        if (activeDirectEditor && activeDirectEditor.__targetCell) {
+          const target = activeDirectEditor.__targetCell;
+          openDirectiveDirectEditor(target);
+        }
+      });
+
+      // Live auto-fit when typing in contenteditable table cells
+      gridTable.addEventListener('input', (e) => {
+        const targetCell = e.target.closest('td');
+        if (targetCell) autoFitCellText(targetCell);
+      });
+    }
+
+    const subtabs = document.querySelectorAll('.directive-toolbar .tab-btn');
+    subtabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        subtabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const target = tab.getAttribute('data-subtab');
+        document.querySelectorAll('.directive-subtab-content').forEach(c => {
+          c.style.display = 'none';
+          c.classList.remove('active');
+        });
+
+        const activeContent = document.getElementById(target);
+        if (activeContent) {
+          activeContent.style.display = target === 'tab-template-editor' ? 'flex' : 'block';
+          activeContent.classList.add('active');
+          if (target === 'tab-template-editor') {
+            initTemplateEditorCanvas();
+          }
+        }
+      });
+    });
+  }
+
+  // DIRECTIVE REAL-TIME ZOOM ENGINE & CONTROLS
+  const DIRECTIVE_ZOOM_LEVELS = [50, 65, 75, 85, 100, 115, 125, 150, 175, 200, 250, 300];
+
+  function setDirectiveZoom(zoom) {
+    const clamped = Math.max(40, Math.min(350, Math.round(zoom)));
+    state.directiveZoom = clamped;
+    saveStateToStorage();
+
+    const wrap = document.getElementById('directiveGridTable');
+    const label = document.getElementById('directiveZoomLevelText');
+    const baseW = 904;
+    const baseH = 96;
+    const newW = Math.round((baseW * clamped) / 100);
+    const newH = Math.round((baseH * clamped) / 100);
+
+    if (wrap) {
+      wrap.style.setProperty('--directive-zoom-width', newW + 'px');
+      wrap.style.setProperty('--directive-zoom-height', newH + 'px');
+      wrap.style.width = newW + 'px';
+      wrap.style.height = newH + 'px';
+      wrap.style.minWidth = newW + 'px';
+      wrap.style.minHeight = newH + 'px';
+    }
+
+    if (label) {
+      label.textContent = clamped + '%';
+    }
+
+    if (activeDirectEditor && activeDirectEditor.__targetCell) {
+      openDirectiveDirectEditor(activeDirectEditor.__targetCell);
+    }
+  }
+
+  function setupDirectiveZoomControls() {
+    const btnZoomOut = document.getElementById('btnDirectiveZoomOut');
+    const btnZoomIn = document.getElementById('btnDirectiveZoomIn');
+    const btnZoomReset = document.getElementById('btnDirectiveZoomReset');
+    const btnZoomFit = document.getElementById('btnDirectiveZoomFit');
+    const zoomLabel = document.getElementById('directiveZoomLevelText');
+    const container = document.getElementById('directiveZoomContainer');
+
+    const getCurrentZoom = () => state.directiveZoom || 100;
+
+    if (btnZoomOut) {
+      btnZoomOut.addEventListener('click', () => {
+        const cur = getCurrentZoom();
+        const smaller = DIRECTIVE_ZOOM_LEVELS.filter(z => z < cur);
+        const next = smaller.length > 0 ? smaller[smaller.length - 1] : Math.max(40, cur - 15);
+        setDirectiveZoom(next);
+      });
+    }
+
+    if (btnZoomIn) {
+      btnZoomIn.addEventListener('click', () => {
+        const cur = getCurrentZoom();
+        const larger = DIRECTIVE_ZOOM_LEVELS.filter(z => z > cur);
+        const next = larger.length > 0 ? larger[0] : Math.min(350, cur + 15);
+        setDirectiveZoom(next);
+      });
+    }
+
+    if (btnZoomReset) {
+      btnZoomReset.addEventListener('click', () => {
+        setDirectiveZoom(100);
+        showToast('Zoom reset to 100%');
+      });
+    }
+
+    if (zoomLabel) {
+      zoomLabel.addEventListener('click', () => {
+        const cur = getCurrentZoom();
+        setDirectiveZoom(cur === 100 ? 150 : 100);
+      });
+    }
+
+    if (btnZoomFit) {
+      btnZoomFit.addEventListener('click', () => {
+        if (!container) return;
+        const availW = container.clientWidth - 28;
+        if (availW > 100) {
+          const fitZoom = Math.round((availW / 904) * 100);
+          setDirectiveZoom(fitZoom);
+          showToast('Zoom fitted to container: ' + fitZoom + '%');
+        }
+      });
+    }
+
+    if (container) {
+      container.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          const cur = getCurrentZoom();
+          const delta = e.deltaY < 0 ? 10 : -10;
+          setDirectiveZoom(cur + delta);
+        }
+      }, { passive: false });
+    }
+
+    if (state.directiveZoom && state.directiveZoom !== 100) {
+      setDirectiveZoom(state.directiveZoom);
+    }
+  }
+
+  const DIRECTIVE_WALL_SVGS = {
+    "concrete-wall": "<g> <polygon fill=\"#FFFFFF\" points=\"-0,3022.83 10572.6,3022.83 10572.6,0 -0,0 \"\/> <g> <g> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M3671.45 1413.43c-38.1,0 -70.4,-13.31 -97.02,-40.03 -26.72,-26.61 -40.03,-58.92 -40.03,-96.69l0 -312.73c0,-38.1 13.42,-70.51 40.25,-97.12 26.72,-26.72 59.02,-40.03 96.8,-40.03 38.1,0 70.4,13.42 96.91,40.24 26.51,26.83 39.71,59.13 39.71,97.02l0 65.47 -89.5 0 0 -67.29c0,-13.63 -4.83,-25.43 -14.59,-35.2 -9.77,-9.77 -21.46,-14.6 -35.2,-14.6 -13.74,0 -25.33,4.83 -34.99,14.6 -9.55,9.77 -14.38,21.46 -14.38,35.2l0 313.59c0,13.74 4.83,25.33 14.38,34.99 9.66,9.55 21.25,14.38 34.99,14.38 13.74,0 25.43,-4.83 35.2,-14.38 9.77,-9.55 14.59,-21.25 14.59,-34.99l0 -78.99 89.5 0 0 79.95c0,38.1 -13.42,70.4 -40.25,96.91 -26.72,26.51 -58.92,39.71 -96.37,39.71zm343.1 -587.25c38.1,0 70.4,13.41 97.02,40.24 26.72,26.83 40.03,59.13 40.03,96.91l0 312.94c0,38.1 -13.42,70.51 -40.24,97.12 -26.72,26.72 -59.03,40.03 -96.8,40.03 -38.1,0 -70.4,-13.42 -96.91,-40.24 -26.51,-26.83 -39.71,-59.13 -39.71,-96.91l0 -312.94c0,-38.1 13.42,-70.51 40.25,-97.12 26.72,-26.72 58.92,-40.03 96.37,-40.03zm46.9 135.65c0,-13.74 -4.83,-25.33 -14.38,-34.99 -9.66,-9.55 -21.25,-14.38 -34.99,-14.38 -13.74,0 -25.43,4.83 -35.2,14.38 -9.77,9.66 -14.6,21.25 -14.6,34.99l0 313.37c0,13.74 4.83,25.33 14.6,34.99 9.77,9.55 21.46,14.38 35.2,14.38 13.74,0 25.33,-4.83 34.99,-14.38 9.55,-9.66 14.38,-21.25 14.38,-34.99l0 -313.37zm263.47 -129.21l114.72 385.06 0 -385.06 86.28 0 0 573.73 -92.83 0 -119.02 -367.25 0 367.25 -86.28 0 0 -573.73 97.12 0zm413.93 580.81c-38.1,0 -70.4,-13.31 -97.02,-40.03 -26.72,-26.61 -40.03,-58.92 -40.03,-96.69l0 -312.73c0,-38.1 13.42,-70.51 40.24,-97.12 26.72,-26.72 59.03,-40.03 96.8,-40.03 38.1,0 70.4,13.42 96.91,40.24 26.51,26.83 39.71,59.13 39.71,97.02l0 65.47 -89.5 0 0 -67.29c0,-13.63 -4.83,-25.43 -14.59,-35.2 -9.77,-9.77 -21.46,-14.6 -35.2,-14.6 -13.74,0 -25.33,4.83 -34.99,14.6 -9.55,9.77 -14.38,21.46 -14.38,35.2l0 313.59c0,13.74 4.83,25.33 14.38,34.99 9.66,9.55 21.25,14.38 34.99,14.38 13.74,0 25.43,-4.83 35.2,-14.38 9.77,-9.55 14.59,-21.25 14.59,-34.99l0 -78.99 89.5 0 0 79.95c0,38.1 -13.42,70.4 -40.25,96.91 -26.72,26.51 -58.92,39.71 -96.37,39.71zm344.28 -580.17c48.19,0 83.6,13.31 106.25,39.82 19.85,23.18 29.73,55.48 29.73,96.91l0 83.28c0,40.57 -15.45,74.8 -46.47,102.92l64.07 250.16 -93.04 0 -52.59 -215.82c-2.47,0.11 -5.04,0.11 -7.83,0.11l-50.23 0 0 215.71 -86.28 0 0 -573.08 136.4 0zm51.62 138.12c0,-33.27 -16.53,-49.9 -49.47,-49.9l-52.26 0 0 183.52 52.26 0c13.74,0 25.44,-4.83 34.99,-14.6 9.66,-9.77 14.49,-21.57 14.49,-35.31l0 -83.71zm176 434.96l0 -573.73 246.08 0 0 86.93 -159.8 0 0 156.47 116.55 0 0 86.93 -116.55 0 0 156.47 159.8 0 0 86.93 -246.08 0zm397.62 -486.15l-92.08 0 0 -86.93 269.8 0 0 86.93 -91.44 0 0 486.15 -86.28 0 0 -486.15zm247.26 486.15l0 -573.73 246.08 0 0 86.93 -159.8 0 0 156.47 116.55 0 0 86.93 -116.55 0 0 156.47 159.8 0 0 86.93 -246.08 0zm720.32 -573.08l90.58 0 -89.61 573.08 -82.53 0 -48.94 -314.12 -45.82 314.12 -82.85 0 -96.16 -573.08 90.58 0 45.29 306.93 41.53 -306.93 90.58 0 45.29 306.61 42.07 -306.61zm190.92 441.08l-21.14 132 -90.15 0 97.45 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm464.26 441.72l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28zm295.02 0l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28z\"\/> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M3790.93 1634.22l62.39 26.43 -23.97 19.26c-1.64,36.88 1.54,68.13 9.53,93.74 8.09,25.61 20.9,56.86 38.42,93.74 62.49,-51.33 104.9,-95.38 127.34,-132.26l40.77 43.33c-15.98,1.54 -36.06,11.17 -60.03,28.79 -25.61,17.62 -60.03,41.7 -103.26,72.12 62.49,120.17 132.87,193.11 211.34,218.72l0 9.63c-30.43,1.64 -48.87,11.17 -55.22,28.89 -97.63,-72.12 -167.29,-189.11 -208.88,-350.98l0 336.53c1.54,40.06 -17.62,64.85 -57.68,74.48 1.64,-22.44 -23.15,-40.06 -74.38,-52.86l0 -9.63c36.78,3.17 61.98,4.81 75.6,4.81 13.63,0 20.39,-9.63 20.39,-28.89l0 -386.93c0,-30.43 -0.82,-60.03 -2.36,-88.92zm-247.3 514.27l-4.81 -7.17c80.01,-80.01 135.23,-182.45 165.65,-307.33l-74.48 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 151.21 0 21.62 -28.79 43.23 38.42 -23.97 11.99c-40.06,142.5 -106.44,244.94 -199.25,307.33zm1104.45 -437.03c0,55.94 0.82,95.89 2.36,119.86l-35.96 14.44 0 -21.62 -208.88 0c1.54,97.63 -7.68,173.34 -27.66,227.02 -19.98,53.58 -57.98,99.68 -114.02,138.1l-4.82 -7.17c38.42,-36.88 66.38,-76.83 84.01,-120.07 17.62,-43.23 27.25,-102.44 28.89,-177.64l0 -156.13c0,-23.97 -0.82,-44.77 -2.46,-62.39l36.06 23.97 204.07 0 19.16 -23.97 38.42 31.25 -19.16 14.34zm-189.73 410.7l0 -165.86c0,-43.23 -0.82,-75.3 -2.36,-96.09l57.57 23.97 -21.62 19.26 0 120.17c54.5,-36.88 96.09,-76.12 124.88,-117.81l38.42 43.33c-14.34,1.54 -33.6,10.35 -57.57,26.43 -25.61,15.98 -60.85,36.88 -105.72,62.49l0 72.12c0,22.44 8.09,32.78 24.07,31.25l117.61 0c12.81,-4.82 20.08,-18.44 21.62,-40.88 1.64,-22.33 2.46,-48.76 2.46,-79.19l11.99 0c0,30.43 1.54,55.22 4.82,74.37 3.18,19.26 12.81,32.07 28.79,38.42 -12.81,24.07 -33.6,36.06 -62.39,36.06l-132.15 0c-35.14,1.64 -51.94,-14.44 -50.4,-48.05zm-52.76 -417.87l0 105.42 208.88 0 0 -105.42 -208.88 0zm-57.68 31.25c-54.4,169.65 -83.59,264.51 -87.59,284.59 -4,19.98 -6.86,44.36 -8.4,73.25 -1.64,28.79 -2.46,49.58 -2.46,62.39 0,6.45 -3.18,9.63 -9.63,9.63 -3.18,0 -9.94,-2.36 -20.39,-7.17 -10.35,-4.81 -15.57,-13.63 -15.57,-26.43 0,-11.17 1.64,-22.44 4.81,-33.6 4.81,-16.08 7.17,-28.89 7.17,-38.42 0,-9.63 -3.59,-17.62 -10.76,-24.07 -7.27,-6.35 -22.85,-12.81 -46.82,-19.16l0 -9.63c27.15,3.18 44.36,4.41 51.53,3.59 7.27,-0.82 15.67,-7.99 25.3,-21.62 9.53,-13.63 43.95,-98.86 103.16,-255.8l9.63 2.46zm-192.08 47.94c54.4,27.25 82.06,48.56 82.88,63.72 0.82,15.26 -2.05,26.43 -8.4,33.7 -6.45,7.17 -11.27,10.76 -14.44,10.76 -4.81,0 -9.63,-7.17 -14.44,-21.62 -6.35,-20.8 -23.15,-47.23 -50.4,-79.29l4.81 -7.27zm55.22 -139.43c44.87,22.44 69.25,38.11 73.25,46.92 4,8.81 6.04,14.85 6.04,18.03 0,7.99 -3.28,16.8 -9.63,26.43 -6.45,9.63 -10.45,14.44 -11.99,14.44 -4.81,0 -9.63,-7.17 -14.44,-21.62 -7.99,-22.44 -23.97,-48.15 -48.05,-77.04l4.82 -7.17zm883.58 360.2l0 59.93 72.02 0 0 -59.93 -72.02 0zm9.63 -290.43c0,-33.5 -0.82,-61.57 -2.36,-83.9l57.57 26.43 -21.62 16.7 0 40.77 88.82 0 28.89 -28.79 43.13 43.23 -160.84 0 0 131.85 36.06 0c27.15,-51.22 43.23,-91.18 47.94,-120.07l45.69 31.25c-17.62,7.99 -44.05,37.6 -79.29,88.82l60.03 0 31.25 -31.14 45.59 45.59 -316.96 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 175.28 0 0 -131.85 -67.2 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 146.49 0zm-115.25 36.06l7.17 -4.81c36.88,25.61 57.68,45.18 62.49,58.7 4.82,13.63 3.18,24.79 -4.81,33.6 -7.99,8.81 -13.63,13.22 -16.8,13.22 -6.45,0 -11.27,-7.99 -14.44,-23.97 -4.82,-23.97 -15.98,-49.58 -33.6,-76.73zm288.07 335.92c0,12.81 0.82,39.95 2.46,81.65l-36.06 11.99 0 -36.27 -225.69 0 0 24.18 -35.96 12.09c1.54,-46.41 2.36,-92.1 2.36,-136.87 0,-44.87 -0.82,-88.1 -2.36,-129.69l35.96 19.16 220.87 0 19.26 -23.97 36.06 31.25 -16.9 14.34 0 132.15zm-259.29 -139.32l0 182.25 225.69 0 0 -182.25 -225.69 0zm76.83 43.33l69.66 0 14.44 -19.16 33.6 26.43 -16.8 11.99c0,31.96 0.72,59.11 2.36,81.55l-31.25 14.44 0 -26.43 -72.02 0 0 16.8 -31.14 11.99c1.54,-25.61 2.36,-47.94 2.36,-67.2 0,-19.16 -0.82,-41.59 -2.36,-67.2l31.14 16.8zm-247.3 -165.35l0 -103.26c0,-25.61 -0.82,-52.86 -2.36,-81.65l57.57 31.25 -21.62 16.8 0 136.87 28.89 0 26.33 -26.33 40.88 40.77 -96.09 0 0 187.27 86.46 -21.62 2.36 9.63c-110.44,40.06 -171.19,69.66 -182.45,88.82l-26.43 -48.05c20.9,-3.18 49.69,-9.53 86.46,-19.16l0 -196.9 -7.17 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 86.46 0z\"\/> <\/g> <polygon fill=\"#ED3237\" points=\"2901.38,2406.67 2901.38,616.16 3306.54,616.16 3306.54,2406.67 \"\/> <\/g> <\/g>",
+    "glass-wall": "<g> <polygon fill=\"#FFFFFF\" points=\"-0,3022.83 10572.6,3022.83 10572.6,0 -0,0 \"\/> <g> <g> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M4188.08 1413.56c-38.1,0 -70.4,-13.42 -97.02,-40.25 -26.72,-26.83 -40.03,-59.03 -40.03,-96.48l0 -312.73c0,-38.1 13.42,-70.51 40.25,-97.12 26.72,-26.72 59.03,-40.03 96.8,-40.03 38.1,0 70.4,13.42 96.91,40.25 26.51,26.83 39.71,59.13 39.71,97.02l0 65.46 -89.5 0 0 -67.29c0,-13.63 -4.83,-25.43 -14.59,-35.2 -9.77,-9.77 -21.46,-14.6 -35.2,-14.6 -13.74,0 -25.33,4.83 -34.99,14.6 -9.55,9.77 -14.38,21.46 -14.38,35.2l0 313.59c0,13.74 4.83,25.33 14.38,34.99 9.66,9.55 21.25,14.38 34.99,14.38 13.74,0 25.43,-4.83 35.2,-14.38 9.77,-9.55 14.59,-21.14 14.59,-34.77l0 -112.47 -48.29 0 0 -86.93 137.8 0 0 200.15c0,38.1 -13.42,70.4 -40.24,96.91 -26.72,26.51 -58.92,39.71 -96.37,39.71zm447.52 -7.08l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28zm170.74 -132l-21.14 132 -90.15 0 97.44 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm488.51 299.31c0.64,39.92 -9.77,74.05 -31.12,102.38 -14.06,19.21 -33.81,32.73 -59.46,40.67 -13.74,4.29 -29.73,6.44 -47.97,6.44 -33.91,0 -61.92,-8.37 -84.24,-25.22 -18.57,-13.74 -33.27,-32.41 -44.11,-56.02 -10.84,-23.72 -17.17,-50.76 -18.99,-81.35l82.21 -5.9c3.76,33.38 12.56,57.52 26.51,72.55 10.41,11.37 22.32,16.74 35.74,16.1 18.89,-0.64 33.91,-9.87 45.18,-27.9 5.79,-8.91 8.69,-21.46 8.69,-37.99 0,-23.83 -10.84,-47.43 -32.52,-70.94 -17.06,-16.1 -42.61,-40.35 -76.73,-72.76 -28.65,-27.69 -48.94,-52.59 -60.85,-74.59 -12.77,-24.68 -19.21,-51.51 -19.21,-80.49 0,-52.16 17.49,-91.65 52.59,-118.48 21.68,-16.2 48.51,-24.25 80.6,-24.25 30.8,0 57.2,6.87 79.09,20.6 17.06,10.63 30.91,25.54 41.43,44.75 10.52,19.1 16.85,41.21 18.99,66.22l-82.96 15.02c-2.47,-23.29 -9.23,-41.53 -20.18,-54.63 -7.94,-9.34 -19.42,-14.06 -34.45,-14.06 -15.88,0 -27.9,6.98 -36.17,21.03 -6.76,11.27 -10.09,25.33 -10.09,42.07 0,26.19 11.27,52.91 33.91,79.95 8.59,10.41 21.46,22.64 38.53,36.6 20.18,16.85 33.48,28.55 39.92,35.2 21.36,21.36 37.88,42.39 49.47,63.1 5.58,9.77 9.98,18.78 13.31,27.04 8.26,20.39 12.56,38.64 12.88,54.84zm345.24 0c0.64,39.92 -9.77,74.05 -31.12,102.38 -14.06,19.21 -33.81,32.73 -59.46,40.67 -13.74,4.29 -29.73,6.44 -47.97,6.44 -33.91,0 -61.92,-8.37 -84.25,-25.22 -18.57,-13.74 -33.27,-32.41 -44.11,-56.02 -10.84,-23.72 -17.17,-50.76 -18.99,-81.35l82.21 -5.9c3.76,33.38 12.56,57.52 26.51,72.55 10.41,11.37 22.32,16.74 35.74,16.1 18.89,-0.64 33.91,-9.87 45.18,-27.9 5.8,-8.91 8.69,-21.46 8.69,-37.99 0,-23.83 -10.84,-47.43 -32.52,-70.94 -17.06,-16.1 -42.61,-40.35 -76.73,-72.76 -28.65,-27.69 -48.94,-52.59 -60.85,-74.59 -12.77,-24.68 -19.21,-51.51 -19.21,-80.49 0,-52.16 17.49,-91.65 52.59,-118.48 21.68,-16.2 48.51,-24.25 80.6,-24.25 30.8,0 57.2,6.87 79.09,20.6 17.06,10.63 30.91,25.54 41.43,44.75 10.52,19.1 16.85,41.21 18.99,66.22l-82.96 15.02c-2.47,-23.29 -9.23,-41.53 -20.18,-54.63 -7.94,-9.34 -19.42,-14.06 -34.45,-14.06 -15.88,0 -27.9,6.98 -36.17,21.03 -6.76,11.27 -10.09,25.33 -10.09,42.07 0,26.19 11.27,52.91 33.91,79.95 8.59,10.41 21.46,22.64 38.53,36.6 20.18,16.85 33.48,28.55 39.92,35.2 21.36,21.36 37.88,42.39 49.47,63.1 5.58,9.77 9.98,18.78 13.31,27.04 8.26,20.39 12.56,38.64 12.88,54.84zm474.13 -430.67l90.58 0 -89.61 573.08 -82.53 0 -48.94 -314.12 -45.82 314.12 -82.85 0 -96.16 -573.08 90.58 0 45.29 306.93 41.53 -306.93 90.58 0 45.29 306.61 42.07 -306.61zm190.92 441.08l-21.14 132 -90.15 0 97.45 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm464.26 441.72l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28zm295.02 0l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28z\"\/> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M4151.43 2189.35c46.41,-33.7 79.7,-72.12 99.68,-115.35 19.98,-43.23 31.25,-99.68 33.6,-169.34 2.36,-69.66 2.77,-131.74 1.23,-186.14l33.6 19.16 91.18 0c0,-52.76 -0.72,-88.72 -2.36,-107.87l50.4 21.62 -16.8 16.8 0 69.46 98.45 0 26.43 -23.97 43.23 45.59c-14.44,3.28 -28.07,7.68 -40.88,13.21 -12.81,5.63 -29.61,20.39 -50.4,44.46l-7.17 -4.81 35.96 -60.03 -105.62 0 0 130 74.48 0 21.62 -21.62 38.42 38.42 -21.62 9.63c-36.88,72.02 -68.02,123.14 -93.64,153.56 47.94,46.41 98.45,76.01 151.21,88.82l0 7.17c-20.8,1.64 -35.96,11.17 -45.59,28.79 -49.58,-30.43 -91.28,-64.85 -124.88,-103.26 -60.85,56.04 -132.87,93.63 -216.05,112.89l-2.46 -7.17c84.82,-35.24 152.13,-78.37 201.71,-129.59 -27.25,-36.78 -49.58,-91.18 -67.2,-163.19l-9.63 0 -16.8 7.17 -14.44 -14.34c-1.54,75.19 -13.93,136.76 -37.19,184.71 -23.15,48.05 -64.44,88.82 -123.65,122.42l-4.81 -7.17zm165.65 -437.23l0 130 93.63 0 0 -130 -93.63 0zm124.88 286.13c25.61,-33.6 51.22,-80.83 76.83,-141.68l-146.5 0c20.9,64.03 44.05,111.26 69.66,141.68zm-384.17 40.77c22.44,-4.82 52.86,-11.99 91.28,-21.62l0 -160.84 -2.46 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 81.65 0 0 -141.68 -9.63 0c-20.8,0 -40.06,2.36 -57.57,7.17l-21.62 -21.62 141.58 0 28.89 -28.79 40.77 43.23 -91.28 0 0 141.68 19.26 0 26.43 -26.33 38.42 40.77 -84.11 0 0 153.67 79.29 -21.62 2.36 9.63c-103.98,38.42 -163.19,65.56 -177.64,81.65l-26.43 -40.88zm729.92 -19.46l84.01 -21.62 2.46 9.53c-56.04,20.8 -112.89,44.05 -170.47,69.66l-14.44 14.44 -26.43 -45.69c38.42,-6.35 69.66,-12.81 93.64,-19.16l0 -158.48 -2.36 0c-20.8,0 -40.06,2.36 -57.57,7.17l-21.62 -21.62 81.55 0 0 -144.14 -11.99 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 136.87 0 26.43 -26.33 38.42 40.77 -79.29 0 0 144.14 21.62 0 23.97 -23.97 36.06 38.42 -81.65 0 0 151.31zm72.02 -345.85l170.47 0c-4.81,-23.87 -18.34,-48.66 -40.77,-74.17l4.81 -4.81c30.43,12.81 49.17,23.15 56.45,31.14 7.17,7.99 10.76,14.34 10.76,19.16 0,9.53 -5.63,19.16 -16.8,28.68l108.08 0 31.14 -28.79 38.42 43.23 -283.26 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62zm110.43 343.8l124.88 -11.99c-7.99,-12.81 -19.16,-27.97 -33.6,-45.59l7.17 -4.81c35.24,22.44 56.04,38.42 62.49,48.05 6.35,9.63 9.53,17.62 9.53,23.97 0,7.99 -2.36,15.67 -7.17,22.85 -4.81,7.17 -7.99,10.76 -9.63,10.76 -3.18,0 -5.53,-3.18 -7.17,-9.53 -4.82,-12.81 -10.35,-24.89 -16.8,-36.06 -81.65,15.98 -130.41,31.25 -146.5,45.59l-21.62 -43.23c8.09,-4.71 16.08,-10.76 24.07,-17.93 7.99,-7.27 19.98,-27.66 35.96,-61.26l-84.01 0 0 201.41 -31.25 14.44c1.64,-49.58 2.46,-96.81 2.46,-141.58 0,-44.67 -0.82,-80.73 -2.46,-107.87l31.25 19.16 88.82 0c11.27,-23.97 18.44,-44.77 21.62,-62.39l-88.82 0 -16.8 19.16 -28.79 -23.97 14.34 -11.99c0,-64.03 -0.82,-106.44 -2.36,-127.24l50.4 19.16 -19.16 16.8 0 93.63 218.41 0c0,-62.39 -0.72,-104.8 -2.36,-127.24l50.4 21.62 -19.16 16.8c0,56.04 0.72,95.27 2.36,117.71l-31.25 14.34 0 -28.79 -127.24 0 45.59 23.97 -19.16 9.63 -16.8 28.79 134.41 0 16.8 -21.62 33.7 28.89 -16.8 14.34 0 148.65c0,28.79 -16.9,49.58 -50.51,62.39 -4.81,-23.97 -29.61,-40.77 -74.37,-50.4l0 -9.53c44.77,3.18 71.61,4.81 80.42,4.81 8.81,0 13.22,-6.45 13.22,-19.26l0 -143.83 -144.04 0c-16.08,31.96 -32.88,58.39 -50.51,79.19zm136.87 -286.02c-11.17,6.45 -25.61,16.08 -43.23,28.89 19.26,8.09 32.88,15.67 40.88,22.95 7.99,7.17 11.99,15.57 11.99,25.3 0,6.35 -0.82,12.4 -2.36,18.03 -1.64,5.63 -3.28,8.4 -4.81,8.4 -4.81,0 -10.45,-4.81 -16.8,-14.44 -12.81,-16.08 -28.07,-30.53 -45.69,-43.33 -38.42,24.07 -72.02,41.7 -100.81,52.96l-4.81 -7.17c33.6,-19.36 61.67,-38.62 84,-57.88 -20.8,-14.44 -42.41,-28.07 -64.75,-40.98l4.81 -7.17c30.32,11.27 55.93,21.72 76.83,31.35 15.98,-12.91 31.96,-30.53 47.94,-53.07l36.06 36.16 -19.26 0zm504.23 235.11l0 59.93 72.02 0 0 -59.93 -72.02 0zm9.63 -290.43c0,-33.5 -0.82,-61.57 -2.36,-83.9l57.57 26.43 -21.62 16.7 0 40.77 88.82 0 28.89 -28.79 43.13 43.23 -160.84 0 0 131.85 36.06 0c27.15,-51.22 43.23,-91.18 47.94,-120.07l45.69 31.25c-17.62,7.99 -44.05,37.6 -79.29,88.82l60.03 0 31.25 -31.14 45.59 45.59 -316.96 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 175.28 0 0 -131.85 -67.2 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 146.5 0zm-115.25 36.06l7.17 -4.81c36.88,25.61 57.68,45.18 62.49,58.7 4.82,13.63 3.18,24.79 -4.81,33.6 -7.99,8.81 -13.63,13.22 -16.8,13.22 -6.45,0 -11.27,-7.99 -14.44,-23.97 -4.82,-23.97 -15.98,-49.58 -33.6,-76.73zm288.07 335.92c0,12.81 0.82,39.95 2.46,81.65l-36.06 11.99 0 -36.27 -225.69 0 0 24.18 -35.96 12.09c1.54,-46.41 2.36,-92.1 2.36,-136.87 0,-44.87 -0.82,-88.1 -2.36,-129.69l35.96 19.16 220.87 0 19.26 -23.97 36.06 31.25 -16.9 14.34 0 132.15zm-259.29 -139.32l0 182.25 225.69 0 0 -182.25 -225.69 0zm76.83 43.33l69.66 0 14.44 -19.16 33.6 26.43 -16.8 11.99c0,31.96 0.72,59.11 2.36,81.55l-31.25 14.44 0 -26.43 -72.02 0 0 16.8 -31.14 11.99c1.54,-25.61 2.36,-47.94 2.36,-67.2 0,-19.16 -0.82,-41.59 -2.36,-67.2l31.14 16.8zm-247.3 -165.35l0 -103.26c0,-25.61 -0.82,-52.86 -2.36,-81.65l57.57 31.25 -21.62 16.8 0 136.87 28.89 0 26.33 -26.33 40.88 40.77 -96.09 0 0 187.27 86.46 -21.62 2.36 9.63c-110.44,40.06 -171.19,69.66 -182.45,88.82l-26.43 -48.05c20.9,-3.18 49.69,-9.53 86.46,-19.16l0 -196.9 -7.17 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 86.46 0z\"\/> <\/g> <polygon fill=\"#ED3237\" points=\"3418.01,2406.67 3418.01,616.16 3823.17,616.16 3823.17,2406.67 \"\/> <\/g> <\/g>",
+    "iron-plated": "<g> <polygon fill=\"#FFFFFF\" points=\"-0,3022.83 10572.6,3022.83 10572.6,0 -0,0 \"\/> <g> <g> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M3527.77 1110.15l-72.66 0 0 -482.6 72.66 0 0 482.6zm180.03 -482.6c40.58,0 70.4,11.21 89.47,33.53 16.72,19.52 25.03,46.72 25.03,81.61l0 70.13c0,34.16 -13.01,62.99 -39.13,86.67l53.95 210.66 -78.35 0 -44.28 -181.74c-2.08,0.09 -4.25,0.09 -6.6,0.09l-42.3 0 0 181.65 -72.66 0 0 -482.6 114.87 0zm43.47 116.31c0,-28.02 -13.92,-42.02 -41.66,-42.02l-44.01 0 0 154.54 44.01 0c11.57,0 21.42,-4.07 29.46,-12.29 8.13,-8.22 12.2,-18.17 12.2,-29.73l0 -70.49zm250.97 -122.28c32.08,0 59.29,11.3 81.7,33.89 22.5,22.59 33.71,49.8 33.71,81.61l0 263.53c0,32.08 -11.3,59.38 -33.89,81.79 -22.5,22.5 -49.71,33.71 -81.52,33.71 -32.08,0 -59.29,-11.3 -81.61,-33.89 -22.32,-22.59 -33.44,-49.8 -33.44,-81.61l0 -263.53c0,-32.08 11.3,-59.38 33.89,-81.79 22.5,-22.5 49.62,-33.71 81.16,-33.71zm39.49 114.23c0,-11.57 -4.07,-21.33 -12.11,-29.46 -8.13,-8.04 -17.89,-12.11 -29.46,-12.11 -11.57,0 -21.42,4.07 -29.64,12.11 -8.22,8.13 -12.29,17.89 -12.29,29.46l0 263.89c0,11.57 4.07,21.33 12.29,29.46 8.22,8.04 18.07,12.11 29.64,12.11 11.57,0 21.33,-4.07 29.46,-12.11 8.04,-8.13 12.11,-17.89 12.11,-29.46l0 -263.89zm221.87 -108.81l96.61 324.26 0 -324.26 72.66 0 0 483.14 -78.17 0 -100.22 -309.26 0 309.26 -72.66 0 0 -483.14 81.79 0zm219.34 205.51l215.63 0 0 73.2 -215.63 0 0 -73.2zm380.48 -204.97c35.43,0 63.71,11.21 84.77,33.53 19.52,21.33 29.28,48.53 29.28,81.7l0 70.13c0,31.81 -11.12,59.1 -33.35,81.7 -22.23,22.59 -49.16,33.89 -80.79,33.89l-42.02 0 0 181.65 -72.66 0 0 -482.6 114.78 0zm43.56 116.31c0,-12.65 -3.8,-22.77 -11.39,-30.46 -7.59,-7.68 -17.71,-11.57 -30.28,-11.57l-44.01 0 0 154.54 44.01 0c11.57,0 21.42,-4.07 29.46,-12.29 8.13,-8.22 12.2,-18.17 12.2,-29.73l0 -70.49zm326.88 366.29l-198.37 0 0 -482.6 72.66 0 0 409.94 125.71 0 0 72.66zm143.79 -111.16l-17.8 111.16 -75.91 0 82.06 -482.6 100.14 0 80.88 482.6 -76.46 0 -16.99 -111.16 -75.91 0zm37.96 -260.82l-26.93 189.79 53.95 0 -27.02 -189.79zm201.9 -37.42l-77.54 0 0 -73.2 227.2 0 0 73.2 -77 0 0 409.4 -72.66 0 0 -409.4zm208.22 409.4l0 -483.14 207.23 0 0 73.2 -134.57 0 0 131.77 98.15 0 0 73.2 -98.15 0 0 131.77 134.57 0 0 73.2 -207.23 0zm486.12 -115.59c0,31.81 -11.21,59.11 -33.53,81.7 -22.32,22.59 -49.25,33.89 -80.88,33.89l-114.41 0 0 -483.14 114.41 0c31.81,0 58.83,11.3 81.07,33.89 22.23,22.59 33.35,49.71 33.35,81.34l0 252.32zm-156.17 43.47l43.92 0c11.57,0 21.33,-4.16 29.28,-12.56 7.95,-8.31 11.93,-18.16 11.93,-29.46l0 -252.69c0,-11.57 -4.07,-21.51 -12.11,-29.73 -8.13,-8.22 -17.8,-12.29 -29.1,-12.29l-43.92 0 0 336.73zm457.75 -441.39l59.2 0 -201.44 528.15 -59.2 0 201.44 -528.15zm231.99 513.51l-72.66 0 0 -482.6 72.66 0 0 482.6zm180.03 -482.6c40.58,0 70.4,11.21 89.47,33.53 16.72,19.52 25.03,46.72 25.03,81.61l0 70.13c0,34.16 -13.01,62.99 -39.13,86.67l53.95 210.66 -78.35 0 -44.28 -181.74c-2.08,0.09 -4.25,0.09 -6.6,0.09l-42.3 0 0 181.65 -72.66 0 0 -482.6 114.87 0zm43.47 116.31c0,-28.02 -13.92,-42.02 -41.66,-42.02l-44.01 0 0 154.54 44.01 0c11.57,0 21.42,-4.07 29.46,-12.29 8.13,-8.22 12.2,-18.17 12.2,-29.73l0 -70.49zm250.97 -122.28c32.08,0 59.29,11.3 81.7,33.89 22.5,22.59 33.71,49.8 33.71,81.61l0 263.53c0,32.08 -11.3,59.38 -33.89,81.79 -22.5,22.5 -49.71,33.71 -81.52,33.71 -32.08,0 -59.29,-11.3 -81.61,-33.89 -22.32,-22.59 -33.44,-49.8 -33.44,-81.61l0 -263.53c0,-32.08 11.3,-59.38 33.89,-81.79 22.5,-22.5 49.62,-33.71 81.16,-33.71zm39.49 114.23c0,-11.57 -4.07,-21.33 -12.11,-29.46 -8.13,-8.04 -17.89,-12.11 -29.46,-12.11 -11.57,0 -21.42,4.07 -29.64,12.11 -8.22,8.13 -12.29,17.89 -12.29,29.46l0 263.89c0,11.57 4.07,21.33 12.29,29.46 8.22,8.04 18.07,12.11 29.64,12.11 11.57,0 21.33,-4.07 29.46,-12.11 8.04,-8.13 12.11,-17.89 12.11,-29.46l0 -263.89zm221.87 -108.81l96.61 324.26 0 -324.26 72.66 0 0 483.14 -78.17 0 -100.22 -309.26 0 309.26 -72.66 0 0 -483.14 81.79 0zm-4053.47 1200.62l-72.66 0 0 -483.14 207.23 0 0 73.2 -134.57 0 0 131.77 98.15 0 0 73.2 -98.15 0 0 204.97zm299.5 -482.6c40.58,0 70.4,11.21 89.47,33.53 16.72,19.52 25.03,46.72 25.03,81.61l0 70.13c0,34.16 -13.01,62.99 -39.13,86.67l53.95 210.66 -78.35 0 -44.28 -181.74c-2.08,0.09 -4.25,0.09 -6.6,0.09l-42.3 0 0 181.65 -72.66 0 0 -482.6 114.87 0zm43.47 116.31c0,-28.02 -13.92,-42.02 -41.66,-42.02l-44.01 0 0 154.54 44.01 0c11.57,0 21.42,-4.07 29.46,-12.29 8.13,-8.22 12.2,-18.16 12.2,-29.73l0 -70.49zm238.14 255.13l-17.8 111.16 -75.91 0 82.06 -482.6 100.14 0 80.88 482.6 -76.46 0 -16.99 -111.16 -75.91 0zm37.96 -260.82l-26.93 189.79 53.95 0 -27.02 -189.79zm265.25 371.98l-72.66 0 0 -483.14 104.56 0 67.87 347.85 65.43 -347.85 99.95 0 0 483.14 -72.66 0 0 -303.48 -63.35 303.48 -58.56 0 -70.58 -302.66 0 302.66zm330.14 0l0 -483.14 207.23 0 0 73.2 -134.57 0 0 131.77 98.15 0 0 73.2 -98.15 0 0 131.77 134.57 0 0 73.2 -207.23 0zm556.52 -482.6l76.28 0 -75.46 482.6 -69.5 0 -41.21 -264.53 -38.59 264.53 -69.77 0 -80.98 -482.6 76.28 0 38.14 258.47 34.97 -258.47 76.28 0 38.14 258.2 35.43 -258.2zm241.39 -5.96c32.08,0 59.29,11.3 81.7,33.89 22.5,22.59 33.71,49.8 33.71,81.61l0 263.53c0,32.08 -11.3,59.38 -33.89,81.79 -22.5,22.5 -49.71,33.71 -81.52,33.71 -32.08,0 -59.29,-11.3 -81.61,-33.89 -22.32,-22.59 -33.44,-49.8 -33.44,-81.61l0 -263.53c0,-32.08 11.3,-59.38 33.89,-81.79 22.5,-22.5 49.62,-33.71 81.16,-33.71zm39.49 114.23c0,-11.57 -4.07,-21.33 -12.11,-29.46 -8.13,-8.04 -17.89,-12.11 -29.46,-12.11 -11.57,0 -21.42,4.07 -29.64,12.11 -8.22,8.13 -12.29,17.89 -12.29,29.46l0 263.89c0,11.57 4.07,21.33 12.29,29.46 8.22,8.04 18.07,12.11 29.64,12.11 11.57,0 21.33,-4.07 29.46,-12.11 8.04,-8.13 12.11,-17.89 12.11,-29.46l0 -263.89zm255.4 -108.27c40.58,0 70.4,11.21 89.47,33.53 16.72,19.52 25.03,46.72 25.03,81.61l0 70.13c0,34.16 -13.01,62.99 -39.13,86.67l53.95 210.66 -78.35 0 -44.28 -181.74c-2.08,0.09 -4.25,0.09 -6.6,0.09l-42.3 0 0 181.65 -72.66 0 0 -482.6 114.87 0zm43.47 116.31c0,-28.02 -13.92,-42.02 -41.66,-42.02l-44.01 0 0 154.54 44.01 0c11.57,0 21.42,-4.07 29.46,-12.29 8.13,-8.22 12.2,-18.16 12.2,-29.73l0 -70.49zm220.87 213.73l0 152.55 -72.66 0 0 -483.14 72.66 0 0 172.34 89.11 -172.34 78.08 0 -100.04 197.11 116.76 286.04 -85.58 0 -76.46 -196.11 -21.87 43.56zm583.18 -330.05l76.28 0 -75.46 482.6 -69.5 0 -41.21 -264.53 -38.59 264.53 -69.77 0 -80.98 -482.6 76.28 0 38.14 258.47 34.97 -258.47 76.28 0 38.14 258.2 35.43 -258.2zm160.78 371.44l-17.8 111.16 -75.91 0 82.06 -482.6 100.14 0 80.88 482.6 -76.46 0 -16.99 -111.16 -75.91 0zm37.96 -260.82l-26.93 189.79 53.95 0 -27.02 -189.79zm390.96 371.98l-198.37 0 0 -482.6 72.66 0 0 409.94 125.71 0 0 72.66zm248.44 0l-198.37 0 0 -482.6 72.66 0 0 409.94 125.71 0 0 72.66z\"\/> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M3698.19 2088.69c-16.13,36.4 -32.35,65.39 -48.48,86.96l-6.04 -4.05c20.19,-41.75 35.72,-101.8 46.5,-179.96l44.43 24.24 -16.13 8.11c-4.06,10.78 -9.49,28.3 -16.22,52.54l60.65 0c0,-44.51 -0.6,-86.36 -1.98,-125.52l46.5 24.33 -16.13 14.15 0 87.05 56.59 0 26.31 -28.3 36.32 40.46 -119.22 0c-1.38,38.99 -3.36,75.31 -6.13,108.96l80.92 0 26.23 -28.3 36.41 40.46 -129.4 0c28.3,98.35 73.5,158.39 135.53,179.96l0 8.02c-20.27,-1.29 -35.11,5.43 -44.51,20.27 -51.24,-48.57 -84.89,-117.93 -101.11,-208.26l-6.04 0c-22.95,102.4 -84.98,173.83 -186,214.29l-4.05 -6.04c87.56,-51.24 141.48,-120.69 161.76,-208.26l-44.52 0c-17.51,0 -33.73,1.98 -48.48,6.04l-18.2 -18.2 113.19 0c2.67,-34.94 4.74,-71.26 6.04,-108.96l-64.7 0zm-131.39 252.51l82.9 -48.57 6.04 6.04c-59.27,45.9 -93,78.94 -101.11,99.12l-28.3 -30.28c8.11,-6.73 12.16,-16.91 12.16,-30.37l0 -109.22 -12.16 0c-17.51,0 -33.64,1.98 -48.48,6.04l-18.2 -18.2 78.85 0 0 -81.01 -40.46 0c-12.08,14.84 -24.24,28.99 -36.4,42.44l-6.04 -4.05c32.35,-48.48 59.96,-121.21 82.9,-218.09l46.5 24.24 -16.22 8.11c-10.78,24.24 -18.81,43.05 -24.24,56.51l58.66 0 24.24 -26.23 34.42 38.39 -121.38 0c-13.46,26.92 -25.62,49.09 -36.41,66.51l86.96 0 24.33 -24.24 32.35 36.41 -80.92 0 0 81.01 36.41 0 24.24 -22.17 30.37 34.33 -91.01 0 0 113.27zm653.06 -295.21c0,-37.7 -0.6,-70.05 -1.98,-97.05l48.48 20.19 -18.2 16.22 0 60.65 121.38 0 20.19 -24.24 38.39 38.39c-20.19,1.38 -46.5,22.95 -78.85,64.7l-6.04 -3.97 30.37 -62.72 -125.44 0 0 121.38 76.87 0 22.26 -22.17 32.35 36.32 -22.26 8.11c-32.35,52.54 -63.32,94.98 -93,127.33 40.46,31.06 101.8,49.86 184.01,56.59l0 8.11c-22.95,2.67 -36.4,12.77 -40.46,30.37 -63.32,-16.22 -117.24,-41.84 -161.76,-76.87 -57.97,41.75 -131.39,67.38 -220.42,76.87l-1.98 -6.13c91.62,-20.19 159.08,-49.86 202.22,-88.94 -33.73,-36.32 -60.65,-82.21 -80.92,-137.43l-24.24 4.05 -16.22 -16.22 115.26 0 0 -121.38 -129.4 0c0,55.3 -0.35,102.49 -0.95,141.57 -0.69,39.08 -9.14,77.82 -25.28,116.29 -16.22,38.39 -41.15,75.14 -74.88,110.17l-6.04 -4.06c28.3,-39.08 48.22,-78.16 59.7,-117.24 11.39,-39.17 17.51,-82.9 18.12,-131.47 0.69,-48.48 0.34,-97.74 -0.95,-147.61l32.35 20.19 127.33 0zm-64.7 145.71c25.62,51.24 55.3,91.01 89.03,119.31 28.3,-28.3 55.9,-68.07 82.9,-119.31l-171.93 0zm552.04 -46.76c0,53.92 0.69,92.4 1.98,115.34l-30.28 12.08 0 -24.24 -101.11 0 0 24.24 -30.37 14.15c1.38,-30.97 2.07,-61.34 2.07,-91.01 0,-29.68 -0.69,-58.66 -2.07,-86.96l34.42 16.13 93 0 18.2 -20.19 28.3 28.3 -14.15 12.16zm-129.4 -8.11l0 99.12 101.11 0 0 -99.12 -101.11 0zm254.75 -180.13c32.35,12.16 51.85,21.57 58.66,28.3 6.73,6.73 10.09,12.85 10.09,18.2 0,5.43 -2.07,11.13 -6.13,17.17 -3.97,6.13 -7.33,9.14 -10.09,9.14 -4.05,0 -8.71,-5.43 -14.15,-16.22 -9.4,-14.84 -23.55,-31.66 -42.44,-50.55l4.05 -6.04zm121.3 327.65c-1.29,21.57 -1.98,39.77 -1.98,54.61 0,14.84 0.95,27.69 3.02,38.48 1.98,10.78 5,21.57 9.06,32.35 1.38,4.05 0,6.13 -4.06,6.13 -5.35,0 -21.83,-6.13 -49.52,-18.2 -27.61,-12.16 -58.32,-40.46 -91.96,-84.98 -43.14,40.46 -97.05,75.49 -161.76,105.16l-4.05 -8.11c64.7,-36.41 115.26,-77.56 151.66,-123.45 -24.24,-44.51 -38.48,-120.09 -42.44,-226.63l-188.07 0c-17.51,0 -33.73,1.98 -48.57,6.04l-18.2 -18.2 252.77 0c0,-28.21 -0.69,-58.49 -1.98,-90.84l50.55 22.26 -18.2 16.13 0 52.45 103.09 0 28.3 -28.3 40.46 40.46 -169.86 0c4.05,95.76 14.84,162.53 32.35,200.32 10.78,-16.13 21.22,-37.44 31.32,-63.75 10.18,-26.31 19.24,-56.25 27.35,-89.98l46.5 32.35 -20.19 12.16c-24.33,59.35 -47.19,105.85 -68.76,139.58 20.19,29.68 49.17,56.68 86.87,81.01l18.2 -87.05 8.11 0zm-454.9 54.7c28.3,-1.3 114.57,-14.75 258.81,-40.37l1.98 8.11c-150.97,38.99 -231.2,64.62 -240.61,76.78l-20.19 -44.51zm752.1 -250.35c-16.13,36.4 -32.35,65.39 -48.48,86.96l-6.04 -4.05c20.19,-41.75 35.72,-101.8 46.5,-179.96l44.43 24.24 -16.13 8.11c-4.06,10.78 -9.49,28.3 -16.22,52.54l60.65 0c0,-44.51 -0.6,-86.36 -1.98,-125.52l46.5 24.33 -16.13 14.15 0 87.05 56.59 0 26.31 -28.3 36.32 40.46 -119.22 0c-1.38,38.99 -3.36,75.31 -6.13,108.96l80.92 0 26.23 -28.3 36.41 40.46 -129.4 0c28.3,98.35 73.5,158.39 135.53,179.96l0 8.02c-20.27,-1.29 -35.11,5.43 -44.51,20.27 -51.24,-48.57 -84.89,-117.93 -101.11,-208.26l-6.04 0c-22.95,102.4 -84.98,173.83 -186,214.29l-4.05 -6.04c87.56,-51.24 141.48,-120.69 161.76,-208.26l-44.52 0c-17.51,0 -33.73,1.98 -48.48,6.04l-18.2 -18.2 113.19 0c2.67,-34.94 4.74,-71.26 6.04,-108.96l-64.7 0zm-131.39 252.51l82.9 -48.57 6.04 6.04c-59.27,45.9 -93,78.94 -101.11,99.12l-28.3 -30.28c8.11,-6.73 12.16,-16.91 12.16,-30.37l0 -109.22 -12.16 0c-17.51,0 -33.65,1.98 -48.48,6.04l-18.2 -18.2 78.85 0 0 -81.01 -40.46 0c-12.08,14.84 -24.24,28.99 -36.41,42.44l-6.04 -4.05c32.35,-48.48 59.96,-121.21 82.9,-218.09l46.5 24.24 -16.22 8.11c-10.78,24.24 -18.81,43.05 -24.24,56.51l58.66 0 24.24 -26.23 34.42 38.39 -121.38 0c-13.46,26.92 -25.62,49.09 -36.41,66.51l86.96 0 24.33 -24.24 32.35 36.41 -80.92 0 0 81.01 36.41 0 24.24 -22.17 30.37 34.33 -91.01 0 0 113.27zm659.19 -80.66c0,87.56 0.6,138.03 1.98,151.49l-32.35 14.15c1.38,-44.52 2.07,-98.43 2.07,-161.76 -47.19,74.11 -120,126.04 -218.43,155.72l-1.98 -8.11c88.94,-36.32 150.97,-86.87 186,-151.49l-105.16 0c-17.51,0 -33.64,1.98 -48.48,6.04l-18.2 -18.2 206.27 0c0,-17.51 -0.69,-38.39 -2.07,-62.63l48.57 20.19 -18.2 14.15 0 28.3 149.59 0 28.3 -28.3 40.46 40.46 -198.16 0c41.75,60.65 106.46,97.05 194.11,109.22l0 8.02c-20.19,2.76 -33.73,11.47 -40.46,26.31 -74.11,-24.24 -128.71,-72.12 -163.74,-143.55l-10.09 0zm-230.51 -232.67l84.89 0c0,-24.24 -0.69,-49.86 -1.98,-76.87l46.5 24.33 -16.22 14.15 0 38.39 56.68 0 18.12 -20.19 28.38 26.31 -16.22 12.08c-2.67,62.03 -5.09,99.12 -7.07,111.2 -1.98,12.16 -7.42,22.26 -16.13,30.37 -8.8,8.11 -20.62,14.15 -35.46,18.2 1.38,-13.46 -13.46,-26.31 -44.43,-38.39l1.98 -8.11c29.68,6.73 47.88,8.71 54.61,6.04 6.73,-2.67 11.13,-9.4 13.11,-20.19 2.07,-10.78 4.4,-45.89 7.07,-105.16l-60.65 0c0,86.27 -39.08,150.28 -117.24,192.12l-4.05 -6.13c62.03,-45.81 93,-107.84 93,-186l-50.55 0 -18.2 4.05 -16.13 -16.22zm262.86 161.76c1.29,-32.35 1.98,-64.62 1.98,-96.97 0,-32.26 -0.69,-64.62 -1.98,-96.97l30.28 18.2 80.92 0 18.2 -18.2 26.23 26.31 -16.13 12.08c0,72.73 0.69,117.15 1.98,133.29l-28.3 14.15 0 -34.33 -84.89 0 0 28.3 -28.3 14.15zm28.3 -163.57l0 108.96 84.89 0 0 -108.96 -84.89 0zm487.25 240.17l0 50.47 60.65 0 0 -50.47 -60.65 0zm8.11 -244.57c0,-28.21 -0.69,-51.85 -1.98,-70.66l48.48 22.26 -18.2 14.06 0 34.34 74.8 0 24.33 -24.24 36.32 36.41 -135.44 0 0 111.03 30.37 0c22.86,-43.13 36.41,-76.78 40.37,-101.11l38.48 26.31c-14.84,6.73 -37.1,31.66 -66.77,74.8l50.55 0 26.31 -26.23 38.39 38.39 -266.92 0c-17.51,0 -33.65,1.98 -48.48,6.04l-18.2 -18.2 147.61 0 0 -111.03 -56.59 0c-17.51,0 -33.73,1.98 -48.57,6.04l-18.2 -18.2 123.37 0zm-97.05 30.37l6.04 -4.05c31.06,21.57 48.57,38.04 52.62,49.43 4.06,11.47 2.67,20.88 -4.05,28.3 -6.73,7.42 -11.47,11.13 -14.15,11.13 -5.43,0 -9.49,-6.73 -12.16,-20.19 -4.06,-20.19 -13.46,-41.75 -28.3,-64.62zm242.59 282.88c0,10.78 0.69,33.64 2.07,68.76l-30.37 10.09 0 -30.54 -190.05 0 0 20.36 -30.28 10.18c1.29,-39.08 1.98,-77.56 1.98,-115.26 0,-37.79 -0.69,-74.19 -1.98,-109.22l30.28 16.13 186 0 16.22 -20.19 30.37 26.31 -14.23 12.08 0 111.29zm-218.35 -117.33l0 153.47 190.05 0 0 -153.47 -190.05 0zm64.7 36.49l58.66 0 12.16 -16.13 28.3 22.26 -14.15 10.09c0,26.92 0.6,49.78 1.98,68.67l-26.31 12.16 0 -22.26 -60.65 0 0 14.15 -26.23 10.09c1.29,-21.57 1.98,-40.37 1.98,-56.59 0,-16.13 -0.69,-35.03 -1.98,-56.59l26.23 14.15zm-208.26 -139.24l0 -86.96c0,-21.57 -0.69,-44.52 -1.98,-68.76l48.48 26.31 -18.2 14.15 0 115.26 24.33 0 22.17 -22.17 34.42 34.33 -80.92 0 0 157.7 72.81 -18.2 1.98 8.11c-93,33.73 -144.16,58.66 -153.65,74.8l-22.26 -40.46c17.6,-2.67 41.84,-8.02 72.81,-16.13l0 -165.81 -6.04 0c-17.51,0 -33.73,1.98 -48.57,6.04l-18.2 -18.2 72.81 0z\"\/> <\/g> <polygon fill=\"#ED3237\" points=\"2822.09,2418.07 2822.09,627.56 3227.25,627.56 3227.25,2418.07 \"\/> <\/g> <\/g>",
+    "acp": "<g> <polygon fill=\"#FFFFFF\" points=\"-0,3022.83 10572.6,3022.83 10572.6,0 -0,0 \"\/> <g> <g> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M4493.45 1239.61l-21.14 132 -90.15 0 97.44 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm352.43 448.81c-38.1,0 -70.4,-13.31 -97.02,-40.03 -26.72,-26.61 -40.03,-58.92 -40.03,-96.69l0 -312.73c0,-38.1 13.42,-70.51 40.25,-97.12 26.72,-26.72 59.02,-40.03 96.8,-40.03 38.1,0 70.4,13.42 96.91,40.24 26.51,26.83 39.71,59.13 39.71,97.02l0 65.47 -89.5 0 0 -67.29c0,-13.63 -4.83,-25.43 -14.59,-35.2 -9.77,-9.77 -21.46,-14.6 -35.2,-14.6 -13.74,0 -25.33,4.83 -34.99,14.6 -9.55,9.77 -14.38,21.46 -14.38,35.2l0 313.59c0,13.74 4.83,25.33 14.38,34.99 9.66,9.55 21.25,14.38 34.99,14.38 13.74,0 25.43,-4.83 35.2,-14.38 9.77,-9.55 14.59,-21.25 14.59,-34.99l0 -78.99 89.5 0 0 79.95c0,38.1 -13.42,70.4 -40.24,96.91 -26.72,26.51 -58.92,39.71 -96.37,39.71zm344.17 -580.17c42.07,0 75.66,13.31 100.67,39.82 23.18,25.33 34.77,57.63 34.77,97.02l0 83.28c0,37.78 -13.2,70.19 -39.6,97.02 -26.4,26.83 -58.38,40.25 -95.94,40.25l-49.9 0 0 215.71 -86.28 0 0 -573.08 136.29 0zm51.73 138.12c0,-15.03 -4.51,-27.04 -13.52,-36.17 -9.01,-9.12 -21.03,-13.74 -35.95,-13.74l-52.26 0 0 183.52 52.26 0c13.74,0 25.44,-4.83 34.99,-14.6 9.66,-9.77 14.49,-21.57 14.49,-35.31l0 -83.71zm557.84 -138.12l90.58 0 -89.61 573.08 -82.53 0 -48.94 -314.12 -45.82 314.12 -82.85 0 -96.16 -573.08 90.58 0 45.29 306.93 41.53 -306.93 90.58 0 45.29 306.61 42.07 -306.61zm190.92 441.08l-21.14 132 -90.15 0 97.44 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm464.26 441.72l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28zm295.02 0l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28z\"\/> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M4675.34 1724.87l0 129.39 165.65 0 0 -129.39 -165.65 0zm165.65 143.83l-165.65 0 0 26.43 -35.96 11.99c1.54,-47.94 2.36,-85.54 2.36,-112.79 0,-27.15 -0.82,-61.47 -2.36,-103.06l35.96 19.16 160.94 0 16.8 -23.97 40.77 28.79 -19.16 16.8c0,68.74 0.72,119.86 2.36,153.46l-36.06 16.8 0 -33.6zm21.62 285.21l-213.7 0 0 40.88 -35.96 14.44c1.64,-44.77 2.36,-85.13 2.36,-121.09 0,-35.96 -0.72,-81.14 -2.36,-135.53l35.96 23.97 208.99 0 19.16 -26.33 38.42 31.14 -19.16 16.8c0,84.72 0.72,147.11 2.36,187.06l-36.06 14.34 0 -45.69zm-213.7 -162.89l0 148.44 213.7 0 0 -148.44 -213.7 0zm-151.21 136.66l86.46 -50.3 4.81 7.17c-65.67,54.3 -100.91,91.07 -105.72,110.23l-28.79 -38.31c6.45,-6.35 9.63,-17.62 9.63,-33.6l0 -129.39 -16.8 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 96.09 0 0 -96.2 -50.4 0c-12.81,15.98 -26.43,32.78 -40.88,50.4l-7.17 -4.81c43.23,-70.38 78.37,-158.28 105.62,-263.79l50.4 28.79 -21.62 14.44c-11.17,23.97 -20.8,46.31 -28.79,67.1l72.02 0 31.25 -31.14 38.42 45.59 -146.5 0c-15.98,30.32 -31.14,56.65 -45.59,78.99l115.25 0 28.79 -28.79 38.42 43.23 -105.62 0 0 96.2 45.59 0 28.79 -28.79 36.06 43.23 -110.44 0 0 134.2zm537.83 -216.06c0,-35.24 -0.82,-70.38 -2.46,-105.62l52.86 21.62 -19.16 14.34 0 76.83 62.39 0c1.64,-57.57 2.36,-104.9 2.36,-141.68l-57.57 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 96.09 0c-3.17,-27.25 -15.98,-56.14 -38.42,-86.57l7.17 -4.81c36.88,22.44 57.68,40.06 62.49,52.96 4.81,12.81 -0.82,25.61 -16.8,38.42l62.39 0c19.16,-36.88 31.96,-68.95 38.42,-96.2l45.59 26.43 -21.62 9.63c-19.16,25.71 -35.14,45.69 -47.94,60.14l52.76 0 26.43 -26.33 40.77 40.77 -136.76 0c0,43.23 -1.64,90.46 -4.81,141.68l67.2 0c0,-36.78 -0.82,-74.37 -2.46,-112.79l48.05 19.16 -16.8 14.44c0,49.58 0.82,84.82 2.46,105.62l-31.25 11.99 0 -23.97 -69.66 0c-9.63,46.41 -30.02,80.42 -61.16,102.03 -31.25,21.62 -66.08,38.83 -104.49,51.63l-2.36 -7.17c33.6,-17.62 62.8,-37.29 87.59,-58.91 24.79,-21.51 41.18,-50.81 49.28,-87.59l-60.03 0 -14.44 16.8 -31.25 -26.43 14.44 -11.99zm280.9 -218.51l33.6 21.62 112.89 0 14.34 -21.62 38.42 26.43 -16.8 14.44 0 247.3c1.64,28.79 -15.98,51.22 -52.76,67.2 -1.64,-17.62 -23.26,-33.6 -64.85,-47.94l0 -9.63c35.24,4.82 58.39,7.17 69.66,7.17 11.17,0 16.8,-10.35 16.8,-31.25l0 -57.57 -124.88 0c-7.99,38.42 -32.06,73.66 -72.02,105.62l33.6 19.26 -19.26 14.34 0 50.4 103.26 0 31.25 -31.14 45.59 45.59 -180.1 0 0 69.77 168.11 0 36.06 -35.96 50.4 50.4 -470.63 0c-20.8,0 -40.06,2.36 -57.57,7.17l-21.62 -21.62 261.64 0 0 -69.77 -107.98 0c-20.9,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 187.27 0 0 -72.02c-11.17,7.99 -35.96,18.44 -74.38,31.25l-2.46 -7.17c51.22,-25.61 86.87,-52.04 106.85,-79.29 20.08,-27.15 31.25,-56.86 33.6,-88.82 2.46,-32.07 3.69,-62.39 3.69,-91.28 0,-28.79 -0.82,-61.57 -2.46,-98.45zm33.6 36.06l0 71.61 117.71 0 0 -71.61 -117.71 0zm0 86.05c0,28.99 -1.54,55.52 -4.81,79.6l122.52 0 0 -79.6 -117.71 0zm732.38 62.39c-27.25,88.1 -56.04,152.95 -86.46,194.64 44.77,57.57 97.63,93.64 158.48,108.08l0 9.53c-28.79,1.64 -45.69,11.27 -50.4,28.89 -44.87,-22.44 -87.28,-63.21 -127.34,-122.52 -52.76,56.04 -117.61,96.09 -194.44,120.06l-4.82 -7.17c76.83,-35.24 137.69,-80.83 182.45,-136.97 -30.43,-59.21 -50.4,-128.06 -60.03,-206.53l-26.33 0c0,40.06 -2.46,82.47 -7.27,127.34 -4.81,44.77 -15.16,85.64 -31.14,122.52 -16.08,36.78 -46.51,72.84 -91.28,108.08l-7.17 -7.27c46.41,-46.41 75.19,-96.4 86.36,-150.08 11.27,-53.58 16.8,-108.8 16.8,-165.65 0,-56.75 -0.72,-114.84 -2.36,-174.05l36.06 19.16c73.55,-19.16 120.37,-33.19 140.45,-42 19.98,-8.81 38.01,-18.03 53.99,-27.56l36.06 45.59c-19.26,0 -44.05,3.18 -74.48,9.53 -31.96,6.45 -84,15.26 -156.02,26.43l0 93.53 172.82 0 23.97 -23.97 36.06 36.06 -23.97 14.34zm-170.47 -11.99c14.34,68.84 36.78,128.87 67.2,180.1 28.79,-48.05 51.22,-108.08 67.2,-180.1l-134.41 0zm-184.91 36.27c0,174.46 0.82,278.44 2.36,312.05l-38.42 16.8c1.64,-72.02 2.46,-172.82 2.46,-302.42 -22.44,63.93 -52.86,119.14 -91.28,165.55l-7.17 -4.81c43.23,-76.73 74.38,-164.83 93.64,-264l-55.22 0 -19.26 4.81 -19.16 -19.26 98.45 0c0,-57.68 -0.82,-105.72 -2.46,-144.14l55.22 28.79 -19.16 16.9 0 98.45 28.79 0 26.43 -26.33 40.77 40.77 -95.99 0 0 62.39c36.78,20.8 59.21,36.06 67.2,45.59 7.99,9.63 11.99,19.26 11.99,28.89 0,7.99 -1.95,16.8 -5.94,26.33 -4,9.63 -6.86,14.44 -8.4,14.44 -4.81,0 -9.63,-7.99 -14.44,-23.97 -9.63,-24.07 -26.43,-49.69 -50.4,-76.83zm813.92 134.61l0 59.93 72.02 0 0 -59.93 -72.02 0zm9.63 -290.43c0,-33.5 -0.82,-61.57 -2.36,-83.9l57.57 26.43 -21.62 16.7 0 40.77 88.82 0 28.89 -28.79 43.13 43.23 -160.84 0 0 131.85 36.06 0c27.15,-51.22 43.23,-91.18 47.94,-120.06l45.69 31.25c-17.62,7.99 -44.05,37.6 -79.29,88.82l60.03 0 31.25 -31.14 45.59 45.59 -316.96 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 175.28 0 0 -131.85 -67.2 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 146.49 0zm-115.25 36.06l7.17 -4.81c36.88,25.61 57.68,45.18 62.49,58.7 4.82,13.63 3.18,24.79 -4.81,33.6 -7.99,8.81 -13.63,13.22 -16.8,13.22 -6.45,0 -11.27,-7.99 -14.44,-23.97 -4.82,-23.97 -15.98,-49.58 -33.6,-76.73zm288.07 335.92c0,12.81 0.82,39.95 2.46,81.65l-36.06 11.99 0 -36.27 -225.69 0 0 24.18 -35.96 12.09c1.54,-46.41 2.36,-92.1 2.36,-136.87 0,-44.87 -0.82,-88.1 -2.36,-129.69l35.96 19.16 220.87 0 19.26 -23.97 36.06 31.25 -16.9 14.34 0 132.15zm-259.29 -139.32l0 182.25 225.69 0 0 -182.25 -225.69 0zm76.83 43.33l69.66 0 14.44 -19.16 33.6 26.43 -16.8 11.99c0,31.96 0.72,59.11 2.36,81.55l-31.25 14.44 0 -26.43 -72.02 0 0 16.8 -31.14 11.99c1.54,-25.61 2.36,-47.94 2.36,-67.2 0,-19.16 -0.82,-41.59 -2.36,-67.2l31.14 16.8zm-247.3 -165.35l0 -103.26c0,-25.61 -0.82,-52.86 -2.36,-81.65l57.57 31.25 -21.62 16.8 0 136.87 28.89 0 26.33 -26.33 40.88 40.77 -96.09 0 0 187.27 86.46 -21.62 2.36 9.63c-110.44,40.06 -171.19,69.66 -182.45,88.82l-26.43 -48.05c20.9,-3.18 49.69,-9.53 86.46,-19.16l0 -196.9 -7.17 0c-20.8,0 -40.05,2.36 -57.68,7.17l-21.62 -21.62 86.46 0z\"\/> <\/g> <polygon fill=\"#ED3237\" points=\"3732.63,2406.67 3732.63,616.16 4137.78,616.16 4137.78,2406.67 \"\/> <\/g> <\/g>",
+    "woodenpanel": "<g> <polygon fill=\"#FFFFFF\" points=\"-0,3022.83 10572.6,3022.83 10572.6,0 -0,0 \"\/> <g> <g> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M3300.92 832.47l90.58 0 -89.61 573.08 -82.53 0 -48.94 -314.12 -45.82 314.12 -82.85 0 -96.16 -573.08 90.58 0 45.29 306.93 41.53 -306.93 90.58 0 45.29 306.61 42.07 -306.61zm286.65 -7.08c38.1,0 70.4,13.41 97.02,40.24 26.72,26.83 40.03,59.13 40.03,96.91l0 312.94c0,38.1 -13.42,70.51 -40.25,97.12 -26.72,26.72 -59.03,40.03 -96.8,40.03 -38.1,0 -70.4,-13.42 -96.91,-40.25 -26.51,-26.83 -39.71,-59.13 -39.71,-96.91l0 -312.94c0,-38.1 13.42,-70.51 40.24,-97.12 26.72,-26.72 58.92,-40.03 96.37,-40.03zm46.9 135.65c0,-13.74 -4.83,-25.33 -14.38,-34.99 -9.66,-9.55 -21.25,-14.38 -34.99,-14.38 -13.74,0 -25.43,4.83 -35.2,14.38 -9.77,9.66 -14.6,21.25 -14.6,34.99l0 313.37c0,13.74 4.83,25.33 14.6,34.99 9.77,9.55 21.46,14.38 35.2,14.38 13.74,0 25.33,-4.83 34.99,-14.38 9.55,-9.66 14.38,-21.25 14.38,-34.99l0 -313.37zm301.67 -135.65c38.1,0 70.4,13.41 97.02,40.24 26.72,26.83 40.03,59.13 40.03,96.91l0 312.94c0,38.1 -13.42,70.51 -40.25,97.12 -26.72,26.72 -59.03,40.03 -96.8,40.03 -38.1,0 -70.4,-13.42 -96.91,-40.25 -26.51,-26.83 -39.71,-59.13 -39.71,-96.91l0 -312.94c0,-38.1 13.42,-70.51 40.24,-97.12 26.72,-26.72 58.92,-40.03 96.37,-40.03zm46.9 135.65c0,-13.74 -4.83,-25.33 -14.38,-34.99 -9.66,-9.55 -21.25,-14.38 -34.99,-14.38 -13.74,0 -25.43,4.83 -35.2,14.38 -9.77,9.66 -14.6,21.25 -14.6,34.99l0 313.37c0,13.74 4.83,25.33 14.6,34.99 9.77,9.55 21.46,14.38 35.2,14.38 13.74,0 25.33,-4.83 34.99,-14.38 9.55,-9.66 14.38,-21.25 14.38,-34.99l0 -313.37zm438.08 307.25c0,37.78 -13.31,70.19 -39.82,97.02 -26.51,26.83 -58.49,40.24 -96.05,40.24l-135.87 0 0 -573.73 135.87 0c37.78,0 69.86,13.42 96.26,40.25 26.4,26.83 39.6,59.03 39.6,96.59l0 299.63zm-185.45 51.62l52.16 0c13.74,0 25.33,-4.94 34.77,-14.92 9.44,-9.87 14.17,-21.57 14.17,-34.99l0 -300.06c0,-13.74 -4.83,-25.54 -14.38,-35.31 -9.66,-9.77 -21.14,-14.6 -34.56,-14.6l-52.16 0 0 399.87zm261.21 85.64l0 -573.73 246.08 0 0 86.93 -159.8 0 0 156.47 116.55 0 0 86.93 -116.55 0 0 156.47 159.8 0 0 86.93 -246.08 0zm402.66 -573.73l114.72 385.06 0 -385.06 86.28 0 0 573.73 -92.83 0 -119.02 -367.25 0 367.25 -86.28 0 0 -573.73 97.12 0zm456.21 0.64c42.07,0 75.66,13.31 100.66,39.82 23.18,25.33 34.77,57.63 34.77,97.02l0 83.28c0,37.78 -13.2,70.19 -39.6,97.02 -26.4,26.83 -58.38,40.25 -95.94,40.25l-49.9 0 0 215.71 -86.28 0 0 -573.08 136.29 0zm51.73 138.12c0,-15.03 -4.51,-27.04 -13.52,-36.17 -9.01,-9.12 -21.03,-13.74 -35.95,-13.74l-52.26 0 0 183.52 52.26 0c13.74,0 25.44,-4.83 34.99,-14.6 9.66,-9.77 14.49,-21.57 14.49,-35.31l0 -83.71zm208.63 302.96l-21.14 132 -90.15 0 97.45 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm325.82 -132l114.72 385.06 0 -385.06 86.28 0 0 573.73 -92.83 0 -119.02 -367.25 0 367.25 -86.28 0 0 -573.73 97.12 0zm278.28 573.73l0 -573.73 246.08 0 0 86.93 -159.8 0 0 156.47 116.55 0 0 86.93 -116.55 0 0 156.47 159.8 0 0 86.93 -246.08 0zm541.1 0l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28zm474.24 -573.08l90.58 0 -89.61 573.08 -82.53 0 -48.94 -314.12 -45.82 314.12 -82.85 0 -96.16 -573.08 90.58 0 45.29 306.93 41.53 -306.93 90.58 0 45.29 306.61 42.07 -306.61zm190.92 441.08l-21.14 132 -90.15 0 97.45 -573.08 118.91 0 96.05 573.08 -90.79 0 -20.18 -132 -90.15 0zm45.07 -309.72l-31.98 225.37 64.07 0 -32.09 -225.37zm464.26 441.72l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28zm295.02 0l-235.56 0 0 -573.08 86.28 0 0 486.8 149.28 0 0 86.28z\"\/> <path fill=\"#000000\" fill-rule=\"nonzero\" d=\"M3222.61 1813.28c0,190.75 0.82,310.92 2.46,360.61l-40.88 19.26c1.64,-97.73 2.46,-212.37 2.46,-343.8 -49.69,116.99 -133.69,210.73 -252.12,281.31l-4.81 -7.27c108.8,-84.93 185.63,-188.29 230.5,-310.1l-139.32 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 244.94 0c0,-64.03 -0.82,-119.25 -2.46,-165.65l62.49 26.43 -24.07 19.16 0 120.07 163.3 0 38.42 -38.42 52.86 52.86 -230.5 0c46.41,139.43 127.24,223.64 242.49,252.42l0 9.63c-35.24,6.45 -55.22,18.44 -60.03,36.06 -108.9,-75.3 -173.64,-174.67 -194.54,-298.11l-11.99 0zm809.21 31.04c-27.25,88.1 -56.04,152.95 -86.46,194.64 44.77,57.57 97.63,93.63 158.48,108.08l0 9.53c-28.79,1.64 -45.69,11.27 -50.4,28.89 -44.87,-22.44 -87.28,-63.21 -127.34,-122.52 -52.76,56.04 -117.61,96.09 -194.44,120.06l-4.82 -7.17c76.83,-35.24 137.69,-80.83 182.45,-136.97 -30.43,-59.21 -50.4,-128.06 -60.03,-206.53l-26.33 0c0,40.06 -2.46,82.47 -7.27,127.34 -4.81,44.77 -15.16,85.64 -31.14,122.52 -16.08,36.78 -46.51,72.84 -91.28,108.08l-7.17 -7.27c46.41,-46.41 75.19,-96.4 86.36,-150.08 11.27,-53.58 16.8,-108.8 16.8,-165.65 0,-56.75 -0.72,-114.84 -2.36,-174.05l36.06 19.16c73.55,-19.16 120.37,-33.19 140.45,-42 19.98,-8.81 38.01,-18.03 53.99,-27.56l36.06 45.59c-19.26,0 -44.05,3.18 -74.48,9.53 -31.96,6.45 -84,15.26 -156.02,26.43l0 93.53 172.82 0 23.97 -23.97 36.06 36.06 -23.97 14.34zm-170.47 -11.99c14.34,68.84 36.78,128.88 67.2,180.1 28.79,-48.05 51.22,-108.08 67.2,-180.1l-134.41 0zm-184.91 36.27c0,174.46 0.82,278.44 2.36,312.05l-38.42 16.8c1.64,-72.02 2.46,-172.82 2.46,-302.42 -22.44,63.93 -52.86,119.14 -91.28,165.55l-7.17 -4.81c43.23,-76.73 74.38,-164.83 93.64,-264l-55.22 0 -19.26 4.81 -19.16 -19.26 98.45 0c0,-57.68 -0.82,-105.72 -2.46,-144.14l55.22 28.79 -19.16 16.9 0 98.45 28.79 0 26.43 -26.33 40.77 40.77 -95.99 0 0 62.39c36.78,20.8 59.21,36.06 67.2,45.59 7.99,9.63 11.99,19.26 11.99,28.89 0,7.99 -1.95,16.8 -5.94,26.33 -4,9.63 -6.86,14.44 -8.4,14.44 -4.81,0 -9.63,-7.99 -14.44,-23.97 -9.63,-24.07 -26.43,-49.69 -50.4,-76.83zm813.92 134.61l0 59.93 72.02 0 0 -59.93 -72.02 0zm9.63 -290.43c0,-33.5 -0.82,-61.57 -2.36,-83.9l57.57 26.43 -21.62 16.7 0 40.77 88.82 0 28.89 -28.79 43.13 43.23 -160.84 0 0 131.85 36.06 0c27.15,-51.22 43.23,-91.18 47.94,-120.07l45.69 31.25c-17.62,7.99 -44.05,37.6 -79.29,88.82l60.03 0 31.25 -31.14 45.59 45.59 -316.96 0c-20.8,0 -39.95,2.36 -57.57,7.17l-21.62 -21.62 175.28 0 0 -131.85 -67.2 0c-20.8,0 -40.06,2.36 -57.68,7.17l-21.62 -21.62 146.49 0zm-115.25 36.06l7.17 -4.81c36.88,25.61 57.68,45.18 62.49,58.7 4.82,13.63 3.18,24.79 -4.81,33.6 -7.99,8.81 -13.63,13.22 -16.8,13.22 -6.45,0 -11.27,-7.99 -14.44,-23.97 -4.82,-23.97 -15.98,-49.58 -33.6,-76.73zm288.07 335.92c0,12.81 0.82,39.95 2.46,81.65l-36.06 11.99 0 -36.27 -225.69 0 0 24.18 -35.96 12.09c1.54,-46.41 2.36,-92.1 2.36,-136.87 0,-44.87 -0.82,-88.1 -2.36,-129.69l35.96 19.16 220.87 0 19.26 -23.97 36.06 31.25 -16.9 14.34 0 132.15zm-259.29 -139.32l0 182.25 225.69 0 0 -182.25 -225.69 0zm76.83 43.33l69.66 0 14.44 -19.16 33.6 26.43 -16.8 11.99c0,31.96 0.72,59.11 2.36,81.55l-31.25 14.44 0 -26.43 -72.02 0 0 16.8 -31.14 11.99c1.54,-25.61 2.36,-47.94 2.36,-67.2 0,-19.16 -0.82,-41.59 -2.36,-67.2l31.14 16.8zm-247.3 -165.35l0 -103.26c0,-25.61 -0.82,-52.86 -2.36,-81.65l57.57 31.25 -21.62 16.8 0 136.87 28.89 0 26.33 -26.33 40.88 40.77 -96.09 0 0 187.27 86.46 -21.62 2.36 9.63c-110.44,40.06 -171.19,69.66 -182.45,88.82l-26.43 -48.05c20.9,-3.18 49.69,-9.53 86.46,-19.16l0 -196.9 -7.17 0c-20.8,0 -40.05,2.36 -57.68,7.17l-21.62 -21.62 86.46 0z\"\/> <\/g> <polygon fill=\"#ED3237\" points=\"2296.7,2406.67 2296.7,616.16 2701.86,616.16 2701.86,2406.67 \"\/> <\/g> <\/g>",
+  };
+
+  function setDirectiveEnvType(type) {
+    const cleanType = (type || '').trim();
+    state.directiveEnvType = cleanType;
+    const svgEl = document.getElementById('docEnvSvg');
+    const container = document.getElementById('docFieldEnvOption');
+    const ctrl = document.getElementById('ctrlEnvType');
+    if (ctrl && ctrl.value !== cleanType) {
+      ctrl.value = cleanType;
+    }
+    if (container) {
+      container.setAttribute('data-env-type', cleanType);
+    }
+    if (svgEl) {
+      svgEl.innerHTML = DIRECTIVE_WALL_SVGS[cleanType] || '';
+    }
+  }
+
+  function openEnvOptionMenu(anchorEl) {
+    let menu = document.getElementById('directiveEnvPickerMenu');
+    if (menu) {
+      menu.remove();
+      return;
+    }
+    menu = document.createElement('div');
+    menu.id = 'directiveEnvPickerMenu';
+    menu.className = 'directive-env-picker-menu';
+
+    const options = [
+      { id: '', label: 'Blank (None)', desc: 'Leave environment blank / unselected' },
+      { id: 'concrete-wall', label: 'Concrete Wall', desc: '水泥墙' },
+      { id: 'glass-wall', label: 'Glass Wall', desc: '玻璃墙' },
+      { id: 'iron-plated', label: 'Iron-plated / Iron Framework Wall', desc: '铁皮/铁架墙' },
+      { id: 'woodenpanel', label: 'Wooden Panel Wall', desc: '木板墙' },
+      { id: 'acp', label: 'ACP Wall', desc: '铝塑板墙' }
+    ];
+
+    const cur = state.directiveEnvType || '';
+
+    menu.innerHTML = `
+      <div class="env-picker-header">
+        <span>Select Installation Environment</span>
+        <button type="button" class="env-picker-close">&times;</button>
+      </div>
+      <div class="env-picker-list">
+        ${options.map(opt => `
+          <button type="button" class="env-picker-item ${opt.id === cur ? 'active' : ''}" data-env-id="${opt.id}">
+            <div class="env-picker-item-label">${opt.label}</div>
+            <div class="env-picker-item-desc">${opt.desc}</div>
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    document.body.appendChild(menu);
+
+    const rect = anchorEl.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = (rect.bottom + 6) + 'px';
+    menu.style.left = Math.max(10, Math.min(window.innerWidth - 320, rect.left)) + 'px';
+    menu.style.zIndex = '999999';
+
+    menu.querySelector('.env-picker-close').onclick = (e) => {
+      e.stopPropagation();
+      menu.remove();
+    };
+
+    menu.querySelectorAll('.env-picker-item').forEach(item => {
+      item.onclick = (e) => {
+        e.stopPropagation();
+        const id = item.getAttribute('data-env-id');
+        setDirectiveEnvType(id);
+        const name = item.querySelector('.env-picker-item-label')?.textContent || id;
+        showToast(id ? `Environment set to ${name}` : 'Environment set to Blank');
+        menu.remove();
+      };
+    });
+
+    const closeHandler = (e) => {
+      if (!menu.contains(e.target) && e.target !== anchorEl) {
+        menu.remove();
+        document.removeEventListener('click', closeHandler);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeHandler), 10);
+  }
+
+  function copyFallback(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('Vector SVG copied to clipboard!');
+    } catch (e) {
+      showToast('Unable to copy automatically.', 'error');
+    }
+    document.body.removeChild(ta);
+  }
+
+  // ==========================================================================
+  // TEMPLATE EDITOR ENGINE (Interactive Drag, Resize & Customization)
+  // ==========================================================================
+
+  let isDraggingElem = false;
+  let isResizingElem = false;
+  let dragTarget = null;
+  let dragOffset = { x: 0, y: 0 };
+  let initialSize = { w: 0, h: 0 };
+  let initialMousePos = { x: 0, y: 0 };
+
+  function initTemplateEditorCanvas() {
+    const canvas = document.getElementById('interactiveTemplateCanvas');
+    if (!canvas) return;
+
+    canvas.innerHTML = '';
+    state.templateElements.forEach(el => {
+      const elemNode = document.createElement('div');
+      elemNode.className = `template-element ${state.selectedTemplateElemId === el.id ? 'selected' : ''}`;
+      elemNode.id = `tpl-${el.id}`;
+      elemNode.style.left = `${el.x}px`;
+      elemNode.style.top = `${el.y}px`;
+      elemNode.style.width = `${el.w}px`;
+      elemNode.style.height = `${el.h}px`;
+      elemNode.style.textAlign = el.align || 'center';
+
+      elemNode.innerHTML = `
+        <div class="element-label">${escapeHTML(el.label)}</div>
+        <div class="element-content" style="font-size: ${el.fontSize}px; color: ${el.color || '#1F2937'};">${escapeHTML(el.content)}</div>
+        <div class="resize-handle" title="Drag to resize"></div>
+      `;
+
+      elemNode.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('resize-handle')) {
+          isResizingElem = true;
+          dragTarget = el;
+          initialSize = { w: el.w, h: el.h };
+          initialMousePos = { x: e.clientX, y: e.clientY };
+          selectTemplateElement(el.id);
+          e.stopPropagation();
+          return;
+        }
+
+        isDraggingElem = true;
+        dragTarget = el;
+        const rect = elemNode.getBoundingClientRect();
+        dragOffset = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+        selectTemplateElement(el.id);
+        e.stopPropagation();
+      });
+
+      canvas.appendChild(elemNode);
+    });
+
+    if (!canvas._listenersAttached) {
+      window.addEventListener('mousemove', handleCanvasMouseMove);
+      window.addEventListener('mouseup', handleCanvasMouseUp);
+      canvas._listenersAttached = true;
+    }
+
+    setupTemplateToolbar();
+  }
+
+  function handleCanvasMouseMove(e) {
+    if (!dragTarget) return;
+    const canvas = document.getElementById('interactiveTemplateCanvas');
+    if (!canvas) return;
+    const canvasRect = canvas.getBoundingClientRect();
+
+    if (isDraggingElem) {
+      let newX = e.clientX - canvasRect.left - dragOffset.x;
+      let newY = e.clientY - canvasRect.top - dragOffset.y;
+
+      newX = Math.max(0, Math.min(newX, canvas.clientWidth - dragTarget.w));
+      newY = Math.max(0, Math.min(newY, canvas.clientHeight - dragTarget.h));
+
+      dragTarget.x = Math.round(newX);
+      dragTarget.y = Math.round(newY);
+
+      const node = document.getElementById(`tpl-${dragTarget.id}`);
+      if (node) {
+        node.style.left = `${dragTarget.x}px`;
+        node.style.top = `${dragTarget.y}px`;
+      }
+    } else if (isResizingElem) {
+      const deltaX = e.clientX - initialMousePos.x;
+      const deltaY = e.clientY - initialMousePos.y;
+
+      let newW = Math.max(80, initialSize.w + deltaX);
+      let newH = Math.max(35, initialSize.h + deltaY);
+
+      dragTarget.w = Math.round(newW);
+      dragTarget.h = Math.round(newH);
+
+      const node = document.getElementById(`tpl-${dragTarget.id}`);
+      if (node) {
+        node.style.width = `${dragTarget.w}px`;
+        node.style.height = `${dragTarget.h}px`;
+      }
+    }
+  }
+
+  function handleCanvasMouseUp() {
+    if (isDraggingElem || isResizingElem) {
+      isDraggingElem = false;
+      isResizingElem = false;
+      dragTarget = null;
+    }
+  }
+
+  function selectTemplateElement(id) {
+    state.selectedTemplateElemId = id;
+    document.querySelectorAll('.template-element').forEach(n => n.classList.remove('selected'));
+    const cur = document.getElementById(`tpl-${id}`);
+    if (cur) cur.classList.add('selected');
+
+    const el = state.templateElements.find(item => item.id === id);
+    if (el) {
+      const lblInput = document.getElementById('propElemLabel');
+      const cntInput = document.getElementById('propElemContent');
+      const fsInput = document.getElementById('propElemFontSize');
+      const alignInput = document.getElementById('propElemAlign');
+
+      if (lblInput) lblInput.value = el.label;
+      if (cntInput) cntInput.value = el.content;
+      if (fsInput) fsInput.value = el.fontSize;
+      if (alignInput) alignInput.value = el.align || 'center';
+    }
+  }
+
+  function setupTemplateToolbar() {
+    const lblInput = document.getElementById('propElemLabel');
+    const cntInput = document.getElementById('propElemContent');
+    const fsInput = document.getElementById('propElemFontSize');
+    const alignInput = document.getElementById('propElemAlign');
+
+    const updateCurrent = () => {
+      if (!state.selectedTemplateElemId) return;
+      const el = state.templateElements.find(item => item.id === state.selectedTemplateElemId);
+      if (!el) return;
+
+      if (lblInput) el.label = lblInput.value;
+      if (cntInput) el.content = cntInput.value;
+      if (fsInput) el.fontSize = parseInt(fsInput.value, 10) || 12;
+      if (alignInput) el.align = alignInput.value;
+
+      const node = document.getElementById(`tpl-${el.id}`);
+      if (node) {
+        node.querySelector('.element-label').textContent = el.label;
+        const cntNode = node.querySelector('.element-content');
+        cntNode.textContent = el.content;
+        cntNode.style.fontSize = `${el.fontSize}px`;
+        node.style.textAlign = el.align;
+      }
+    };
+
+    if (lblInput) lblInput.oninput = updateCurrent;
+    if (cntInput) cntInput.oninput = updateCurrent;
+    if (fsInput) fsInput.oninput = updateCurrent;
+    if (alignInput) alignInput.onchange = updateCurrent;
+
+    const btnAdd = document.getElementById('btnTplAddElement');
+    if (btnAdd) {
+      btnAdd.onclick = () => {
+        const newId = `el-${Date.now().toString(36)}`;
+        const newEl = { id: newId, label: 'CUSTOM FIELD', content: 'NEW CONTENT', x: 50, y: 50, w: 160, h: 44, fontSize: 12, align: 'center', color: '#1F2937' };
+        state.templateElements.push(newEl);
+        initTemplateEditorCanvas();
+        selectTemplateElement(newId);
+        showToast('New template field added.');
+      };
+    }
+
+    const btnDel = document.getElementById('btnTplDeleteElement');
+    if (btnDel) {
+      btnDel.onclick = () => {
+        if (!state.selectedTemplateElemId) return;
+        state.templateElements = state.templateElements.filter(e => e.id !== state.selectedTemplateElemId);
+        state.selectedTemplateElemId = null;
+        initTemplateEditorCanvas();
+        showToast('Element deleted.');
+      };
+    }
+
+    const btnSaveTpl = document.getElementById('btnTplSaveTemplate');
+    if (btnSaveTpl) {
+      btnSaveTpl.onclick = () => {
+        saveStateToStorage();
+        showToast('Custom template layout saved!');
+      };
+    }
+
+    const btnResetTpl = document.getElementById('btnTplResetDefault');
+    if (btnResetTpl) {
+      btnResetTpl.onclick = () => {
+        state.templateElements = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS));
+        state.selectedTemplateElemId = null;
+        initTemplateEditorCanvas();
+        saveStateToStorage();
+        showToast('Template restored to standard layout.');
+      };
+    }
+  }
+
+  // ==========================================================================
+  // ATTACHMENTS HANDLING
+  // ==========================================================================
+
+  function resolveAttachmentUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
+      return url;
+    }
+    if (typeof isInsidePagesDir === 'function' && isInsidePagesDir() && !url.startsWith('../')) {
+      return '../' + url;
+    }
+    return url;
+  }
+
+  function sanitizeAttachmentUrls() {
+    if (!Array.isArray(state.attachments)) return;
+    state.attachments.forEach(att => {
+      if (att.url === 'assets/img/sign-depot-logo.png' || att.url === '../assets/img/sign-depot-logo.png' || !att.url) {
+        const match = DEFAULT_ATTACHMENTS.find(d => d.id === att.id || d.name === att.name);
+        if (match && match.url) {
+          att.url = match.url;
+          if (match.type) att.type = match.type;
+        }
+      }
+    });
+  }
+
+  function renderAttachmentsList() {
+    const grid = document.getElementById('attachmentsGridContainer');
+    const badge = document.getElementById('attachmentsCountBadge');
+    sanitizeAttachmentUrls();
+    if (badge) badge.textContent = state.attachments.length;
+    if (!grid) return;
+
+    if (!state.attachments || state.attachments.length === 0) {
+      grid.innerHTML = `
+        <div class="attachment-empty-box">
+          <div class="attachment-empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <h4 style="font-size:15px; font-weight:700; color:#0F172A; margin:0 0 6px 0;">No Proofs Attached Yet</h4>
+          <p style="font-size:12.5px; color:#64748B; margin:0 0 16px 0;">Upload design renders, vector drawings, or site photos for this directive.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('localAttachmentUploadInput').click();">
+            Upload First Proof
+          </button>
+        </div>
+      `;
+    } else {
+      grid.innerHTML = state.attachments.map(att => {
+        const resolvedUrl = resolveAttachmentUrl(att.url);
+        return `
+          <div class="attachment-card" data-att-id="${escapeHTML(att.id)}">
+            <div class="attachment-thumbnail" onclick="window.SignDepotApp.previewAttachment('${escapeHTML(att.id)}')">
+              <span class="attachment-type-badge">${escapeHTML(att.type || 'Proof')}</span>
+              <img src="${resolvedUrl}" alt="${escapeHTML(att.name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+              <div class="attachment-fallback-preview" style="display:none;">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="fallback-name">${escapeHTML(att.name)}</span>
+              </div>
+              <div class="attachment-thumb-overlay">
+                <span class="attachment-zoom-pill">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  Click to Inspect
+                </span>
+              </div>
+            </div>
+            <div class="attachment-meta">
+              <div class="attachment-title" title="${escapeHTML(att.name)}">${escapeHTML(att.name)}</div>
+              <div class="attachment-info-row">
+                <span class="attachment-size-pill">${escapeHTML(att.size || 'N/A')}</span>
+                <span class="attachment-date-pill">${escapeHTML(att.dateAdded || '')}</span>
+              </div>
+            </div>
+            <div class="attachment-footer-actions">
+              <button type="button" class="attachment-btn-view" onclick="window.SignDepotApp.previewAttachment('${escapeHTML(att.id)}')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                View Proof
+              </button>
+              <button type="button" class="attachment-btn-delete" title="Delete attachment" onclick="window.SignDepotApp.deleteAttachment('${escapeHTML(att.id)}')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const uploadBtn = document.getElementById('btnUploadLocalAttachment');
+    const fileInput = document.getElementById('localAttachmentUploadInput');
+    if (uploadBtn && fileInput) {
+      uploadBtn.onclick = () => fileInput.click();
+      fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const handleAddAttachment = (name, type, sizeBytes, url) => {
+          const newAtt = {
+            id: `att-${Date.now()}`,
+            name: name,
+            type: type || 'Image File',
+            size: `${(sizeBytes / 1024).toFixed(1)} KB`,
+            dateAdded: new Date().toISOString().split('T')[0],
+            storageType: 'Local Browser',
+            url: url
+          };
+          state.attachments.unshift(newAtt);
+          saveStateToStorage();
+          renderAttachmentsList();
+          showToast(`Attached ${name} successfully.`);
+          fileInput.value = '';
+        };
+
+        if (file.type && file.type.startsWith('image/') && window.SignDepotCropper) {
+          window.SignDepotCropper.open({
+            file: file,
+            title: 'Crop & Adjust Proof Artwork',
+            circular: false,
+            allowSkip: true,
+            outputSize: 1200,
+            onCrop: (croppedBlob, croppedDataUrl, croppedFile) => {
+              handleAddAttachment(croppedFile.name, 'image/jpeg', croppedBlob.size, croppedDataUrl);
+            },
+            onSkip: () => {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                handleAddAttachment(file.name, file.type, file.size, event.target.result);
+              };
+              reader.readAsDataURL(file);
+            },
+            onCancel: () => {
+              fileInput.value = '';
+            }
+          });
+        } else {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            handleAddAttachment(file.name, file.type, file.size, event.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+    }
+  }
+
+  // ==========================================================================
+  // MODULE 6: PENDING PROJECTS — ARTIST QUEUE (Directly Editable)
+  // ==========================================================================
+
+  function renderPendingArtistQueue() {
+    const myArtist = getLoggedInArtist();
+    const artistSelect = document.getElementById('pendingArtistSelect');
+    if (artistSelect) {
+      if (myArtist) {
+        artistSelect.innerHTML = `<option value="${escapeHTML(myArtist)}" selected>🎨 Artist: ${escapeHTML(myArtist)} (You)</option>`;
+        artistSelect.disabled = true;
+        state.pendingArtistSelected = myArtist;
+      } else if (artistSelect.children.length === 0) {
+        state.artists.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a;
+          opt.textContent = `Artist: ${a}`;
+          artistSelect.appendChild(opt);
+        });
+        artistSelect.value = state.pendingArtistSelected || state.artists[0];
+      }
+    }
+
+    const currentArtist = myArtist || (artistSelect ? artistSelect.value : state.pendingArtistSelected) || state.artists[0];
+    state.pendingArtistSelected = currentArtist;
+
+    const pendingList = state.requests.filter(r => r.artist === currentArtist && r.projectStatus !== 'Completed');
+    const activeList = pendingList.filter(r => r.designStatus === 'In Progress' || r.projectStatus === 'On-going');
+    const overdueList = pendingList.filter(r => isOverdue(r.designDeadline, r.projectStatus));
+
+    document.getElementById('artistStatTotal').textContent = pendingList.length;
+    document.getElementById('artistStatActive').textContent = activeList.length;
+    document.getElementById('artistStatOverdue').textContent = overdueList.length;
+
+    const totalItems = pendingList.length;
+    const page = state.pendingArtistPage || 1;
+    const perPage = state.pendingArtistPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'pendingArtistPaginationInfo',
+      controlsId: 'pendingArtistPaginationControls',
+      selectIds: ['pendingArtistFilterPerPage', 'pendingArtistPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setPendingArtistPage',
+      itemLabel: 'tasks'
+    });
+
+    state.pendingArtistPage = validPage;
+    const pagedList = pendingList.slice(startIndex, startIndex + perPage);
+
+    const tbody = document.getElementById('pendingArtistTableBody');
+    if (tbody) {
+      if (pagedList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">${currentArtist} currently has no pending projects.</td></tr>`;
+      } else {
+        tbody.innerHTML = pagedList.map(r => `
+          <tr>
+            <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
+            <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
+            <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
+            <td>${renderInlineSelect(r.id, 'designStatus', r.designStatus, DESIGN_STATUSES)}</td>
+            <td>${renderInlineDate(r.id, 'designDeadline', r.designDeadline, r.projectStatus)}</td>
+            <td style="text-align:center;">${renderInlineNumber(r.id, 'revisionCount', r.revisionCount)}</td>
+            <td>${renderEditableCell(r.id, 'remarks', r.remarks)}</td>
+            <td>
+              <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                ${isCurrentUserSuperAdmin() ? `
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Task (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+  }
+
+  // ==========================================================================
+  // MODULE 7: PENDING PROJECTS — SALES QUEUE (Directly Editable)
+  // ==========================================================================
+
+  function renderPendingSalesQueue() {
+    // Strictly filter to all pending or newly encoded sales requests that are NOT yet approved
+    let list = state.requests.filter(r => {
+      const clientApp = (r.clientApproval || '').trim().toLowerCase();
+      const projStat = (r.projectStatus || '').trim().toLowerCase();
+      const isApproved = clientApp === 'approved' || projStat === 'approved';
+      const isCompleted = projStat === 'completed';
+      return !isApproved && !isCompleted;
+    });
+
+    const qFilter = state.pendingSalesFilter;
+    const search = state.pendingSalesSearch;
+
+    if (qFilter === 'approval') list = list.filter(r => (r.clientApproval || 'Pending') === 'Pending');
+    if (qFilter === 'files') list = list.filter(r => r.fileSent === 'Pending' || r.fileSent === 'TO FOLLOW');
+    if (qFilter === 'release') list = list.filter(r => r.releasingDate || r.releasingMode);
+    if (qFilter === 'rush') list = list.filter(r => r.priority === 'Rush');
+
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(r => 
+        r.projectName.toLowerCase().includes(q) ||
+        r.joNumber.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q)
+      );
+    }
+
+    const totalItems = list.length;
+    const page = state.pendingSalesPage || 1;
+    const perPage = state.pendingSalesPerPage || 10;
+
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'pendingSalesPaginationInfo',
+      controlsId: 'pendingSalesPaginationControls',
+      selectIds: ['pendingSalesFilterPerPage', 'pendingSalesPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setPendingSalesPage',
+      itemLabel: 'orders'
+    });
+
+    state.pendingSalesPage = validPage;
+    const pagedList = list.slice(startIndex, startIndex + perPage);
+
+    const tbody = document.getElementById('pendingSalesTableBody');
+    if (tbody) {
+      if (pagedList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:var(--text-muted);">No sales queue tasks for the selected filter.</td></tr>`;
+      } else {
+        tbody.innerHTML = pagedList.map(r => `
+          <tr>
+            <td><strong style="color:var(--primary-green);">${escapeHTML(r.requestId)}</strong></td>
+            <td><strong style="color:var(--accent-red);">${escapeHTML(r.joNumber)}</strong></td>
+            <td>${renderInlineSelect(r.id, 'salesRep', r.salesRep, state.salesReps)}</td>
+            <td>${renderEditableCell(r.id, 'client', r.client)}</td>
+            <td>${renderEditableCell(r.id, 'projectName', r.projectName)}</td>
+            <td>${renderInlineSelect(r.id, 'artist', r.artist, state.artists)}</td>
+            <td>${renderInlineSelect(r.id, 'clientApproval', r.clientApproval, APPROVAL_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'fileSent', r.fileSent, FILE_SENT_LEVELS)}</td>
+            <td>${renderInlineDate(r.id, 'releasingDate', r.releasingDate)}</td>
+            <td>${renderInlineSelect(r.id, 'priority', r.priority, PRIORITY_LEVELS)}</td>
+            <td>${renderInlineSelect(r.id, 'projectStatus', r.projectStatus, PROJECT_STATUSES)}</td>
+            <td>
+              <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.quickSalesApprove('${r.id}')">Approve</button>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                ${isCurrentUserSuperAdmin() ? `
+                  <button class="btn btn-sm btn-icon-only" onclick="window.SignDepotApp.deleteSalesRequest('${r.id}')" title="Delete Order (Super Admin)" style="color:#DC2626; background:#FEF2F2; border:1px solid #FECACA; flex-shrink:0;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+  }
+
+  // ==========================================================================
+  // ==========================================================================
+  // MODULE 8: DATE UTILITIES & TIMEFRAME FILTER ENGINE
+  // ==========================================================================
+
+  function parseRequestDate(str) {
+    if (!str) return null;
+    str = String(str).trim();
+    // YYYY-MM-DD
+    const iso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) {
+      return new Date(parseInt(iso[1], 10), parseInt(iso[2], 10) - 1, parseInt(iso[3], 10));
+    }
+    // DD/MM/YYYY
+    const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmy) {
+      return new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+    }
+    // Natural date string like September 26, 2026 or Ocotber 13, 2026
+    const clean = str.replace(/Ocotber/i, 'October').replace(/,(\d{4})/g, ', $1');
+    const ts = Date.parse(clean);
+    if (!isNaN(ts)) {
+      return new Date(ts);
+    }
+    return null;
+  }
+
+  function getReferenceToday() {
+    const now = new Date();
+    if (now.getFullYear() !== 2026) {
+      return new Date(2026, 9, 26);
+    }
+    return now;
+  }
+
+  function matchesTimeframe(req, tf) {
+    if (!tf || tf === 'all') return true;
+    const dateStr = req.releasingDate || req.designDeadline || req.orderDate;
+    if (!dateStr) return false;
+    const d = parseRequestDate(dateStr);
+    if (!d) return false;
+
+    const ref = getReferenceToday();
+
+    if (tf === 'today') {
+      return d.getFullYear() === ref.getFullYear() &&
+             d.getMonth() === ref.getMonth() &&
+             d.getDate() === ref.getDate();
+    }
+    if (tf === 'week') {
+      const day = (ref.getDay() + 6) % 7; // Monday = 0
+      const startOfWeek = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() - day, 0, 0, 0);
+      const endOfWeek = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() - day + 6, 23, 59, 59);
+      return d >= startOfWeek && d <= endOfWeek;
+    }
+    if (tf === 'month') {
+      return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+    }
+    return true;
+  }
+
+  // ==========================================================================
+  // MODULE 8A: PRODUCTION OUTPUT REPORT ENGINE (DAY, WEEK, MONTH, YEAR FILTERS)
+  // ==========================================================================
+
+  function formatIsoDate(d) {
+    if (!d || !(d instanceof Date) || isNaN(d.getTime())) return '2026-10-26';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  function getMondayOfWeek(d) {
+    const date = new Date(d);
+    const day = (date.getDay() + 6) % 7; // Monday = 0, Sunday = 6
+    date.setDate(date.getDate() - day);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function initOutputFilterState() {
+    if (!state.outputFilter) {
+      state.outputFilter = {
+        timeframe: state.timeframe || 'month',
+        year: '2026',
+        month: '9', // 0-indexed: 9 = October
+        weekStartDate: '2026-10-19', // Monday of peak active week
+        dayDate: '2026-10-26' // Today
+      };
+    }
+  }
+
+  function populateOutputWeekOptions() {
+    const weekSelect = document.getElementById('outputFilterWeek');
+    if (!weekSelect) return;
+
+    initOutputFilterState();
+    const selYear = state.outputFilter.year === 'all' ? 2026 : parseInt(state.outputFilter.year, 10);
+    const selMonth = state.outputFilter.month === 'all' ? null : parseInt(state.outputFilter.month, 10);
+
+    const options = [];
+    const startYear = new Date(selYear, 0, 1);
+    const firstMon = getMondayOfWeek(startYear);
+    const endYear = new Date(selYear, 11, 31);
+
+    let curMon = new Date(firstMon);
+    let weekIndex = 1;
+
+    while (curMon <= endYear || curMon.getFullYear() === selYear) {
+      const sun = new Date(curMon);
+      sun.setDate(sun.getDate() + 6);
+
+      let include = true;
+      if (selMonth !== null) {
+        include = (curMon.getMonth() === selMonth || sun.getMonth() === selMonth);
+      }
+
+      if (include && (curMon.getFullYear() === selYear || sun.getFullYear() === selYear)) {
+        const iso = formatIsoDate(curMon);
+        const m1 = curMon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const m2 = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isPeak = (iso === '2026-10-19');
+        options.push(`<option value="${iso}">${isPeak ? '★ ' : ''}Week ${weekIndex} (${m1} — ${m2})</option>`);
+      }
+
+      curMon.setDate(curMon.getDate() + 7);
+      weekIndex++;
+      if (curMon.getFullYear() > selYear + 1) break;
+    }
+
+    weekSelect.innerHTML = options.join('');
+
+    const exists = Array.from(weekSelect.options).some(o => o.value === state.outputFilter.weekStartDate);
+    if (exists) {
+      weekSelect.value = state.outputFilter.weekStartDate;
+    } else if (weekSelect.options.length > 0) {
+      const peakOpt = Array.from(weekSelect.options).find(o => o.value === '2026-10-19');
+      if (peakOpt) {
+        weekSelect.value = '2026-10-19';
+        state.outputFilter.weekStartDate = '2026-10-19';
+      } else {
+        weekSelect.value = weekSelect.options[0].value;
+        state.outputFilter.weekStartDate = weekSelect.options[0].value;
+      }
+    }
+  }
+
+  function syncOutputFilterControlsUI(tf) {
+    initOutputFilterState();
+    state.outputFilter.timeframe = tf;
+
+    const yearSelect = document.getElementById('outputFilterYear');
+    const monthSelect = document.getElementById('outputFilterMonth');
+    const fieldWeek = document.getElementById('filterFieldWeek');
+    const fieldDay = document.getElementById('filterFieldDay');
+    const fieldMonth = document.getElementById('filterFieldMonth');
+    const dateInput = document.getElementById('outputFilterDate');
+    const statusBadge = document.getElementById('outputFilterStatusBadge');
+
+    if (yearSelect) yearSelect.value = state.outputFilter.year || '2026';
+    if (monthSelect) monthSelect.value = state.outputFilter.month !== undefined ? state.outputFilter.month : '9';
+    if (dateInput) dateInput.value = state.outputFilter.dayDate || '2026-10-26';
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.outputFilter.year === 'all' ? 'All Years' : state.outputFilter.year;
+
+    if (tf === 'today') {
+      if (fieldDay) fieldDay.style.display = 'flex';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      const parts = (state.outputFilter.dayDate || '2026-10-26').split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (statusBadge) {
+        statusBadge.textContent = `Daily: ${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-completed';
+      }
+    } else if (tf === 'week') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'flex';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      populateOutputWeekOptions();
+      const parts = (state.outputFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+      const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      if (statusBadge) {
+        statusBadge.textContent = `Weekly: ${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else if (tf === 'month') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      if (statusBadge) {
+        const mIdx = parseInt(state.outputFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.outputFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthNames[mIdx];
+        statusBadge.textContent = `Monthly: ${mLabel} ${curYear}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'none';
+      if (statusBadge) {
+        statusBadge.textContent = `All-Time History (${curYear})`;
+        statusBadge.className = 'badge badge-priority-rush';
+      }
+    }
+  }
+
+  function setupOutputFilterToolbarEvents() {
+    const yearSelect = document.getElementById('outputFilterYear');
+    const monthSelect = document.getElementById('outputFilterMonth');
+    const weekSelect = document.getElementById('outputFilterWeek');
+    const dateInput = document.getElementById('outputFilterDate');
+    const btnPrevWeek = document.getElementById('btnPrevWeek');
+    const btnNextWeek = document.getElementById('btnNextWeek');
+    const btnPrevDay = document.getElementById('btnPrevDay');
+    const btnNextDay = document.getElementById('btnNextDay');
+    const btnFilterToday = document.getElementById('btnFilterToday');
+    const btnReset = document.getElementById('btnResetOutputFilter');
+
+    initOutputFilterState();
+
+    if (yearSelect && !yearSelect._bound) {
+      yearSelect._bound = true;
+      yearSelect.addEventListener('change', () => {
+        state.outputFilter.year = yearSelect.value;
+        if (state.outputFilter.timeframe === 'today') {
+          const parts = state.outputFilter.dayDate.split('-');
+          state.outputFilter.dayDate = `${yearSelect.value === 'all' ? '2026' : yearSelect.value}-${parts[1]}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.outputFilter.dayDate;
+        } else if (state.outputFilter.timeframe === 'week') {
+          populateOutputWeekOptions();
+        }
+        renderMonthlyOutputReport(state.outputFilter.timeframe);
+      });
+    }
+
+    if (monthSelect && !monthSelect._bound) {
+      monthSelect._bound = true;
+      monthSelect.addEventListener('change', () => {
+        state.outputFilter.month = monthSelect.value;
+        const selYear = state.outputFilter.year === 'all' ? '2026' : state.outputFilter.year;
+        if (monthSelect.value !== 'all') {
+          const mNum = parseInt(monthSelect.value, 10) + 1;
+          const mStr = String(mNum).padStart(2, '0');
+          if (state.outputFilter.timeframe === 'today') {
+            state.outputFilter.dayDate = `${selYear}-${mStr}-15`;
+            if (dateInput) dateInput.value = state.outputFilter.dayDate;
+          } else if (state.outputFilter.timeframe === 'week') {
+            populateOutputWeekOptions();
+          }
+        }
+        renderMonthlyOutputReport(state.outputFilter.timeframe);
+      });
+    }
+
+    if (weekSelect && !weekSelect._bound) {
+      weekSelect._bound = true;
+      weekSelect.addEventListener('change', () => {
+        state.outputFilter.weekStartDate = weekSelect.value;
+        renderMonthlyOutputReport(state.outputFilter.timeframe);
+      });
+    }
+
+    if (btnPrevWeek && !btnPrevWeek._bound) {
+      btnPrevWeek._bound = true;
+      btnPrevWeek.addEventListener('click', () => {
+        const parts = (state.outputFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const curMon = new Date(parts[0], parts[1] - 1, parts[2]);
+        curMon.setDate(curMon.getDate() - 7);
+        state.outputFilter.weekStartDate = formatIsoDate(curMon);
+        populateOutputWeekOptions();
+        renderMonthlyOutputReport('week');
+      });
+    }
+
+    if (btnNextWeek && !btnNextWeek._bound) {
+      btnNextWeek._bound = true;
+      btnNextWeek.addEventListener('click', () => {
+        const parts = (state.outputFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const curMon = new Date(parts[0], parts[1] - 1, parts[2]);
+        curMon.setDate(curMon.getDate() + 7);
+        state.outputFilter.weekStartDate = formatIsoDate(curMon);
+        populateOutputWeekOptions();
+        renderMonthlyOutputReport('week');
+      });
+    }
+
+    if (dateInput && !dateInput._bound) {
+      dateInput._bound = true;
+      dateInput.addEventListener('change', () => {
+        if (!dateInput.value) return;
+        state.outputFilter.dayDate = dateInput.value;
+        const parts = dateInput.value.split('-').map(Number);
+        if (yearSelect && parts[0]) {
+          yearSelect.value = String(parts[0]);
+          state.outputFilter.year = String(parts[0]);
+        }
+        if (monthSelect && parts[1]) {
+          monthSelect.value = String(parts[1] - 1);
+          state.outputFilter.month = String(parts[1] - 1);
+        }
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnPrevDay && !btnPrevDay._bound) {
+      btnPrevDay._bound = true;
+      btnPrevDay.addEventListener('click', () => {
+        const parts = (state.outputFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        d.setDate(d.getDate() - 1);
+        state.outputFilter.dayDate = formatIsoDate(d);
+        if (dateInput) dateInput.value = state.outputFilter.dayDate;
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnNextDay && !btnNextDay._bound) {
+      btnNextDay._bound = true;
+      btnNextDay.addEventListener('click', () => {
+        const parts = (state.outputFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        d.setDate(d.getDate() + 1);
+        state.outputFilter.dayDate = formatIsoDate(d);
+        if (dateInput) dateInput.value = state.outputFilter.dayDate;
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnFilterToday && !btnFilterToday._bound) {
+      btnFilterToday._bound = true;
+      btnFilterToday.addEventListener('click', () => {
+        state.outputFilter.dayDate = '2026-10-26';
+        state.outputFilter.year = '2026';
+        state.outputFilter.month = '9';
+        if (dateInput) dateInput.value = '2026-10-26';
+        if (yearSelect) yearSelect.value = '2026';
+        if (monthSelect) monthSelect.value = '9';
+        renderMonthlyOutputReport('today');
+      });
+    }
+
+    if (btnReset && !btnReset._bound) {
+      btnReset._bound = true;
+      btnReset.addEventListener('click', () => {
+        state.outputFilter = {
+          timeframe: 'month',
+          year: '2026',
+          month: '9',
+          weekStartDate: '2026-10-19',
+          dayDate: '2026-10-26'
+        };
+        if (yearSelect) yearSelect.value = '2026';
+        if (monthSelect) monthSelect.value = '9';
+        if (dateInput) dateInput.value = '2026-10-26';
+        populateOutputWeekOptions();
+        renderMonthlyOutputReport('month');
+        showToast('Filters reset to default (October 2026)');
+      });
+    }
+  }
+
+  function renderMonthlyOutputReport(timeframe) {
+    initOutputFilterState();
+    setupOutputFilterToolbarEvents();
+
+    const rawTf = timeframe || state.outputFilter.timeframe || state.timeframe || 'month';
+    let tf = 'month';
+    const lowTf = String(rawTf).toLowerCase().trim();
+    if (lowTf === 'today' || lowTf === 'daily' || lowTf === 'day') tf = 'today';
+    else if (lowTf === 'week' || lowTf === 'weekly') tf = 'week';
+    else if (lowTf === 'month' || lowTf === 'monthly') tf = 'month';
+    else if (lowTf === 'all' || lowTf === 'all_time' || lowTf === 'alltime') tf = 'all';
+
+    state.timeframe = tf;
+    state.outputFilter.timeframe = tf;
+
+    // Sync timeframe buttons on page and navbar
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+      const bTf = (btn.getAttribute('data-timeframe') || '').toLowerCase();
+      const isAct = (bTf === tf) || 
+                    (tf === 'today' && (bTf === 'daily' || bTf === 'today' || bTf === 'day')) ||
+                    (tf === 'week' && (bTf === 'weekly' || bTf === 'week')) ||
+                    (tf === 'month' && (bTf === 'monthly' || bTf === 'month')) ||
+                    (tf === 'all' && (bTf === 'all' || bTf === 'all_time' || bTf === 'alltime'));
+      btn.classList.toggle('active', isAct);
+    });
+
+    // Update filter toolbar controls visibility and values
+    syncOutputFilterControlsUI(tf);
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthFullNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    // 1. All completed requests
+    const allCompleted = (state.requests || []).filter(r => 
+      r.projectStatus === 'Completed' || r.designStatus === 'Submitted'
+    );
+
+    // Dynamic Elements References
+    const reportTitle = document.getElementById('outputReportTitle');
+    const reportSubtitle = document.getElementById('outputReportSubtitle');
+    const chartTitle = document.getElementById('outputChartTitle');
+    const chartSubtitle = document.getElementById('outputChartSubtitle');
+    const chartBadge = document.getElementById('outputChartIntervalBadge');
+    const matrixTitle = document.getElementById('outputMatrixTitle');
+    const matrixBadge = document.getElementById('outputMatrixBadge');
+    const thead = document.getElementById('monthlyOutputTableHead');
+    const tbody = document.getElementById('monthlyOutputTableBody');
+    const tfoot = document.getElementById('monthlyOutputTableFoot');
+    const dailyCard = document.getElementById('dailyCompletedTasksCard');
+
+    // KPI Elements
+    const kpi1Title = document.getElementById('outputKpi1Title');
+    const kpi1Val = document.getElementById('outputYtdTotal');
+    const kpi1Desc = document.getElementById('outputKpi1Desc');
+
+    const kpi2Title = document.getElementById('outputKpi2Title');
+    const kpi2Val = document.getElementById('outputCurrentMonthTotal');
+    const kpi2Desc = document.getElementById('outputKpi2Desc');
+
+    const kpi3Title = document.getElementById('outputKpi3Title');
+    const kpi3Val = document.getElementById('outputTopArtistName');
+    const kpi3Desc = document.getElementById('outputTopArtistCount');
+
+    const kpi4Title = document.getElementById('outputKpi4Title');
+    const kpi4Val = document.getElementById('outputMonthlyAvg');
+    const kpi4Desc = document.getElementById('outputKpi4Desc');
+
+    // =========================================================================
+    // CASE 1: DAILY / TODAY VIEW (Filtered by specific Day)
+    // =========================================================================
+    if (tf === 'today') {
+      const targetIso = state.outputFilter.dayDate || '2026-10-26';
+      const [dy, dm, dd] = targetIso.split('-').map(Number);
+      const dateObj = new Date(dy, dm - 1, dd);
+      const formattedDay = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+      if (reportTitle) reportTitle.textContent = `Daily Production Output Report — ${formattedDay}`;
+      if (reportSubtitle) reportSubtitle.textContent = `Verified output and completed artist assignments for ${formattedDay}`;
+      if (chartTitle) chartTitle.textContent = `Daily Completed Output per Artist (${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
+      if (chartSubtitle) chartSubtitle.textContent = `Verified assignments finished on ${formattedDay} across all active artists`;
+      if (chartBadge) { chartBadge.textContent = 'Daily Interval'; chartBadge.className = 'badge badge-completed'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Daily Production Matrix (${formattedDay})`;
+      if (matrixBadge) { matrixBadge.textContent = "Day's Verified Output"; matrixBadge.className = 'badge badge-completed'; }
+
+      // Filter requests completed on the exact target day
+      let dayReqs = allCompleted.filter(r => {
+        const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+        const d = parseRequestDate(dStr);
+        if (!d) return false;
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return iso === targetIso;
+      });
+
+      // Group by artist
+      const artistData = {};
+      state.artists.forEach(a => {
+        artistData[a] = { artist: a, std: 0, prt: 0, spc: 0, total: 0, revisions: 0 };
+      });
+
+      let totalDayOutput = 0;
+      let totalStd = 0, totalPrt = 0, totalSpc = 0, totalRev = 0;
+
+      dayReqs.forEach(r => {
+        let art = toTitleCase(r.artist);
+        if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+        if (art === 'Gle') art = 'Glen';
+
+        if (!artistData[art]) {
+          artistData[art] = { artist: art, std: 0, prt: 0, spc: 0, total: 0, revisions: 0 };
+        }
+        const std = parseInt(r.countStandard, 10) || 0;
+        const prt = parseInt(r.countPrinting, 10) || 0;
+        const spc = parseInt(r.countSpecial, 10) || 0;
+        const cnt = Math.max(std + prt + spc, 1);
+        const rev = parseInt(r.revisionCount, 10) || 0;
+
+        artistData[art].std += std;
+        artistData[art].prt += prt;
+        artistData[art].spc += spc;
+        artistData[art].total += cnt;
+        artistData[art].revisions += rev;
+
+        totalDayOutput += cnt;
+        totalStd += std;
+        totalPrt += prt;
+        totalSpc += spc;
+        totalRev += rev;
+      });
+
+      const sortedArtists = Object.values(artistData).sort((a, b) => b.total - a.total);
+      const topArt = sortedArtists[0] && sortedArtists[0].total > 0 ? sortedArtists[0].artist : (state.artists[0] || 'Glen');
+      const topCount = sortedArtists[0] ? sortedArtists[0].total : 0;
+      const activeArtistsCount = sortedArtists.filter(a => a.total > 0).length;
+
+      // Update KPIs
+      if (kpi1Title) kpi1Title.textContent = "Selected Day's Output";
+      if (kpi1Val) kpi1Val.textContent = Number(totalDayOutput).toLocaleString();
+      if (kpi1Desc) kpi1Desc.textContent = `${dayReqs.length} finished job order${dayReqs.length === 1 ? '' : 's'}`;
+
+      if (kpi2Title) kpi2Title.textContent = "Day's Category Mix";
+      if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${totalStd} | Prt: ${totalPrt} | Spc: ${totalSpc}</span>`;
+      if (kpi2Desc) kpi2Desc.textContent = "Fabrication breakdown";
+
+      if (kpi3Title) kpi3Title.textContent = "Top Producer on Date";
+      if (kpi3Val) kpi3Val.textContent = topArt;
+      if (kpi3Desc) kpi3Desc.textContent = `${topCount} completed assignment${topCount === 1 ? '' : 's'}`;
+
+      if (kpi4Title) kpi4Title.textContent = "Contributing Artists";
+      if (kpi4Val) kpi4Val.textContent = `${activeArtistsCount} / ${state.artists.length}`;
+      if (kpi4Desc) kpi4Desc.textContent = "Designers with output on date";
+
+      // Render Table Header
+      if (thead) {
+        thead.innerHTML = `
+          <tr>
+            <th>Artist</th>
+            <th style="text-align:center;">Standard Signage</th>
+            <th style="text-align:center;">Large Format Print</th>
+            <th style="text-align:center;">Special Fabrication</th>
+            <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">Day's Completed</th>
+            <th style="text-align:center;">Revisions</th>
+            <th style="text-align:center;">Daily Share</th>
+            <th style="text-align:center;">Rank</th>
+          </tr>
+        `;
+      }
+
+      // Render Table Body
+      if (tbody) {
+        tbody.innerHTML = sortedArtists.map((a, idx) => {
+          const share = totalDayOutput > 0 ? ((a.total / totalDayOutput) * 100).toFixed(1) : '0.0';
+          const isTop = idx === 0 && a.total > 0;
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:26px; height:26px; font-size:10px; background:${isTop ? 'var(--primary-green)' : '#0F172A'};">${escapeHTML(a.artist.substring(0, 2).toUpperCase())}</div>
+                  <strong>${escapeHTML(a.artist)}</strong>
+                  ${isTop ? '<span class="badge badge-priority-rush" style="font-size:9px; padding:1px 5px;">★ Top</span>' : ''}
+                </div>
+              </td>
+              <td style="text-align:center; font-weight:${a.std > 0 ? '700' : '400'}; color:${a.std > 0 ? '#0F172A' : '#94A3B8'};">${a.std}</td>
+              <td style="text-align:center; font-weight:${a.prt > 0 ? '700' : '400'}; color:${a.prt > 0 ? '#0F172A' : '#94A3B8'};">${a.prt}</td>
+              <td style="text-align:center; font-weight:${a.spc > 0 ? '700' : '400'}; color:${a.spc > 0 ? '#0F172A' : '#94A3B8'};">${a.spc}</td>
+              <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">${a.total}</td>
+              <td style="text-align:center; color:${a.revisions > 0 ? 'var(--accent-red)' : '#94A3B8'}; font-weight:700;">${a.revisions}</td>
+              <td style="text-align:center; font-weight:700; color:var(--text-secondary);">${share}%</td>
+              <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Table Foot
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+            <td><strong>TOTAL ON DATE</strong></td>
+            <td style="text-align:center;">${totalStd}</td>
+            <td style="text-align:center;">${totalPrt}</td>
+            <td style="text-align:center;">${totalSpc}</td>
+            <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${totalDayOutput}</td>
+            <td style="text-align:center;">${totalRev}</td>
+            <td style="text-align:center;">100.0%</td>
+            <td style="text-align:center;">—</td>
+          </tr>
+        `;
+      }
+
+      // Render Daily Chart
+      renderDailyArtistSvgChart(sortedArtists, totalDayOutput);
+
+      // Render Completed Tasks Log for this day
+      if (dailyCard) {
+        dailyCard.style.display = 'block';
+        const tasksTitle = document.getElementById('dailyTasksTitle');
+        const tasksSubtitle = document.getElementById('dailyTasksSubtitle');
+        const countBadge = document.getElementById('dailyTasksCountBadge');
+
+        if (tasksTitle) tasksTitle.textContent = `Completed Production Tasks (${formattedDay})`;
+        if (tasksSubtitle) tasksSubtitle.textContent = `Detailed log of individual job orders finished on ${formattedDay}`;
+        if (countBadge) countBadge.textContent = `${dayReqs.length} Completed`;
+
+        const logTbody = document.getElementById('dailyCompletedTasksTableBody');
+        if (logTbody) {
+          if (dayReqs.length === 0) {
+            logTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No completed tasks logged for ${formattedDay}.</td></tr>`;
+          } else {
+            logTbody.innerHTML = dayReqs.map(r => {
+              const catBadge = r.countSpecial > 0 ? '<span class="badge badge-priority-rush">Special</span>' :
+                               (r.countPrinting > 0 ? '<span class="badge badge-ongoing">Printing</span>' : '<span class="badge badge-completed">Standard</span>');
+              return `
+                <tr>
+                  <td><strong style="color:var(--primary-green); font-weight:700;">${escapeHTML(r.requestId)}</strong></td>
+                  <td><strong style="color:var(--accent-red); font-weight:700;">${escapeHTML(r.joNumber)}</strong></td>
+                  <td><strong>${escapeHTML(r.projectName)}</strong></td>
+                  <td>${escapeHTML(r.client)}</td>
+                  <td><span class="badge badge-artist">${escapeHTML(r.artist)}</span></td>
+                  <td>${catBadge}</td>
+                  <td><span style="font-size:12px; color:var(--text-secondary);">${formatReadableDate(r.releasingDate || r.designDeadline || r.orderDate)}</span></td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')">Directive</button>
+                  </td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+      }
+
+      setupCsvExportButton(`daily_${targetIso}`, sortedArtists);
+      return;
+    }
+
+    // Hide daily log on non-daily modes
+    if (dailyCard) dailyCard.style.display = 'none';
+
+    // =========================================================================
+    // CASE 2: WEEKLY VIEW (Filtered by specific Week: Monday — Sunday)
+    // =========================================================================
+    if (tf === 'week') {
+      const weekStartIso = state.outputFilter.weekStartDate || '2026-10-19';
+      const [wy, wm, wd] = weekStartIso.split('-').map(Number);
+      const startMon = new Date(wy, wm - 1, wd);
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const weekDays = [];
+
+      for (let i = 0; i < 7; i++) {
+        const cur = new Date(startMon);
+        cur.setDate(startMon.getDate() + i);
+        const iso = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+        const mName = cur.toLocaleDateString('en-US', { month: 'short' });
+        weekDays.push({
+          day: dayNames[i],
+          dateStr: iso,
+          label: `${dayNames[i]} (${mName} ${cur.getDate()})`
+        });
+      }
+
+      const weekRangeLabel = `${weekDays[0].label} — ${weekDays[6].label}`;
+
+      if (reportTitle) reportTitle.textContent = `Weekly Production Output Report (${weekRangeLabel})`;
+      if (reportSubtitle) reportSubtitle.textContent = `Verified output breakdown by day for the active week (${weekRangeLabel})`;
+      if (chartTitle) chartTitle.textContent = `Weekly Production Trend by Day (${weekRangeLabel})`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Daily completed assignment counts across the 7 days of the selected work week';
+      if (chartBadge) { chartBadge.textContent = 'Weekly Interval'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Weekly Output Matrix (${weekRangeLabel})`;
+      if (matrixBadge) { matrixBadge.textContent = 'Weekly Verified Output'; matrixBadge.className = 'badge badge-completed'; }
+
+      const weekMatrix = {};
+      state.artists.forEach(a => {
+        weekMatrix[a] = [0, 0, 0, 0, 0, 0, 0];
+      });
+
+      let weekTotal = 0;
+      let weekStd = 0, weekPrt = 0, weekSpc = 0;
+      const dailyTotals = [0, 0, 0, 0, 0, 0, 0];
+
+      allCompleted.forEach(r => {
+        const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+        const d = parseRequestDate(dStr);
+        if (!d) return;
+        const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        const dayIdx = weekDays.findIndex(w => w.dateStr === isoDate);
+        if (dayIdx >= 0) {
+          let art = toTitleCase(r.artist);
+          if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+          if (art === 'Gle') art = 'Glen';
+
+          if (!weekMatrix[art]) weekMatrix[art] = [0, 0, 0, 0, 0, 0, 0];
+
+          const std = parseInt(r.countStandard, 10) || 0;
+          const prt = parseInt(r.countPrinting, 10) || 0;
+          const spc = parseInt(r.countSpecial, 10) || 0;
+          const cnt = Math.max(std + prt + spc, 1);
+
+          weekMatrix[art][dayIdx] += cnt;
+          dailyTotals[dayIdx] += cnt;
+          weekTotal += cnt;
+          weekStd += std;
+          weekPrt += prt;
+          weekSpc += spc;
+        }
+      });
+
+      // Rows per artist
+      const weekRows = state.artists.map(art => {
+        const counts = weekMatrix[art] || [0, 0, 0, 0, 0, 0, 0];
+        const sum = counts.reduce((a, b) => a + b, 0);
+        return { artist: art, counts, sum };
+      });
+      weekRows.sort((a, b) => b.sum - a.sum);
+
+      const topWeekArt = weekRows[0] && weekRows[0].sum > 0 ? weekRows[0].artist : (state.artists[0] || 'Glen');
+      const topWeekCount = weekRows[0] ? weekRows[0].sum : 0;
+
+      // Update KPIs
+      if (kpi1Title) kpi1Title.textContent = "Weekly Output Total";
+      if (kpi1Val) kpi1Val.textContent = Number(weekTotal).toLocaleString();
+      if (kpi1Desc) kpi1Desc.textContent = `Completed ${weekRangeLabel}`;
+
+      if (kpi2Title) kpi2Title.textContent = "Weekly Category Mix";
+      if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${weekStd} | Prt: ${weekPrt} | Spc: ${weekSpc}</span>`;
+      if (kpi2Desc) kpi2Desc.textContent = "Weekly fabrication types";
+
+      if (kpi3Title) kpi3Title.textContent = "Top Producer This Week";
+      if (kpi3Val) kpi3Val.textContent = topWeekArt;
+      if (kpi3Desc) kpi3Desc.textContent = `${topWeekCount} completed jobs this week`;
+
+      if (kpi4Title) kpi4Title.textContent = "Daily Run Rate";
+      if (kpi4Val) kpi4Val.textContent = `${(weekTotal / 7).toFixed(1)} / day`;
+      if (kpi4Desc) kpi4Desc.textContent = "Average completed per day";
+
+      // Render Table Header
+      if (thead) {
+        thead.innerHTML = `
+          <tr>
+            <th>Artist</th>
+            ${weekDays.map(w => `<th style="text-align:center;">${w.label}</th>`).join('')}
+            <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">Week Total</th>
+            <th style="text-align:center;">Team Share</th>
+            <th style="text-align:center;">Rank</th>
+          </tr>
+        `;
+      }
+
+      // Render Table Body
+      if (tbody) {
+        tbody.innerHTML = weekRows.map((r, idx) => {
+          const share = weekTotal > 0 ? ((r.sum / weekTotal) * 100).toFixed(1) : '0.0';
+          return `
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.artist.substring(0, 2).toUpperCase())}</div>
+                  <strong>${escapeHTML(r.artist)}</strong>
+                </div>
+              </td>
+              ${r.counts.map(c => `<td style="text-align:center; font-weight:${c > 0 ? '700' : '400'}; color:${c > 0 ? '#0F172A' : '#94A3B8'};">${c}</td>`).join('')}
+              <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">${r.sum}</td>
+              <td style="text-align:center; font-weight:700; color:var(--text-secondary);">${share}%</td>
+              <td style="text-align:center; font-weight:800;">#${idx + 1}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Table Foot
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+            <td><strong>WEEKLY TOTAL</strong></td>
+            ${dailyTotals.map(dt => `<td style="text-align:center; font-weight:800;">${dt}</td>`).join('')}
+            <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">${weekTotal}</td>
+            <td style="text-align:center;">100.0%</td>
+            <td style="text-align:center;">—</td>
+          </tr>
+        `;
+      }
+
+      // Render Weekly SVG Chart
+      renderWeeklySvgChart(weekDays, dailyTotals);
+
+      // Export handler for Weekly
+      setupCsvExportButton(`weekly_${weekStartIso}`, weekRows, weekDays);
+      return;
+    }
+
+    // =========================================================================
+    // CASE 3 & 4: MONTHLY & ALL-TIME VIEW (Filtered by Year and Month)
+    // =========================================================================
+    const selectedYear = state.outputFilter.year || '2026';
+    const isYearFilter = (selectedYear !== 'all');
+    const targetYearNum = isYearFilter ? parseInt(selectedYear, 10) : null;
+
+    const rawMonth = state.outputFilter.month;
+    const isAllMonths = (rawMonth === 'all' || rawMonth === undefined);
+    const selectedMIdx = isAllMonths ? null : parseInt(rawMonth, 10);
+
+    const isMonthOnly = (tf === 'month');
+
+    if (isMonthOnly) {
+      if (isAllMonths) {
+        if (reportTitle) reportTitle.textContent = `${isYearFilter ? selectedYear : 'All-Time'} Annual Production Output Report`;
+        if (reportSubtitle) reportSubtitle.textContent = `Verified output breakdown by month across all active artists (Jan — Dec ${isYearFilter ? selectedYear : 'History'})`;
+      } else {
+        const mName = monthFullNames[selectedMIdx] || months[selectedMIdx];
+        if (reportTitle) reportTitle.textContent = `${mName} ${isYearFilter ? selectedYear : '2026'} Production Output Report`;
+        if (reportSubtitle) reportSubtitle.textContent = `Verified output performance and artist breakdown for ${mName} ${isYearFilter ? selectedYear : '2026'}`;
+      }
+      if (chartTitle) chartTitle.textContent = `${isAllMonths ? 'Jan — Dec' : months[selectedMIdx]} ${isYearFilter ? selectedYear : ''} Completed Output`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Hover over bars for exact monthly count and verified volume';
+      if (chartBadge) { chartBadge.textContent = 'Monthly Interval'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Monthly Output Matrix (Jan — Dec ${isYearFilter ? selectedYear : '2026'})`;
+      if (matrixBadge) { matrixBadge.textContent = isAllMonths ? 'Full Year Matrix' : `${months[selectedMIdx]} Highlighted`; matrixBadge.className = 'badge badge-completed'; }
+    } else {
+      if (reportTitle) reportTitle.textContent = `All-Time Production Output Analytics ${isYearFilter ? `(${selectedYear})` : ''}`;
+      if (reportSubtitle) reportSubtitle.textContent = 'Comprehensive production history and cumulative performance rankings';
+      if (chartTitle) chartTitle.textContent = `Completed Assignments by Month ${isYearFilter ? `(${selectedYear})` : ''}`;
+      if (chartSubtitle) chartSubtitle.textContent = 'Historical verified volume distribution across months';
+      if (chartBadge) { chartBadge.textContent = 'All-Time Output'; chartBadge.className = 'badge badge-ongoing'; }
+      if (matrixTitle) matrixTitle.textContent = `Artist Production Output Matrix ${isYearFilter ? `(${selectedYear})` : ''}`;
+      if (matrixBadge) { matrixBadge.textContent = 'Historical Grand Total'; matrixBadge.className = 'badge badge-completed'; }
+    }
+
+    const matrix = {};
+    state.artists.forEach(a => {
+      matrix[a] = new Array(12).fill(0);
+    });
+
+    let ytdTotal = 0;
+    let selectedPeriodTotal = 0;
+    let totalStd = 0, totalPrt = 0, totalSpc = 0;
+    let filterMonthStd = 0, filterMonthPrt = 0, filterMonthSpc = 0;
+
+    allCompleted.forEach(r => {
+      const dateStr = r.releasingDate || r.designDeadline || r.orderDate;
+      const d = parseRequestDate(dateStr);
+      if (!d) return;
+
+      if (targetYearNum && d.getFullYear() !== targetYearNum) return;
+
+      const mIdx = d.getMonth();
+      if (mIdx < 0 || mIdx > 11) return;
+
+      let art = toTitleCase(r.artist);
+      if (art === 'Juls' || art === 'Ju' || art === 'J') art = 'Jules';
+      if (art === 'Gle') art = 'Glen';
+
+      if (!matrix[art]) matrix[art] = new Array(12).fill(0);
+
+      const std = parseInt(r.countStandard, 10) || 0;
+      const prt = parseInt(r.countPrinting, 10) || 0;
+      const spc = parseInt(r.countSpecial, 10) || 0;
+      const cnt = Math.max(std + prt + spc, 1);
+
+      matrix[art][mIdx] += cnt;
+      ytdTotal += cnt;
+      totalStd += std;
+      totalPrt += prt;
+      totalSpc += spc;
+
+      if (selectedMIdx !== null && mIdx === selectedMIdx) {
+        selectedPeriodTotal += cnt;
+        filterMonthStd += std;
+        filterMonthPrt += prt;
+        filterMonthSpc += spc;
+      }
+    });
+
+    const displayTotal = (selectedMIdx !== null) ? selectedPeriodTotal : ytdTotal;
+    const displayStd = (selectedMIdx !== null) ? filterMonthStd : totalStd;
+    const displayPrt = (selectedMIdx !== null) ? filterMonthPrt : totalPrt;
+    const displaySpc = (selectedMIdx !== null) ? filterMonthSpc : totalSpc;
+
+    // Monthly totals per month column
+    const monthlyTotals = new Array(12).fill(0);
+    Object.values(matrix).forEach(counts => {
+      counts.forEach((c, idx) => { monthlyTotals[idx] += c; });
+    });
+
+    // Rows per artist
+    const rows = state.artists.map(art => {
+      const counts = matrix[art] || new Array(12).fill(0);
+      const annualSum = counts.reduce((a, b) => a + b, 0);
+      const monthCount = (selectedMIdx !== null) ? (counts[selectedMIdx] || 0) : annualSum;
+      return { artist: art, counts, annualSum, monthCount };
+    });
+
+    // Sort by selected month or annual sum
+    if (selectedMIdx !== null) {
+      rows.sort((a, b) => b.monthCount - a.monthCount);
+    } else {
+      rows.sort((a, b) => b.annualSum - a.annualSum);
+    }
+
+    const topArtist = rows[0] ? rows[0].artist : (state.artists[0] || 'Glen');
+    const topArtistCount = rows[0] ? (selectedMIdx !== null ? rows[0].monthCount : rows[0].annualSum) : 0;
+
+    // Active months calculation
+    const activeMonthsCount = monthlyTotals.filter(t => t > 0).length || 8;
+    const monthlyAvg = activeMonthsCount > 0 ? (ytdTotal / activeMonthsCount).toFixed(1) : '0';
+
+    // Update KPIs
+    if (kpi1Title) kpi1Title.textContent = (selectedMIdx !== null) ? `${months[selectedMIdx]} Output Total` : "Period Total Output";
+    if (kpi1Val) kpi1Val.textContent = Number(displayTotal).toLocaleString();
+    if (kpi1Desc) kpi1Desc.textContent = (selectedMIdx !== null) ? `Completed in ${months[selectedMIdx]} ${selectedYear}` : `Completed across ${activeMonthsCount} active months`;
+
+    if (kpi2Title) kpi2Title.textContent = (selectedMIdx !== null) ? `${months[selectedMIdx]} Category Mix` : "Category Breakdown";
+    if (kpi2Val) kpi2Val.innerHTML = `<span style="font-size:16px; font-weight:800; color:var(--text-main);">Std: ${displayStd} | Prt: ${displayPrt} | Spc: ${displaySpc}</span>`;
+    if (kpi2Desc) kpi2Desc.textContent = "Fabrication distribution";
+
+    if (kpi3Title) kpi3Title.textContent = (selectedMIdx !== null) ? `Top Producer in ${months[selectedMIdx]}` : "Top Producer";
+    if (kpi3Val) kpi3Val.textContent = topArtist;
+    if (kpi3Desc) kpi3Desc.textContent = `${topArtistCount} completed jobs`;
+
+    if (kpi4Title) kpi4Title.textContent = (selectedMIdx !== null) ? "Daily Run Rate" : "Productivity Benchmark";
+    if (kpi4Val) kpi4Val.textContent = (selectedMIdx !== null) ? `${(displayTotal / 30).toFixed(1)} / day` : `${monthlyAvg} / mo`;
+    if (kpi4Desc) kpi4Desc.textContent = (selectedMIdx !== null) ? "Average completed per day" : "Average monthly output rate";
+
+    // Highlight index
+    const highlightMIdx = (selectedMIdx !== null) ? selectedMIdx : 9;
+
+    // Render Table Header
+    if (thead) {
+      thead.innerHTML = `
+        <tr>
+          <th>Artist</th>
+          ${months.map((m, idx) => `
+            <th style="text-align:center; ${idx === highlightMIdx ? 'background:#D1FAE5; color:#065F46; font-weight:900;' : ''}">
+              ${m}
+            </th>
+          `).join('')}
+          <th style="text-align:center; font-weight:800; background:#EBF7F4; color:var(--primary-green);">${selectedMIdx !== null ? `${months[selectedMIdx]} Total` : 'Annual Total'}</th>
+          <th style="text-align:center;">Rank</th>
+        </tr>
+      `;
+    }
+
+    // Pagination
+    const totalItems = rows.length;
+    const page = state.monthlyOutputPage || 1;
+    const perPage = state.monthlyOutputPerPage || 10;
+    const { validPage, startIndex } = renderPagination({
+      infoId: 'monthlyOutputPaginationInfo',
+      controlsId: 'monthlyOutputPaginationControls',
+      selectIds: ['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'],
+      currentPage: page,
+      perPage,
+      totalItems,
+      onPageChange: 'window.SignDepotApp.setMonthlyOutputPage',
+      itemLabel: 'artists'
+    });
+    state.monthlyOutputPage = validPage;
+    const pagedRows = rows.slice(startIndex, startIndex + perPage);
+
+    // Table Body
+    if (tbody) {
+      tbody.innerHTML = pagedRows.map((r, idx) => {
+        const isTop = idx === 0 && (selectedMIdx !== null ? r.monthCount > 0 : r.annualSum > 0);
+        return `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="user-avatar" style="width:26px; height:26px; font-size:10px; background:${isTop ? 'var(--primary-green)' : '#0F172A'};">${escapeHTML(r.artist.substring(0, 2).toUpperCase())}</div>
+                <strong>${escapeHTML(r.artist)}</strong>
+                ${isTop ? '<span class="badge badge-priority-rush" style="font-size:9px; padding:1px 5px;">★ Top</span>' : ''}
+              </div>
+            </td>
+            ${r.counts.map((c, mIdx) => `
+              <td style="text-align:center; font-weight:${c > 0 ? '700' : '400'}; color:${c > 0 ? '#0F172A' : '#94A3B8'}; ${mIdx === highlightMIdx ? 'background:#F0FDF4; font-weight:800; color:#065F46;' : ''}">
+                ${c}
+              </td>
+            `).join('')}
+            <td style="text-align:center; font-weight:900; background:#EBF7F4; color:var(--primary-green); font-size:14px;">
+              ${selectedMIdx !== null ? r.monthCount : r.annualSum}
+            </td>
+            <td style="text-align:center; font-weight:800;">#${startIndex + idx + 1}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Table Foot
+    if (tfoot) {
+      tfoot.innerHTML = `
+        <tr style="background:#F8FAFC; font-weight:800; border-top:2px solid #CBD5E1;">
+          <td><strong>TOTAL OUTPUT</strong></td>
+          ${monthlyTotals.map((mt, mIdx) => `
+            <td style="text-align:center; font-weight:800; ${mIdx === highlightMIdx ? 'background:#D1FAE5; color:#065F46; font-weight:900;' : ''}">
+              ${mt}
+            </td>
+          `).join('')}
+          <td style="text-align:center; background:#D1FAE5; color:#065F46; font-size:15px; font-weight:900;">
+            ${selectedMIdx !== null ? selectedPeriodTotal : ytdTotal}
+          </td>
+          <td style="text-align:center;">—</td>
+        </tr>
+      `;
+    }
+
+    // Render 12-Month SVG Chart with active month highlight
+    renderMonthlyOutputSvgChart(months, matrix, highlightMIdx, selectedYear);
+
+    // Export CSV
+    setupCsvExportButton(isMonthOnly ? (selectedMIdx !== null ? `month_${months[selectedMIdx]}_${selectedYear}` : `monthly_${selectedYear}`) : `all_time_${selectedYear}`, rows, months);
+  }
+
+  function setupCsvExportButton(mode, rows, headerCols) {
+    const btn = document.getElementById('btnExportMonthlyReportCSV');
+    if (!btn) return;
+    btn.onclick = () => {
+      let csvContent = '';
+      if (mode === 'daily') {
+        const headers = ['Artist', 'Standard Signage', 'Large Format Printing', 'Special Fabrication', "Today's Total", 'Revisions', 'Daily Share %'];
+        const lines = [headers.join(',')];
+        const dayTot = rows.reduce((acc, r) => acc + (r.total || 0), 0);
+        rows.forEach(r => {
+          const share = dayTot > 0 ? ((r.total / dayTot) * 100).toFixed(1) : '0.0';
+          lines.push([`"${r.artist}"`, r.std, r.prt, r.spc, r.total, r.revisions, `"${share}%"`].join(','));
+        });
+        csvContent = lines.join('\n');
+      } else if (mode === 'weekly') {
+        const headers = ['Artist', ...headerCols.map(h => `"${h.label}"`), 'Week Total', 'Team Share %'];
+        const lines = [headers.join(',')];
+        const wTot = rows.reduce((acc, r) => acc + r.sum, 0);
+        rows.forEach(r => {
+          const share = wTot > 0 ? ((r.sum / wTot) * 100).toFixed(1) : '0.0';
+          lines.push([`"${r.artist}"`, ...r.counts, r.sum, `"${share}%"`].join(','));
+        });
+        csvContent = lines.join('\n');
+      } else {
+        const headers = ['Artist', ...headerCols, 'Total Output'];
+        const lines = [headers.join(',')];
+        rows.forEach(r => {
+          lines.push([`"${r.artist}"`, ...r.counts, r.annualSum].join(','));
+        });
+        csvContent = lines.join('\n');
+      }
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sign_Depot_Production_Output_${mode}_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${mode.toUpperCase()} output report to CSV.`);
+      try {
+        fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action_type: 'EXPORT',
+            module: 'Reports',
+            description: `Exported ${mode.toUpperCase()} output report to CSV`
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    };
+  }
+
+  function renderDailyArtistSvgChart(sortedArtists, totalDayOutput) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const topArtists = sortedArtists.slice(0, 9);
+    const maxVal = Math.max(...topArtists.map(a => a.total), 4);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 54;
+    const padding = 36;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * topArtists.length) / Math.max(topArtists.length - 1, 1);
+
+    let bars = '';
+    topArtists.forEach((a, idx) => {
+      const total = a.total;
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isTop = idx === 0 && total > 0;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isTop ? 'var(--primary-green)' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${a.artist}: ${total} completed assignments today</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="12" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">${a.artist}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderWeeklySvgChart(weekDays, dailyTotals) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const maxVal = Math.max(...dailyTotals, 8);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 64;
+    const padding = 40;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * 7) / 6;
+
+    let bars = '';
+    weekDays.forEach((w, idx) => {
+      const total = dailyTotals[idx];
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isPeak = total === Math.max(...dailyTotals) && total > 0;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isPeak ? '#176B55' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${w.label}: ${total} completed assignments</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="12" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">${w.label}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderMonthlyOutputSvgChart(months, matrix, highlightMIdx, yearLabel) {
+    const container = document.getElementById('monthlyChartSvgContainer');
+    if (!container) return;
+
+    const monthlyTotals = new Array(12).fill(0);
+    Object.values(matrix).forEach(counts => {
+      counts.forEach((c, idx) => {
+        monthlyTotals[idx] += c;
+      });
+    });
+
+    const maxVal = Math.max(...monthlyTotals, 8);
+    const svgWidth = 850;
+    const svgHeight = 220;
+    const barWidth = 42;
+    const padding = 32;
+    const usableWidth = svgWidth - padding * 2;
+    const gap = (usableWidth - barWidth * 12) / 11;
+    const activeHighlight = (highlightMIdx !== undefined && highlightMIdx !== null) ? highlightMIdx : 9;
+
+    let bars = '';
+    monthlyTotals.forEach((total, idx) => {
+      const barH = Math.max((total / maxVal) * 140, 4);
+      const x = padding + idx * (barWidth + gap);
+      const y = 170 - barH;
+      const isSelected = idx === activeHighlight;
+
+      bars += `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" 
+            fill="${isSelected ? 'var(--primary-green)' : '#0F172A'}" 
+            opacity="${total > 0 ? '1' : '0.35'}">
+            <title>${months[idx]} ${yearLabel || '2026'}: ${total} completed assignments</title>
+          </rect>
+          <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" font-size="11" font-weight="800" fill="#0F172A">${total}</text>
+          <text x="${x + barWidth / 2}" y="195" text-anchor="middle" font-size="11" font-weight="${isSelected ? '800' : '600'}" fill="${isSelected ? 'var(--primary-green)' : '#64748B'}">${months[idx]}</text>
+        </g>
+      `;
+    });
+
+    container.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">
+        <line x1="${padding}" y1="170" x2="${svgWidth - padding}" y2="170" stroke="#E2E8F0" stroke-width="1.5" />
+        ${bars}
+      </svg>
+    `;
+  }
+
+  // ==========================================================================
+  // MODULE 8B: COMPREHENSIVE REPORTS & ANALYTICS ENGINE (DATABASE DRIVEN)
+  // ==========================================================================
+
+  function initReportFilterState() {
+    if (!state.reportFilter) {
+      state.reportFilter = {
+        timeframe: state.timeframe || 'month',
+        year: '2026',
+        month: '9', // 0-indexed: 9 = October
+        weekStartDate: '2026-10-19', // Monday of peak active week
+        dayDate: '2026-10-26', // Today
+        department: 'all'
+      };
+    }
+  }
+
+  function populateReportWeekOptions() {
+    const weekSelect = document.getElementById('reportFilterWeek');
+    if (!weekSelect) return;
+
+    initReportFilterState();
+    const selYear = state.reportFilter.year === 'all' ? 2026 : parseInt(state.reportFilter.year, 10);
+    const selMonth = state.reportFilter.month === 'all' ? null : parseInt(state.reportFilter.month, 10);
+
+    const options = [];
+    const startYear = new Date(selYear, 0, 1);
+    const firstMon = getMondayOfWeek(startYear);
+    const endYear = new Date(selYear, 11, 31);
+
+    let curMon = new Date(firstMon);
+    let weekIndex = 1;
+
+    while (curMon <= endYear || curMon.getFullYear() === selYear) {
+      const sun = new Date(curMon);
+      sun.setDate(sun.getDate() + 6);
+
+      let include = true;
+      if (selMonth !== null) {
+        include = (curMon.getMonth() === selMonth || sun.getMonth() === selMonth);
+      }
+
+      if (include && (curMon.getFullYear() === selYear || sun.getFullYear() === selYear)) {
+        const iso = formatIsoDate(curMon);
+        const m1 = curMon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const m2 = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isPeak = (iso === '2026-10-19');
+        options.push(`<option value="${iso}">${isPeak ? '★ ' : ''}Week ${weekIndex} (${m1} — ${m2})</option>`);
+      }
+
+      curMon.setDate(curMon.getDate() + 7);
+      weekIndex++;
+      if (curMon.getFullYear() > selYear + 1) break;
+    }
+
+    weekSelect.innerHTML = options.join('');
+
+    const exists = Array.from(weekSelect.options).some(o => o.value === state.reportFilter.weekStartDate);
+    if (exists) {
+      weekSelect.value = state.reportFilter.weekStartDate;
+    } else if (weekSelect.options.length > 0) {
+      const peakOpt = Array.from(weekSelect.options).find(o => o.value === '2026-10-19');
+      if (peakOpt) {
+        weekSelect.value = '2026-10-19';
+        state.reportFilter.weekStartDate = '2026-10-19';
+      } else {
+        weekSelect.value = weekSelect.options[0].value;
+        state.reportFilter.weekStartDate = weekSelect.options[0].value;
+      }
+    }
+  }
+
+  function syncReportFilterControlsUI(tf) {
+    initReportFilterState();
+    state.reportFilter.timeframe = tf;
+
+    const yearSelect = document.getElementById('reportFilterYear');
+    const monthSelect = document.getElementById('reportFilterMonth');
+    const fieldWeek = document.getElementById('reportFilterFieldWeek');
+    const fieldDay = document.getElementById('reportFilterFieldDay');
+    const fieldMonth = document.getElementById('reportFilterFieldMonth');
+    const dateInput = document.getElementById('reportFilterDate');
+    const deptSelect = document.getElementById('reportDepartment');
+    const statusBadge = document.getElementById('reportFilterStatusBadge');
+
+    if (yearSelect) yearSelect.value = state.reportFilter.year || '2026';
+    if (monthSelect) monthSelect.value = state.reportFilter.month !== undefined ? state.reportFilter.month : '9';
+    if (dateInput) dateInput.value = state.reportFilter.dayDate || '2026-10-26';
+    if (deptSelect) deptSelect.value = state.reportFilter.department || 'all';
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.reportFilter.year === 'all' ? 'All Years' : state.reportFilter.year;
+
+    if (tf === 'today') {
+      if (fieldDay) fieldDay.style.display = 'flex';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      const parts = (state.reportFilter.dayDate || '2026-10-26').split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (statusBadge) {
+        statusBadge.textContent = `Daily: ${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-completed';
+      }
+    } else if (tf === 'week') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'flex';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      populateReportWeekOptions();
+      const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+      const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      if (statusBadge) {
+        statusBadge.textContent = `Weekly: ${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else if (tf === 'month') {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'flex';
+      if (statusBadge) {
+        const mIdx = parseInt(state.reportFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.reportFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthNames[mIdx];
+        statusBadge.textContent = `Monthly: ${mLabel} ${curYear}`;
+        statusBadge.className = 'badge badge-ongoing';
+      }
+    } else {
+      if (fieldDay) fieldDay.style.display = 'none';
+      if (fieldWeek) fieldWeek.style.display = 'none';
+      if (fieldMonth) fieldMonth.style.display = 'none';
+      if (statusBadge) {
+        statusBadge.textContent = `All-Time History (${curYear})`;
+        statusBadge.className = 'badge badge-priority-rush';
+      }
+    }
+  }
+
+  function setupReportFilterToolbarEvents() {
+    const yearSelect = document.getElementById('reportFilterYear');
+    const monthSelect = document.getElementById('reportFilterMonth');
+    const weekSelect = document.getElementById('reportFilterWeek');
+    const dateInput = document.getElementById('reportFilterDate');
+    const deptSelect = document.getElementById('reportDepartment');
+    const btnPrevWeek = document.getElementById('btnReportPrevWeek');
+    const btnNextWeek = document.getElementById('btnReportNextWeek');
+    const btnPrevDay = document.getElementById('btnReportPrevDay');
+    const btnNextDay = document.getElementById('btnReportNextDay');
+    const btnFilterToday = document.getElementById('btnReportFilterToday');
+    const btnReset = document.getElementById('btnResetReportFilter');
+
+    initReportFilterState();
+
+    if (yearSelect && !yearSelect._bound) {
+      yearSelect._bound = true;
+      yearSelect.addEventListener('change', () => {
+        state.reportFilter.year = yearSelect.value;
+        if (state.reportFilter.timeframe === 'today') {
+          const parts = state.reportFilter.dayDate.split('-');
+          state.reportFilter.dayDate = `${yearSelect.value === 'all' ? '2026' : yearSelect.value}-${parts[1]}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        } else if (state.reportFilter.timeframe === 'week') {
+          populateReportWeekOptions();
+        }
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (monthSelect && !monthSelect._bound) {
+      monthSelect._bound = true;
+      monthSelect.addEventListener('change', () => {
+        state.reportFilter.month = monthSelect.value;
+        if (state.reportFilter.timeframe === 'today') {
+          const parts = state.reportFilter.dayDate.split('-');
+          const mNum = monthSelect.value === 'all' ? '10' : String(parseInt(monthSelect.value, 10) + 1).padStart(2, '0');
+          state.reportFilter.dayDate = `${parts[0]}-${mNum}-${parts[2]}`;
+          if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        } else if (state.reportFilter.timeframe === 'week') {
+          populateReportWeekOptions();
+        }
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (weekSelect && !weekSelect._bound) {
+      weekSelect._bound = true;
+      weekSelect.addEventListener('change', () => {
+        state.reportFilter.weekStartDate = weekSelect.value;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnPrevWeek && !btnPrevWeek._bound) {
+      btnPrevWeek._bound = true;
+      btnPrevWeek.addEventListener('click', () => {
+        if (weekSelect && weekSelect.selectedIndex > 0) {
+          weekSelect.selectedIndex--;
+          state.reportFilter.weekStartDate = weekSelect.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (btnNextWeek && !btnNextWeek._bound) {
+      btnNextWeek._bound = true;
+      btnNextWeek.addEventListener('click', () => {
+        if (weekSelect && weekSelect.selectedIndex < weekSelect.options.length - 1) {
+          weekSelect.selectedIndex++;
+          state.reportFilter.weekStartDate = weekSelect.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (dateInput && !dateInput._bound) {
+      dateInput._bound = true;
+      dateInput.addEventListener('change', () => {
+        if (dateInput.value) {
+          state.reportFilter.dayDate = dateInput.value;
+          renderReports(state.reportFilter.timeframe);
+        }
+      });
+    }
+
+    if (btnPrevDay && !btnPrevDay._bound) {
+      btnPrevDay._bound = true;
+      btnPrevDay.addEventListener('click', () => {
+        const cur = new Date(state.reportFilter.dayDate || '2026-10-26');
+        cur.setDate(cur.getDate() - 1);
+        state.reportFilter.dayDate = formatIsoDate(cur);
+        if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnNextDay && !btnNextDay._bound) {
+      btnNextDay._bound = true;
+      btnNextDay.addEventListener('click', () => {
+        const cur = new Date(state.reportFilter.dayDate || '2026-10-26');
+        cur.setDate(cur.getDate() + 1);
+        state.reportFilter.dayDate = formatIsoDate(cur);
+        if (dateInput) dateInput.value = state.reportFilter.dayDate;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnFilterToday && !btnFilterToday._bound) {
+      btnFilterToday._bound = true;
+      btnFilterToday.addEventListener('click', () => {
+        state.reportFilter.dayDate = '2026-10-26';
+        if (dateInput) dateInput.value = '2026-10-26';
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (deptSelect && !deptSelect._bound) {
+      deptSelect._bound = true;
+      deptSelect.addEventListener('change', () => {
+        state.reportFilter.department = deptSelect.value;
+        renderReports(state.reportFilter.timeframe);
+      });
+    }
+
+    if (btnReset && !btnReset._bound) {
+      btnReset._bound = true;
+      btnReset.addEventListener('click', () => {
+        state.reportFilter = {
+          timeframe: 'month',
+          year: '2026',
+          month: '9',
+          weekStartDate: '2026-10-19',
+          dayDate: '2026-10-26',
+          department: 'all'
+        };
+        renderReports('month');
+      });
+    }
+  }
+
+  function renderReports(timeframe) {
+    initReportFilterState();
+    setupReportFilterToolbarEvents();
+
+    const rawTf = timeframe || state.reportFilter.timeframe || state.timeframe || 'month';
+    let tf = 'month';
+    const lowTf = String(rawTf).toLowerCase().trim();
+    if (lowTf === 'today' || lowTf === 'daily' || lowTf === 'day') tf = 'today';
+    else if (lowTf === 'week' || lowTf === 'weekly') tf = 'week';
+    else if (lowTf === 'month' || lowTf === 'monthly') tf = 'month';
+    else if (lowTf === 'all' || lowTf === 'all_time' || lowTf === 'alltime') tf = 'all';
+
+    state.timeframe = tf;
+    state.reportFilter.timeframe = tf;
+
+    // Sync timeframe buttons in #reportTimeframeTabs
+    document.querySelectorAll('#reportTimeframeTabs .timeframe-btn').forEach(btn => {
+      const bTf = (btn.getAttribute('data-timeframe') || '').toLowerCase();
+      const isAct = (bTf === tf) || 
+                    (tf === 'today' && (bTf === 'daily' || bTf === 'today' || bTf === 'day')) ||
+                    (tf === 'week' && (bTf === 'weekly' || bTf === 'week')) ||
+                    (tf === 'month' && (bTf === 'monthly' || bTf === 'month')) ||
+                    (tf === 'all' && (bTf === 'all' || bTf === 'all_time' || bTf === 'alltime'));
+      btn.classList.toggle('active', isAct);
+    });
+
+    syncReportFilterControlsUI(tf);
+
+    const monthFullNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const curYear = state.reportFilter.year === 'all' ? 'All Years' : state.reportFilter.year;
+
+    // Filter requests according to state.reportFilter
+    const reqs = (state.requests || []).filter(r => {
+      // Department filter
+      if (state.reportFilter.department && state.reportFilter.department !== 'all') {
+        if (state.reportFilter.department === 'creative' && (!r.artist || r.artist === 'Unassigned')) return false;
+        if (state.reportFilter.department === 'sales' && !r.salesRep) return false;
+        if (state.reportFilter.department === 'production' && ((parseInt(r.countStandard, 10) || 0) + (parseInt(r.countPrinting, 10) || 0) + (parseInt(r.countSpecial, 10) || 0) <= 0)) return false;
+      }
+
+      const dStr = r.releasingDate || r.designDeadline || r.orderDate;
+      if (!dStr) return tf === 'all';
+      const d = parseRequestDate(dStr);
+      if (!d) return tf === 'all';
+
+      if (tf === 'today') {
+        const targetIso = state.reportFilter.dayDate || '2026-10-26';
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return iso === targetIso;
+      }
+
+      if (tf === 'week') {
+        const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0);
+        const sun = new Date(parts[0], parts[1] - 1, parts[2] + 6, 23, 59, 59);
+        return d >= mon && d <= sun;
+      }
+
+      if (tf === 'month') {
+        const yMatch = (state.reportFilter.year === 'all') || (d.getFullYear() === parseInt(state.reportFilter.year, 10));
+        if (!yMatch) return false;
+        if (state.reportFilter.month === 'all') return true;
+        return d.getMonth() === parseInt(state.reportFilter.month, 10);
+      }
+
+      // All Time
+      if (state.reportFilter.year && state.reportFilter.year !== 'all') {
+        return d.getFullYear() === parseInt(state.reportFilter.year, 10);
+      }
+      return true;
+    });
+
+    // Update section titles and subtitles dynamically
+    const headerTitle = document.getElementById('reportHeaderTitle');
+    const headerSubtitle = document.getElementById('reportHeaderSubtitle');
+    if (headerTitle && headerSubtitle) {
+      if (tf === 'today') {
+        const parts = (state.reportFilter.dayDate || '2026-10-26').split('-').map(Number);
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+        headerTitle.textContent = `Daily Production Reports & Analytics — ${dayStr}`;
+        headerSubtitle.textContent = `Verified operational metrics and production performance for ${dayStr}`;
+      } else if (tf === 'week') {
+        const parts = (state.reportFilter.weekStartDate || '2026-10-19').split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+        const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+        const monStr = mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const sunStr = sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        headerTitle.textContent = `Weekly Production Reports & Analytics (${monStr} — ${sunStr})`;
+        headerSubtitle.textContent = `Verified operational metrics and performance breakdown across Week (${monStr} — ${sunStr})`;
+      } else if (tf === 'month') {
+        const mIdx = parseInt(state.reportFilter.month, 10);
+        const mLabel = isNaN(mIdx) || state.reportFilter.month === 'all' ? 'Full Year (Jan — Dec)' : monthFullNames[mIdx];
+        headerTitle.textContent = `Monthly Production Reports & Analytics — ${mLabel} ${curYear}`;
+        headerSubtitle.textContent = `Operational performance, artist turnaround, and output breakdown for ${mLabel} ${curYear}`;
+      } else {
+        headerTitle.textContent = `All-Time Production Reports & Analytics (${curYear})`;
+        headerSubtitle.textContent = `Comprehensive historical operational performance across all logged production orders (${curYear})`;
+      }
+    }
+
+    const totalOrders = reqs.length;
+    let completedOrders = 0;
+    let totalRevisions = 0;
+    let totalTurnaroundDays = 0;
+    let turnaroundCount = 0;
+
+    const artistMap = {};
+    state.artists.forEach(a => {
+      artistMap[a] = {
+        name: a,
+        assigned: 0,
+        completed: 0,
+        inProgress: 0,
+        standard: 0,
+        printing: 0,
+        special: 0,
+        efficiency: '100.0%'
+      };
+    });
+
+    reqs.forEach(r => {
+      const isCompleted = (r.projectStatus === 'Completed' || r.designStatus === 'Submitted');
+      if (isCompleted) completedOrders++;
+      totalRevisions += (parseInt(r.revisionCount, 10) || 0);
+
+      const oDate = parseRequestDate(r.orderDate);
+      const rDate = parseRequestDate(r.releasingDate || r.designDeadline);
+      if (oDate && rDate && rDate >= oDate) {
+        const diffDays = (rDate.getTime() - oDate.getTime()) / (1000 * 3600 * 24);
+        if (diffDays >= 0 && diffDays <= 60) {
+          totalTurnaroundDays += diffDays;
+          turnaroundCount++;
+        }
+      }
+
+      let artistName = toTitleCase(r.artist);
+      if (artistName === 'Juls' || artistName === 'Ju' || artistName === 'J') artistName = 'Jules';
+      if (artistName === 'Gle') artistName = 'Glen';
+
+      if (artistMap[artistName]) {
+        artistMap[artistName].assigned++;
+        if (isCompleted) {
+          artistMap[artistName].completed++;
+        } else {
+          artistMap[artistName].inProgress++;
+        }
+
+        let std = parseInt(r.countStandard, 10) || 0;
+        let prt = parseInt(r.countPrinting, 10) || 0;
+        let spc = parseInt(r.countSpecial, 10) || 0;
+        if (std === 0 && prt === 0 && spc === 0) std = 1;
+        artistMap[artistName].standard += std;
+        artistMap[artistName].printing += prt;
+        artistMap[artistName].special += spc;
+      }
+    });
+
+    Object.values(artistMap).forEach(as => {
+      if (as.assigned > 0) {
+        as.efficiency = ((as.completed / as.assigned) * 100).toFixed(1) + '%';
+      } else {
+        as.efficiency = '100.0%';
+      }
+    });
+
+    const artistRows = Object.values(artistMap).sort((a, b) => b.assigned - a.assigned);
+
+    const avgTurnaround = turnaroundCount > 0 ? (totalTurnaroundDays / turnaroundCount).toFixed(1) : '2.1';
+    const revisionRatio = totalOrders > 0 ? (totalRevisions / totalOrders).toFixed(2) : '0.15';
+    const completionRate = totalOrders > 0 ? ((completedOrders / totalOrders) * 100).toFixed(1) + '%' : '100.0%';
+
+    const elTot = document.getElementById('repStatTotal');
+    if (elTot) elTot.textContent = Number(totalOrders).toLocaleString();
+
+    const elComp = document.getElementById('repStatCompleted');
+    if (elComp) elComp.textContent = Number(completedOrders).toLocaleString();
+
+    const elTurn = document.getElementById('repStatTurnaround');
+    if (elTurn) elTurn.innerHTML = `${avgTurnaround} <span style="font-size:14px; font-weight:600; color:#64748B;">days</span>`;
+
+    const elRev = document.getElementById('repStatRevision');
+    if (elRev) elRev.innerHTML = `${revisionRatio} <span style="font-size:14px; font-weight:600; color:#64748B;">/ job</span>`;
+
+    const elRate = document.getElementById('repStatCompletionRate');
+    if (elRate) elRate.textContent = `${completionRate} on-time rate`;
+
+    const tbody = document.getElementById('reportsArtistTableBody');
+    if (tbody) {
+      if (artistRows.length === 0 || totalOrders === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--text-secondary);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 6px; opacity: 0.6;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div style="font-weight: 700; font-size: 14px;">No production orders found for this filter interval</div>
+              <div style="font-size: 12px; margin-top: 4px;">Try selecting another Day, Week, Month, or Department.</div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = artistRows.map(r => `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="user-avatar" style="width:26px; height:26px; font-size:10px;">${escapeHTML(r.name.substring(0, 2).toUpperCase())}</div>
+                <strong>${escapeHTML(r.name)}</strong>
+              </div>
+            </td>
+            <td><strong>${Number(r.assigned).toLocaleString()}</strong></td>
+            <td><span class="badge" style="background:#F0FDF4; color:#166534; font-weight:700;">${Number(r.completed).toLocaleString()}</span></td>
+            <td><span style="color:#64748B; font-weight:600;">${Number(r.inProgress).toLocaleString()}</span></td>
+            <td>${Number(r.standard).toLocaleString()}</td>
+            <td>${Number(r.printing).toLocaleString()}</td>
+            <td>${Number(r.special).toLocaleString()}</td>
+            <td><span style="font-weight:700; color:${parseFloat(r.efficiency) >= 90 ? '#166534' : '#D97706'};">${r.efficiency}</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    window.currentReportData = {
+      timeframe: tf,
+      totalOrders,
+      completedOrders,
+      avgTurnaround,
+      revisionRatio,
+      artistRows
+    };
+  }
+
+  // ==========================================================================
+  // MODULE 9: SETTINGS ENGINE
+  // ==========================================================================
+
+  function renderSettings() {
+    const artistListEl = document.getElementById('settingsArtistList');
+    if (artistListEl) {
+      artistListEl.innerHTML = state.artists.map(a => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px; background:#F8FAFC; border-radius:var(--radius-sm); border:1px solid #E2E8F0;">
+          <span style="font-weight:700; font-size:13px;">${escapeHTML(a)}</span>
+          <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.removeArtist('${a}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    const salesListEl = document.getElementById('settingsSalesList');
+    if (salesListEl) {
+      salesListEl.innerHTML = state.salesReps.map(s => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px; background:#F8FAFC; border-radius:var(--radius-sm); border:1px solid #E2E8F0;">
+          <span style="font-weight:700; font-size:13px;">${escapeHTML(s)}</span>
+          <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.removeSales('${s}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    const btnAddArtist = document.getElementById('btnSettingsAddArtist');
+    const inputAddArtist = document.getElementById('settingsNewArtistInput');
+    if (btnAddArtist && inputAddArtist) {
+      btnAddArtist.onclick = () => {
+        const val = toTitleCase(inputAddArtist.value.trim());
+        if (val && !state.artists.includes(val)) {
+          state.artists.push(val);
+          state.artists.sort();
+          inputAddArtist.value = '';
+          saveStateToStorage();
+          renderSettings();
+          populateSalesFiltersDropdowns();
+          populateTrackerFiltersDropdowns();
+          showToast(`Artist "${val}" added.`);
+
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=add_artist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: val })
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success && res.data) {
+                state.artists = res.data;
+                saveStateToStorage();
+                populateSalesFiltersDropdowns();
+                populateTrackerFiltersDropdowns();
+              }
+            })
+            .catch(e => console.warn('add_artist API error:', e));
+          }
+        }
+      };
+    }
+
+    const btnAddSales = document.getElementById('btnSettingsAddSales');
+    const inputAddSales = document.getElementById('settingsNewSalesInput');
+    if (btnAddSales && inputAddSales) {
+      btnAddSales.onclick = () => {
+        const val = toTitleCase(inputAddSales.value.trim());
+        if (val && !state.salesReps.includes(val)) {
+          state.salesReps.push(val);
+          state.salesReps.sort();
+          inputAddSales.value = '';
+          saveStateToStorage();
+          renderSettings();
+          populateSalesFiltersDropdowns();
+          showToast(`Sales representative "${val}" added.`);
+
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=add_sales_rep', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: val })
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success && res.data) {
+                state.salesReps = res.data;
+                saveStateToStorage();
+                populateSalesFiltersDropdowns();
+              }
+            })
+            .catch(e => console.warn('add_sales_rep API error:', e));
+          }
+        }
+      };
+    }
+
+    const btnExport = document.getElementById('btnSettingsExportJson');
+    if (btnExport) {
+      btnExport.onclick = () => {
+        const jsonStr = JSON.stringify(state, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Data_Backup_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('JSON backup downloaded.');
+      };
+    }
+
+    const btnImport = document.getElementById('btnSettingsImportJson');
+    const importInput = document.getElementById('importJsonFileInput');
+    if (btnImport && importInput) {
+      btnImport.onclick = () => importInput.click();
+      importInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            if (parsed && Array.isArray(parsed.requests)) {
+              state.requests = parsed.requests;
+              state.artists = parsed.artists || state.artists;
+              state.salesReps = parsed.salesReps || state.salesReps;
+              saveStateToStorage();
+              renderSettings();
+              showToast('Backup restored successfully!');
+            }
+          } catch (err) {
+            showToast('Failed to parse JSON file.', 'error');
+          }
+        };
+        reader.readAsText(file);
+      };
+    }
+
+    // Super Admin Deletion Security Passcode Management
+    const loginPasswordEl = document.getElementById('settingsLoginPasswordInput');
+    const newPasscodeEl = document.getElementById('settingsNewPasscodeInput');
+    const savePasscodeBtn = document.getElementById('btnSettingsSavePasscode');
+    const feedbackEl = document.getElementById('settingsPasscodeFeedback');
+
+    // Ensure password fields are always clean and not pre-filled by browser credential managers
+    if (loginPasswordEl) loginPasswordEl.value = '';
+    if (newPasscodeEl) newPasscodeEl.value = '';
+
+    if (savePasscodeBtn && newPasscodeEl) {
+      savePasscodeBtn.onclick = () => {
+        const loginPass = loginPasswordEl ? loginPasswordEl.value.trim() : '';
+        if (!loginPass) {
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#DC2626';
+            feedbackEl.textContent = 'Please enter your current account login password.';
+          }
+          if (loginPasswordEl) loginPasswordEl.focus();
+          return;
+        }
+
+        const val = newPasscodeEl.value.trim();
+        if (!val) {
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#DC2626';
+            feedbackEl.textContent = 'Please enter a valid new passcode.';
+          }
+          newPasscodeEl.focus();
+          return;
+        }
+
+        savePasscodeBtn.disabled = true;
+        savePasscodeBtn.textContent = 'Saving...';
+
+        const updateLocal = () => {
+          if (loginPasswordEl) loginPasswordEl.value = '';
+          newPasscodeEl.value = '';
+          if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = '#09090B';
+            feedbackEl.textContent = 'Deletion security passcode successfully saved and protected!';
+            setTimeout(() => { if (feedbackEl) feedbackEl.style.display = 'none'; }, 4000);
+          }
+          showToast('Super Admin deletion passcode updated.');
+          savePasscodeBtn.disabled = false;
+          savePasscodeBtn.textContent = 'Save Passcode';
+        };
+
+        if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+          fetch(window.PMS_API_URL + '?action=set_delete_passcode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ passcode: val, login_password: loginPass })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.success) {
+              updateLocal();
+            } else {
+              if (feedbackEl) {
+                feedbackEl.style.display = 'block';
+                feedbackEl.style.color = '#DC2626';
+                feedbackEl.textContent = res.error || 'Failed to update passcode on server.';
+              }
+              savePasscodeBtn.disabled = false;
+              savePasscodeBtn.textContent = 'Save Passcode';
+            }
+          })
+          .catch(() => updateLocal());
+        } else {
+          updateLocal();
+        }
+      };
+    }
+
+    const btnResetAll = document.getElementById('btnSettingsResetDefaults');
+    if (btnResetAll) {
+      btnResetAll.onclick = () => {
+        showCustomConfirm({
+          title: 'Reset to Factory Defaults',
+          subtitle: 'LOCALSTORAGE DATA RESET',
+          message: 'Are you sure you want to reset all mock data to factory defaults? All unsynced local drafts will be cleared.',
+          requiresPasscode: false,
+          confirmText: 'Reset Defaults',
+          onConfirm: () => {
+            localStorage.removeItem(STORAGE_KEY);
+            state.artists = [...DEFAULT_ARTISTS];
+            state.salesReps = [...DEFAULT_SALES_REPS];
+            state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+            state.templateElements = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_ELEMENTS));
+            state.attachments = [...DEFAULT_ATTACHMENTS];
+            saveStateToStorage();
+            renderCurrentView(state.activeView);
+            showToast('Sample dataset restored to factory defaults.');
+            return true;
+          }
+        });
+      };
+    }
+  }
+
+  // ==========================================================================
+  // GLOBAL SEARCH & TOPBAR
+  // ==========================================================================
+
+  function setupGlobalSearch() {
+    const input = document.getElementById('globalSearchInput');
+    const dropdown = document.getElementById('quickSearchResults');
+    if (!input || !dropdown) return;
+
+    // Immediately purge if browser erroneously prefilled a user account credential
+    if (input.value && (input.value.toLowerCase().startsWith('sup_') || input.value.toLowerCase().includes('angel') || input.value.toLowerCase() === 'superadmin')) {
+      input.value = '';
+    }
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      if (!q) {
+        dropdown.style.display = 'none';
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      const matching = state.requests.filter(r => 
+        r.joNumber.toLowerCase().includes(q) ||
+        r.projectName.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q) ||
+        r.artist.toLowerCase().includes(q)
+      ).slice(0, 8);
+
+      if (matching.length === 0) {
+        dropdown.innerHTML = `<div style="padding:10px 14px; font-size:12px; color:var(--text-muted);">No records found.</div>`;
+      } else {
+        dropdown.innerHTML = `
+          <div class="search-group-title">Matches (${matching.length})</div>
+          ${matching.map(m => `
+            <div class="search-item" onclick="window.SignDepotApp.openDirectiveForJo('${m.joNumber}'); document.getElementById('quickSearchResults').style.display='none';">
+              <div>
+                <div class="search-item-primary">${escapeHTML(m.projectName)}</div>
+                <div class="search-item-sub"><strong style="color:var(--accent-red);">${escapeHTML(m.joNumber)}</strong> • ${escapeHTML(m.client)}</div>
+              </div>
+              <span class="badge ${getStatusBadgeClass(m.projectStatus)}">${escapeHTML(m.projectStatus)}</span>
+            </div>
+          `).join('')}
+        `;
+      }
+      dropdown.style.display = 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    const profBtn = document.getElementById('userProfileBtn');
+    const profDropdown = document.getElementById('userProfileDropdown');
+    if (profBtn && profDropdown) {
+      profBtn.addEventListener('click', () => profDropdown.classList.toggle('show'));
+      document.addEventListener('click', (e) => {
+        if (!profBtn.contains(e.target) && !profDropdown.contains(e.target)) {
+          profDropdown.classList.remove('show');
+        }
+      });
+    }
+
+    const btnQuickUral = document.getElementById('btnQuickDirectiveSample');
+    if (btnQuickUral) {
+      btnQuickUral.onclick = () => {
+        window.SignDepotApp.openDirectiveForJo('P261001348');
+        profDropdown.classList.remove('show');
+      };
+    }
+
+    const btnResetStore = document.getElementById('btnResetLocalStorage');
+    if (btnResetStore) {
+      btnResetStore.onclick = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        state.requests = JSON.parse(JSON.stringify(DEFAULT_REQUESTS));
+        saveStateToStorage();
+        renderCurrentView(state.activeView);
+        profDropdown.classList.remove('show');
+        showToast('Mock data reset.');
+      };
+    }
+
+    const btnGotoSettings = document.getElementById('btnGotoSettings');
+    if (btnGotoSettings) {
+      btnGotoSettings.onclick = () => {
+        if (document.getElementById('view-settings')) {
+          switchView('view-settings');
+        } else {
+          window.location.href = getPageUrl('settings.html');
+        }
+        profDropdown.classList.remove('show');
+      };
+    }
+
+    // Sidebar toggle is handled cleanly via delegated events with debounce in window.toggleDesktopSidebar
+
+    // Timeframe filters (Today | This Week | This Month | All Time)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.timeframe-btn');
+      if (!btn) return;
+      const tf = btn.getAttribute('data-timeframe') || 'all';
+      document.querySelectorAll('.timeframe-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-timeframe') === tf);
+      });
+      state.timeframe = tf;
+
+      // Sync dropdowns if present
+      const reportTfSelect = document.getElementById('reportTimeframe');
+      if (reportTfSelect) {
+        reportTfSelect.value = tf;
+      }
+
+      // Re-render corresponding views
+      if (document.getElementById('view-monthly-output') || state.activeView === 'view-monthly-output') {
+        renderMonthlyOutputReport(tf);
+      }
+      if (document.getElementById('view-reports') || state.activeView === 'view-reports') {
+        renderReports(tf);
+      }
+
+      const labelMap = { today: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' };
+      showToast(`Timeframe: ${labelMap[tf] || tf}`);
+    });
+
+    const reportTfSelect = document.getElementById('reportTimeframe');
+    if (reportTfSelect) {
+      reportTfSelect.addEventListener('change', () => {
+        const tf = reportTfSelect.value;
+        document.querySelectorAll('.timeframe-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-timeframe') === tf);
+        });
+        state.timeframe = tf;
+        renderReports(tf);
+        if (document.getElementById('view-monthly-output') || state.activeView === 'view-monthly-output') {
+          renderMonthlyOutputReport(tf);
+        }
+      });
+    }
+
+    const reportDeptSelect = document.getElementById('reportDepartment');
+    if (reportDeptSelect) {
+      reportDeptSelect.addEventListener('change', () => {
+        renderReports(state.timeframe || 'all');
+      });
+    }
+
+    setupOutputFilterToolbarEvents();
+    setupReportFilterToolbarEvents();
+  }
+
+  // ==========================================================================
+  // REQUEST ID AUTO-GENERATION & SEPARATOR DASH FORMATTING ENGINE
+  // ==========================================================================
+
+  function getNextRequestId() {
+    let maxSeq = 2103;
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    (state.requests || []).forEach(r => {
+      if (!r.requestId) return;
+      const match = String(r.requestId).match(/(?:LR-?\d{2}-?)?(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxSeq) {
+          maxSeq = num;
+        }
+      }
+    });
+    const nextSeq = maxSeq + 1;
+    return `LR-${curYear}-${nextSeq}`;
+  }
+
+  function getNextJoNumber() {
+    let maxJo = 1001357;
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    (state.requests || []).forEach(r => {
+      if (!r.joNumber) return;
+      const match = String(r.joNumber).match(/P\d{2}(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxJo) {
+          maxJo = num;
+        }
+      }
+    });
+    return `P${curYear}${maxJo + 1}`;
+  }
+
+  function formatRequestIdInput(val) {
+    if (!val) return '';
+    const curYear = new Date().getFullYear().toString().slice(-2);
+    let str = String(val).trim().toUpperCase();
+
+    // Pure digits: "2104" or "2105" -> "LR-26-2104"
+    if (/^\d{4,5}$/.test(str)) {
+      return `LR-${curYear}-${str}`;
+    }
+    // "26-2104" or "262104" -> "LR-26-2104"
+    if (/^\d{2}-?\d{4,5}$/.test(str)) {
+      const clean = str.replace(/-/g, '');
+      return `LR-${clean.slice(0, 2)}-${clean.slice(2)}`;
+    }
+    // "LR2104" -> "LR-26-2104"
+    if (/^LR\d{4,5}$/.test(str)) {
+      return `LR-${curYear}-${str.slice(2)}`;
+    }
+    // "LR262104" -> "LR-26-2104"
+    if (/^LR\d{6,7}$/.test(str)) {
+      return `LR-${str.slice(2, 4)}-${str.slice(4)}`;
+    }
+    // "LR-262104" -> "LR-26-2104"
+    if (/^LR-\d{6,7}$/.test(str)) {
+      return `LR-${str.slice(3, 5)}-${str.slice(5)}`;
+    }
+    // Progressive typing formatting
+    if (str === 'LR') return 'LR-';
+    if (/^LR-\d{2}$/.test(str)) return `${str}-`;
+
+    return str;
+  }
+
+  function openNewSalesRequestModal() {
+    const form = document.getElementById('salesRequestForm');
+    if (form) {
+      form.reset();
+      form.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+    }
+    const idField = document.getElementById('salesFormId');
+    if (idField) idField.value = '';
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = 'New Sales Request';
+
+    // Auto-generate sequential Request ID with separator dash (e.g. LR-26-2104 / LR-26-2105)
+    const nextId = getNextRequestId();
+    const reqInput = document.getElementById('salesFormReqId');
+    if (reqInput) reqInput.value = nextId;
+
+    // Fetch live backend for latest ID if available to ensure perfect multi-client sync
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_next_request_id')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.nextRequestId && reqInput && (!reqInput.value || reqInput.value === nextId)) {
+            reqInput.value = res.nextRequestId;
+          }
+        })
+        .catch(() => {});
+    }
+
+    // No default JO number on the add request form
+    const joInput = document.getElementById('salesFormJo');
+    if (joInput) joInput.value = '';
+
+    const orderDateInput = document.getElementById('salesFormOrderDate');
+    if (orderDateInput) {
+      orderDateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    // Default design deadline (+3 days from today)
+    const deadlineInput = document.getElementById('salesFormDeadline');
+    if (deadlineInput && !deadlineInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 3);
+      deadlineInput.value = d.toISOString().split('T')[0];
+    }
+
+    // Default production due (+5 days from today)
+    const releasingInput = document.getElementById('salesFormReleasing');
+    if (releasingInput && !releasingInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 5);
+      releasingInput.value = d.toISOString().split('T')[0];
+    }
+
+    const locInput = document.getElementById('salesFormLocation');
+    if (locInput) locInput.value = 'Indoor';
+
+    const prioInput = document.getElementById('salesFormPriority');
+    if (prioInput) prioInput.value = 'Normal';
+
+    const appInput = document.getElementById('salesFormClientApproval');
+    if (appInput) appInput.value = 'Pending Approval';
+
+    const relModeInput = document.getElementById('salesFormRelMode');
+    if (relModeInput) relModeInput.value = 'Pickup';
+
+    const fileSentInput = document.getElementById('salesFormFileSent');
+    if (fileSentInput) fileSentInput.value = 'File Sent';
+
+    populateSalesFiltersDropdowns();
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => {
+        if (joInput) {
+          joInput.focus();
+        } else if (reqInput) {
+          reqInput.focus();
+        }
+      }, 100);
+    }
+  }
+  window.openNewSalesRequestModal = openNewSalesRequestModal;
+
+  function renderDraftCustomSelect(fieldName, currentValue, optionsList, elementId, styleWidth) {
+    const hasVal = currentValue && String(currentValue).trim() !== '' && String(currentValue).trim() !== 'N/A' && String(currentValue).trim() !== 'Blank';
+    const val = hasVal ? String(currentValue).trim() : '';
+    const badgeClass = hasVal ? getBadgeClassForValue(fieldName, val) : 'badge-neutral';
+    const safeLabel = hasVal ? escapeHTML(val) : '— Select —';
+    let options = Array.isArray(optionsList) ? [...optionsList] : [];
+    const safeOptions = JSON.stringify(options).replace(/"/g, '&quot;');
+    const widthStyle = styleWidth ? `style="width:${styleWidth};"` : '';
+
+    return `
+      <button type="button" class="custom-select-btn draft-custom-select ${badgeClass} ${!hasVal ? 'is-blank is-unselected' : ''}"
+        id="${elementId}"
+        ${widthStyle}
+        data-is-draft="true"
+        data-field="${fieldName}"
+        data-current="${escapeHTML(val)}"
+        data-options="${safeOptions}"
+        title="Click to select ${fieldName}"
+        onclick="window.SignDepotApp.openCustomDropdown(this, event)">
+        <span class="custom-select-label">${safeLabel}</span>
+        <svg class="custom-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    `;
+  }
+
+  function renderDraftSalesRowHTML(d) {
+    const orderDateVal = d.orderDate || '';
+    const deadlineVal = d.designDeadline || '';
+    const releasingVal = d.releasingDate || '';
+
+    return `
+      <tr class="table-draft-row" id="draftSalesRow">
+        <td><input type="text" class="draft-cell-input" id="draftReqId" value="${escapeHTML(d.requestId)}" style="color:var(--primary-green); font-weight:700; width:95px;" placeholder="Req ID" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftJoNumber" value="${escapeHTML(d.joNumber || '')}" placeholder="JO # (e.g. P26...)" style="color:var(--accent-red); font-weight:700; width:110px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="date" class="draft-cell-input" id="draftOrderDate" value="${escapeHTML(orderDateVal)}" style="width:125px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('salesRep', d.salesRep, state.salesReps, 'draftSalesRep', '120px')}</td>
+        <td><input type="text" class="draft-cell-input" id="draftClient" value="${escapeHTML(d.client || '')}" placeholder="Client name..." style="width:140px;" required autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftProjectName" value="${escapeHTML(d.projectName || '')}" placeholder="Project name..." style="width:170px; font-weight:600;" required autocomplete="off" onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('artist', d.artist, state.artists, 'draftArtist', '120px')}</td>
+        <td><input type="date" class="draft-cell-input" id="draftDeadline" value="${escapeHTML(deadlineVal)}" style="width:125px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="date" class="draft-cell-input" id="draftReleasing" value="${escapeHTML(releasingVal)}" style="width:125px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('fileSent', d.fileSent, FILE_STATUS_LEVELS, 'draftFileSent', '100px')}</td>
+        <td><input type="text" class="draft-cell-input" id="draftAddress" value="${escapeHTML(d.completeAddress || '')}" placeholder="Full address..." style="width:190px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('location', d.location, PLACEMENT_OPTIONS, 'draftLocation', '115px')}</td>
+        <td>${renderDraftCustomSelect('releasingMode', d.releasingMode, RELEASING_MODES, 'draftRelMode', '100px')}</td>
+        <td><input type="text" class="draft-cell-input" id="draftContactPerson" value="${escapeHTML(d.contactPerson || '')}" placeholder="Contact person..." style="width:130px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td><input type="text" class="draft-cell-input" id="draftContactNumber" value="${escapeHTML(d.contactNumber || '')}" placeholder="Phone number..." style="width:120px;" required onkeydown="window.SignDepotApp.handleDraftKey(event)"></td>
+        <td>${renderDraftCustomSelect('clientApproval', d.clientApproval || 'Pending Approval', APPROVAL_LEVELS, 'draftClientApproval', '125px')}</td>
+        <td>${renderDraftCustomSelect('priority', d.priority || 'Normal', PRIORITY_LEVELS, 'draftPriority', '95px')}</td>
+        <td class="draft-actions-cell">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button type="button" class="btn btn-save-draft" id="btnSaveDraftRequest" onclick="if(window.SignDepotApp && window.SignDepotApp.saveDraftSalesRequest){window.SignDepotApp.saveDraftSalesRequest();}else{saveDraftSalesRequest();}" title="Save Request (✓)" aria-label="Save Request">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button type="button" class="btn btn-cancel-draft" id="btnCancelDraftRequest" onclick="if(window.SignDepotApp && window.SignDepotApp.cancelDraftSalesRequest){window.SignDepotApp.cancelDraftSalesRequest();}else{cancelDraftSalesRequest();}" title="Cancel (✕)" aria-label="Cancel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function addNewSalesRequestRow() {
+    openNewSalesRequestModal();
+  }
+  window.addNewSalesRequestRow = addNewSalesRequestRow;
+
+  function saveDraftSalesRequest() {
+    if (!state.draftSalesRequest) return;
+
+    const draftRow = document.getElementById('draftSalesRow');
+    if (draftRow) {
+      draftRow.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+    }
+
+    const getDraftSelectVal = (elemId, fieldName) => {
+      const el = document.getElementById(elemId);
+      if (el) {
+        const cur = el.getAttribute('data-current');
+        if (cur !== null && cur !== undefined && cur !== '' && cur !== 'N/A' && cur !== 'Blank') return cur.trim();
+        if (el.value !== undefined && el.value !== '' && el.value !== 'N/A') return el.value.trim();
+      }
+      const st = state.draftSalesRequest && state.draftSalesRequest[fieldName];
+      return (st && st !== 'N/A' && st !== 'Blank') ? String(st).trim() : '';
+    };
+
+    const reqIdInput = document.getElementById('draftReqId');
+    const reqId = (reqIdInput && reqIdInput.value.trim()) || '';
+    const joNumber = document.getElementById('draftJoNumber') ? document.getElementById('draftJoNumber').value.trim() : '';
+    const orderDate = document.getElementById('draftOrderDate') ? document.getElementById('draftOrderDate').value.trim() : '';
+    const projectName = document.getElementById('draftProjectName') ? document.getElementById('draftProjectName').value.trim() : '';
+    const client = document.getElementById('draftClient') ? document.getElementById('draftClient').value.trim() : '';
+    const salesRep = getDraftSelectVal('draftSalesRep', 'salesRep');
+    const artist = getDraftSelectVal('draftArtist', 'artist');
+    const location = getDraftSelectVal('draftLocation', 'location');
+    const releasingMode = getDraftSelectVal('draftRelMode', 'releasingMode');
+    const designDeadline = document.getElementById('draftDeadline') ? document.getElementById('draftDeadline').value.trim() : '';
+    const releasingDate = document.getElementById('draftReleasing') ? document.getElementById('draftReleasing').value.trim() : '';
+    const fileSent = getDraftSelectVal('draftFileSent', 'fileSent');
+    const clientApproval = getDraftSelectVal('draftClientApproval', 'clientApproval');
+    const priority = getDraftSelectVal('draftPriority', 'priority');
+    const contactPerson = document.getElementById('draftContactPerson') ? document.getElementById('draftContactPerson').value.trim() : '';
+    const contactNumber = document.getElementById('draftContactNumber') ? document.getElementById('draftContactNumber').value.trim() : '';
+    const completeAddress = document.getElementById('draftAddress') ? document.getElementById('draftAddress').value.trim() : '';
+
+    const checks = [
+      { val: reqId, id: 'draftReqId', name: 'Request ID' },
+      { val: joNumber, id: 'draftJoNumber', name: 'JO Number' },
+      { val: orderDate, id: 'draftOrderDate', name: 'Timestamp (Date Encoded)' },
+      { val: salesRep, id: 'draftSalesRep', name: 'Sales Representative' },
+      { val: client, id: 'draftClient', name: 'Client' },
+      { val: projectName, id: 'draftProjectName', name: 'Project Name' },
+      { val: artist, id: 'draftArtist', name: 'Artist' },
+      { val: designDeadline, id: 'draftDeadline', name: 'Design Deadline' },
+      { val: releasingDate, id: 'draftReleasing', name: 'Production Due' },
+      { val: fileSent, id: 'draftFileSent', name: 'File Status' },
+      { val: completeAddress, id: 'draftAddress', name: 'Address' },
+      { val: location, id: 'draftLocation', name: 'Placement' },
+      { val: releasingMode, id: 'draftRelMode', name: 'Mode of Releasing' },
+      { val: contactPerson, id: 'draftContactPerson', name: 'Contact Person' },
+      { val: contactNumber, id: 'draftContactNumber', name: 'Contact Number' },
+      { val: clientApproval, id: 'draftClientApproval', name: 'Client Approval' },
+      { val: priority, id: 'draftPriority', name: 'Priority Level' }
+    ];
+
+    const missing = [];
+    checks.forEach(c => {
+      if (!c.val) {
+        missing.push(c.name);
+        const el = document.getElementById(c.id);
+        if (el) {
+          el.classList.add('is-invalid-detail');
+          const cleanUp = () => {
+            el.classList.remove('is-invalid-detail');
+            el.removeEventListener('input', cleanUp);
+            el.removeEventListener('change', cleanUp);
+          };
+          el.addEventListener('input', cleanUp);
+          el.addEventListener('change', cleanUp);
+        }
+      }
+    });
+
+    if (missing.length > 0) {
+      showToast(`Cannot save: All sales request details are required. Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? ' (+' + (missing.length - 3) + ' more)' : ''}.`, 'error');
+      const firstInvalid = draftRow ? draftRow.querySelector('.is-invalid-detail') : null;
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (typeof firstInvalid.focus === 'function') firstInvalid.focus();
+      }
+      return;
+    }
+
+    const finalId = reqId.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const nowStamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+    const newRecord = {
+      id: finalId,
+      requestId: reqId,
+      joNumber: joNumber,
+      orderDate: orderDate || nowStamp.substring(0, 10),
+      salesRep: salesRep,
+      client: client,
+      projectName: projectName,
+      artist: artist,
+      designDeadline: designDeadline,
+      releasingDate: releasingDate,
+      fileSent: fileSent,
+      completeAddress: completeAddress,
+      location: location,
+      releasingMode: releasingMode,
+      contactPerson: contactPerson,
+      contactNumber: contactNumber,
+      projectStatus: 'On-going',
+      clientApproval: clientApproval || 'Pending Approval',
+      priority: priority || 'Normal',
+      headApproval: 'Pending',
+      countStandard: 0,
+      countSpecial: 0,
+      countPrinting: 0,
+      designStatus: 'On Queue',
+      revisionCount: 0,
+      remarks: 'N/A',
+      timestamp: orderDate || nowStamp.substring(0, 10),
+      dateUpdated: nowStamp
+    };
+
+    // Clear draft state so draft row vanishes
+    state.draftSalesRequest = null;
+
+    // Add to requests list and save state locally
+    state.requests.unshift(newRecord);
+    saveStateToStorage();
+
+    // Persist to MySQL backend
+    const apiUrl = window.PMS_API_URL || (window.location.pathname.includes('/pages/') ? '../api.php' : './api.php');
+    fetch(apiUrl + '?action=create_request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res && res.success) {
+        if (window.PmsCache) window.PmsCache.invalidate();
+        if (res.id) newRecord.id = res.id;
+        if (res.requestId && res.requestId !== newRecord.requestId) {
+          newRecord.requestId = res.requestId;
+          renderSalesRequests();
+        }
+      }
+    })
+    .catch(err => console.warn('MySQL save failed:', err));
+
+    // Re-render table with newly committed row
+    renderSalesRequests();
+
+    // Smooth scroll and green glow animation on newly saved row
+    setTimeout(() => {
+      const row = document.querySelector(`tr[data-req-id="${newRecord.id}"]`);
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        row.classList.add('table-row-new-entry');
+      }
+    }, 80);
+
+    showToast(`Request ${reqId} saved successfully!`, 'success');
+  }
+  window.saveDraftSalesRequest = saveDraftSalesRequest;
+
+  function cancelDraftSalesRequest() {
+    state.draftSalesRequest = null;
+    renderSalesRequests();
+    showToast('New request row cancelled.', 'info');
+  }
+  window.cancelDraftSalesRequest = cancelDraftSalesRequest;
+
+  function handleDraftKey(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveDraftSalesRequest();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelDraftSalesRequest();
+    }
+  }
+  window.handleDraftKey = handleDraftKey;
+
+  function editSalesRequest(id) {
+    const rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) return;
+
+    const form = document.getElementById('salesRequestForm');
+    if (form) form.reset();
+
+    const setVal = (elemId, val) => {
+      const el = document.getElementById(elemId);
+      if (el) el.value = (val !== undefined && val !== null) ? val : '';
+    };
+
+    setVal('salesFormId', rec.id || '');
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = `Edit Sales Request — ${rec.requestId}`;
+
+    setVal('salesFormReqId', rec.requestId);
+    setVal('salesFormJo', rec.joNumber);
+    setVal('salesFormOrderDate', rec.orderDate || rec.timestamp || '');
+    setVal('salesFormProject', rec.projectName);
+    setVal('salesFormClient', rec.client);
+    setVal('salesFormLocation', rec.location || 'Indoor');
+    setVal('salesFormArtist', rec.artist);
+    setVal('salesFormSalesRep', rec.salesRep);
+    setVal('salesFormDeadline', rec.designDeadline);
+    setVal('salesFormReleasing', rec.releasingDate || rec.designDeadline);
+    setVal('salesFormPriority', rec.priority || 'Normal');
+    setVal('salesFormRelMode', rec.releasingMode || 'Pickup');
+    setVal('salesFormFileSent', rec.fileSent || 'Pending');
+    setVal('salesFormContactPerson', rec.contactPerson || '');
+    setVal('salesFormContactNumber', rec.contactNumber || '');
+    setVal('salesFormAddress', rec.completeAddress || '');
+
+    populateSalesFiltersDropdowns();
+    upgradeAllFormSelects();
+    syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) modal.classList.add('show');
+  }
+  window.editSalesRequest = editSalesRequest;
+
+  function showCustomConfirm(options) {
+    const modal = document.getElementById('customConfirmModal');
+    if (!modal) {
+      if (confirm(options.message || 'Are you sure?')) {
+        if (options.onConfirm) options.onConfirm('', () => {});
+      }
+      return;
+    }
+
+    const titleEl = document.getElementById('confirmModalTitle');
+    const subtitleEl = document.getElementById('confirmModalSubtitle');
+    const msgEl = document.getElementById('confirmModalMessage');
+    const recordCard = document.getElementById('confirmModalRecordCard');
+    const passcodeSection = document.getElementById('confirmPasscodeSection');
+    const passcodeInput = document.getElementById('confirmDeletePasscode');
+    const passcodeError = document.getElementById('confirmPasscodeError');
+    const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
+    const submitBtn = document.getElementById('btnExecuteCustomConfirm');
+    const submitLabel = document.getElementById('confirmModalSubmitLabel');
+    const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
+
+    if (titleEl) titleEl.textContent = options.title || 'Permanent Data Deletion';
+    if (subtitleEl) subtitleEl.textContent = options.subtitle || (options.requiresPasscode ? 'SUPER ADMIN SECURITY PASSCODE REQUIRED' : 'CONFIRM ACTION');
+    if (msgEl) msgEl.innerHTML = options.message || 'Are you sure you want to proceed?';
+    if (submitLabel) submitLabel.textContent = options.confirmText || 'Permanently Delete';
+
+    if (passcodeError) {
+      passcodeError.style.display = 'none';
+      passcodeError.textContent = '';
+    }
+    if (setupDrawer) setupDrawer.style.display = 'none';
+    if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
+
+    const loginPassModalInput = document.getElementById('confirmLoginPasswordInput');
+    const newPasscodeModalInput = document.getElementById('confirmNewPasscodeInput');
+    const newPasscodeFeedback = document.getElementById('confirmNewPasscodeFeedback');
+    if (loginPassModalInput) loginPassModalInput.value = '';
+    if (newPasscodeModalInput) newPasscodeModalInput.value = '';
+    if (newPasscodeFeedback) {
+      newPasscodeFeedback.style.display = 'none';
+      newPasscodeFeedback.textContent = '';
+    }
+
+    if (recordCard && options.record) {
+      recordCard.style.display = 'block';
+      const reqIdEl = document.getElementById('confirmRecordRequestId');
+      const joEl = document.getElementById('confirmRecordJoNumber');
+      const projEl = document.getElementById('confirmRecordProjectName');
+      const clientEl = document.getElementById('confirmRecordClient');
+      if (reqIdEl) reqIdEl.textContent = options.record.requestId || '-';
+      if (joEl) joEl.textContent = options.record.joNumber || 'Unassigned';
+      if (projEl) projEl.textContent = options.record.projectName || '-';
+      if (clientEl) clientEl.textContent = options.record.client || '-';
+    } else if (recordCard) {
+      recordCard.style.display = 'none';
+    }
+
+    if (passcodeSection) {
+      passcodeSection.style.display = options.requiresPasscode ? 'block' : 'none';
+      if (passcodeInput) {
+        passcodeInput.value = '';
+        passcodeInput.classList.remove('input-shake');
+        passcodeInput.style.borderColor = '#D4D4D8';
+      }
+    }
+
+    modal.classList.add('show');
+    if (options.requiresPasscode && passcodeInput) {
+      setTimeout(() => passcodeInput.focus(), 150);
+    }
+
+    const handleSubmit = async () => {
+      const enteredPasscode = passcodeInput ? passcodeInput.value.trim() : '';
+
+      if (options.requiresPasscode) {
+        if (!enteredPasscode) {
+          if (passcodeError) {
+            passcodeError.style.display = 'block';
+            passcodeError.textContent = 'Please enter the Super Admin permission passcode.';
+          }
+          if (passcodeInput) {
+            passcodeInput.style.borderColor = '#DC2626';
+            passcodeInput.classList.add('input-shake');
+            setTimeout(() => passcodeInput.classList.remove('input-shake'), 400);
+            passcodeInput.focus();
+          }
+          return;
+        }
+      }
+
+      if (typeof options.onConfirm === 'function') {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        try {
+          const success = await options.onConfirm(enteredPasscode, () => modal.classList.remove('show'));
+          if (success) {
+            modal.classList.remove('show');
+          }
+        } catch (err) {
+          if (passcodeError) {
+            passcodeError.style.display = 'block';
+            passcodeError.textContent = err.message || 'Operation failed.';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+        }
+      } else {
+        modal.classList.remove('show');
+      }
+    };
+
+    submitBtn.onclick = handleSubmit;
+    if (passcodeInput) {
+      passcodeInput.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSubmit();
+        }
+      };
+    }
+  }
+  window.showCustomConfirm = showCustomConfirm;
+
+  function deleteSalesRequest(id) {
+    if (!isCurrentUserSuperAdmin()) {
+      showToast('Permission Denied: Only Super Admin can delete records.', 'error');
+      return;
+    }
+
+    let rec = state.requests.find(r => r.id === id || r.requestId === id);
+    if (!rec) {
+      rec = { id: id, requestId: id, projectName: 'Sales Request', client: '' };
+    }
+
+    const reqLabel = rec.requestId || id;
+
+    showCustomConfirm({
+      title: 'Permanent Data Deletion',
+      subtitle: 'SUPER ADMIN SECURITY PASSCODE REQUIRED',
+      message: `Are you sure you want to permanently delete <strong>${escapeHTML(reqLabel)}</strong>? This action will permanently remove it from both your local workspace and the live MySQL database.`,
+      record: {
+        requestId: rec.requestId,
+        joNumber: rec.joNumber,
+        projectName: rec.projectName,
+        client: rec.client
+      },
+      requiresPasscode: true,
+      confirmText: 'Permanently Delete',
+      onConfirm: async (passcode, closeModal) => {
+        if (window.PMS_API_URL) {
+          try {
+            const res = await fetch(window.PMS_API_URL + '?action=delete_request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: rec.id || id,
+                requestId: rec.requestId,
+                passcode: passcode
+              })
+            }).then(r => r.json());
+
+            if (res && res.success) {
+              if (window.PmsCache) window.PmsCache.invalidate();
+              state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+              saveStateToStorage();
+              renderCurrentView(state.activeView);
+              updateDashboardKPIs();
+              updateDeadlineAlertCenter();
+              showToast(`Request ${reqLabel} deleted successfully.`);
+              return true;
+            } else {
+              const passcodeError = document.getElementById('confirmPasscodeError');
+              const passcodeInput = document.getElementById('confirmDeletePasscode');
+              if (passcodeError) {
+                passcodeError.style.display = 'block';
+                passcodeError.textContent = res.error || 'Invalid permission passcode. Deletion rejected.';
+              }
+              if (passcodeInput) {
+                passcodeInput.style.borderColor = '#DC2626';
+                passcodeInput.classList.add('input-shake');
+                setTimeout(() => passcodeInput.classList.remove('input-shake'), 400);
+                passcodeInput.focus();
+                passcodeInput.select();
+              }
+              return false;
+            }
+          } catch (err) {
+            console.warn('MySQL delete error:', err);
+            state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+            saveStateToStorage();
+            renderCurrentView(state.activeView);
+            updateDashboardKPIs();
+            updateDeadlineAlertCenter();
+            showToast(`Deleted ${reqLabel} locally.`, 'info');
+            return true;
+          }
+        } else {
+          state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
+          saveStateToStorage();
+          renderCurrentView(state.activeView);
+          updateDashboardKPIs();
+          updateDeadlineAlertCenter();
+          showToast(`Request ${reqLabel} deleted successfully.`);
+          return true;
+        }
+      }
+    });
+  }
+  window.deleteSalesRequest = deleteSalesRequest;
+
+  // ==========================================================================
+  // MODALS
+  // ==========================================================================
+
+  function setupModals() {
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modalId = btn.getAttribute('data-close-modal');
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.remove('show');
+      });
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('show');
+      });
+
+      // Custom Confirm & Passcode Modal Controls Setup
+      const confirmPasscodeInput = document.getElementById('confirmDeletePasscode');
+      const toggleSetupBtn = document.getElementById('btnTogglePasscodeSetup');
+      const setupDrawer = document.getElementById('confirmPasscodeSetupDrawer');
+      if (toggleSetupBtn && setupDrawer) {
+        toggleSetupBtn.onclick = () => {
+          const isHidden = setupDrawer.style.display === 'none' || !setupDrawer.style.display;
+          setupDrawer.style.display = isHidden ? 'block' : 'none';
+          toggleSetupBtn.textContent = isHidden ? 'Close Setup' : 'Change Passcode';
+        };
+      }
+
+      const saveInsideModalBtn = document.getElementById('btnSaveNewPasscodeInsideModal');
+      const loginPasswordInsideModalInput = document.getElementById('confirmLoginPasswordInput');
+      const newPasscodeInsideModalInput = document.getElementById('confirmNewPasscodeInput');
+      const newPasscodeFeedback = document.getElementById('confirmNewPasscodeFeedback');
+      if (saveInsideModalBtn && newPasscodeInsideModalInput) {
+        saveInsideModalBtn.onclick = () => {
+          const loginPass = loginPasswordInsideModalInput ? loginPasswordInsideModalInput.value.trim() : '';
+          if (!loginPass) {
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#DC2626';
+              newPasscodeFeedback.textContent = 'Please enter your current account login password.';
+            }
+            if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.focus();
+            return;
+          }
+
+          const val = newPasscodeInsideModalInput.value.trim();
+          if (!val) {
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#DC2626';
+              newPasscodeFeedback.textContent = 'Please enter a valid passcode.';
+            }
+            newPasscodeInsideModalInput.focus();
+            return;
+          }
+
+          saveInsideModalBtn.disabled = true;
+          saveInsideModalBtn.textContent = 'Updating...';
+
+          const onSaved = () => {
+            if (loginPasswordInsideModalInput) loginPasswordInsideModalInput.value = '';
+            if (newPasscodeInsideModalInput) newPasscodeInsideModalInput.value = '';
+            if (confirmPasscodeInput) {
+              confirmPasscodeInput.value = '';
+              confirmPasscodeInput.style.borderColor = '#D4D4D8';
+            }
+            if (newPasscodeFeedback) {
+              newPasscodeFeedback.style.display = 'block';
+              newPasscodeFeedback.style.color = '#09090B';
+              newPasscodeFeedback.textContent = 'Passcode updated successfully! Enter it above to confirm deletion.';
+            }
+            setTimeout(() => {
+              if (setupDrawer) setupDrawer.style.display = 'none';
+              if (toggleSetupBtn) toggleSetupBtn.textContent = 'Change Passcode';
+            }, 1800);
+            showToast('Super Admin deletion passcode updated.');
+            saveInsideModalBtn.disabled = false;
+            saveInsideModalBtn.textContent = 'Update';
+          };
+
+          if (window.PMS_API_URL && isCurrentUserSuperAdmin()) {
+            fetch(window.PMS_API_URL + '?action=set_delete_passcode', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ passcode: val, login_password: loginPass })
+            })
+            .then(r => r.json())
+            .then(res => {
+              if (res && res.success) {
+                onSaved();
+              } else {
+                if (newPasscodeFeedback) {
+                  newPasscodeFeedback.style.display = 'block';
+                  newPasscodeFeedback.style.color = '#DC2626';
+                  newPasscodeFeedback.textContent = res.error || 'Failed to update passcode.';
+                }
+                saveInsideModalBtn.disabled = false;
+                saveInsideModalBtn.textContent = 'Update';
+              }
+            })
+            .catch(() => onSaved());
+          } else {
+            onSaved();
+          }
+        };
+      }
+
+      // Automatically upgrade and sync all form selects whenever any modal becomes visible
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.attributeName === 'class' && modal.classList.contains('show')) {
+            upgradeAllFormSelects();
+            syncAllFormDropdowns();
+          }
+        });
+      });
+      observer.observe(modal, { attributes: true });
+    });
+
+    // Automatically sync dropdown button labels when forms are reset
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('reset', () => {
+        setTimeout(() => syncAllFormDropdowns(), 20);
+      });
+    });
+
+    const salesForm = document.getElementById('salesRequestForm');
+    if (salesForm) {
+      salesForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        salesForm.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+
+        const id = document.getElementById('salesFormId').value;
+        const rawReqId = document.getElementById('salesFormReqId').value.trim();
+        const reqId = formatRequestIdInput(rawReqId) || getNextRequestId();
+        const jo = document.getElementById('salesFormJo').value.trim();
+        const project = document.getElementById('salesFormProject').value.trim();
+        const client = document.getElementById('salesFormClient').value.trim();
+        const artist = document.getElementById('salesFormArtist').value;
+        const salesRep = toTitleCase(document.getElementById('salesFormSalesRep').value);
+        const deadline = document.getElementById('salesFormDeadline').value;
+        const releasingDate = (document.getElementById('salesFormReleasingDate') || document.getElementById('salesFormReleasing'))?.value || '';
+        const fileSentRaw = document.getElementById('salesFormFileSent')?.value || '';
+        const fileSent = (fileSentRaw === 'Blank' || fileSentRaw === 'N/A' || !fileSentRaw) ? '' : fileSentRaw;
+        const clientApproval = document.getElementById('salesFormClientApproval')?.value || '';
+        const priority = document.getElementById('salesFormPriority')?.value || '';
+        const relModeRaw = (document.getElementById('salesFormRelMode') || document.getElementById('salesFormReleasingMode'))?.value || '';
+        const mode = (relModeRaw === 'Blank' || relModeRaw === 'N/A' || !relModeRaw) ? '' : relModeRaw;
+        const locRaw = document.getElementById('salesFormLocation')?.value || '';
+        const location = (locRaw === 'Blank' || locRaw === 'N/A' || !locRaw) ? '' : locRaw;
+        const contactPerson = document.getElementById('salesFormContactPerson').value.trim();
+        const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
+        const address = document.getElementById('salesFormAddress').value.trim();
+        const nowStamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+        const orderDateEl = document.getElementById('salesFormOrderDate');
+        const orderDate = (orderDateEl && orderDateEl.value) ? orderDateEl.value.trim() : nowStamp.substring(0, 10);
+
+        const requiredChecks = [
+          { val: reqId, id: 'salesFormReqId', name: 'Request ID' },
+          { val: jo, id: 'salesFormJo', name: 'JO Number' },
+          ...(orderDateEl ? [{ val: orderDate, id: 'salesFormOrderDate', name: 'Date Encoded' }] : []),
+          { val: salesRep, id: 'salesFormSalesRep', name: 'Sales Representative' },
+          { val: client, id: 'salesFormClient', name: 'Client Name' },
+          { val: project, id: 'salesFormProject', name: 'Project Name' },
+          { val: deadline, id: 'salesFormDeadline', name: 'Design Deadline' },
+          { val: releasingDate, id: 'salesFormReleasing', name: 'Production Due' },
+          { val: artist, id: 'salesFormArtist', name: 'Assigned Artist' },
+          { val: priority, id: 'salesFormPriority', name: 'Priority Level' },
+          { val: mode, id: 'salesFormRelMode', name: 'Mode of Releasing' },
+          { val: location, id: 'salesFormLocation', name: 'Placement' },
+          { val: fileSent, id: 'salesFormFileSent', name: 'File Status' },
+          { val: clientApproval, id: 'salesFormClientApproval', name: 'Client Approval' },
+          { val: contactPerson, id: 'salesFormContactPerson', name: 'Contact Person' },
+          { val: contactNumber, id: 'salesFormContactNumber', name: 'Contact Number' },
+          { val: address, id: 'salesFormAddress', name: 'Complete Address' }
+        ];
+
+        const missingModal = [];
+        requiredChecks.forEach(c => {
+          if (!c.val) {
+            missingModal.push(c.name);
+            const el = document.getElementById(c.id);
+            const customBtn = el && el._formDropdownBtn;
+            const target = customBtn || el;
+            if (target) {
+              target.classList.add('is-invalid-detail');
+              const cleanUp = () => {
+                target.classList.remove('is-invalid-detail');
+                if (el) {
+                  el.removeEventListener('input', cleanUp);
+                  el.removeEventListener('change', cleanUp);
+                }
+              };
+              if (el) {
+                el.addEventListener('input', cleanUp);
+                el.addEventListener('change', cleanUp);
+              }
+            }
+          }
+        });
+
+        if (missingModal.length > 0) {
+          showToast(`Cannot save: All sales request details are required. Please fill in: ${missingModal.slice(0, 3).join(', ')}${missingModal.length > 3 ? ' (+' + (missingModal.length - 3) + ' more)' : ''}.`, 'error');
+          const firstInvalid = salesForm.querySelector('.is-invalid-detail');
+          if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof firstInvalid.focus === 'function') firstInvalid.focus();
+          }
+          return;
+        }
+
+        let newRec = null;
+        if (id) {
+          const rec = state.requests.find(r => r.id === id);
+          if (rec) {
+            rec.requestId = reqId;
+            rec.joNumber = jo || 'N/A';
+            rec.orderDate = orderDate || rec.orderDate;
+            rec.projectName = project || 'N/A';
+            rec.client = client || 'N/A';
+            rec.artist = artist || 'N/A';
+            rec.salesRep = salesRep || 'N/A';
+            rec.designDeadline = deadline || 'N/A';
+            rec.releasingDate = releasingDate || deadline || 'N/A';
+            rec.fileSent = fileSent;
+            rec.location = location;
+            rec.clientApproval = clientApproval;
+            rec.priority = priority;
+            rec.releasingMode = mode;
+            rec.contactPerson = contactPerson;
+            rec.contactNumber = contactNumber;
+            rec.completeAddress = address;
+            rec.dateUpdated = nowStamp;
+            rec.timestamp = orderDate || rec.timestamp;
+            showToast(`Sales request ${reqId} updated.`);
+            if (window.PMS_API_URL) {
+              fetch(window.PMS_API_URL + '?action=update_request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rec)
+              }).catch(err => console.warn('MySQL update sync:', err));
+            }
+          }
+        } else {
+          newRec = {
+            id: `req-${Date.now()}`,
+            requestId: reqId,
+            joNumber: jo || 'N/A',
+            projectName: project || 'N/A',
+            client: client || 'N/A',
+            artist: artist || 'N/A',
+            salesRep: salesRep || 'N/A',
+            inCharge: toTitleCase(salesRep),
+            drawnBy: toTitleCase(artist),
+            orderDate: orderDate || nowStamp.substring(0, 10),
+            designDeadline: deadline || 'N/A',
+            releasingDate: releasingDate || deadline || 'N/A',
+            releasingMode: mode,
+            location: location,
+            completeAddress: address,
+            contactPerson: contactPerson,
+            contactNumber: contactNumber,
+            clientApproval: clientApproval,
+            priority: priority,
+            fileSent: fileSent,
+            installers: '2 Installers',
+            duration: '1 Day',
+            notes: 'N/A',
+            projectStatus: clientApproval === 'Approved' ? 'Completed' : 'On-going',
+            designStatus: 'On Queue',
+            headApproval: 'Pending',
+            countStandard: 0,
+            countPrinting: 0,
+            countSpecial: 0,
+            revisionCount: 0,
+            remarks: 'N/A',
+            month: 'October 2026',
+            completionDate: null,
+            timestamp: orderDate || nowStamp.substring(0, 10),
+            dateUpdated: nowStamp
+          };
+          state.requests.unshift(newRec);
+          if (window.PMS_API_URL) {
+            fetch(window.PMS_API_URL + '?action=create_request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newRec)
+            })
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.success) {
+                if (res.id) newRec.id = res.id;
+                if (res.requestId && res.requestId !== newRec.requestId) {
+                  newRec.requestId = res.requestId;
+                  if (document.getElementById('salesRequestsTableBody')) {
+                    renderSalesRequests();
+                  }
+                }
+              }
+            })
+            .catch(err => console.warn('MySQL create sync:', err));
+          }
+          showToast(`Request ${reqId} created successfully!`, 'success');
+        }
+
+        saveStateToStorage();
+        document.getElementById('salesModal').classList.remove('show');
+        renderCurrentView(state.activeView);
+        if (document.getElementById('salesRequestsTableBody')) {
+          renderSalesRequests();
+          setTimeout(() => {
+            const targetId = id || (newRec && newRec.id);
+            if (targetId) {
+              const row = document.querySelector(`tr[data-req-id="${targetId}"]`);
+              if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                row.classList.add('table-row-new-entry');
+              }
+            }
+          }, 120);
+        }
+      });
+    }
+
+    const trackerForm = document.getElementById('trackerTaskForm');
+    if (trackerForm) {
+      trackerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('trackerFormId').value;
+        const rec = state.requests.find(r => r.id === id);
+        if (rec) {
+          rec.artist = document.getElementById('trackerFormArtist').value || 'N/A';
+          rec.projectName = document.getElementById('trackerFormProject').value.trim() || 'N/A';
+          rec.designDeadline = document.getElementById('trackerFormDeadline').value || 'N/A';
+          rec.headApproval = document.getElementById('trackerFormHeadApproval').value || 'Pending';
+          rec.projectStatus = document.getElementById('trackerFormProjectStatus').value || 'On-going';
+          rec.designStatus = document.getElementById('trackerFormDesignStatus').value || 'On Queue';
+          rec.countStandard = parseInt(document.getElementById('trackerFormStd').value, 10) || 0;
+          rec.countSpecial = parseInt(document.getElementById('trackerFormSpc').value, 10) || 0;
+          rec.countPrinting = parseInt(document.getElementById('trackerFormPrt').value, 10) || 0;
+          rec.revisionCount = parseInt(document.getElementById('trackerFormRev').value, 10) || 0;
+          rec.remarks = document.getElementById('trackerFormRemarks').value.trim() || 'N/A';
+          rec.dateUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+          if (rec.projectStatus === 'Completed' && !rec.completionDate) {
+            rec.completionDate = '2026-10-23';
+          }
+
+          saveStateToStorage();
+          showToast(`Task ${rec.requestId} updated.`);
+        }
+        document.getElementById('trackerModal').classList.remove('show');
+        renderCurrentView(state.activeView);
+      });
+    }
+  }
+
+  // ==========================================================================
+  // DEADLINE REMINDER ALERTS & NOTIFICATION CENTER ENGINE
+  // ==========================================================================
+
+  let currentAlertTab = 'all';
+
+  function updateDeadlineAlertCenter() {
+    const requests = state.requests || [];
+    
+    // Categorize active requests
+    const overdueList = [];
+    const todayList = [];
+    const soonList = [];
+
+    requests.forEach(r => {
+      if (r.projectStatus === 'Completed') return;
+      const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+      if (alertInfo.status === 'overdue') {
+        overdueList.push({ request: r, alert: alertInfo });
+      } else if (alertInfo.status === 'today') {
+        todayList.push({ request: r, alert: alertInfo });
+      } else if (alertInfo.status === 'soon') {
+        soonList.push({ request: r, alert: alertInfo });
+      }
+    });
+
+    const allAlerts = [...overdueList, ...todayList, ...soonList];
+    const totalCount = allAlerts.length;
+
+    // 1. Update Topbar Bell Badge
+    const badgeEl = document.getElementById('deadlineAlertBadge');
+    if (badgeEl) {
+      badgeEl.textContent = totalCount;
+      if (totalCount > 0) {
+        badgeEl.style.display = 'inline-flex';
+        badgeEl.className = 'deadline-alert-badge has-alerts' + (overdueList.length > 0 ? ' badge-overdue' : '');
+      } else {
+        badgeEl.style.display = 'none';
+      }
+    }
+
+    // 2. Update Dropdown Header & Tab Counts
+    const totalPill = document.getElementById('deadlineAlertTotalPill');
+    if (totalPill) {
+      totalPill.textContent = `${totalCount} Alert${totalCount === 1 ? '' : 's'}`;
+      totalPill.className = 'deadline-alert-total-pill' + (overdueList.length > 0 ? ' pill-overdue' : '');
+    }
+
+    const countTabAll = document.getElementById('countTabAll');
+    if (countTabAll) countTabAll.textContent = totalCount;
+
+    const countTabOverdue = document.getElementById('countTabOverdue');
+    if (countTabOverdue) countTabOverdue.textContent = overdueList.length;
+
+    const countTabToday = document.getElementById('countTabToday');
+    if (countTabToday) countTabToday.textContent = todayList.length;
+
+    const countTabSoon = document.getElementById('countTabSoon');
+    if (countTabSoon) countTabSoon.textContent = soonList.length;
+
+    // 3. Render Dropdown Alert Items
+    renderAlertDrawerItems(allAlerts, overdueList, todayList, soonList);
+
+    // 4. Update Dashboard Widget (if on index / dashboard)
+    const widgetOverdue = document.getElementById('widgetCountOverdue');
+    if (widgetOverdue) {
+      widgetOverdue.textContent = overdueList.length;
+      const subOverdue = document.getElementById('widgetSubOverdue');
+      if (subOverdue) subOverdue.textContent = overdueList.length > 0 ? `${overdueList.length} past deadline` : 'No overdue projects';
+    }
+
+    const widgetToday = document.getElementById('widgetCountToday');
+    if (widgetToday) {
+      widgetToday.textContent = todayList.length;
+      const subToday = document.getElementById('widgetSubToday');
+      if (subToday) subToday.textContent = todayList.length > 0 ? `${todayList.length} due today` : 'None due today';
+    }
+
+    const widgetSoon = document.getElementById('widgetCountSoon');
+    if (widgetSoon) {
+      widgetSoon.textContent = soonList.length;
+      const subSoon = document.getElementById('widgetSubSoon');
+      if (subSoon) subSoon.textContent = soonList.length > 0 ? `${soonList.length} due in next 48h` : 'None in next 48h';
+    }
+
+    const widgetTotalPill = document.getElementById('widgetTotalAlertsPill');
+    if (widgetTotalPill) {
+      if (totalCount > 0) {
+        widgetTotalPill.textContent = `${totalCount} Action Required`;
+        widgetTotalPill.className = 'deadline-pill ' + (overdueList.length > 0 ? 'deadline-pill-overdue' : 'deadline-pill-today');
+      } else {
+        widgetTotalPill.textContent = `All On Track`;
+        widgetTotalPill.className = 'deadline-pill deadline-pill-ontrack';
+      }
+    }
+  }
+
+  function renderAlertDrawerItems(allAlerts, overdueList, todayList, soonList) {
+    const listEl = document.getElementById('deadlineAlertList');
+    if (!listEl) return;
+
+    let itemsToRender = [];
+    if (currentAlertTab === 'overdue') itemsToRender = overdueList;
+    else if (currentAlertTab === 'today') itemsToRender = todayList;
+    else if (currentAlertTab === 'soon') itemsToRender = soonList;
+    else itemsToRender = allAlerts;
+
+    if (itemsToRender.length === 0) {
+      listEl.innerHTML = `
+        <div class="deadline-empty-state">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <div class="empty-state-title">No Pending Alerts</div>
+          <p class="empty-state-desc">All project milestones for this category are on schedule.</p>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = itemsToRender.map(item => {
+      const r = item.request;
+      const a = item.alert;
+      const sevClass = a.status === 'overdue' ? 'sev-overdue' : (a.status === 'today' ? 'sev-today' : 'sev-soon');
+      const pillClass = a.status === 'overdue' ? 'deadline-pill-overdue' : (a.status === 'today' ? 'deadline-pill-today' : 'deadline-pill-soon');
+
+      return `
+        <div class="deadline-alert-item ${sevClass}" data-req-id="${r.id}">
+          <div class="alert-item-header">
+            <div class="alert-item-left">
+              <div class="alert-item-topline">
+                <span class="alert-jo-badge">${escapeHTML(r.requestId || r.joNumber || r.id)}</span>
+                <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:1px 6px;">${escapeHTML(r.projectStatus)}</span>
+              </div>
+              <h4 class="alert-project-title" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</h4>
+            </div>
+            <span class="deadline-pill ${pillClass}">${escapeHTML(a.diffText)}</span>
+          </div>
+
+          <div class="alert-item-meta">
+            <span class="alert-meta-point">Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+            <span class="alert-meta-point">Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+          </div>
+
+          <div class="alert-item-actions">
+            <button class="alert-action-btn btn-view-table" onclick="window.SignDepotApp.filterByDeadlineProject('${r.id}')" title="Find and highlight in table">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>View in Table</span>
+            </button>
+            <button class="alert-action-btn btn-view-directive" onclick="window.SignDepotApp.openDirectiveForRequest('${r.id}')" title="Open Job Order Blueprint">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><rect x="6" y="14" width="12" height="8"></rect></svg>
+              <span>Directive</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ==========================================================================
+  // PUBLIC API (Exposed on window.SignDepotApp)
+  // ==========================================================================
+
+  window.SignDepotApp = {
+    openEnvOptionMenu: openEnvOptionMenu,
+    setDirectiveEnvType: setDirectiveEnvType,
+    setActivityFilter: (f) => renderRecentActivityFeed(f),
+    refreshRecentActivity: () => renderRecentActivityFeed(currentActivityFilter, true),
+    clearTrackerKpiFilter: () => {
+      state.trackerKpiFilter = 'all';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.designStatus = '';
+      state.trackerFilter.artist = '';
+      state.trackerFilter.overdue = '';
+      state.trackerFilter.search = '';
+      state.trackerFilter.page = 1;
+      const statusSel = document.getElementById('trackerFilterProjectStatus');
+      if (statusSel) statusSel.value = '';
+      const overdueSel = document.getElementById('trackerFilterOverdue');
+      if (overdueSel) overdueSel.value = '';
+      const searchInput = document.getElementById('trackerSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderCreativesTracker();
+      showToast('Showing all tasks in Creatives Tracker', 'info');
+    },
+    switchTrackerAcceptanceTab: (tabKey) => {
+      state.trackerAcceptanceTab = tabKey || 'accepted';
+      state.trackerFilter.page = 1;
+      renderCreativesTracker();
+      const labels = {
+        accepted: 'Accepted Projects',
+        pending: 'Pending Projects (To be Accepted)',
+        all: 'All Projects'
+      };
+      showToast('Viewing ' + (labels[tabKey] || 'Accepted Projects'), 'info');
+    },
+    acceptArtistProject: (id) => {
+      if (!id) return;
+      const rec = (state.requests || []).find(r => String(r.id) === String(id) || String(r.requestId) === String(id));
+      if (!rec) {
+        showToast('Task not found', 'error');
+        return;
+      }
+      const todayStr = (new Date()).toISOString().slice(0, 10);
+      rec.artistAccepted = 'Accepted';
+      rec.artistAcceptedDate = todayStr;
+      if (rec.designStatus === 'On Queue' || rec.designStatus === 'Not Started' || !rec.designStatus) {
+        rec.designStatus = 'Ongoing';
+      }
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=accept_artist_project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: rec.id })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && window.PmsCache) window.PmsCache.invalidate();
+        })
+        .catch(err => console.error('Accept project network error:', err));
+      }
+      renderCreativesTracker();
+      updateDashboardKPIs();
+      showToast('Project ' + rec.requestId + ' accepted! Moved to Accepted Projects.', 'success');
+    },
+    handleKpiCardClick: (type) => {
+      if (state.dashboardKpiFilter === type && type !== 'all') {
+        state.dashboardKpiFilter = 'all';
+      } else {
+        state.dashboardKpiFilter = type;
+      }
+      const statusSelect = document.getElementById('dashboardFilterStatus');
+      if (statusSelect) statusSelect.value = '';
+      state.dashboardStatus = '';
+      const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+      if (deadlineSelect && type !== 'overdue') {
+        deadlineSelect.value = '';
+        state.dashboardDeadline = '';
+      }
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+    openKpiQuickView: (type) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (!modal) return;
+      const titleEl = document.getElementById('kpiQuickViewTitle');
+      const countEl = document.getElementById('kpiQuickViewCount');
+      const descEl = document.getElementById('kpiQuickViewDesc');
+      const content = document.getElementById('kpiQuickViewContent');
+      const filterBtn = document.getElementById('btnKpiModalFilterTable');
+      const titles = {
+        all: { title: 'Total Production Requests', desc: 'All active and historical sales orders logged in system' },
+        pending: { title: 'Pending Approval Tasks', desc: 'Awaiting creative lead or client design approval' },
+        working: { title: 'Active Production / On-going', desc: 'Currently being actively designed and fabricated' },
+        approved: { title: 'Approved Creative Directives', desc: 'Directives that have passed final approval' },
+        revising: { title: 'Revisions in Progress', desc: 'Design directives under customer-requested revisions' },
+        overdue: { title: 'Overdue Directives', desc: 'Active tasks past their specified deadline target date' }
+      };
+      const meta = titles[type] || titles.all;
+      if (titleEl) titleEl.textContent = meta.title;
+      if (descEl) descEl.textContent = meta.desc;
+      const items = (typeof getKpiFilteredRequests === 'function') ? getKpiFilteredRequests(type) : [];
+      if (countEl) countEl.textContent = '(' + items.length + ' items)';
+      if (content) {
+        if (items.length === 0) {
+          content.innerHTML = '<div style="text-align:center; padding:32px 16px; color:var(--text-muted); font-size:13px;">There are currently no active projects matching this category.</div>';
+        } else {
+          content.innerHTML = items.map(r => `
+            <div class="kpi-modal-item">
+              <div class="kpi-modal-item-left">
+                <div class="kpi-modal-item-title-row">
+                  <span class="kpi-modal-req">${escapeHTML(r.requestId)}</span>
+                  <span class="kpi-modal-jo">${escapeHTML(r.joNumber)}</span>
+                  <span class="kpi-modal-name" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+                </div>
+                <div class="kpi-modal-meta">
+                  <span>Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+                  <span>Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+                  <span>Sales: <strong>${escapeHTML(r.salesRep || '-')}</strong></span>
+                  <span>Status: <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
+                </div>
+              </div>
+              <div class="kpi-modal-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.viewProjectInQueue('${r.id}')" title="Find in Live Table">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  Table
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
+                  Directive
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+      if (filterBtn) {
+        filterBtn.onclick = () => {
+          modal.classList.remove('show');
+          window.SignDepotApp.navigateToPageTable(type);
+        };
+        filterBtn.textContent = 'Open in Tracker Table (' + items.length + ') ↗';
+      }
+      modal.classList.add('show');
+    },
+    viewProjectInQueue: (reqId) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (modal) modal.classList.remove('show');
+      window.SignDepotApp.filterByDeadlineProject(reqId);
+    },
+    setAlertTab: (tab) => {
+      currentAlertTab = tab;
+      document.querySelectorAll('.deadline-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-alert-tab') === tab);
+      });
+      updateDeadlineAlertCenter();
+    },
+    toggleDeadlineAlertDrawer: (force) => {
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (!dropdown) return;
+      if (typeof force === 'boolean') {
+        dropdown.classList.toggle('show', force);
+      } else {
+        dropdown.classList.toggle('show');
+      }
+    },
+    filterDashboardDeadlines: (type) => {
+      const select = document.getElementById('dashboardFilterDeadline');
+      const cards = {
+        overdue: document.getElementById('cardFilterOverdue'),
+        today: document.getElementById('cardFilterToday'),
+        soon: document.getElementById('cardFilterSoon')
+      };
+      if (state.dashboardDeadline === type) {
+        state.dashboardDeadline = '';
+        if (select) select.value = '';
+        Object.values(cards).forEach(c => c && c.classList.remove('active'));
+      } else {
+        state.dashboardDeadline = type;
+        if (select) select.value = type;
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === type);
+        });
+      }
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+    switchView: switchView,
+    renderSalesRequests: renderSalesRequests,
+    renderCreativesTracker: renderCreativesTracker,
+    renderDashboardRecentProjectsTable: renderDashboardRecentProjectsTable,
+    canUserEditField: canUserEditField,
+    canUserAccessTab: canUserAccessTab,
+    getCurrentUserPermissions: getCurrentUserPermissions,
+    openNewSalesRequestModal: openNewSalesRequestModal,
+    editSalesRequest: editSalesRequest,
+    deleteSalesRequest: deleteSalesRequest,
+    formatRequestIdInput: formatRequestIdInput,
+    getNextRequestId: getNextRequestId,
+    showCustomConfirm: showCustomConfirm,
+    resetSalesFilters: resetSalesRequestsFilters,
+    resetTrackerFilters: resetCreativesTrackerFilters,
+    renderProgressTimeline: renderProgressTimeline,
+    renderRecentActivityFeed: renderRecentActivityFeed,
+    refreshRecentActivity: () => renderRecentActivityFeed(currentActivityFilter),
+    showTimelineTooltip: showTimelineTooltip,
+    hideTimelineTooltip: hideTimelineTooltip,
+    getState: () => state,
+
+    // KPI Cards Clickable & Viewable Public API (SPA + Multi-Page Aware)
+    navigateToPageTable: (type) => {
+      // 1. In Single-Page App mode (GAS or single page with view-panels in DOM):
+      const creativesPanel = document.getElementById('view-creatives-tracker');
+      const isGas = typeof google !== 'undefined' && google.script;
+      if (creativesPanel || isGas) {
+        if (typeof switchView === 'function') {
+          switchView('view-creatives-tracker');
+        }
+        if (typeof window.SignDepotApp.applyKpiFilterToCreativesTracker === 'function') {
+          window.SignDepotApp.applyKpiFilterToCreativesTracker(type);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // 2. Multi-page fallback for standalone static HTML pages
+      sessionStorage.setItem('SIGN_DEPOT_ACTIVE_KPI', type);
+      const currentPath = window.location.pathname.replace(/\\/g, '/');
+      const isInsidePagesFolder = currentPath.toLowerCase().includes('/pages/');
+      const isPhp = window.location.pathname.endsWith('.php') || typeof window.PMS_API_URL !== 'undefined';
+      const ext = isPhp ? '.php' : '.html';
+      const targetUrl = (isInsidePagesFolder ? '' : 'pages/') + 'creatives-production' + ext + '?kpi=' + encodeURIComponent(type);
+      window.location.href = targetUrl;
+    },
+
+    applyKpiFilterToCreativesTracker: (type) => {
+      if (state.trackerKpiFilter === type && type !== 'all') {
+        state.trackerKpiFilter = 'all';
+      } else {
+        state.trackerKpiFilter = type || 'all';
+      }
+
+      state.trackerFilter.page = 1;
+
+      // Reset dropdown inputs to match cleanly
+      const statusSelect = document.getElementById('trackerFilterProjectStatus');
+      const overdueSelect = document.getElementById('trackerFilterOverdue');
+      if (statusSelect) statusSelect.value = '';
+      if (overdueSelect) overdueSelect.value = '';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.overdue = '';
+
+      renderCreativesTracker();
+
+      const labels = {
+        all: 'All Requests',
+        pending: 'Pending Approval',
+        working: 'Working / On-Going',
+        approved: 'Approved',
+        revising: 'Revising',
+        overdue: 'Overdue'
+      };
+      showToast(`Showing ${labels[state.trackerKpiFilter] || 'All'} in Creatives Tracker`, 'info');
+    },
+
+    clearTrackerKpiFilter: () => {
+      state.trackerKpiFilter = 'all';
+      state.trackerFilter.projectStatus = '';
+      state.trackerFilter.designStatus = '';
+      state.trackerFilter.artist = '';
+      state.trackerFilter.overdue = '';
+      state.trackerFilter.search = '';
+      state.trackerFilter.page = 1;
+      const statusSel = document.getElementById('trackerFilterProjectStatus');
+      if (statusSel) statusSel.value = '';
+      const overdueSel = document.getElementById('trackerFilterOverdue');
+      if (overdueSel) overdueSel.value = '';
+      const searchInput = document.getElementById('trackerSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderCreativesTracker();
+      showToast('Showing all tasks in Creatives Tracker', 'info');
+    },
+
+    switchTrackerAcceptanceTab: (tabKey) => {
+      state.trackerAcceptanceTab = tabKey || 'accepted';
+      state.trackerFilter.page = 1;
+      renderCreativesTracker();
+      const labels = {
+        accepted: 'Accepted Projects',
+        pending: 'Pending Projects (To be Accepted)',
+        all: 'All Projects'
+      };
+      showToast(`Viewing ${labels[tabKey] || 'Accepted Projects'}`, 'info');
+    },
+
+    acceptArtistProject: (id) => {
+      if (!id) return;
+      const rec = (state.requests || []).find(r => String(r.id) === String(id) || String(r.requestId) === String(id));
+      if (!rec) {
+        showToast('Task not found', 'error');
+        return;
+      }
+
+      const todayStr = (new Date()).toISOString().slice(0, 10);
+      rec.artistAccepted = 'Accepted';
+      rec.artistAcceptedDate = todayStr;
+      if (rec.designStatus === 'On Queue' || rec.designStatus === 'Not Started' || !rec.designStatus) {
+        rec.designStatus = 'Ongoing';
+      }
+
+      // Sync to backend MySQL
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=accept_artist_project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: rec.id })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success) {
+            if (window.PmsCache) window.PmsCache.invalidate();
+          } else if (!res || !res.success) {
+            console.warn('Backend sync response:', res);
+          }
+        })
+        .catch(err => console.error('Accept project network error:', err));
+      }
+
+      renderCreativesTracker();
+      updateDashboardKPIs();
+      showToast(`Project ${rec.requestId} accepted! Moved to Accepted Projects.`, 'success');
+    },
+
+    handleKpiCardClick: (type) => {
+      if (state.dashboardKpiFilter === type && type !== 'all') {
+        state.dashboardKpiFilter = 'all';
+      } else {
+        state.dashboardKpiFilter = type;
+      }
+
+      // Reset specific conflicting filters if any
+      const statusSelect = document.getElementById('dashboardFilterStatus');
+      if (statusSelect) statusSelect.value = '';
+      state.dashboardStatus = '';
+      
+      const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+      if (deadlineSelect && type !== 'overdue') {
+        deadlineSelect.value = '';
+        state.dashboardDeadline = '';
+      }
+
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+
+      // Smooth scroll to table
+      const queueSection = document.getElementById('liveProductionQueueCard');
+      if (queueSection) {
+        queueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      const labels = {
+        all: 'All Requests',
+        pending: 'Pending Approval',
+        working: 'Working / On-Going',
+        completed: 'Completed',
+        revising: 'Revising',
+        overdue: 'Overdue'
+      };
+      showToast(`Showing ${labels[state.dashboardKpiFilter] || 'All'} in Production Queue`, 'info');
+    },
+
+    openKpiQuickView: (type) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      const content = document.getElementById('kpiModalContent');
+      const title = document.getElementById('kpiModalTitle');
+      const badge = document.getElementById('kpiModalBadge');
+      const footerCount = document.getElementById('kpiModalFooterCount');
+      const filterBtn = document.getElementById('btnKpiModalFilterTable');
+      if (!modal || !content) return;
+
+      const items = getKpiFilteredRequests(type);
+
+      const metaMap = {
+        all: { title: 'Total Active Requests', badge: 'All Records', badgeClass: 'badge-ongoing' },
+        pending: { title: 'Pending Approval Queue', badge: 'Queue', badgeClass: 'badge-pending' },
+        working: { title: 'Working & On-Going Projects', badge: 'In Progress', badgeClass: 'badge-ongoing' },
+        approved: { title: 'Approved Projects', badge: 'Approved', badgeClass: 'badge-approved' },
+        completed: { title: 'Approved Projects', badge: 'Approved', badgeClass: 'badge-approved' },
+        revising: { title: 'Client Revision Requests', badge: 'Feedback', badgeClass: 'badge-revising' },
+        overdue: { title: 'Past Due / Overdue Projects', badge: 'Past Due', badgeClass: 'badge-priority-rush' }
+      };
+
+      const meta = metaMap[type] || metaMap['all'];
+      if (title) title.textContent = meta.title;
+      if (badge) {
+        badge.textContent = meta.badge;
+        badge.className = `badge ${meta.badgeClass}`;
+      }
+      if (footerCount) {
+        footerCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'project' : 'projects'}`;
+      }
+
+      if (items.length === 0) {
+        content.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 8px;">
+              <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div style="font-size: 15px; font-weight: 700; color: #1E293B;">No Projects in this Category</div>
+            <p style="font-size: 13px; margin-top: 4px;">There are currently no active projects matching "${meta.title}".</p>
+          </div>
+        `;
+      } else {
+        content.innerHTML = items.map(r => {
+          const alertInfo = getDeadlineAlertStatus(r.designDeadline, r.projectStatus);
+          let deadlinePill = '';
+          if (alertInfo.status === 'overdue') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-overdue">${alertInfo.pillText}</span>`;
+          } else if (alertInfo.status === 'today') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-today">Today</span>`;
+          } else if (alertInfo.status === 'soon') {
+            deadlinePill = `<span class="deadline-pill deadline-pill-soon">${alertInfo.pillText}</span>`;
+          }
+
+          return `
+            <div class="kpi-modal-item">
+              <div class="kpi-modal-item-left">
+                <div class="kpi-modal-item-title-row">
+                  <span class="kpi-modal-req">${escapeHTML(r.requestId)}</span>
+                  <span class="kpi-modal-jo">${escapeHTML(r.joNumber)}</span>
+                  <span class="kpi-modal-name" title="${escapeHTML(r.projectName)}">${escapeHTML(r.projectName)}</span>
+                  ${deadlinePill}
+                </div>
+                <div class="kpi-modal-meta">
+                  <span>Client: <strong>${escapeHTML(r.client || '-')}</strong></span>
+                  <span>Artist: <strong>${escapeHTML(r.artist || 'Unassigned')}</strong></span>
+                  <span>Sales: <strong>${escapeHTML(r.salesRep || '-')}</strong></span>
+                  <span>Status: <span class="badge ${getStatusBadgeClass(r.projectStatus)}" style="font-size:10px; padding:2px 6px;">${escapeHTML(r.projectStatus)}</span></span>
+                </div>
+              </div>
+              <div class="kpi-modal-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.viewProjectInQueue('${r.id}')" title="Find in Live Table">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  Table
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
+                  Directive
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (filterBtn) {
+        filterBtn.onclick = () => {
+          modal.classList.remove('show');
+          window.SignDepotApp.navigateToPageTable(type);
+        };
+        filterBtn.textContent = `Open in Tracker Table (${items.length}) â†—`;
+      }
+
+      modal.classList.add('show');
+    },
+
+    viewProjectInQueue: (reqId) => {
+      const modal = document.getElementById('kpiQuickViewModal');
+      if (modal) modal.classList.remove('show');
+      window.SignDepotApp.filterByDeadlineProject(reqId);
+    },
+
+    // Deadline Alert Center Public API
+    setAlertTab: (tab) => {
+      currentAlertTab = tab;
+      document.querySelectorAll('.deadline-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-alert-tab') === tab);
+      });
+      updateDeadlineAlertCenter();
+    },
+
+    toggleDeadlineAlertDrawer: (force) => {
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (!dropdown) return;
+      if (typeof force === 'boolean') {
+        dropdown.classList.toggle('show', force);
+      } else {
+        dropdown.classList.toggle('show');
+      }
+    },
+
+    filterDashboardDeadlines: (type) => {
+      const select = document.getElementById('dashboardFilterDeadline');
+      const cards = {
+        overdue: document.getElementById('cardFilterOverdue'),
+        today: document.getElementById('cardFilterToday'),
+        soon: document.getElementById('cardFilterSoon')
+      };
+
+      if (state.dashboardDeadline === type) {
+        state.dashboardDeadline = '';
+        if (select) select.value = '';
+        Object.values(cards).forEach(c => c && c.classList.remove('active'));
+      } else {
+        state.dashboardDeadline = type;
+        if (select) select.value = type;
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === type);
+        });
+      }
+
+      state.dashboardPage = 1;
+      renderDashboardRecentProjectsTable();
+    },
+
+    filterByDeadlineProject: (reqId) => {
+      const rec = state.requests.find(r => r.id === reqId);
+      if (!rec) return;
+
+      const dropdown = document.getElementById('deadlineAlertDropdown');
+      if (dropdown) dropdown.classList.remove('show');
+
+      const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+
+      const isGas = typeof google !== 'undefined' && google.script;
+      if ((state.activeView === 'view-dashboard') || currentFile === 'index.html' || currentFile === '' || isGas) {
+        state.dashboardSearch = rec.requestId;
+        state.dashboardStatus = '';
+        state.dashboardDeadline = '';
+        const searchInput = document.getElementById('dashboardSearchInput');
+        if (searchInput) searchInput.value = rec.requestId;
+        const statusSelect = document.getElementById('dashboardFilterStatus');
+        if (statusSelect) statusSelect.value = '';
+        const deadlineSelect = document.getElementById('dashboardFilterDeadline');
+        if (deadlineSelect) deadlineSelect.value = '';
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+
+        setTimeout(() => {
+          const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+          if (row) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            row.classList.add('table-row-highlight');
+            setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+          }
+        }, 150);
+        showToast(`Viewing ${rec.requestId} - ${rec.projectName}`, 'info');
+      } else {
+        if (document.getElementById('trackerSearchInput')) {
+          state.trackerFilter.search = rec.requestId;
+          state.trackerFilter.projectStatus = '';
+          state.trackerFilter.designStatus = '';
+          state.trackerFilter.artist = '';
+          state.trackerFilter.overdue = '';
+          state.trackerFilter.page = 1;
+          const tSearch = document.getElementById('trackerSearchInput');
+          if (tSearch) tSearch.value = rec.requestId;
+          renderCreativesTracker();
+          setTimeout(() => {
+            const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('table-row-highlight');
+              setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+            }
+          }, 150);
+          showToast(`Viewing ${rec.requestId} in Creatives Tracker`, 'info');
+        } else if (document.getElementById('salesSearchInput')) {
+          state.salesFilter.search = rec.requestId;
+          state.salesFilter.priority = '';
+          state.salesFilter.approval = '';
+          state.salesFilter.fileSent = '';
+          state.salesFilter.salesRep = '';
+          state.salesFilter.deadline = '';
+          state.salesFilter.page = 1;
+          const sSearch = document.getElementById('salesSearchInput');
+          if (sSearch) sSearch.value = rec.requestId;
+          renderSalesRequests();
+          setTimeout(() => {
+            const row = document.querySelector(`tr[data-req-id="${reqId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('table-row-highlight');
+              setTimeout(() => row.classList.remove('table-row-highlight'), 3000);
+            }
+          }, 150);
+          showToast(`Viewing ${rec.requestId} in Sales Requests`, 'info');
+        } else {
+          window.SignDepotApp.openDirectiveForJo(rec.joNumber);
+        }
+      }
+    },
+
+    openDirectiveForRequest: (reqId) => {
+      const rec = state.requests.find(r => r.id === reqId);
+      if (rec && rec.joNumber) {
+        const dropdown = document.getElementById('deadlineAlertDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+        window.SignDepotApp.openDirectiveForJo(rec.joNumber);
+      }
+    },
+
+    updateDeadlineAlertCenter: () => updateDeadlineAlertCenter(),
+    openCustomDropdown: (btn, ev) => openCustomDropdown(btn, ev),
+    closeCustomDropdown: () => closeCustomDropdown(),
+    upgradeAllFormSelects: () => upgradeAllFormSelects(),
+    syncAllFormDropdowns: () => syncAllFormDropdowns(),
+
+    addNewSalesRequestRow: () => addNewSalesRequestRow(),
+    saveDraftSalesRequest: () => saveDraftSalesRequest(),
+    cancelDraftSalesRequest: () => cancelDraftSalesRequest(),
+    handleDraftKey: (e) => handleDraftKey(e),
+
+    // Direct Inline Editing Handlers
+    handleInlineTextBlur: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      const text = el.innerText;
+      updateRequestField(reqId, field, text, el);
+    },
+    handleInlineTextKey: (e, el) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el.blur();
+      } else if (e.key === 'Tab') {
+        const row = el.closest('tr');
+        if (row) {
+          const cells = Array.from(row.querySelectorAll('.editable-cell, .custom-select-btn:not(.is-readonly), .inline-date-input:not([disabled])'));
+          const idx = cells.indexOf(el);
+          if (idx !== -1) {
+            const next = e.shiftKey ? cells[idx - 1] : cells[idx + 1];
+            if (next) {
+              e.preventDefault();
+              el.blur();
+              next.focus();
+            }
+          }
+        }
+      }
+    },
+    handleInlineSelectChange: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      updateRequestField(reqId, field, el.value, el);
+      showToast(`Updated ${field} to ${el.value}.`);
+    },
+    handleInlineDateChange: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      updateRequestField(reqId, field, el.value, el);
+      showToast(`Deadline updated to ${formatDate(el.value)}.`);
+    },
+    handleInlineNumberChange: (el) => {
+      const reqId = el.getAttribute('data-req-id');
+      const field = el.getAttribute('data-field');
+      updateRequestField(reqId, field, el.value, el);
+    },
+    toggleTaskCompletion: (id) => {
+      const rec = state.requests.find(r => r.id === id);
+      if (rec) {
+        if (rec.projectStatus === 'Completed') {
+          rec.projectStatus = 'On-going';
+          rec.designStatus = 'In Progress';
+          rec.completionDate = null;
+          showToast(`Task ${rec.requestId} marked in progress.`);
+        } else {
+          rec.projectStatus = 'Completed';
+          rec.designStatus = 'Submitted';
+          rec.completionDate = '2026-10-23';
+          showToast(`Task ${rec.requestId} marked as Completed!`);
+        }
+        saveStateToStorage();
+        renderDashboard();
+      }
+    },
+
+    openDirectiveForJo: (jo, reqId, id) => {
+      const identifier = (reqId && String(reqId).trim()) ? String(reqId).trim() :
+                         ((jo && String(jo).trim()) ? String(jo).trim() :
+                         ((id !== undefined && id !== null && String(id).trim()) ? String(id).trim() : ''));
+      state.currentDirectiveJo = identifier;
+      try { sessionStorage.setItem('SIGN_DEPOT_CURRENT_DIRECTIVE', identifier); } catch (e) {}
+      saveStateToStorage();
+      if (document.getElementById('view-directives-details')) {
+        switchView('view-directives-details');
+        renderDirectivePreview(identifier);
+      } else {
+        window.location.href = getPageUrl('directives-details.html') + '?id=' + encodeURIComponent(identifier);
+      }
+    },
+    selectAutocompleteJo: (joOrReq) => {
+      const box = document.getElementById('directiveAutocompleteBox');
+      if (box) box.classList.remove('show');
+      renderDirectivePreview(joOrReq);
+      showToast(`Loaded directive for ${joOrReq}.`);
+    },
+
+    setSalesPage: (p) => {
+      state.salesFilter.page = p;
+      renderSalesRequests();
+    },
+    setSalesApprovalTab: (tab) => {
+      state.salesFilter.approvalTab = tab || '';
+      state.salesFilter.page = 1;
+      renderSalesRequests();
+    },
+    setSalesPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.salesFilter.perPage = val;
+        state.salesFilter.page = 1;
+        setStoredRowsPerPage(val);
+        renderSalesRequests();
+      }
+    },
+
+    setTrackerPage: (p) => {
+      state.trackerFilter.page = p;
+      renderCreativesTracker();
+    },
+    setTrackerPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.trackerFilter.perPage = val;
+        state.trackerFilter.page = 1;
+        setStoredRowsPerPage(val);
+        renderCreativesTracker();
+      }
+    },
+
+    setPendingSalesPage: (p) => {
+      state.pendingSalesPage = p;
+      renderPendingSalesQueue();
+    },
+    setPendingSalesPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.pendingSalesPerPage = val;
+        state.pendingSalesPage = 1;
+        setStoredRowsPerPage(val);
+        renderPendingSalesQueue();
+      }
+    },
+
+    setPendingArtistPage: (p) => {
+      state.pendingArtistPage = p;
+      renderPendingArtistQueue();
+    },
+    setPendingArtistPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.pendingArtistPerPage = val;
+        state.pendingArtistPage = 1;
+        setStoredRowsPerPage(val);
+        renderPendingArtistQueue();
+      }
+    },
+
+    setWorkloadPage: (p) => {
+      state.workloadPage = p;
+      renderWorkloadDetailsTable();
+    },
+    setWorkloadPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.workloadPerPage = val;
+        state.workloadPage = 1;
+        setStoredRowsPerPage(val);
+        renderWorkloadDetailsTable();
+      }
+    },
+
+    setDashboardPage: (p) => {
+      state.dashboardPage = p;
+      renderDashboardRecentProjectsTable();
+    },
+    setDashboardPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.dashboardPerPage = val;
+        state.dashboardPage = 1;
+        setStoredRowsPerPage(val);
+        renderDashboardRecentProjectsTable();
+      }
+    },
+
+    setMonthlyOutputTimeframe: (tf) => {
+      renderMonthlyOutputReport(tf);
+    },
+    renderMonthlyOutputReport: (tf) => {
+      renderMonthlyOutputReport(tf);
+    },
+    setMonthlyOutputFilter: (filterObj) => {
+      initOutputFilterState();
+      if (filterObj && typeof filterObj === 'object') {
+        Object.assign(state.outputFilter, filterObj);
+      }
+      renderMonthlyOutputReport();
+    },
+    setMonthlyOutputPage: (p) => {
+      state.monthlyOutputPage = p;
+      renderMonthlyOutputReport();
+    },
+    setMonthlyOutputPerPage: (n) => {
+      const val = parseInt(n, 10);
+      if ([10, 15, 20, 25, 30].includes(val)) {
+        state.monthlyOutputPerPage = val;
+        state.monthlyOutputPage = 1;
+        setStoredRowsPerPage(val);
+        renderMonthlyOutputReport();
+      }
+    },
+    duplicateSalesRequest: (id) => {
+      const rec = state.requests.find(r => r.id === id);
+      if (!rec) return;
+
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const cloned = JSON.parse(JSON.stringify(rec));
+      cloned.id = `req-${Date.now()}`;
+      cloned.requestId = `LR-26-${randomNum}`;
+      cloned.joNumber = `P2607${randomNum}`;
+      cloned.projectName = `${rec.projectName} (Copy)`;
+      cloned.projectStatus = 'Pending';
+      cloned.designStatus = 'Not Started';
+      cloned.completionDate = null;
+
+      state.requests.unshift(cloned);
+      saveStateToStorage();
+      renderCurrentView(state.activeView);
+      showToast(`Cloned into ${cloned.requestId}`);
+    },
+
+    setTrackerPage: (p) => {
+      state.trackerFilter.page = p;
+      renderCreativesTracker();
+    },
+    resetTrackerFilters: () => {
+      resetCreativesTrackerFilters();
+    },
+
+    selectWorkloadArtist: (artist) => {
+      state.workloadFilter.selectedArtist = (state.workloadFilter.selectedArtist === artist) ? '' : artist;
+      renderWorkloadDetailsTable();
+    },
+
+    quickSalesApprove: (id) => {
+      const rec = state.requests.find(r => r.id === id);
+      if (rec) {
+        rec.clientApproval = 'Approved';
+        rec.projectStatus = 'Approved';
+        saveStateToStorage();
+        renderPendingSalesQueue();
+        showToast(`Project ${rec.requestId} approved.`);
+      }
+    },
+
+    previewAttachment: (id) => {
+      const att = state.attachments.find(a => a.id === id);
+      if (!att) return;
+      document.getElementById('attachmentModalTitle').textContent = att.name;
+      const resolvedUrl = resolveAttachmentUrl(att.url);
+      document.getElementById('attachmentModalImg').src = resolvedUrl;
+      document.getElementById('attachmentPreviewModal').classList.add('show');
+    },
+    deleteAttachment: (id) => {
+      state.attachments = state.attachments.filter(a => a.id !== id);
+      saveStateToStorage();
+      renderAttachmentsList();
+      showToast('Attachment deleted.');
+    },
+
+    removeArtist: (artist) => {
+      if (state.artists.length <= 1) {
+        showToast('Must have at least one artist.', 'error');
+        return;
+      }
+      state.artists = state.artists.filter(a => a !== artist && a.toLowerCase() !== artist.toLowerCase());
+      saveStateToStorage();
+      renderSettings();
+      populateSalesFiltersDropdowns();
+      populateTrackerFiltersDropdowns();
+      showToast(`Removed artist ${artist}.`);
+
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=delete_artist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: artist })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            state.artists = res.data;
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+            populateTrackerFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('delete_artist API error:', e));
+      }
+    },
+    removeSales: (rep) => {
+      if (state.salesReps.length <= 1) {
+        showToast('Must have at least one sales rep.', 'error');
+        return;
+      }
+      state.salesReps = state.salesReps.filter(s => s !== rep && s.toLowerCase() !== rep.toLowerCase());
+      saveStateToStorage();
+      renderSettings();
+      populateSalesFiltersDropdowns();
+      showToast(`Removed sales rep ${rep}.`);
+
+      if (window.PMS_API_URL) {
+        fetch(window.PMS_API_URL + '?action=delete_sales_rep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: rep })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.data) {
+            state.salesReps = res.data;
+            saveStateToStorage();
+            populateSalesFiltersDropdowns();
+          }
+        })
+        .catch(e => console.warn('delete_sales_rep API error:', e));
+      }
+    }
+  };
+
+  // ==========================================================================
+  // EVENT LISTENERS INITIALIZATION
+  // ==========================================================================
+
+  function initEventListeners() {
+    // Sidebar Desktop Collapse Toggle & Mobile Offcanvas Drawer
+    function ensureMobileBackdrop() {
+      let backdrop = document.querySelector('.sidebar-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(backdrop);
+      }
+      return backdrop;
+    }
+
+    function closeMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      const backdrop = document.querySelector('.sidebar-backdrop');
+      if (appSidebar) appSidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+
+    function openMobileSidebar() {
+      const appSidebar = document.getElementById('appSidebar');
+      const backdrop = ensureMobileBackdrop();
+      if (appSidebar) appSidebar.classList.add('mobile-open');
+      if (backdrop) backdrop.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+
+    function toggleMobileSidebar() {
+      if (typeof window.toggleMobileSidebar === 'function' && window.toggleMobileSidebar !== toggleMobileSidebar) {
+        window.toggleMobileSidebar();
+        return;
+      }
+      const appSidebar = document.getElementById('appSidebar');
+      if (appSidebar && appSidebar.classList.contains('mobile-open')) {
+        closeMobileSidebar();
+      } else {
+        openMobileSidebar();
+      }
+    }
+
+    function toggleDesktopSidebar() {
+      if (typeof window.toggleDesktopSidebar === 'function' && window.toggleDesktopSidebar !== toggleDesktopSidebar) {
+        window.toggleDesktopSidebar();
+        return;
+      }
+      const appSidebar = document.getElementById('appSidebar');
+      if (!appSidebar) return;
+      const isCollapsed = appSidebar.classList.contains('collapsed');
+      appSidebar.classList.toggle('collapsed', !isCollapsed);
+      const activeTip = document.getElementById('sdGlobalTooltip');
+      if (activeTip) activeTip.classList.remove('show');
+      try {
+        localStorage.setItem('SIGN_DEPOT_SIDEBAR_COLLAPSED', !isCollapsed ? '1' : '0');
+      } catch (err) {}
+    }
+
+    // Delegated click handler for 100% reliable clicks on buttons and child SVGs
+    document.addEventListener('click', (e) => {
+      // If modular components.js navigation is already active, prevent duplicate handling
+      if (window.SignDepotNav) return;
+
+      const mobileBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn');
+      if (mobileBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        toggleMobileSidebar();
+        return;
+      }
+
+      const closeBtn = e.target.closest('#sidebarCloseBtn, .sidebar-close-btn');
+      if (closeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        closeMobileSidebar();
+        return;
+      }
+
+      const collapseBtn = e.target.closest('#sidebarCollapseBtn, .sidebar-collapse-btn');
+      if (collapseBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if (window.innerWidth <= 992) {
+          closeMobileSidebar();
+        } else {
+          toggleDesktopSidebar();
+        }
+        return;
+      }
+
+      if (e.target.closest('.sidebar-backdrop')) {
+        closeMobileSidebar();
+        return;
+      }
+
+      if (e.target.closest('.sidebar-nav .nav-item') && window.innerWidth <= 992) {
+        closeMobileSidebar();
+      }
+    });
+
+    // Restore desktop collapsed preference
+    try {
+      if (window.innerWidth > 992 && localStorage.getItem('SIGN_DEPOT_SIDEBAR_COLLAPSED') === '1') {
+        const appSidebar = document.getElementById('appSidebar');
+        if (appSidebar) appSidebar.classList.add('collapsed');
+      }
+    } catch (err) {}
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMobileSidebar();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        closeMobileSidebar();
+      } else {
+        const appSidebar = document.getElementById('appSidebar');
+        if (appSidebar) appSidebar.classList.remove('collapsed');
+      }
+    });
+
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (window.innerWidth <= 992) {
+          closeMobileSidebar();
+        }
+        const href = item.getAttribute('href');
+        const viewId = item.getAttribute('data-view');
+
+        if (href && href !== '#' && !href.startsWith('javascript:')) {
+          const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+          const targetFile = (href.replace(/\\/g, '/').split('?')[0].split('/').pop() || 'index.html').toLowerCase();
+          if (targetFile !== currentFile) {
+            // Allow native browser navigation across distinct HTML pages
+            return;
+          }
+        }
+
+        e.preventDefault();
+        if (viewId) switchView(viewId);
+      });
+    });
+
+    const brandHomeLink = document.getElementById('brandHomeLink');
+    if (brandHomeLink && !brandHomeLink.getAttribute('href')?.includes('signdepot.ph')) {
+      brandHomeLink.addEventListener('click', (e) => {
+        if (document.getElementById('view-dashboard')) {
+          e.preventDefault();
+          switchView('view-dashboard');
+          return;
+        }
+        const currentFile = (window.location.pathname.replace(/\\/g, '/').split('/').pop() || 'index.html').toLowerCase();
+        if (currentFile !== 'index.html') {
+          return;
+        }
+        e.preventDefault();
+        switchView('view-dashboard');
+      });
+    }
+
+    const handleNewRequestTrigger = (e) => {
+      if (e) e.preventDefault();
+      if (document.getElementById('salesModal')) {
+        openNewSalesRequestModal();
+      } else {
+        const pagesPrefix = window.location.pathname.includes('/pages/') ? './' : './pages/';
+        window.location.href = pagesPrefix + 'sales-requests.php?action=add_new';
+      }
+    };
+
+    const btnNewReqDash = document.getElementById('btnDashboardNewRequest');
+    if (btnNewReqDash) {
+      btnNewReqDash.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    const btnPanzeAdd = document.getElementById('btnPanzeAddTask');
+    if (btnPanzeAdd) {
+      btnPanzeAdd.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    const btnSalesNewReq = document.getElementById('btnSalesNewRequest');
+    if (btnSalesNewReq) {
+      btnSalesNewReq.addEventListener('click', handleNewRequestTrigger);
+    }
+
+    // Delegated click handler for save (✓) and cancel (✕) buttons on the draft row
+    document.addEventListener('click', (e) => {
+      const saveBtn = e.target.closest && e.target.closest('.btn-save-draft');
+      if (saveBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        saveDraftSalesRequest();
+        return;
+      }
+      const cancelBtn = e.target.closest && e.target.closest('.btn-cancel-draft');
+      if (cancelBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        cancelDraftSalesRequest();
+        return;
+      }
+    });
+
+    // Auto-trigger new request modal if navigated from external page with ?action=add_new
+    if (window.location.search.includes('action=add_new')) {
+      setTimeout(() => {
+        openNewSalesRequestModal();
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 300);
+    }
+
+    // Automatic separator dash formatting on Request ID input
+    const reqIdInput = document.getElementById('salesFormReqId');
+    if (reqIdInput) {
+      reqIdInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        const formatted = formatRequestIdInput(raw);
+        if (formatted && formatted !== raw) {
+          const oldLen = raw.length;
+          e.target.value = formatted;
+          if (formatted.length > oldLen) {
+            e.target.setSelectionRange(formatted.length, formatted.length);
+          }
+        }
+      });
+      reqIdInput.addEventListener('blur', (e) => {
+        const formatted = formatRequestIdInput(e.target.value);
+        if (formatted) e.target.value = formatted;
+      });
+    }
+
+    const salesSearch = document.getElementById('salesSearchInput');
+    if (salesSearch) {
+      // Purge any errant autofill before binding
+      if (salesSearch.value && (salesSearch.value.toLowerCase().startsWith('sup_') || salesSearch.value.toLowerCase().includes('angel') || salesSearch.value.toLowerCase() === 'superadmin')) {
+        salesSearch.value = '';
+        state.salesFilter.search = '';
+      }
+
+      salesSearch.addEventListener('input', () => {
+        state.salesFilter.search = salesSearch.value.trim();
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    }
+
+    ['salesFilterPriority', 'salesFilterApproval', 'salesFilterFileSent', 'salesFilterSalesRep', 'salesFilterLocation'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          if (id === 'salesFilterPriority') state.salesFilter.priority = el.value;
+          if (id === 'salesFilterApproval') {
+            state.salesFilter.approval = el.value;
+            state.salesFilter.approvalTab = el.value;
+          }
+          if (id === 'salesFilterFileSent') state.salesFilter.fileSent = el.value;
+          if (id === 'salesFilterSalesRep') state.salesFilter.salesRep = el.value;
+          if (id === 'salesFilterLocation') state.salesFilter.location = el.value;
+          state.salesFilter.page = 1;
+          renderSalesRequests();
+        });
+      }
+    });
+
+    // Client Approval Status Tabs listener
+    document.querySelectorAll('.sales-approval-tab[data-tab-approval]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabVal = btn.getAttribute('data-tab-approval') || '';
+        state.salesFilter.approvalTab = tabVal;
+        state.salesFilter.approval = tabVal;
+        const selApproval = document.getElementById('salesFilterApproval');
+        if (selApproval) {
+          selApproval.value = tabVal;
+          syncFilterSelectUI(selApproval);
+        }
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    });
+
+    const btnResetSales = document.getElementById('btnResetSalesFilters');
+    if (btnResetSales) {
+      btnResetSales.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetSalesRequestsFilters();
+      });
+    }
+
+    document.querySelectorAll('#view-sales-requests .data-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.getAttribute('data-sort');
+        if (state.salesFilter.sortField === field) {
+          state.salesFilter.sortDir = state.salesFilter.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.salesFilter.sortField = field;
+          state.salesFilter.sortDir = 'asc';
+        }
+        renderSalesRequests();
+      });
+    });
+
+    const btnTrackerNew = document.getElementById('btnTrackerNewTask');
+    if (btnTrackerNew) {
+      btnTrackerNew.addEventListener('click', () => {
+        const myArtist = getLoggedInArtist();
+        const candidateList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
+        const first = candidateList[0] || state.requests[0];
+        if (!first) return;
+        document.getElementById('trackerFormId').value = first.id;
+        document.getElementById('trackerFormReqId').value = first.requestId;
+        document.getElementById('trackerFormProject').value = first.projectName;
+        if (myArtist) {
+          const mArtist = document.getElementById('trackerFormArtist');
+          if (mArtist) mArtist.value = myArtist;
+        }
+        document.getElementById('trackerModalTitle').textContent = `Add Creative Task — ${first.requestId}`;
+        document.getElementById('trackerModal').classList.add('show');
+      });
+    }
+
+    const trackerSearch = document.getElementById('trackerSearchInput');
+    if (trackerSearch) {
+      trackerSearch.addEventListener('input', () => {
+        state.trackerFilter.search = trackerSearch.value.trim();
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    ['trackerFilterProjectStatus', 'trackerFilterDesignStatus', 'trackerFilterArtist', 'trackerFilterOverdue'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          if (id === 'trackerFilterProjectStatus') state.trackerFilter.projectStatus = el.value;
+          if (id === 'trackerFilterDesignStatus') state.trackerFilter.designStatus = el.value;
+          if (id === 'trackerFilterArtist') state.trackerFilter.artist = el.value;
+          if (id === 'trackerFilterOverdue') state.trackerFilter.overdue = el.value;
+          state.trackerFilter.page = 1;
+          renderCreativesTracker();
+        });
+      }
+    });
+
+    // Date filter listeners
+    const trackerDatePreset = document.getElementById('trackerFilterDatePreset');
+    const trackerDateCustom = document.getElementById('trackerFilterDateCustom');
+    const trackerDateColumn = document.getElementById('trackerFilterDateColumn');
+
+    if (trackerDatePreset) {
+      trackerDatePreset.addEventListener('change', () => {
+        state.trackerFilter.datePreset = trackerDatePreset.value;
+        if (trackerDatePreset.value === 'custom') {
+          if (trackerDateCustom) {
+            trackerDateCustom.style.display = 'inline-block';
+            trackerDateCustom.focus();
+          }
+        } else {
+          if (trackerDateCustom) {
+            trackerDateCustom.style.display = 'none';
+          }
+        }
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    if (trackerDateCustom) {
+      trackerDateCustom.addEventListener('change', () => {
+        state.trackerFilter.dateCustom = trackerDateCustom.value;
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    if (trackerDateColumn) {
+      trackerDateColumn.addEventListener('change', () => {
+        state.trackerFilter.dateColumn = trackerDateColumn.value;
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    }
+
+    // Sort Dropdown listener
+    const trackerSortEl = document.getElementById('trackerSortDropdown');
+    if (trackerSortEl) {
+      trackerSortEl.addEventListener('change', () => {
+        const parts = trackerSortEl.value.split('_');
+        if (parts.length === 2) {
+          state.trackerFilter.sortField = parts[0];
+          state.trackerFilter.sortDir = parts[1];
+          state.trackerFilter.page = 1;
+          renderCreativesTracker();
+        }
+      });
+    }
+
+    // Actual table header click-to-sort listeners for Creatives Tracker!
+    document.querySelectorAll('#view-creatives-tracker .data-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.getAttribute('data-sort');
+        if (state.trackerFilter.sortField === field) {
+          state.trackerFilter.sortDir = state.trackerFilter.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.trackerFilter.sortField = field;
+          if (field === 'requestId' || field === 'orderDate' || field === 'dateUpdated') {
+            state.trackerFilter.sortDir = 'desc';
+          } else {
+            state.trackerFilter.sortDir = 'asc';
+          }
+        }
+        state.trackerFilter.page = 1;
+        renderCreativesTracker();
+      });
+    });
+
+    const btnResetTracker = document.getElementById('btnResetTrackerFilters');
+    if (btnResetTracker) {
+      btnResetTracker.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetCreativesTrackerFilters();
+      });
+    }
+
+    const btnExportTrackerCSV = document.getElementById('btnQuickExportTrackerCSV');
+    if (btnExportTrackerCSV) {
+      btnExportTrackerCSV.addEventListener('click', () => exportTrackerCsv());
+    }
+
+    const btnExportOutputCSV = document.getElementById('btnExportMonthlyReportCSV');
+    if (btnExportOutputCSV) {
+      btnExportOutputCSV.addEventListener('click', () => exportMonthlyReportCsv());
+    }
+
+    const btnSampleUral = document.getElementById('btnDirectivesLoadSampleUral');
+    if (btnSampleUral) {
+      btnSampleUral.addEventListener('click', () => {
+        renderDirectivePreview('P261001348');
+        showToast('Sample directive for URAL loaded.');
+      });
+    }
+
+    const availFilter = document.getElementById('workloadFilterAvailability');
+    if (availFilter) {
+      availFilter.addEventListener('change', () => {
+        state.workloadFilter.availability = availFilter.value;
+        renderArtistWorkload();
+      });
+    }
+
+    const workloadTableSearch = document.getElementById('workloadTableSearch');
+    if (workloadTableSearch) {
+      workloadTableSearch.addEventListener('input', () => {
+        state.workloadFilter.search = workloadTableSearch.value.trim();
+        renderWorkloadDetailsTable();
+      });
+    }
+
+    const pendingArtistSelect = document.getElementById('pendingArtistSelect');
+    if (pendingArtistSelect) {
+      pendingArtistSelect.addEventListener('change', () => {
+        state.pendingArtistSelected = pendingArtistSelect.value;
+        renderPendingArtistQueue();
+      });
+    }
+
+    document.querySelectorAll('.sales-queue-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.sales-queue-tab').forEach(t => {
+          t.classList.remove('btn-primary');
+          t.classList.add('btn-secondary');
+        });
+        tab.classList.remove('btn-secondary');
+        tab.classList.add('btn-primary');
+
+        state.pendingSalesFilter = tab.getAttribute('data-queue');
+        renderPendingSalesQueue();
+      });
+    });
+
+    const pendingSalesSearch = document.getElementById('pendingSalesSearchInput');
+    if (pendingSalesSearch) {
+      pendingSalesSearch.addEventListener('input', () => {
+        state.pendingSalesSearch = pendingSalesSearch.value.trim();
+        state.pendingSalesPage = 1;
+        renderPendingSalesQueue();
+      });
+    }
+
+    // Rows Per Page event listeners for all tables
+    const bindRowsSelects = (ids, setter) => {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', () => setter(el.value));
+        }
+      });
+    };
+
+    bindRowsSelects(['salesFilterPerPage', 'salesPaginationPerPage'], window.SignDepotApp.setSalesPerPage);
+    bindRowsSelects(['trackerFilterPerPage', 'trackerPaginationPerPage'], window.SignDepotApp.setTrackerPerPage);
+    bindRowsSelects(['pendingSalesFilterPerPage', 'pendingSalesPaginationPerPage'], window.SignDepotApp.setPendingSalesPerPage);
+    bindRowsSelects(['pendingArtistFilterPerPage', 'pendingArtistPaginationPerPage'], window.SignDepotApp.setPendingArtistPerPage);
+    bindRowsSelects(['workloadFilterPerPage', 'workloadPaginationPerPage'], window.SignDepotApp.setWorkloadPerPage);
+    bindRowsSelects(['dashboardFilterPerPage', 'dashboardPaginationPerPage'], window.SignDepotApp.setDashboardPerPage);
+    bindRowsSelects(['monthlyOutputFilterPerPage', 'monthlyOutputPaginationPerPage'], window.SignDepotApp.setMonthlyOutputPerPage);
+
+    // Dashboard Search & Status Filter listeners
+    const dashSearch = document.getElementById('dashboardSearchInput');
+    if (dashSearch) {
+      dashSearch.addEventListener('input', () => {
+        state.dashboardSearch = dashSearch.value.trim();
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    const dashStatus = document.getElementById('dashboardFilterStatus');
+    if (dashStatus) {
+      dashStatus.addEventListener('change', () => {
+        state.dashboardStatus = dashStatus.value;
+        if (state.dashboardStatus) state.dashboardKpiFilter = '';
+        state.dashboardPage = 1;
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    // Dashboard Deadline Filter listener
+    const dashDeadline = document.getElementById('dashboardFilterDeadline');
+    if (dashDeadline) {
+      dashDeadline.addEventListener('change', () => {
+        state.dashboardDeadline = dashDeadline.value;
+        state.dashboardPage = 1;
+        const cards = {
+          overdue: document.getElementById('cardFilterOverdue'),
+          today: document.getElementById('cardFilterToday'),
+          soon: document.getElementById('cardFilterSoon')
+        };
+        Object.entries(cards).forEach(([k, c]) => {
+          if (c) c.classList.toggle('active', k === state.dashboardDeadline);
+        });
+        renderDashboardRecentProjectsTable();
+      });
+    }
+
+    // Sales Requests Deadline Filter listener
+    const salesDeadline = document.getElementById('salesFilterDeadline');
+    if (salesDeadline) {
+      salesDeadline.addEventListener('change', () => {
+        state.salesFilter.deadline = salesDeadline.value;
+        state.salesFilter.page = 1;
+        renderSalesRequests();
+      });
+    }
+
+    // Recent Activity Tabs & Timeline Options
+    document.addEventListener('click', (e) => {
+      const actBtn = e.target.closest('#activityFilterTabs [data-act-filter]');
+      if (actBtn) {
+        e.preventDefault();
+        const filter = actBtn.getAttribute('data-act-filter');
+        renderRecentActivityFeed(filter);
+        return;
+      }
+
+      const optBtn = e.target.closest('#btnTimelineOptions');
+      if (optBtn) {
+        e.preventDefault();
+        showToast('Timeline timeframe: Active Production Week (Oct 19–25, 2026)', 'info');
+        return;
+      }
+    });
+
+    // Topbar Deadline Alert Notification Drawer & Tab Switching
+    document.addEventListener('click', (e) => {
+      const bellBtn = e.target.closest('#deadlineAlertBtn, .deadline-alert-btn');
+      const alertDropdown = document.getElementById('deadlineAlertDropdown');
+
+      if (bellBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (alertDropdown) {
+          alertDropdown.classList.toggle('show');
+          const globalTip = document.getElementById('sdGlobalTooltip');
+          if (globalTip) globalTip.classList.remove('show');
+        }
+        return;
+      }
+
+      const tabBtn = e.target.closest('.deadline-tab-btn');
+      if (tabBtn && tabBtn.getAttribute('data-alert-tab')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const tab = tabBtn.getAttribute('data-alert-tab');
+        window.SignDepotApp.setAlertTab(tab);
+        return;
+      }
+
+      if (alertDropdown && alertDropdown.classList.contains('show') && !e.target.closest('#deadlineAlertContainer')) {
+        alertDropdown.classList.remove('show');
+      }
+    });
+  }
+
+  function exportTrackerCsv() {
+    const myArtist = getLoggedInArtist();
+    const headers = ['Request ID', 'JO Number', 'Artist', 'Project Name', 'Design Deadline', 'Head Approval', 'Standard', 'Printing', 'Special', 'Project Status', 'Design Status', 'Revisions', 'Remarks', 'Date', 'Sales', 'Month'];
+    const reqList = myArtist ? state.requests.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : state.requests;
+    const rows = reqList.map(r => [
+      r.requestId,
+      r.joNumber || '',
+      r.artist,
+      `"${(r.projectName || '').replace(/"/g, '""')}"`,
+      r.designDeadline,
+      r.headApproval,
+      r.countStandard,
+      r.countPrinting,
+      r.countSpecial,
+      r.projectStatus,
+      r.designStatus,
+      r.revisionCount,
+      `"${(r.remarks || '').replace(/"/g, '""')}"`,
+      r.orderDate,
+      r.salesRep,
+      r.month
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    downloadCsv(csvContent, `Sign_Depot_Creatives_Tracker_${myArtist ? myArtist + '_' : ''}${Date.now()}.csv`);
+    try {
+      fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action_type: 'EXPORT',
+          module: 'Creatives Tracker',
+          description: `Exported Creatives Tracker records to CSV (${reqList.length} rows)`
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function exportMonthlyReportCsv() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const matrix = {};
+    state.artists.forEach(a => matrix[a] = new Array(12).fill(0));
+
+    state.requests.forEach(r => {
+      if (r.projectStatus === 'Completed') {
+        let mIdx = -1;
+        if (r.completionDate) {
+          const mNum = parseInt(r.completionDate.split('-')[1], 10);
+          if (!isNaN(mNum) && mNum >= 1 && mNum <= 12) mIdx = mNum - 1;
+        } else if (r.month) {
+          const matchMonth = months.findIndex(m => r.month.toLowerCase().startsWith(m.toLowerCase()));
+          if (matchMonth !== -1) mIdx = matchMonth;
+        }
+        if (mIdx !== -1 && matrix[r.artist]) {
+          const count = Math.max((r.countStandard || 0) + (r.countPrinting || 0) + (r.countSpecial || 0), 1);
+          matrix[r.artist][mIdx] += count;
+        }
+      }
+    });
+
+    const headers = ['Artist', ...months, 'Annual Total'];
+    const rows = state.artists.map(a => {
+      const counts = matrix[a];
+      const sum = counts.reduce((acc, v) => acc + v, 0);
+      return [a, ...counts, sum];
+    });
+
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    downloadCsv(csvContent, `Sign_Depot_Monthly_Production_2026_${Date.now()}.csv`);
+    try {
+      fetch((typeof apiBase !== 'undefined' ? apiBase : 'api.php') + '?action=log_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action_type: 'EXPORT',
+          module: 'Monthly Output',
+          description: 'Exported Annual Production report to CSV'
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function downloadCsv(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast(`Downloaded ${filename}`);
+  }
+
+  // ==========================================================================
+  // FULL-PLEDGE VECTOR STUDIO EDITOR (CorelDRAW / Adobe Illustrator Mode)
+  // ==========================================================================
+
+  function initStudioVectorEditor() {
+    const inspector = document.getElementById('studioPropertyInspector');
+    if (!inspector) return;
+
+    const svg = document.getElementById('directiveExactSvg');
+    const artwrap = document.getElementById('studioArtboardWrap');
+    const transformBox = document.getElementById('studioTransformBox');
+    if (!svg || !artwrap || !transformBox) return;
+
+    let zoom = 1.25;
+    let activeFieldId = 'docFieldProjectName';
+    let isMoving = false;
+    let isResizing = false;
+    let activeHandle = null;
+    let dragStart = { x: 0, y: 0 };
+    let initBox = { x: 0, y: 0, w: 0, h: 0 };
+
+    const STUDIO_FIELDS = [
+      { id: 'docFieldClientName', name: 'Client Name', defX: 342, defY: 20, defW: 220, defH: 28, defSz: 22, color: '#000000', align: 'middle' },
+      { id: 'docFieldJoNumber', name: 'JO Number', defX: 58, defY: 2, defW: 164, defH: 29, defSz: 28, color: '#FFFFFF', align: 'start' },
+      { id: 'docFieldProjectName', name: 'Project Name', defX: 342, defY: 52, defW: 220, defH: 19, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldDueDate', name: 'Due Date', defX: 227, defY: 34, defW: 111, defH: 30, defSz: 14, color: '#FFFFFF', align: 'middle' },
+      { id: 'docFieldOrderDate', name: 'Order Date', defX: 227, defY: 2, defW: 111, defH: 30, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldReleasingDate', name: 'Release Date', defX: 227, defY: 66, defW: 111, defH: 29, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldInCharge', name: 'In-Charge', defX: 8, defY: 34, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },
+      { id: 'docFieldDrawnBy', name: 'Drawn By', defX: 8, defY: 55, defW: 215, defH: 19, defSz: 15, color: '#000000', align: 'end' },
+      { id: 'docFieldAddress', name: 'Address', defX: 99, defY: 77, defW: 122, defH: 17, defSz: 12, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactPerson', name: 'Contact Person', defX: 715, defY: 46, defW: 100, defH: 18, defSz: 13, color: '#000000', align: 'middle' },
+      { id: 'docFieldContactNumber', name: 'Contact Number', defX: 715, defY: 73, defW: 100, defH: 18, defSz: 13, color: '#000000', align: 'middle' },
+      { id: 'docFieldInstallers', name: 'Installers', defX: 824, defY: 2, defW: 78, defH: 44, defSz: 14, color: '#000000', align: 'middle' },
+      { id: 'docFieldDuration', name: 'Duration', defX: 824, defY: 50, defW: 78, defH: 44, defSz: 14, color: '#000000', align: 'middle' }
+    ];
+
+    if (!state.customBoxPositions) state.customBoxPositions = {};
+    if (!state.customBoxSizes) state.customBoxSizes = {};
+    if (!state.customCellFonts) state.customCellFonts = {};
+
+    // 1. Zoom Engine
+    const applyZoom = (z) => {
+      zoom = Math.max(0.5, Math.min(3, z));
+      artwrap.style.transform = `scale(${zoom})`;
+      const zoomSel = document.getElementById('studioZoomSelect');
+      if (zoomSel) zoomSel.value = String(zoom);
+    };
+
+    const btnZoomIn = document.getElementById('studioZoomIn');
+    if (btnZoomIn) btnZoomIn.onclick = () => applyZoom(Math.round((zoom + 0.25) * 100) / 100);
+
+    const btnZoomOut = document.getElementById('studioZoomOut');
+    if (btnZoomOut) btnZoomOut.onclick = () => applyZoom(Math.round((zoom - 0.25) * 100) / 100);
+
+    const btnZoomReset = document.getElementById('studioZoomReset');
+    if (btnZoomReset) btnZoomReset.onclick = () => applyZoom(1);
+
+    const btnZoomFit = document.getElementById('studioZoomFit');
+    if (btnZoomFit) {
+      btnZoomFit.onclick = () => {
+        const viewport = document.getElementById('studioArtboardViewport');
+        if (viewport) {
+          const availW = viewport.clientWidth - 100;
+          const fitZ = Math.min(2, Math.max(0.75, Math.round((availW / 904) * 10) / 10));
+          applyZoom(fitZ);
+        }
+      };
+    }
+
+    const zoomSelect = document.getElementById('studioZoomSelect');
+    if (zoomSelect) {
+      zoomSelect.onchange = () => applyZoom(parseFloat(zoomSelect.value));
+    }
+
+    // 2. Field Selection & Transform Bounding Box
+    const getFieldData = (id) => {
+      const def = STUDIO_FIELDS.find(f => f.id === id) || STUDIO_FIELDS[0];
+      const pos = (state.customBoxPositions && state.customBoxPositions[id]) || { x: def.defX, y: def.defY };
+      const sz = (state.customBoxSizes && state.customBoxSizes[id]) || { w: def.defW, h: def.defH };
+      const fontSz = (state.customCellFonts && state.customCellFonts[id]) || def.defSz;
+      return {
+        id,
+        name: def.name,
+        x: pos.x !== undefined ? pos.x : def.defX,
+        y: pos.y !== undefined ? pos.y : def.defY,
+        w: sz.w !== undefined ? sz.w : def.defW,
+        h: sz.h !== undefined ? sz.h : def.defH,
+        fontSize: fontSz,
+        align: def.align,
+        color: def.color
+      };
+    };
+
+    const updateTransformBoxUI = (fieldId) => {
+      const data = getFieldData(fieldId);
+      transformBox.style.display = 'block';
+      transformBox.style.left = `${data.x}px`;
+      transformBox.style.top = `${data.y}px`;
+      transformBox.style.width = `${data.w}px`;
+      transformBox.style.height = `${data.h}px`;
+
+      // Update Inspector Inputs
+      const inpX = document.getElementById('propPosX');
+      const inpY = document.getElementById('propPosY');
+      const inpW = document.getElementById('propBoxW');
+      const inpH = document.getElementById('propBoxH');
+      const inpSz = document.getElementById('propFontSize');
+      const selField = document.getElementById('studioFieldSelect');
+      const textInput = document.getElementById('studioActiveTextInput');
+
+      if (inpX) inpX.value = Math.round(data.x);
+      if (inpY) inpY.value = Math.round(data.y);
+      if (inpW) inpW.value = Math.round(data.w);
+      if (inpH) inpH.value = Math.round(data.h);
+      if (inpSz) inpSz.value = Math.round(data.fontSize);
+      if (selField) selField.value = fieldId;
+
+      const el = document.getElementById(fieldId);
+      if (el && textInput) {
+        textInput.value = getFieldRawText(el);
+      }
+
+      // Update Layers List Active State
+      document.querySelectorAll('.sidebar-layers-list .layer-item').forEach(item => {
+        item.classList.toggle('active', item.getAttribute('data-field-id') === fieldId);
+      });
+    };
+
+    const selectStudioField = (fieldId) => {
+      activeFieldId = fieldId;
+      const el = document.getElementById(fieldId);
+      if (el) {
+        document.querySelectorAll('#directiveExactSvg .active-svg-cell').forEach(c => c.classList.remove('active-svg-cell'));
+        el.classList.add('active-svg-cell');
+      }
+      updateTransformBoxUI(fieldId);
+    };
+
+    // 3. Populate Layers List in Sidebar
+    const renderLayersList = () => {
+      const container = document.getElementById('studioLayersList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      STUDIO_FIELDS.forEach(f => {
+        const el = document.getElementById(f.id);
+        const rawText = el ? getFieldRawText(el) : '';
+        const item = document.createElement('div');
+        item.className = `layer-item ${f.id === activeFieldId ? 'active' : ''}`;
+        item.setAttribute('data-field-id', f.id);
+        item.innerHTML = `
+          <div class="layer-info">
+            <span class="layer-name">${escapeHTML(f.name)}</span>
+            <span class="layer-preview">${escapeHTML(rawText.replace(/\\n/g, ' ↵ ') || '—')}</span>
+          </div>
+          <span class="layer-badge">${Math.round(getCellCurrentFontSize(el))}px</span>
+        `;
+        item.onclick = () => selectStudioField(f.id);
+        container.appendChild(item);
+      });
+    };
+
+    // 4. Transform Box Mouse Handlers (Move & 8-Handle Resize in Artboard Coordinates)
+    const getArtboardCoords = (e) => {
+      const rect = svg.getBoundingClientRect();
+      const scaleX = 904 / rect.width;
+      const scaleY = 96 / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    };
+
+    const dragArea = transformBox.querySelector('.transform-drag-area');
+    if (dragArea) {
+      dragArea.addEventListener('mousedown', (e) => {
+        isMoving = true;
+        const cur = getFieldData(activeFieldId);
+        const mouse = getArtboardCoords(e);
+        dragStart = { x: mouse.x, y: mouse.y };
+        initBox = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    }
+
+    transformBox.querySelectorAll('.studio-transform-handle').forEach(handle => {
+      handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        activeHandle = handle.getAttribute('data-handle');
+        const cur = getFieldData(activeFieldId);
+        const mouse = getArtboardCoords(e);
+        dragStart = { x: mouse.x, y: mouse.y };
+        initBox = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMoving && !isResizing) return;
+      const mouse = getArtboardCoords(e);
+      const dx = mouse.x - dragStart.x;
+      const dy = mouse.y - dragStart.y;
+      const data = getFieldData(activeFieldId);
+
+      if (isMoving) {
+        let newX = Math.round(initBox.x + dx);
+        let newY = Math.round(initBox.y + dy);
+        newX = Math.max(0, Math.min(904 - initBox.w, newX));
+        newY = Math.max(0, Math.min(96 - initBox.h, newY));
+
+        data.x = newX;
+        data.y = newY;
+        state.customBoxPositions[activeFieldId] = { x: newX, y: newY };
+        saveStateToStorage();
+
+        // Update SVG text coordinates
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          const tspans = el.querySelectorAll('tspan');
+          if (tspans && tspans.length > 0) {
+            const fontSz = getCellCurrentFontSize(el);
+            const lh = Math.round(fontSz * 1.15 * 10) / 10;
+            const startY = Math.round(newY + fontSz);
+            tspans.forEach((t, i) => {
+              t.setAttribute('x', Math.round(newX + data.w / 2));
+              t.setAttribute('y', Math.round(startY + i * lh));
+            });
+          } else {
+            el.setAttribute('x', Math.round(newX + data.w / 2));
+            el.setAttribute('y', Math.round(newY + data.h * 0.75));
+          }
+        }
+        updateTransformBoxUI(activeFieldId);
+      } else if (isResizing) {
+        let { x, y, w, h } = initBox;
+
+        if (activeHandle.includes('e')) w = Math.max(20, initBox.w + dx);
+        if (activeHandle.includes('s')) h = Math.max(12, initBox.h + dy);
+        if (activeHandle.includes('w')) {
+          const maxDx = initBox.w - 20;
+          const appliedDx = Math.min(maxDx, dx);
+          x = initBox.x + appliedDx;
+          w = initBox.w - appliedDx;
+        }
+        if (activeHandle.includes('n')) {
+          const maxDy = initBox.h - 12;
+          const appliedDy = Math.min(maxDy, dy);
+          y = initBox.y + appliedDy;
+          h = initBox.h - appliedDy;
+        }
+
+        data.x = Math.round(x);
+        data.y = Math.round(y);
+        data.w = Math.round(w);
+        data.h = Math.round(h);
+
+        state.customBoxPositions[activeFieldId] = { x: data.x, y: data.y };
+        state.customBoxSizes[activeFieldId] = { w: data.w, h: data.h };
+        saveStateToStorage();
+
+        updateTransformBoxUI(activeFieldId);
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isMoving || isResizing) {
+        isMoving = false;
+        isResizing = false;
+        activeHandle = null;
+        renderLayersList();
+      }
+    });
+
+    // 5. Direct Artboard Click to Select Field
+    svg.addEventListener('click', (e) => {
+      const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
+      const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+      if (indoorTarget || outdoorTarget) {
+        const curState = state.directiveLocation || {
+          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+        };
+        if (indoorTarget) {
+          const nextIndoor = !curState.indoor;
+          setDirectiveLocation(nextIndoor, curState.outdoor);
+          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+        } else {
+          const nextOutdoor = !curState.outdoor;
+          setDirectiveLocation(curState.indoor, nextOutdoor);
+          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+        }
+        return;
+      }
+      const coords = getArtboardCoords(e);
+      if (coords.x >= 340 && coords.x <= 564 && coords.y <= 18) {
+        const isIndoorClick = coords.x <= 452;
+        const curState = state.directiveLocation || {
+          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
+          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
+        };
+        if (isIndoorClick) {
+          const nextIndoor = !curState.indoor;
+          setDirectiveLocation(nextIndoor, curState.outdoor);
+          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
+        } else {
+          const nextOutdoor = !curState.outdoor;
+          setDirectiveLocation(curState.indoor, nextOutdoor);
+          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
+        }
+        return;
+      }
+      const targetCell = e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
+      if (targetCell && targetCell.id) {
+        selectStudioField(targetCell.id);
+        return;
+      }
+      const fieldId = getFieldIdAtSvgCoords(coords.x, coords.y);
+      if (fieldId) {
+        selectStudioField(fieldId);
+      }
+    });
+
+    // 6. Right Sidebar Textarea: Multi-line with Enter key support
+    const textInput = document.getElementById('studioActiveTextInput');
+    if (textInput) {
+      textInput.addEventListener('input', () => {
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          setFieldMultilineText(el, textInput.value);
+          syncControlValues(activeFieldId, textInput.value);
+          renderLayersList();
+          updateTransformBoxUI(activeFieldId);
+        }
+      });
+      textInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation(); // Next line supported naturally!
+        }
+      });
+    }
+
+    // 7. Inspector Toolbar Input Bindings
+    const selField = document.getElementById('studioFieldSelect');
+    if (selField) {
+      selField.addEventListener('change', () => selectStudioField(selField.value));
+    }
+
+    const inpSz = document.getElementById('propFontSize');
+    const btnSzDec = document.getElementById('propFontDec');
+    const btnSzInc = document.getElementById('propFontInc');
+
+    const changeFontSz = (deltaOrVal) => {
+      const el = document.getElementById(activeFieldId);
+      if (!el) return;
+      const cur = getCellCurrentFontSize(el);
+      const next = typeof deltaOrVal === 'number' ? Math.max(6, Math.min(72, deltaOrVal)) : Math.max(6, Math.min(72, cur + (deltaOrVal === 'dec' ? -1 : 1)));
+      setCellCustomFontSize(el, next);
+      if (inpSz) inpSz.value = Math.round(next);
+      updateTransformBoxUI(activeFieldId);
+      renderLayersList();
+    };
+
+    if (btnSzDec) btnSzDec.onclick = () => changeFontSz('dec');
+    if (btnSzInc) btnSzInc.onclick = () => changeFontSz('inc');
+    if (inpSz) inpSz.onchange = () => changeFontSz(parseFloat(inpSz.value));
+
+    // Position / Dimension Inputs
+    const inpX = document.getElementById('propPosX');
+    const inpY = document.getElementById('propPosY');
+    const inpW = document.getElementById('propBoxW');
+    const inpH = document.getElementById('propBoxH');
+
+    const updateManualTransform = () => {
+      const data = getFieldData(activeFieldId);
+      const newX = inpX ? parseFloat(inpX.value) : data.x;
+      const newY = inpY ? parseFloat(inpY.value) : data.y;
+      const newW = inpW ? parseFloat(inpW.value) : data.w;
+      const newH = inpH ? parseFloat(inpH.value) : data.h;
+
+      data.x = isNaN(newX) ? data.x : Math.max(0, Math.min(904, newX));
+      data.y = isNaN(newY) ? data.y : Math.max(0, Math.min(96, newY));
+      data.w = isNaN(newW) ? data.w : Math.max(20, Math.min(800, newW));
+      data.h = isNaN(newH) ? data.h : Math.max(10, Math.min(300, newH));
+
+      state.customBoxPositions[activeFieldId] = { x: data.x, y: data.y };
+      state.customBoxSizes[activeFieldId] = { w: data.w, h: data.h };
+      saveStateToStorage();
+      updateTransformBoxUI(activeFieldId);
+    };
+
+    [inpX, inpY, inpW, inpH].forEach(inp => {
+      if (inp) inp.addEventListener('change', updateManualTransform);
+    });
+
+    // Swatches
+    document.querySelectorAll('.inspector-swatches .swatch-btn').forEach(sw => {
+      sw.onclick = () => {
+        const color = sw.getAttribute('data-color');
+        const el = document.getElementById(activeFieldId);
+        if (el) {
+          el.setAttribute('fill', color);
+          el.style.fill = color;
+          showToast(`Set ${activeFieldId} color to ${color}`);
+        }
+      };
+    });
+
+    // 8. Studio Export Actions & Dropdown
+    const btnStudioExpDropdown = document.getElementById('btnStudioExportDropdown');
+    const studioExpMenu = document.getElementById('studioExportMenu');
+    if (btnStudioExpDropdown && studioExpMenu) {
+      btnStudioExpDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = studioExpMenu.classList.contains('show');
+        document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
+        if (!isOpen) {
+          studioExpMenu.classList.add('show');
+          btnStudioExpDropdown.setAttribute('aria-expanded', 'true');
+        } else {
+          btnStudioExpDropdown.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    const optStudioDownloadEMF = document.getElementById('optStudioDownloadEMF');
+    if (optStudioDownloadEMF) {
+      optStudioDownloadEMF.addEventListener('click', () => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        downloadDirectiveEMF();
+      });
+    }
+
+    const optStudioCopyPNG = document.getElementById('optStudioCopyPNG');
+    if (optStudioCopyPNG) {
+      optStudioCopyPNG.addEventListener('click', (e) => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        handleCopyImage4K(e);
+      });
+    }
+
+    const optStudioCopySVG = document.getElementById('optStudioCopySVG');
+    if (optStudioCopySVG) {
+      optStudioCopySVG.addEventListener('click', (e) => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        handleCopyVector(e);
+      });
+    }
+
+    const optStudioDownloadSVG = document.getElementById('optStudioDownloadSVG');
+    if (optStudioDownloadSVG) {
+      optStudioDownloadSVG.addEventListener('click', () => {
+        if (studioExpMenu) studioExpMenu.classList.remove('show');
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgString = generateDirectiveSVG(cur);
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.');
+      });
+    }
+
+    const copySvgBtn = document.getElementById('studioCopySVG');
+    if (copySvgBtn) {
+      copySvgBtn.onclick = () => {
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgCode = generateDirectiveSVG(cur);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(svgCode).then(() => showToast('Vector SVG copied for Illustrator / CorelDRAW!'));
+        } else {
+          copyFallback(svgCode);
+          showToast('Vector SVG copied to clipboard!');
+        }
+      };
+    }
+
+    const copyPngBtn = document.getElementById('studioCopyPNG');
+    if (copyPngBtn) {
+      copyPngBtn.onclick = () => {
+        const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                    (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+        const svgString = generateDirectiveSVG(cur);
+        const scale = 4;
+        const targetWidth = 904 * scale;
+        const targetHeight = 96 * scale;
+        const svg4K = svgString.replace(/width="[0-9]+"/, `width="${targetWidth}"`).replace(/height="[0-9]+"/, `height="${targetHeight}"`);
+
+        const img = new Image();
+        const svgBlob = new Blob([svg4K], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d', { alpha: false });
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob((blob) => {
+            if (blob && navigator.clipboard && window.ClipboardItem) {
+              navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                .then(() => showToast('Ultra HD 4K image copied to clipboard (Ctrl+V ready)!'))
+                .catch(() => showToast('4K image render completed.'));
+            }
+          }, 'image/png');
+        };
+        img.src = url;
+      };
+    }
+
+    const resetAllBtn = document.getElementById('studioResetAll');
+    if (resetAllBtn) {
+      resetAllBtn.onclick = () => {
+        state.customBoxPositions = {};
+        state.customBoxSizes = {};
+        state.customCellFonts = {};
+        if (typeof setDirectiveZoom === 'function') setDirectiveZoom(100);
+        if (typeof setDirectiveEnvType === 'function') setDirectiveEnvType('');
+        saveStateToStorage();
+        STUDIO_FIELDS.forEach(f => {
+          const el = document.getElementById(f.id);
+          if (el) {
+            el.removeAttribute('data-custom-size');
+            el.style.removeProperty('font-size');
+            el.setAttribute('font-size', f.defSz);
+            setFieldMultilineText(el, getFieldRawText(el));
+          }
+        });
+        selectStudioField(activeFieldId);
+        renderLayersList();
+        showToast('All text positions and sizes reset to defaults.');
+      };
+    }
+
+    // Initial Setup
+    renderLayersList();
+    selectStudioField('docFieldProjectName');
+    applyZoom(1.25);
+  }
+
+  function initApp() {
+    if (window.SignDepotNav && typeof window.SignDepotNav.renderComponents === 'function') {
+      window.SignDepotNav.renderComponents();
+    }
+    loadStateFromStorage();
+    initEventListeners();
+    setupDirectiveControlsSync();
+    setupDirectiveAutocomplete();
+    setupDirectiveActions();
+    setupDirectiveZoomControls();
+    setupGlobalSearch();
+    setupModals();
+
+    initCustomDropdownEngine();
+    upgradeAllFilterSelects();
+    upgradeAllFormSelects();
+    initCustomTooltipEngine();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const joParam = urlParams.get('id') || urlParams.get('jo') || urlParams.get('req') || urlParams.get('requestId') || window.__INITIAL_DIRECTIVE_KEY || sessionStorage.getItem('SIGN_DEPOT_CURRENT_DIRECTIVE');
+    if (joParam) {
+      state.currentDirectiveJo = joParam;
+    }
+
+    const kpiParam = urlParams.get('kpi') || sessionStorage.getItem('SIGN_DEPOT_ACTIVE_KPI');
+    if (kpiParam) {
+      sessionStorage.removeItem('SIGN_DEPOT_ACTIVE_KPI');
+      state.trackerKpiFilter = kpiParam;
+      state.dashboardKpiFilter = kpiParam;
+    }
+
+    const currentView = detectCurrentPage();
+    switchView(currentView);
+
+    if (currentView === 'view-directives-details') {
+      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+    }
+
+    // Initialize Dedicated Vector Studio Editor if on directive-editor.php
+    if (document.getElementById('studioPropertyInspector')) {
+      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      setTimeout(initStudioVectorEditor, 50);
+    }
+
+    updateDeadlineAlertCenter();
+
+    // Non-intrusive reminder alert on first login ONLY
+    const hasShownReminder = sessionStorage.getItem('PMS_DEADLINE_REMINDER_SHOWN');
+    const isFirstLogin = Boolean(window.PMS_JUST_LOGGED_IN) || (!hasShownReminder && !sessionStorage.getItem('PMS_SESSION_INITIALIZED'));
+    sessionStorage.setItem('PMS_SESSION_INITIALIZED', 'true');
+
+    if (!hasShownReminder && isFirstLogin) {
+      sessionStorage.setItem('PMS_DEADLINE_REMINDER_SHOWN', 'true');
+      setTimeout(() => {
+        const activeAlerts = (state.requests || []).filter(r => r.projectStatus !== 'Completed').map(r => getDeadlineAlertStatus(r.designDeadline, r.projectStatus));
+        const overdueCount = activeAlerts.filter(a => a.status === 'overdue').length;
+        const todayCount = activeAlerts.filter(a => a.status === 'today').length;
+        if (overdueCount > 0 || todayCount > 0) {
+          let msg = 'Deadline Reminder: ';
+          if (overdueCount > 0 && todayCount > 0) {
+            msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due & ${todayCount} due today!`;
+          } else if (overdueCount > 0) {
+            msg += `${overdueCount} project${overdueCount > 1 ? 's' : ''} past due requiring immediate attention!`;
+          } else {
+            msg += `${todayCount} project${todayCount > 1 ? 's' : ''} due today!`;
+          }
+          showToast(msg, overdueCount > 0 ? 'error' : 'info');
+        }
+      }, 1200);
+    }
+
+    // Run active autofill scrubbing to prevent browsers from placing credentials into search bars
+    purgeSearchAutofill();
+    [20, 80, 200, 500, 1000, 2000].forEach(delay => setTimeout(purgeSearchAutofill, delay));
+  }
+
+  // Guardian: Purges any errant browser credential autofill (e.g. 'sup_angel') from all search bars
+  function purgeSearchAutofill() {
+    const knownCredentials = ['sup_angel', 'superadmin', 'admin', 'angelica'];
+    const searchSelectors = [
+      '#globalSearchInput',
+      '#salesSearchInput',
+      '#pendingSalesSearchInput',
+      '#trackerSearchInput',
+      '#workloadTableSearch',
+      '#usersSearchInput',
+      '#auditSearchInput',
+      'input[type="search"]',
+      'input.global-search-input',
+      'input.filter-input'
+    ];
+    document.querySelectorAll(searchSelectors.join(',')).forEach(input => {
+      if (!input || input.type === 'password') return;
+      const val = (input.value || '').trim();
+      const lower = val.toLowerCase();
+      if (
+        knownCredentials.includes(lower) ||
+        lower.startsWith('sup_') ||
+        lower.startsWith('artist_') ||
+        lower.startsWith('sales_') ||
+        lower.includes('@')
+      ) {
+        input.value = '';
+        if (input.id === 'salesSearchInput' && state && state.salesFilter) {
+          state.salesFilter.search = '';
+          if (typeof renderSalesRequests === 'function') renderSalesRequests();
+        } else if (input.id === 'pendingSalesSearchInput' && state) {
+          state.pendingSalesSearch = '';
+          if (typeof renderSalesRequests === 'function') renderSalesRequests();
+        } else if (input.id === 'globalSearchInput') {
+          const dd = document.getElementById('quickSearchResults');
+          if (dd) dd.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  window.addEventListener('focus', purgeSearchAutofill);
+  window.addEventListener('pageshow', purgeSearchAutofill);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
+
+})();
