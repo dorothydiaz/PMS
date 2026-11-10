@@ -150,7 +150,7 @@
     currentDirectiveJo: 'P261001348',
     salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', deadline: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
     trackerFilter: { search: '', headApproval: '', projectStatus: '', designStatus: '', artist: '', overdue: '', datePreset: '', dateCustom: '', dateColumn: 'orderDate', sortField: 'requestId', sortDir: 'desc', page: 1, perPage: initialRowsPerPage },
-    trackerAcceptanceTab: 'pending',
+    trackerAcceptanceTab: 'accepted',
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
     pendingSalesPage: 1,

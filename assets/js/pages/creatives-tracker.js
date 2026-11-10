@@ -138,9 +138,31 @@
     return true;
   }
 
+  function updateTrackerKPIs() {
+    const reqs = state.requests || [];
+    const myArtist = getLoggedInArtist();
+    const trackerReqs = myArtist ? reqs.filter(r => r.artist && r.artist.trim().toLowerCase() === myArtist.toLowerCase()) : reqs;
+    const trkTotal = trackerReqs.length;
+    const trkPending = trackerReqs.filter(r => r.clientApproval === 'Pending' || r.projectStatus === 'Pending').length;
+    const trkWorking = trackerReqs.filter(r => r.projectStatus === 'On-going' || r.designStatus === 'In Progress').length;
+    const trkApproved = trackerReqs.filter(r => r.projectStatus === 'Approved' || r.clientApproval === 'Approved').length;
+    const trkRevising = trackerReqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
+    const trkOverdue = trackerReqs.filter(r => isOverdue(r.designDeadline, r.projectStatus, r.artistAccepted, r.artistAcceptedDate, r.orderDate)).length;
+
+    const elTotTrk = document.getElementById('kpiTotalRequestsTracker'); if (elTotTrk) elTotTrk.textContent = Number(trkTotal).toLocaleString();
+    const elPendTrk = document.getElementById('kpiPendingApprovalTracker'); if (elPendTrk) elPendTrk.textContent = Number(trkPending).toLocaleString();
+    const elWorkTrk = document.getElementById('kpiWorkingTracker'); if (elWorkTrk) elWorkTrk.textContent = Number(trkWorking).toLocaleString();
+    const elApprTrk = document.getElementById('kpiApprovedTracker'); if (elApprTrk) elApprTrk.textContent = Number(trkApproved).toLocaleString();
+    const elRevTrk = document.getElementById('kpiRevisingTracker'); if (elRevTrk) elRevTrk.textContent = Number(trkRevising).toLocaleString();
+    const elOverTrk = document.getElementById('kpiOverdueTracker'); if (elOverTrk) elOverTrk.textContent = Number(trkOverdue).toLocaleString();
+  }
+
   function renderCreativesTracker() {
     populateTrackerFiltersDropdowns();
-    if (typeof App.updateDashboardKPIs === "function") App.updateDashboardKPIs();
+    updateTrackerKPIs();
+    if (typeof App.updateDashboardKPIs === "function" && App.updateDashboardKPIs !== updateTrackerKPIs) {
+      App.updateDashboardKPIs();
+    }
 
     const myArtist = getLoggedInArtist();
     let list = [...state.requests];
@@ -172,8 +194,14 @@
     const elBadgeAll = document.getElementById('trackerBadgeCountAll');
     if (elBadgeAll) elBadgeAll.textContent = countAll.toLocaleString();
 
+    // Default to 'accepted' tab, or fallback to 'accepted' if 'pending' has 0 tasks
+    let curAcceptanceTab = state.trackerAcceptanceTab || 'accepted';
+    if (curAcceptanceTab === 'pending' && countPending === 0 && countAccepted > 0) {
+      curAcceptanceTab = 'accepted';
+      state.trackerAcceptanceTab = 'accepted';
+    }
+
     // Sync active acceptance tab styling
-    const curAcceptanceTab = state.trackerAcceptanceTab || 'pending';
     document.querySelectorAll('.tracker-acceptance-tabs .tracker-acceptance-tab').forEach(btn => {
       const tabKey = btn.getAttribute('data-tracker-tab');
       const isAct = (tabKey === curAcceptanceTab);
@@ -765,7 +793,7 @@
       });
     }
 
-    document.querySelectorAll('#creativesTrackerTable th[data-sort]').forEach(th => {
+    document.querySelectorAll('#creativesTrackerTable th[data-sort], #creativesProductionTable th[data-sort], #view-creatives-tracker .data-table th[data-sort]').forEach(th => {
       th.addEventListener('click', () => {
         const field = th.getAttribute('data-sort');
         if (state.trackerFilter.sortField === field) {
@@ -813,6 +841,10 @@
   // Expose Creatives Tracker Public API
   App.renderCreativesTracker = renderCreativesTracker;
   App.renderCreativesTrackerTable = renderCreativesTracker;
+  App.updateTrackerKPIs = updateTrackerKPIs;
+  if (typeof App.updateDashboardKPIs !== 'function') {
+    App.updateDashboardKPIs = updateTrackerKPIs;
+  }
   App.populateTrackerFiltersDropdowns = populateTrackerFiltersDropdowns;
   App.resetTrackerFilters = resetCreativesTrackerFilters;
   App.setTrackerPage = (p) => {
