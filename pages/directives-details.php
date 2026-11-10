@@ -136,7 +136,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
               <div class="doc-top-quick-actions">
                 <!-- Real-time Font Size Controls -->
-                <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale font size, or edit text directly">
+                <div class="doc-font-controls" id="directiveFontControls" title="Click any directive field to select and scale font size. Edit details in the form below.">
                   <span class="font-ctrl-cell-badge" id="fontCtrlCellBadge">PROJECT NAME: 22px</span>
                   <button class="btn-font-scale" id="btnCellFontDec" title="Decrease font size (Ctrl+[)">A−</button>
                   <input type="number" class="cell-font-size-input" id="cellFontSizeInput" min="6" max="72" value="22" title="Custom font size in px">
@@ -160,13 +160,13 @@ require_once __DIR__ . '/includes/sidebar.php';
 
                 <div class="doc-action-btn-group">
                   <div class="directive-dropdown-container">
-                    <button class="btn btn-primary btn-sm directive-dropdown-btn" id="btnDirectiveExportDropdown" type="button" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-primary btn-sm directive-dropdown-btn" id="btnDirectiveExportDropdown" type="button" aria-haspopup="true" aria-expanded="false" onclick="if(window.toggleDirectiveExportDropdown) window.toggleDirectiveExportDropdown(this, event);">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                       <span>Export / Copy</span>
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div class="directive-export-menu" id="directiveExportMenu">
-                      <button type="button" class="directive-export-item is-featured" id="optDirectiveDownloadEMF">
+                      <button type="button" class="directive-export-item is-featured" id="optDirectiveDownloadEMF" onclick="if(window.downloadDirectiveEMF){window.downloadDirectiveEMF();if(window.closeAllExportMenus)window.closeAllExportMenus();}">
                         <div class="export-item-icon emf-icon">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         </div>
@@ -181,7 +181,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                       
                       <div class="directive-export-divider"></div>
 
-                      <button type="button" class="directive-export-item" id="optDirectiveCopyPNG">
+                      <button type="button" class="directive-export-item" id="optDirectiveCopyPNG" onclick="if(window.handleCopyImage4K){window.handleCopyImage4K(event);if(window.closeAllExportMenus)window.closeAllExportMenus();}">
                         <div class="export-item-icon img-icon">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                         </div>
@@ -194,7 +194,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                         </div>
                       </button>
 
-                      <button type="button" class="directive-export-item" id="optDirectiveCopySVG">
+                      <button type="button" class="directive-export-item" id="optDirectiveCopySVG" onclick="if(window.handleCopyDirectiveSVG){window.handleCopyDirectiveSVG(event);if(window.closeAllExportMenus)window.closeAllExportMenus();}">
                         <div class="export-item-icon svg-icon">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                         </div>
@@ -209,7 +209,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
                       <div class="directive-export-divider"></div>
 
-                      <button type="button" class="directive-export-item" id="optDirectiveDownloadSVG">
+                      <button type="button" class="directive-export-item" id="optDirectiveDownloadSVG" onclick="if(window.handleDownloadDirectiveSVG){window.handleDownloadDirectiveSVG();if(window.closeAllExportMenus)window.closeAllExportMenus();}">
                         <div class="export-item-icon dl-icon">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         </div>
@@ -327,11 +327,15 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- COLUMN 3: (340 to 564) -->
                     <!-- ========================================== -->
                     <!-- Indoor & Outdoor Header Blocks -->
-                    <rect x="340" y="0" width="112" height="18" fill="<?= $isIndoor ? '#E10600' : '#FFFFFF' ?>" id="bgIndoor" style="cursor: pointer;"/>
-                    <rect x="452" y="0" width="112" height="18" fill="<?= $isOutdoor ? '#E10600' : '#FFFFFF' ?>" id="bgOutdoor" style="cursor: pointer;"/>
+                    <g id="grpIndoor" style="cursor: pointer;" onclick="if(window.toggleDirectiveLocation) window.toggleDirectiveLocation('indoor', event);">
+                      <rect x="340" y="0" width="112" height="18" fill="<?= $isIndoor ? '#E10600' : '#FFFFFF' ?>" id="bgIndoor" style="cursor: pointer;"/>
+                      <text x="396" y="14" fill="<?= $isIndoor ? '#FFFFFF' : '#000000' ?>" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor" style="cursor: pointer; user-select: none; pointer-events: none;">INDOOR</text>
+                    </g>
+                    <g id="grpOutdoor" style="cursor: pointer;" onclick="if(window.toggleDirectiveLocation) window.toggleDirectiveLocation('outdoor', event);">
+                      <rect x="452" y="0" width="112" height="18" fill="<?= $isOutdoor ? '#E10600' : '#FFFFFF' ?>" id="bgOutdoor" style="cursor: pointer;"/>
+                      <text x="508" y="14" fill="<?= $isOutdoor ? '#FFFFFF' : '#000000' ?>" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor" style="cursor: pointer; user-select: none; pointer-events: none;">OUTDOOR</text>
+                    </g>
                     <line x1="452" y1="0" x2="452" y2="18" stroke="#000000" stroke-width="1"/>
-                    <text x="396" y="14" fill="<?= $isIndoor ? '#FFFFFF' : '#000000' ?>" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5" id="lblIndoor" style="cursor: pointer; user-select: none;">INDOOR</text>
-                    <text x="508" y="14" fill="<?= $isOutdoor ? '#FFFFFF' : '#000000' ?>" font-size="13.5" class="cond-black center-txt" letter-spacing="0.5" id="lblOutdoor" style="cursor: pointer; user-select: none;">OUTDOOR</text>
 
                     <line x1="340" y1="18" x2="564" y2="18" stroke="#000000" stroke-width="1.5"/>
 
@@ -450,7 +454,7 @@ require_once __DIR__ . '/includes/sidebar.php';
                     <!-- COLUMN 4: (564 to 822) -->
                     <!-- ========================================== -->
                     <!-- Wall Option Container (Clickable to switch wall type or leave blank) -->
-                    <g id="docFieldEnvOption" class="interactive-field" data-field-name="Environment Option" data-env-type="<?= htmlspecialchars($docEnvType) ?>" style="cursor: pointer;" title="Click to select wall environment" onclick="if(window.openEnvOptionMenu) window.openEnvOptionMenu(this, event);">
+                    <g id="docFieldEnvOption" class="interactive-field" data-field-name="Environment Option" data-env-type="<?= htmlspecialchars($docEnvType) ?>" style="cursor: pointer;" onclick="if(window.openEnvOptionMenu) window.openEnvOptionMenu(this, event);">
                       <rect x="564" y="0" width="97" height="43" fill="#000000"/>
                       <text x="612.5" y="13" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ON-SITE INSTALLATION</text>
                       <text x="612.5" y="24.5" fill="#FFFFFF" font-size="10.5" class="cond-bold center-txt" letter-spacing="0.2">ENVIRONMENT OPTIONS</text>

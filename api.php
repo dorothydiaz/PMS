@@ -79,6 +79,7 @@ function getDefaultPermissionPresets() {
     $modules = [
         'dashboard',
         'sales-requests',
+        'print-request',
         'creatives-tracker',
         'artist-workload',
         'directives-details',
@@ -91,7 +92,7 @@ function getDefaultPermissionPresets() {
         'account-settings',
         'settings'
     ];
-    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
+    $tables = ['sales-requests', 'print-request', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
     
     $allPerms = [];
     $roPerms = [];
@@ -102,6 +103,7 @@ function getDefaultPermissionPresets() {
     $artistCols = [
         'creatives-tracker' => ['headApproval', 'designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
         'sales-requests' => ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
+        'print-request' => ['projectName', 'reference'],
         'artist-workload' => ['designDeadline', 'projectStatus'],
         'directives-details' => ['projectName', 'reference'],
         'account-settings' => ['fullName', 'password', 'avatar'],
@@ -110,6 +112,7 @@ function getDefaultPermissionPresets() {
 
     $salesCols = [
         'sales-requests' => ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
+        'print-request' => ['requestId', 'salesRep', 'client', 'projectName', 'joNumber', 'artist', 'dateReq', 'deadline', 'releasing', 'reference'],
         'creatives-tracker' => ['projectStatus', 'remarks'],
         'artist-workload' => [],
         'directives-details' => ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference'],
@@ -128,7 +131,7 @@ function getDefaultPermissionPresets() {
             $nonePerms[$m]['editable_columns'] = [];
         }
         
-        if (in_array($m, ['dashboard', 'creatives-tracker', 'directives-details', 'directives-editor', 'directives-attachments', 'monthly-output', 'artist-workload'])) {
+        if (in_array($m, ['dashboard', 'creatives-tracker', 'directives-details', 'directives-editor', 'directives-attachments', 'monthly-output', 'artist-workload', 'print-request'])) {
             $artistPerms[$m] = [
                 'c' => in_array($m, ['creatives-tracker', 'directives-editor', 'directives-attachments']),
                 'r' => true,
@@ -144,7 +147,7 @@ function getDefaultPermissionPresets() {
             $artistPerms[$m]['editable_columns'] = $artistCols[$m];
         }
 
-        if (in_array($m, ['dashboard', 'sales-requests'])) {
+        if (in_array($m, ['dashboard', 'sales-requests', 'print-request'])) {
             $salesPerms[$m] = ['c' => true, 'r' => true, 'u' => true, 'd' => true];
         } elseif (in_array($m, ['creatives-tracker', 'directives-details', 'directives-attachments', 'artist-workload'])) {
             $salesPerms[$m] = ['c' => false, 'r' => true, 'u' => false, 'd' => false];
@@ -535,8 +538,8 @@ switch ($action) {
                 'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                 'revisionCount' => (int)$r['revision_count'],
                 'remarks' => $r['remarks'],
-                'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Accepted',
-                'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : (!empty($r['order_date']) ? $r['order_date'] : '2026-10-24'),
+                'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Pending',
+                'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : null,
                 'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
                 'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
             ];
@@ -651,6 +654,7 @@ switch ($action) {
                     'contactPerson' => $r['contact_person'],
                     'contactNumber' => $r['contact_number'],
                     'projectStatus' => $r['project_status'],
+                    'clientApproval' => $r['project_status'],
                     'priority' => $r['priority'],
                     'headApproval' => $r['head_approval'],
                     'countStandard' => (int)$r['count_standard'],
@@ -659,8 +663,8 @@ switch ($action) {
                     'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
                     'remarks' => $r['remarks'],
-                    'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Accepted',
-                    'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : (!empty($r['order_date']) ? $r['order_date'] : '2026-10-24'),
+                    'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Pending',
+                    'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : null,
                     'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
                     'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
                 ];
@@ -703,6 +707,7 @@ switch ($action) {
                     'contactPerson' => $r['contact_person'],
                     'contactNumber' => $r['contact_number'],
                     'projectStatus' => $r['project_status'],
+                    'clientApproval' => $r['project_status'],
                     'priority' => $r['priority'],
                     'headApproval' => $r['head_approval'],
                     'countStandard' => (int)$r['count_standard'],
@@ -711,8 +716,8 @@ switch ($action) {
                     'designStatus' => normalizeDesignStatus($r['design_status'], $r['project_status']),
                     'revisionCount' => (int)$r['revision_count'],
                     'remarks' => $r['remarks'],
-                    'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Accepted',
-                    'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : (!empty($r['order_date']) ? $r['order_date'] : '2026-10-24'),
+                    'artistAccepted' => !empty($r['artist_accepted']) ? $r['artist_accepted'] : 'Pending',
+                    'artistAcceptedDate' => !empty($r['artist_accepted_date']) ? $r['artist_accepted_date'] : null,
                     'timestamp' => !empty($r['order_date']) ? $r['order_date'] : (!empty($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : 'N/A'),
                     'dateUpdated' => !empty($r['updated_at']) ? date('Y-m-d H:i', strtotime($r['updated_at'])) : (!empty($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : (!empty($r['order_date']) ? $r['order_date'] : 'N/A'))
                 ];
@@ -928,9 +933,12 @@ switch ($action) {
             $salesRep = trim($data['salesRep'] ?? $data['sales_rep'] ?? '');
             $artist = trim($data['artist'] ?? '');
             $jo = trim($data['joNumber'] ?? $data['jo_number'] ?? '');
+            if (empty($jo)) {
+                $jo = 'TF';
+            }
             $deadline = trim($data['designDeadline'] ?? $data['design_deadline'] ?? '');
 
-            if (empty($proj) || empty($client) || empty($salesRep) || empty($artist) || empty($jo) || empty($deadline)) {
+            if (empty($proj) || empty($client) || empty($salesRep) || empty($artist) || empty($deadline)) {
                 sendJsonResponse([
                     'success' => false,
                     'error' => 'All details must be filled up on sales requests.'
@@ -959,21 +967,21 @@ switch ($action) {
             $stmt->execute([
                 ':id' => $id,
                 ':req_id' => $reqId,
-                ':jo' => trim($data['joNumber'] ?? $data['jo_number'] ?? ''),
-                ':order_date' => trim($data['orderDate'] ?? $data['order_date'] ?? ''),
+                ':jo' => $jo ?: 'TF',
+                ':order_date' => trim($data['orderDate'] ?? $data['order_date'] ?? date('Y-m-d')),
                 ':sales_rep' => trim($data['salesRep'] ?? $data['sales_rep'] ?? ''),
                 ':client' => trim($data['client'] ?? ''),
                 ':proj' => trim($data['projectName'] ?? $data['project_name'] ?? ''),
                 ':artist' => trim($data['artist'] ?? ''),
                 ':deadline' => trim($data['designDeadline'] ?? $data['design_deadline'] ?? ''),
-                ':releasing' => trim($data['releasingDate'] ?? $data['releasing_date'] ?? ''),
-                ':file_sent' => trim($data['fileSent'] ?? $data['file_sent'] ?? ''),
-                ':addr' => trim($data['completeAddress'] ?? $data['complete_address'] ?? ''),
-                ':loc' => trim($data['location'] ?? ''),
-                ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? ''),
-                ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? ''),
-                ':contact_n' => trim($data['contactNumber'] ?? $data['contact_number'] ?? ''),
-                ':status' => trim($data['projectStatus'] ?? $data['project_status'] ?? 'On-going') ?: 'On-going',
+                ':releasing' => trim($data['releasingDate'] ?? $data['releasing_date'] ?? $data['designDeadline'] ?? ''),
+                ':file_sent' => trim($data['fileSent'] ?? $data['file_sent'] ?? 'File Sent') ?: 'File Sent',
+                ':addr' => trim($data['completeAddress'] ?? $data['complete_address'] ?? 'N/A') ?: 'N/A',
+                ':loc' => trim($data['location'] ?? 'Indoor') ?: 'Indoor',
+                ':rel_mode' => trim($data['releasingMode'] ?? $data['releasing_mode'] ?? 'Pickup') ?: 'Pickup',
+                ':contact_p' => trim($data['contactPerson'] ?? $data['contact_person'] ?? 'N/A') ?: 'N/A',
+                ':contact_n' => trim($data['contactNumber'] ?? $data['contact_number'] ?? 'N/A') ?: 'N/A',
+                ':status' => trim($data['projectStatus'] ?? $data['project_status'] ?? $data['clientApproval'] ?? 'Pending Approval') ?: 'Pending Approval',
                 ':priority' => trim($data['priority'] ?? ''),
                 ':head_appr' => trim($data['headApproval'] ?? $data['head_approval'] ?? 'Pending'),
                 ':std' => (int)($data['countStandard'] ?? $data['count_standard'] ?? 0),
@@ -1887,7 +1895,8 @@ switch ($action) {
                     foreach ($defaults as $d) {
                         $defMap[$d['id']] = $d;
                     }
-                    $tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
+                    $tables = ['sales-requests', 'print-request', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
+                    $needsResave = false;
                     foreach ($decoded as &$p) {
                         $pId = $p['id'] ?? '';
                         $defP = $defMap[$pId] ?? null;
@@ -1896,13 +1905,18 @@ switch ($action) {
                         }
                         foreach ($tables as $t) {
                             if (!isset($p['permissions'][$t])) {
-                                $p['permissions'][$t] = ['c' => false, 'r' => true, 'u' => true, 'd' => false, 'editable_columns' => ['*']];
+                                $p['permissions'][$t] = $defP['permissions'][$t] ?? ['c' => false, 'r' => true, 'u' => true, 'd' => false, 'editable_columns' => ['*']];
+                                $needsResave = true;
                             } elseif (!isset($p['permissions'][$t]['editable_columns'])) {
                                 $p['permissions'][$t]['editable_columns'] = $defP['permissions'][$t]['editable_columns'] ?? ['*'];
+                                $needsResave = true;
                             }
                         }
                     }
                     unset($p);
+                    if ($needsResave) {
+                        setSystemSetting('permission_presets', json_encode($decoded));
+                    }
                     sendJsonResponse(['success' => true, 'presets' => $decoded]);
                 }
             }

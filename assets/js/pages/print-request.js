@@ -60,7 +60,7 @@
     const dateReq = formatDate(req.order_date || req.orderDate || req.created_at || req.timestamp || '');
     const deadline = formatDate(req.design_deadline || req.designDeadline || '');
     const releasing = formatDate(req.releasing_date || req.releasingDate || '');
-    const ref = req.remarks || req.complete_address || req.location || req.drive_link || '';
+    const ref = req.file_sent || req.fileSent || req.fileStatus || req.remarks || '';
 
     // Update active badge in toolbar
     const badge = document.getElementById('docActiveReqBadge');
@@ -100,6 +100,8 @@
       orderDate: dateReq,
       designDeadline: deadline,
       releasingDate: releasing,
+      file_sent: ref,
+      fileSent: ref,
       remarks: ref
     };
   }

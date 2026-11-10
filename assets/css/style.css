@@ -6939,6 +6939,9 @@ input[type="password"]::-ms-clear {
 }
 
 .directive-direct-editor {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
   position: absolute;
   box-sizing: border-box;
   font-family: 'Bebas Kai', 'BebasKai', 'Archivo', 'Oswald', sans-serif !important;
@@ -7061,9 +7064,11 @@ input[type="password"]::-ms-clear {
 }
 
 .directive-export-menu.show {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
 }
 
 .directive-export-item {

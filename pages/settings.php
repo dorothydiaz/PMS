@@ -1156,7 +1156,18 @@ require_once __DIR__ . '/includes/sidebar.php';
 
   if (btnRemoveAvatar) {
     btnRemoveAvatar.addEventListener('click', async () => {
-      if (!confirm('Remove profile photo?')) return;
+      const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+        title: 'Remove Profile Photo?',
+        subtitle: 'Profile Avatar',
+        message: 'Are you sure you want to remove your profile photo? Your avatar will revert to your default initials.',
+        confirmText: 'Remove Photo',
+        cancelText: 'Cancel',
+        icon: 'trash',
+        isDanger: true
+      }) : Promise.resolve(confirm('Remove profile photo?')));
+
+      if (!confirmed) return;
+
       try {
         const res = await fetch('../api.php', {
           method: 'POST',
@@ -1167,11 +1178,22 @@ require_once __DIR__ . '/includes/sidebar.php';
         if (data.success) {
           syncAvatars(null);
           btnRemoveAvatar.style.display = 'none';
+          if (typeof showToast === 'function') {
+            showToast('Profile photo removed.', 'info');
+          }
         } else {
-          alert('Error removing avatar.');
+          if (typeof showToast === 'function') {
+            showToast('Error removing avatar.', 'error');
+          } else {
+            alert('Error removing avatar.');
+          }
         }
       } catch (err) {
-        alert('Network error removing avatar.');
+        if (typeof showToast === 'function') {
+          showToast('Network error removing avatar.', 'error');
+        } else {
+          alert('Network error removing avatar.');
+        }
       }
     });
   }
@@ -1338,7 +1360,18 @@ require_once __DIR__ . '/includes/sidebar.php';
   }
 
   async function handleDisable2fa() {
-    if (!confirm('Disable Two-Factor Authentication?')) return;
+    const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+      title: 'Disable Two-Factor Authentication?',
+      subtitle: 'Security Confirmation',
+      message: 'Are you sure you want to disable Two-Factor Authentication? Your account will no longer require a 6-digit verification code from Google Authenticator to sign in.',
+      confirmText: 'Disable 2FA',
+      cancelText: 'Cancel',
+      icon: 'shield',
+      isDanger: true
+    }) : Promise.resolve(confirm('Disable Two-Factor Authentication?')));
+
+    if (!confirmed) return;
+
     try {
       const res = await fetch('../api.php', {
         method: 'POST',
@@ -1347,12 +1380,23 @@ require_once __DIR__ . '/includes/sidebar.php';
       });
       const data = await res.json();
       if (data.success) {
+        if (typeof showToast === 'function') {
+          showToast('Two-Factor Authentication has been disabled.', 'info');
+        }
         loadAccountSecurityInfo();
       } else {
-        alert('Error: ' + data.error);
+        if (typeof showToast === 'function') {
+          showToast('Error: ' + data.error, 'error');
+        } else {
+          alert('Error: ' + data.error);
+        }
       }
     } catch (err) {
-      alert('Network error disabling 2FA.');
+      if (typeof showToast === 'function') {
+        showToast('Network error disabling 2FA.', 'error');
+      } else {
+        alert('Network error disabling 2FA.');
+      }
     }
   }
 
@@ -1409,7 +1453,18 @@ require_once __DIR__ . '/includes/sidebar.php';
       container.querySelectorAll('.btn-revoke').forEach(b => {
         b.addEventListener('click', async () => {
           const sId = b.getAttribute('data-id');
-          if (!confirm('Log out this remote session?')) return;
+          const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+            title: 'Log Out Remote Session?',
+            subtitle: 'Device Security',
+            message: 'Are you sure you want to terminate this remote session? The device will immediately be logged out.',
+            confirmText: 'Log Out Session',
+            cancelText: 'Cancel',
+            icon: 'logout',
+            isDanger: true
+          }) : Promise.resolve(confirm('Log out this remote session?')));
+
+          if (!confirmed) return;
+
           try {
             const r = await fetch('../api.php', {
               method: 'POST',
@@ -1417,9 +1472,18 @@ require_once __DIR__ . '/includes/sidebar.php';
               body: JSON.stringify({ action: 'account_revoke_device', session_id: sId })
             });
             const d = await r.json();
-            if (d.success) loadDevices();
+            if (d.success) {
+              if (typeof showToast === 'function') {
+                showToast('Remote session terminated.', 'info');
+              }
+              loadDevices();
+            }
           } catch (e) {
-            alert('Failed to revoke session.');
+            if (typeof showToast === 'function') {
+              showToast('Failed to revoke session.', 'error');
+            } else {
+              alert('Failed to revoke session.');
+            }
           }
         });
       });
@@ -1431,7 +1495,18 @@ require_once __DIR__ . '/includes/sidebar.php';
   const btnRevokeAllOther = document.getElementById('btnRevokeAllOther');
   if (btnRevokeAllOther) {
     btnRevokeAllOther.addEventListener('click', async () => {
-      if (!confirm('Log out all other active sessions?')) return;
+      const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+        title: 'Log Out All Other Devices?',
+        subtitle: 'Security Safeguard',
+        message: 'Are you sure you want to log out all other active sessions across browsers and mobile devices? Only your current browser session will remain active.',
+        confirmText: 'Log Out All Others',
+        cancelText: 'Cancel',
+        icon: 'logout',
+        isDanger: true
+      }) : Promise.resolve(confirm('Log out all other active sessions?')));
+
+      if (!confirmed) return;
+
       try {
         const res = await fetch('../api.php', {
           method: 'POST',
@@ -1440,11 +1515,17 @@ require_once __DIR__ . '/includes/sidebar.php';
         });
         const data = await res.json();
         if (data.success) {
-          alert('All other devices have been logged out.');
+          if (typeof showToast === 'function') {
+            showToast('All other devices have been logged out.', 'info');
+          }
           loadDevices();
         }
       } catch (err) {
-        alert('Network error.');
+        if (typeof showToast === 'function') {
+          showToast('Network error revoking devices.', 'error');
+        } else {
+          alert('Network error.');
+        }
       }
     });
   }

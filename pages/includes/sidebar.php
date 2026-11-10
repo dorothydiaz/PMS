@@ -116,9 +116,9 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
     <a class="nav-item <?= ($cur === 'directives-details') ? 'active' : '' ?>" href="<?= $pagesBase ?>directives-details.php" data-view="view-directives-details" data-page="view-directives-details" title="Directive Details">
       <span class="nav-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 6 2 18 2 18 9"></polyline>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-          <rect x="6" y="14" width="12" height="8"></rect>
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
         </svg>
       </span>
       <span class="nav-label">Directive Details</span>

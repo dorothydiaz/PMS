@@ -233,6 +233,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <label style="font-size: 12px; font-weight: 700; color: #334155; text-transform: uppercase;">Configuring Table:</label>
             <select class="form-control" id="permTableSelect" style="width: auto; font-weight: 700; font-size: 13px;" onchange="onPermTableSelectChange(this.value)">
               <option value="sales-requests">Sales Requests Table</option>
+              <option value="print-request">Print Request Table</option>
               <option value="creatives-tracker">Creatives Tracker Table</option>
               <option value="artist-workload">Artist Workload Table</option>
               <option value="directives-details">Directive Details Spec Sheet</option>
@@ -492,6 +493,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <div>
               <select class="form-control" id="editPresetTableSelect" style="width: auto; font-size: 12px; font-weight: 700; padding: 4px 8px;" onchange="onEditPresetTableChange(this.value)">
                 <option value="sales-requests">Sales Requests Table</option>
+                <option value="print-request">Print Request Table</option>
                 <option value="creatives-tracker">Creatives Tracker Table</option>
                 <option value="artist-workload">Artist Workload Table</option>
                 <option value="directives-details">Directive Details Spec Sheet</option>
@@ -838,9 +840,16 @@ require_once __DIR__ . '/includes/sidebar.php';
 
   // Delete User
   async function deleteUser(id, username) {
-    if (!confirm(`Are you sure you want to permanently delete user "${username}"?`)) {
-      return;
-    }
+    const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+      title: `Delete User "${username}"?`,
+      subtitle: 'Account Management',
+      message: `Are you sure you want to permanently delete user <strong>${escapeHtml(username)}</strong>? This user will immediately lose all access permissions to the system.`,
+      confirmText: 'Delete User',
+      icon: 'trash',
+      isDanger: true
+    }) : Promise.resolve(confirm(`Are you sure you want to permanently delete user "${username}"?`)));
+
+    if (!confirmed) return;
     try {
       const res = await fetch(window.PMS_API_URL, {
         method: 'POST',
@@ -883,6 +892,22 @@ require_once __DIR__ . '/includes/sidebar.php';
         { key: 'contactPerson', label: 'Contact Person', desc: 'On-site contact name', type: 'Text' },
         { key: 'contactNumber', label: 'Contact Number', desc: 'Phone / mobile number', type: 'Text' },
         { key: 'remarks', label: 'Remarks', desc: 'Special production instructions', type: 'Text' }
+      ]
+    },
+    'print-request': {
+      label: 'Print Request Table',
+      subtitle: 'Printable request vector card generator, sales specifications, dates, and order details.',
+      columns: [
+        { key: 'requestId', label: 'Request ID', desc: 'Job Request ID', type: 'Text' },
+        { key: 'salesRep', label: 'Requested By', desc: 'Sales representative name', type: 'Dropdown' },
+        { key: 'client', label: 'Client / Account', desc: 'Customer account name', type: 'Text' },
+        { key: 'projectName', label: 'Project Name', desc: 'Project or signage name', type: 'Text' },
+        { key: 'joNumber', label: 'JO Number', desc: 'Job Order ID Number', type: 'Text' },
+        { key: 'artist', label: 'Assigned Artist', desc: 'Creative artist assigned', type: 'Dropdown' },
+        { key: 'dateReq', label: 'Date Requested', desc: 'Order intake timestamp', type: 'Date' },
+        { key: 'deadline', label: 'Design Deadline', desc: 'Target blueprint deadline', type: 'Date' },
+        { key: 'releasing', label: 'Releasing Date', desc: 'Production release date', type: 'Date' },
+        { key: 'reference', label: 'Reference / File Sent', desc: 'File sent reference status', type: 'Dropdown' }
       ]
     },
     'creatives-tracker': {
@@ -1106,12 +1131,12 @@ require_once __DIR__ . '/includes/sidebar.php';
     } else if (presetType === 'artist') {
       document.getElementById('colModeAll').checked = false;
       document.getElementById('colModeCustom').checked = true;
-      const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'];
+      const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'releasing', 'fileSent', 'reference', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks', 'projectName'];
       currentEditingPerms[currentPermTable].editable_columns = cfg.columns.map(c => c.key).filter(k => artistCols.includes(k));
     } else if (presetType === 'sales') {
       document.getElementById('colModeAll').checked = false;
       document.getElementById('colModeCustom').checked = true;
-      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
+      const salesCols = ['client', 'salesRep', 'projectName', 'joNumber', 'dateReq', 'deadline', 'releasingMode', 'releasingDate', 'releasing', 'projectStatus', 'remarks', 'reference', 'contactPerson', 'contactNumber', 'completeAddress', 'location', 'requestId'];
       currentEditingPerms[currentPermTable].editable_columns = cfg.columns.map(c => c.key).filter(k => salesCols.includes(k));
     }
     renderColumnPermGrid(currentPermTable);
@@ -1134,6 +1159,7 @@ require_once __DIR__ . '/includes/sidebar.php';
     const modules = [
       'dashboard',
       'sales-requests',
+      'print-request',
       'creatives-tracker',
       'artist-workload',
       'directives-details',
@@ -1146,12 +1172,13 @@ require_once __DIR__ . '/includes/sidebar.php';
       'account-settings',
       'settings'
     ];
-    const tables = ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
+    const tables = ['sales-requests', 'print-request', 'creatives-tracker', 'artist-workload', 'directives-details', 'account-settings', 'settings'];
     const allP = {}, roP = {}, artP = {}, salP = {}, nonP = {};
 
     const artistCols = {
       'creatives-tracker': ['headApproval', 'designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'],
       'sales-requests': ['client', 'projectName', 'designDeadline', 'releasingDate', 'fileSent', 'remarks'],
+      'print-request': ['projectName', 'reference'],
       'artist-workload': ['designDeadline', 'projectStatus'],
       'directives-details': ['projectName', 'reference'],
       'account-settings': ['fullName', 'password', 'avatar'],
@@ -1160,6 +1187,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
     const salesCols = {
       'sales-requests': ['joNumber', 'orderDate', 'salesRep', 'client', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'],
+      'print-request': ['requestId', 'salesRep', 'client', 'projectName', 'joNumber', 'artist', 'dateReq', 'deadline', 'releasing', 'reference'],
       'creatives-tracker': ['projectStatus', 'remarks'],
       'artist-workload': [],
       'directives-details': ['projectName', 'client', 'artist', 'salesRep', 'designDeadline', 'releasingDate', 'reference'],
@@ -1178,7 +1206,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         nonP[m].editable_columns = [];
       }
 
-      if (['dashboard', 'creatives-tracker', 'directives-details', 'directives-editor', 'directives-attachments', 'monthly-output', 'artist-workload'].includes(m)) {
+      if (['dashboard', 'creatives-tracker', 'directives-details', 'directives-editor', 'directives-attachments', 'monthly-output', 'artist-workload', 'print-request'].includes(m)) {
         artP[m] = { c: ['creatives-tracker', 'directives-editor', 'directives-attachments'].includes(m), r: true, u: true, d: false };
       } else if (m === 'account-settings') {
         artP[m] = { c: false, r: true, u: true, d: false };
@@ -1189,7 +1217,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         artP[m].editable_columns = [...artistCols[m]];
       }
 
-      if (['dashboard', 'sales-requests'].includes(m)) {
+      if (['dashboard', 'sales-requests', 'print-request'].includes(m)) {
         salP[m] = { c: true, r: true, u: true, d: true };
       } else if (['creatives-tracker', 'directives-details', 'directives-attachments', 'artist-workload'].includes(m)) {
         salP[m] = { c: false, r: true, u: false, d: false };
@@ -1218,6 +1246,7 @@ require_once __DIR__ . '/includes/sidebar.php';
       const data = await res.json();
       if (data && data.success && Array.isArray(data.presets) && data.presets.length > 0) {
         cachedPermPresets = data.presets;
+        localStorage.setItem('pms_perm_presets', JSON.stringify(data.presets));
       } else {
         const local = localStorage.getItem('pms_perm_presets');
         cachedPermPresets = local ? JSON.parse(local) : getDefaultPermPresets();
@@ -1582,10 +1611,10 @@ require_once __DIR__ . '/includes/sidebar.php';
     } else if (presetType === 'none') {
       editingPresetWorkingPerms[tableKey].editable_columns = [];
     } else if (presetType === 'artist') {
-      const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'fileSent', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks'];
+      const artistCols = ['designStatus', 'projectStatus', 'releasingDate', 'releasing', 'fileSent', 'reference', 'countStandard', 'countPrinting', 'countSpecial', 'revisionCount', 'remarks', 'projectName'];
       editingPresetWorkingPerms[tableKey].editable_columns = cfg.columns.map(c => c.key).filter(k => artistCols.includes(k));
     } else if (presetType === 'sales') {
-      const salesCols = ['client', 'salesRep', 'projectName', 'releasingMode', 'projectStatus', 'remarks', 'contactPerson', 'contactNumber', 'completeAddress', 'location'];
+      const salesCols = ['client', 'salesRep', 'projectName', 'joNumber', 'dateReq', 'deadline', 'releasingMode', 'releasingDate', 'releasing', 'projectStatus', 'remarks', 'reference', 'contactPerson', 'contactNumber', 'completeAddress', 'location', 'requestId'];
       editingPresetWorkingPerms[tableKey].editable_columns = cfg.columns.map(c => c.key).filter(k => salesCols.includes(k));
     }
     renderEditPresetColGrid();
@@ -1615,7 +1644,16 @@ require_once __DIR__ . '/includes/sidebar.php';
   async function deletePreset(presetId) {
     const preset = cachedPermPresets.find(p => p.id === presetId);
     if (!preset) return;
-    if (!confirm(`Are you sure you want to delete preset "${preset.name}"?`)) return;
+    const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+      title: `Delete Preset "${preset.name}"?`,
+      subtitle: 'Preset Configuration',
+      message: `Are you sure you want to permanently delete custom preset <strong>${escapeHtml(preset.name)}</strong>?`,
+      confirmText: 'Delete Preset',
+      icon: 'trash',
+      isDanger: true
+    }) : Promise.resolve(confirm(`Are you sure you want to delete preset "${preset.name}"?`)));
+
+    if (!confirmed) return;
 
     cachedPermPresets = cachedPermPresets.filter(p => p.id !== presetId);
     await savePermPresetsToServer();
@@ -1626,9 +1664,16 @@ require_once __DIR__ . '/includes/sidebar.php';
   window.deletePreset = deletePreset;
 
   async function resetPresetsToDefaults() {
-    if (!confirm('Are you sure you want to reset all Quick Presets back to system defaults? Any custom presets will be restored to defaults.')) {
-      return;
-    }
+    const confirmed = await (window.showConfirmDialog ? window.showConfirmDialog({
+      title: 'Reset Presets to Defaults?',
+      subtitle: 'Restore Defaults',
+      message: 'Are you sure you want to reset all Quick Presets back to system defaults? Any custom presets will be restored to defaults.',
+      confirmText: 'Reset Defaults',
+      icon: 'warning',
+      isDanger: true
+    }) : Promise.resolve(confirm('Are you sure you want to reset all Quick Presets back to system defaults? Any custom presets will be restored to defaults.')));
+
+    if (!confirmed) return;
     try {
       const res = await fetch(window.PMS_API_URL, {
         method: 'POST',

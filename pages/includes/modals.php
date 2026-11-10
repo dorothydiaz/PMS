@@ -12,7 +12,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
-    <form id="salesRequestForm" style="display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; margin: 0;">
+    <form id="salesRequestForm" novalidate style="display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; margin: 0;">
       <div class="modal-body" style="overflow-y: auto; flex: 1; min-height: 0; padding: 22px 26px;">
         <input type="hidden" id="salesFormId">
         <div class="form-grid-2">
@@ -22,8 +22,8 @@
             <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Auto-generated sequential ID with separator dash (e.g. LR-26-0001)</div>
           </div>
           <div class="form-group">
-            <label class="form-label required">JO Number</label>
-            <input type="text" class="form-control" id="salesFormJo" placeholder="e.g. P261001357" required>
+            <label class="form-label">JO Number</label>
+            <input type="text" class="form-control" id="salesFormJo" placeholder="e.g. P261001357 (or TF if pending)">
           </div>
           <div class="form-group">
             <label class="form-label required">Date Encoded (Timestamp)</label>
@@ -54,8 +54,8 @@
             <input type="date" class="form-control" id="salesFormDeadline" required>
           </div>
           <div class="form-group">
-            <label class="form-label required">Production Due</label>
-            <input type="date" class="form-control" id="salesFormReleasing" required>
+            <label class="form-label">Production Due</label>
+            <input type="date" class="form-control" id="salesFormReleasing">
           </div>
           <div class="form-group">
             <label class="form-label required">Priority Level</label>
@@ -108,16 +108,16 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label required">Contact Person</label>
-            <input type="text" class="form-control" id="salesFormContactPerson" placeholder="Full name" required>
+            <label class="form-label">Contact Person</label>
+            <input type="text" class="form-control" id="salesFormContactPerson" placeholder="Full name (optional)">
           </div>
           <div class="form-group">
-            <label class="form-label required">Contact Number</label>
-            <input type="text" class="form-control" id="salesFormContactNumber" placeholder="e.g. 0917 123 4567" required>
+            <label class="form-label">Contact Number</label>
+            <input type="text" class="form-control" id="salesFormContactNumber" placeholder="e.g. 0917 123 4567 (optional)">
           </div>
           <div class="form-group col-span-2">
-            <label class="form-label required">Complete Delivery/Installation Address</label>
-            <input type="text" class="form-control" id="salesFormAddress" placeholder="Full address" required>
+            <label class="form-label">Complete Delivery/Installation Address</label>
+            <input type="text" class="form-control" id="salesFormAddress" placeholder="Full address (optional)">
           </div>
         </div>
       </div>
@@ -138,7 +138,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
-    <form id="trackerTaskForm" style="display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; margin: 0;">
+    <form id="trackerTaskForm" novalidate style="display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; margin: 0;">
       <div class="modal-body" style="overflow-y: auto; flex: 1; min-height: 0; padding: 22px 26px;">
         <input type="hidden" id="trackerFormId">
         <div class="form-grid-2">
@@ -375,6 +375,48 @@
         <span id="confirmModalSubmitLabel">Permanently Delete</span>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: UNIVERSAL MODERN CONFIRMATION DIALOG -->
+<div class="modal-backdrop" id="genericConfirmModal" style="display: none; align-items: center; justify-content: center; z-index: 10050;">
+  <div class="modal-container" style="max-width: 440px; width: 92%; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; animation: modalSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+    
+    <div style="padding: 24px 24px 18px; display: flex; align-items: flex-start; gap: 16px;">
+      <div id="genericConfirmIconWrap" style="width: 46px; height: 46px; border-radius: 12px; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);">
+        <svg id="genericConfirmIconSvg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+
+      <div style="flex: 1; min-width: 0;">
+        <div id="genericConfirmSubtitle" style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px;">
+          Security Confirmation
+        </div>
+        <h3 id="genericConfirmTitle" style="font-size: 17px; font-weight: 700; color: #0F172A; margin: 0 0 6px 0; line-height: 1.35; letter-spacing: -0.2px;">
+          Disable Two-Factor Authentication?
+        </h3>
+        <div id="genericConfirmMessage" style="font-size: 13.5px; color: #475569; line-height: 1.55;">
+          Are you sure you want to disable Two-Factor Authentication? Your account will no longer require a verification code from Google Authenticator to sign in.
+        </div>
+      </div>
+
+      <button type="button" class="modal-close-btn" data-close-modal="genericConfirmModal" aria-label="Close" style="background: none; border: none; cursor: pointer; color: #94A3B8; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.15s; margin-top: -4px; margin-right: -4px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div style="padding: 14px 24px 18px; display: flex; justify-content: flex-end; gap: 10px; background: #F8FAFC; border-top: 1px solid #F1F5F9;">
+      <button type="button" class="btn btn-secondary" id="genericConfirmCancelBtn" data-close-modal="genericConfirmModal" style="padding: 8px 18px; font-size: 13px; font-weight: 600; border-radius: 8px; background: #FFFFFF; border: 1px solid #D4D4D8; color: #334155; cursor: pointer; transition: all 0.15s;">
+        Cancel
+      </button>
+      <button type="button" class="btn" id="genericConfirmOkBtn" style="padding: 8px 20px; font-size: 13px; font-weight: 700; border-radius: 8px; background: #DC2626; border: 1px solid #DC2626; color: #FFFFFF; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25); transition: all 0.15s;">
+        <span id="genericConfirmOkLabel">Disable 2FA</span>
+      </button>
+    </div>
+
   </div>
 </div>
 

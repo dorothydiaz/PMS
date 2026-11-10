@@ -48,7 +48,7 @@ $docArtist = $targetRecord ? ($targetRecord['artist'] ?: '') : '';
 $docDateReq = ($targetRecord && !empty($targetRecord['order_date'])) ? formatDisplayDate($targetRecord['order_date']) : (($targetRecord && !empty($targetRecord['created_at'])) ? formatDisplayDate($targetRecord['created_at']) : '');
 $docDeadline = ($targetRecord && !empty($targetRecord['design_deadline'])) ? formatDisplayDate($targetRecord['design_deadline']) : '';
 $docReleasing = ($targetRecord && !empty($targetRecord['releasing_date'])) ? formatDisplayDate($targetRecord['releasing_date']) : '';
-$docRef = $targetRecord ? ($targetRecord['remarks'] ?: ($targetRecord['complete_address'] ?: ($targetRecord['drive_link'] ?: ''))) : '';
+$docRef = $targetRecord ? (!empty($targetRecord['file_sent']) ? $targetRecord['file_sent'] : (!empty($targetRecord['fileSent']) ? $targetRecord['fileSent'] : '')) : '';
 
 $docLookupVal = $targetRecord ? ($targetRecord['request_id'] ?: $targetRecord['jo_number'] ?: $targetRecord['project_name'] ?: '') : '';
 $initialRequestKey = $docRequestId;
@@ -327,11 +327,13 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 352" width="560" height="352" id="printRequestSvg" class="print-req-svg-frame">
                   <defs>
                     <style>
-                      .req-label { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #1E2229; }
-                      .req-val { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14.5px; font-weight: 500; fill: #111827; cursor: pointer; }
+                      .req-label { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #111827; }
+                      .req-val { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14.5px; font-weight: 500; fill: #111827; cursor: pointer; text-anchor: middle; }
                       .req-val-bold { font-weight: 700; fill: #0F172A; }
+                      .req-val-artist { fill: #DC2626 !important; font-weight: 700; }
+                      .req-val-artist:hover { fill: #B91C1C !important; }
                       .interactive-field { cursor: pointer; transition: opacity 0.15s ease; }
-                      .interactive-field:hover { fill: #047857 !important; }
+                      .interactive-field:hover { fill: #047857; }
                     </style>
                   </defs>
 
@@ -365,8 +367,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <!-- ======================================================== -->
                   <!-- ROW 1: Request ID -->
                   <!-- ======================================================== -->
-                  <text x="12" y="21.5" class="req-label">Request ID:</text>
-                  <text x="182" y="21.5" class="req-val req-val-bold interactive-field" id="svgFieldRequestId" data-field-name="Request ID" data-base-y="21.5"><?= htmlspecialchars($docRequestId) ?></text>
+                  <text x="12" y="21.5" class="req-label" font-weight="700">Request ID:</text>
+                  <text x="365" y="21.5" text-anchor="middle" class="req-val req-val-bold interactive-field" id="svgFieldRequestId" data-field-name="Request ID" data-base-y="21.5"><?= htmlspecialchars($docRequestId) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 2: (Empty separator row matching template) -->
@@ -375,56 +377,56 @@ require_once __DIR__ . '/includes/sidebar.php';
                   <!-- ======================================================== -->
                   <!-- ROW 3: Requested by -->
                   <!-- ======================================================== -->
-                  <text x="12" y="85.5" class="req-label">Requested by:</text>
-                  <text x="182" y="85.5" class="req-val interactive-field" id="svgFieldSales" data-field-name="Requested by" data-base-y="85.5"><?= htmlspecialchars($docSales) ?></text>
+                  <text x="12" y="85.5" class="req-label" font-weight="700">Requested by:</text>
+                  <text x="365" y="85.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldSales" data-field-name="Requested by" data-base-y="85.5"><?= htmlspecialchars($docSales) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 4: Client -->
                   <!-- ======================================================== -->
-                  <text x="12" y="117.5" class="req-label">Client:</text>
-                  <text x="182" y="117.5" class="req-val interactive-field" id="svgFieldClient" data-field-name="Client" data-base-y="117.5"><?= htmlspecialchars($docClient) ?></text>
+                  <text x="12" y="117.5" class="req-label" font-weight="700">Client:</text>
+                  <text x="365" y="117.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldClient" data-field-name="Client" data-base-y="117.5"><?= htmlspecialchars($docClient) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 5: Project Name -->
                   <!-- ======================================================== -->
-                  <text x="12" y="149.5" class="req-label">Project Name:</text>
-                  <text x="182" y="149.5" class="req-val interactive-field" id="svgFieldProject" data-field-name="Project Name" data-base-y="149.5"><?= htmlspecialchars($docProj) ?></text>
+                  <text x="12" y="149.5" class="req-label" font-weight="700">Project Name:</text>
+                  <text x="365" y="149.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldProject" data-field-name="Project Name" data-base-y="149.5"><?= htmlspecialchars($docProj) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 6: JO Number -->
                   <!-- ======================================================== -->
-                  <text x="12" y="181.5" class="req-label">JO Number:</text>
-                  <text x="182" y="181.5" class="req-val interactive-field" id="svgFieldJo" data-field-name="JO Number" data-base-y="181.5"><?= htmlspecialchars($docJo) ?></text>
+                  <text x="12" y="181.5" class="req-label" font-weight="700">JO Number:</text>
+                  <text x="365" y="181.5" text-anchor="middle" class="req-val req-val-bold interactive-field" id="svgFieldJo" data-field-name="JO Number" data-base-y="181.5"><?= htmlspecialchars($docJo) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 7: Artist -->
                   <!-- ======================================================== -->
-                  <text x="12" y="213.5" class="req-label">Artist:</text>
-                  <text x="182" y="213.5" class="req-val interactive-field" id="svgFieldArtist" data-field-name="Artist" data-base-y="213.5"><?= htmlspecialchars($docArtist) ?></text>
+                  <text x="12" y="213.5" class="req-label" font-weight="700">Artist:</text>
+                  <text x="365" y="213.5" text-anchor="middle" class="req-val req-val-artist interactive-field" id="svgFieldArtist" data-field-name="Artist" data-base-y="213.5" fill="#DC2626"><?= htmlspecialchars($docArtist) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 8: Date Requested -->
                   <!-- ======================================================== -->
-                  <text x="12" y="245.5" class="req-label">Date Requested:</text>
-                  <text x="182" y="245.5" class="req-val interactive-field" id="svgFieldDateReq" data-field-name="Date Requested" data-base-y="245.5"><?= htmlspecialchars($docDateReq) ?></text>
+                  <text x="12" y="245.5" class="req-label" font-weight="700">Date Requested:</text>
+                  <text x="365" y="245.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldDateReq" data-field-name="Date Requested" data-base-y="245.5"><?= htmlspecialchars($docDateReq) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 9: Deadline -->
                   <!-- ======================================================== -->
-                  <text x="12" y="277.5" class="req-label">Deadline:</text>
-                  <text x="182" y="277.5" class="req-val interactive-field" id="svgFieldDeadline" data-field-name="Deadline" data-base-y="277.5"><?= htmlspecialchars($docDeadline) ?></text>
+                  <text x="12" y="277.5" class="req-label" font-weight="700">Deadline:</text>
+                  <text x="365" y="277.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldDeadline" data-field-name="Deadline" data-base-y="277.5"><?= htmlspecialchars($docDeadline) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 10: Releasing Date -->
                   <!-- ======================================================== -->
-                  <text x="12" y="309.5" class="req-label">Releasing Date:</text>
-                  <text x="182" y="309.5" class="req-val interactive-field" id="svgFieldReleasing" data-field-name="Releasing Date" data-base-y="309.5"><?= htmlspecialchars($docReleasing) ?></text>
+                  <text x="12" y="309.5" class="req-label" font-weight="700">Releasing Date:</text>
+                  <text x="365" y="309.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldReleasing" data-field-name="Releasing Date" data-base-y="309.5"><?= htmlspecialchars($docReleasing) ?></text>
 
                   <!-- ======================================================== -->
                   <!-- ROW 11: Reference -->
                   <!-- ======================================================== -->
-                  <text x="12" y="341.5" class="req-label">Reference:</text>
-                  <text x="182" y="341.5" class="req-val interactive-field" id="svgFieldReference" data-field-name="Reference" data-base-y="341.5"><?= htmlspecialchars($docRef) ?></text>
+                  <text x="12" y="341.5" class="req-label" font-weight="700">Reference:</text>
+                  <text x="365" y="341.5" text-anchor="middle" class="req-val interactive-field" id="svgFieldReference" data-field-name="Reference" data-base-y="341.5"><?= htmlspecialchars($docRef) ?></text>
                 </svg>
 
               </div>
@@ -462,7 +464,7 @@ require_once __DIR__ . '/includes/sidebar.php';
 
               <div class="form-group">
                 <label class="form-label">Artist Assigned</label>
-                <input type="text" class="form-control" id="ctrlReqArtist" value="<?= htmlspecialchars($docArtist) ?>" placeholder="Artist...">
+                <input type="text" class="form-control" id="ctrlReqArtist" value="<?= htmlspecialchars($docArtist) ?>" placeholder="Artist..." style="color: #DC2626; font-weight: 600;">
               </div>
               <div class="form-group">
                 <label class="form-label">Date Requested</label>
@@ -478,8 +480,8 @@ require_once __DIR__ . '/includes/sidebar.php';
                 <input type="text" class="form-control" id="ctrlReqReleasing" value="<?= htmlspecialchars($docReleasing) ?>" placeholder="MM/DD/YYYY">
               </div>
               <div class="form-group col-span-2">
-                <label class="form-label">Reference / Remarks</label>
-                <input type="text" class="form-control" id="ctrlReqRef" value="<?= htmlspecialchars($docRef) ?>" placeholder="Reference remarks, address, or details...">
+                <label class="form-label">Reference (File Sent Status)</label>
+                <input type="text" class="form-control" id="ctrlReqRef" value="<?= htmlspecialchars($docRef) ?>" placeholder="File sent status (e.g. File Sent, To Follow, Incomplete)...">
               </div>
             </div>
           </div>

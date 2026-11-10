@@ -57,6 +57,7 @@
     if (m.startsWith('PICK')) return 'Pickup';
     return 'Pickup';
   }
+  window.normalizeReleasingMode = normalizeReleasingMode;
 
   // Comprehensive Shared Mock Dataset (25+ real-world Sign Depot projects)
   // Live Spreadsheet Database Orders (LR-26-2102 to LR-26-1950 from 1Uwm-SjFgMgo62S8YY2IonJkmy9BfCmcIvZ7Txvp09Pg)
@@ -149,7 +150,7 @@
     currentDirectiveJo: 'P261001348',
     salesFilter: { search: '', priority: '', approval: '', fileSent: '', salesRep: '', location: '', deadline: '', sortField: 'orderDate', sortDir: 'desc', page: 1, perPage: initialRowsPerPage, approvalTab: '' },
     trackerFilter: { search: '', headApproval: '', projectStatus: '', designStatus: '', artist: '', overdue: '', datePreset: '', dateCustom: '', dateColumn: 'orderDate', sortField: 'requestId', sortDir: 'desc', page: 1, perPage: initialRowsPerPage },
-    trackerAcceptanceTab: 'accepted',
+    trackerAcceptanceTab: 'pending',
     pendingSalesFilter: 'all',
     pendingSalesSearch: '',
     pendingSalesPage: 1,
@@ -1287,9 +1288,18 @@
   // UTILITIES & HELPERS
   // ==========================================================================
 
+  let lastToastMsg = '';
+  let lastToastTime = 0;
   function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
+
+    const now = Date.now();
+    if (message === lastToastMsg && (now - lastToastTime) < 600) {
+      return; // Deduplicate rapid identical toasts
+    }
+    lastToastMsg = message;
+    lastToastTime = now;
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -1315,6 +1325,22 @@
   }
 
   window.showToast = showToast;
+
+  // Safe global stubs to prevent ReferenceErrors when not on dashboard.js
+  if (typeof window.updateDashboardKPIs !== 'function') {
+    window.updateDashboardKPIs = function() {
+      if (window.SignDepotApp && typeof window.SignDepotApp.updateDashboardKPIs === 'function') {
+        window.SignDepotApp.updateDashboardKPIs();
+      }
+    };
+  }
+  if (typeof window.renderDashboard !== 'function') {
+    window.renderDashboard = function() {
+      if (window.SignDepotApp && typeof window.SignDepotApp.renderDashboard === 'function') {
+        window.SignDepotApp.renderDashboard();
+      }
+    };
+  }
 
   function getLoggedInArtist() {
     const u = window.PMS_CURRENT_USER;
@@ -1371,15 +1397,16 @@
   }
 
   function isProjectArtistAccepted(valOrObj) {
-    if (valOrObj === null || valOrObj === undefined) return true; // all existing projects assumed accepted!
+    if (valOrObj === null || valOrObj === undefined) return false;
     if (typeof valOrObj === 'object') {
       const st = valOrObj.artistAccepted ?? valOrObj.artist_accepted;
-      if (st === 'Pending' || st === 'pending' || st === false) return false;
-      return true;
+      if (!st || st === 'Pending' || st === 'pending' || st === false) return false;
+      return String(st).trim().toLowerCase() === 'accepted';
     }
-    if (valOrObj === 'Pending' || valOrObj === 'pending' || valOrObj === false) return false;
-    return true;
+    if (!valOrObj || valOrObj === 'Pending' || valOrObj === 'pending' || valOrObj === false) return false;
+    return String(valOrObj).trim().toLowerCase() === 'accepted';
   }
+  window.isProjectArtistAccepted = isProjectArtistAccepted;
 
   // Real-time Deadline Alert Calculation based on user local date vs artist acceptance
   function getDeadlineAlertStatus(deadlineStr, projectStatus, artistAccepted, acceptedDate, orderDate) {
@@ -1516,6 +1543,7 @@
       default: return 'badge-not-started';
     }
   }
+  window.getStatusBadgeClass = getStatusBadgeClass;
 
   function getPriorityBadgeClass(priority) {
     switch (priority) {
@@ -2104,6 +2132,54 @@
     return str;
   }
 
+  function populateSalesFiltersDropdowns() {
+    state.salesReps = (state.salesReps || []).filter(s => s && s.toLowerCase() !== 'shela');
+    const repSelect = document.getElementById('salesFilterSalesRep');
+    if (repSelect) {
+      const curVal = repSelect.value;
+      repSelect.innerHTML = '<option value="">All Sales Reps</option>';
+      state.salesReps.forEach(rep => {
+        const titleRep = toTitleCase(rep);
+        const opt = document.createElement('option');
+        opt.value = titleRep;
+        opt.textContent = titleRep;
+        repSelect.appendChild(opt);
+      });
+      if (curVal && curVal.toLowerCase() !== 'shela') repSelect.value = curVal;
+    }
+
+    const modalArtistSelect = document.getElementById('salesFormArtist');
+    if (modalArtistSelect) {
+      const curArtist = modalArtistSelect.value;
+      modalArtistSelect.innerHTML = '<option value="">Select Artist...</option>';
+      (state.artists || []).forEach(a => {
+        const titleA = toTitleCase(a);
+        const opt = document.createElement('option');
+        opt.value = titleA;
+        opt.textContent = titleA;
+        modalArtistSelect.appendChild(opt);
+      });
+      if (curArtist) modalArtistSelect.value = curArtist;
+    }
+
+    const modalSalesSelect = document.getElementById('salesFormSalesRep');
+    if (modalSalesSelect) {
+      const curRep = modalSalesSelect.value;
+      modalSalesSelect.innerHTML = '<option value="">Select Sales Rep...</option>';
+      (state.salesReps || []).forEach(s => {
+        const titleS = toTitleCase(s);
+        const opt = document.createElement('option');
+        opt.value = titleS;
+        opt.textContent = titleS;
+        modalSalesSelect.appendChild(opt);
+      });
+      if (curRep && curRep.toLowerCase() !== 'shela') {
+        modalSalesSelect.value = curRep;
+      }
+    }
+  }
+  window.populateSalesFiltersDropdowns = populateSalesFiltersDropdowns;
+
   function openNewSalesRequestModal() {
     const form = document.getElementById('salesRequestForm');
     if (form) {
@@ -2163,7 +2239,7 @@
     const prioInput = document.getElementById('salesFormPriority');
     if (prioInput) prioInput.value = 'Normal';
 
-    const appInput = document.getElementById('salesFormClientApproval');
+    const appInput = document.getElementById('salesFormProjectStatus') || document.getElementById('salesFormClientApproval');
     if (appInput) appInput.value = 'Pending Approval';
 
     const relModeInput = document.getElementById('salesFormRelMode');
@@ -2173,6 +2249,13 @@
     if (fileSentInput) fileSentInput.value = 'File Sent';
 
     populateSalesFiltersDropdowns();
+
+    const loggedInRep = typeof getLoggedInSalesRep === 'function' ? getLoggedInSalesRep() : null;
+    const salesRepSelect = document.getElementById('salesFormSalesRep');
+    if (loggedInRep && salesRepSelect && !salesRepSelect.value) {
+      salesRepSelect.value = toTitleCase(loggedInRep);
+    }
+
     upgradeAllFormSelects();
     syncAllFormDropdowns();
 
@@ -2470,6 +2553,7 @@
     setVal('salesFormContactPerson', rec.contactPerson || '');
     setVal('salesFormContactNumber', rec.contactNumber || '');
     setVal('salesFormAddress', rec.completeAddress || '');
+    setVal('salesFormProjectStatus', rec.projectStatus || rec.clientApproval || 'Pending Approval');
 
     populateSalesFiltersDropdowns();
     upgradeAllFormSelects();
@@ -2604,6 +2688,130 @@
   }
   window.showCustomConfirm = showCustomConfirm;
 
+  /**
+   * Universal Promise-based and callback-based Modern Confirmation Dialog
+   * Replaces ugly browser native confirm() with a sleek Sign Depot design modal.
+   */
+  function showConfirmDialog(options = {}) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('genericConfirmModal');
+      if (!modal) {
+        const nativeResult = window.confirm(options.message ? options.message.replace(/<[^>]*>/g, '') : (options.title || 'Are you sure?'));
+        if (nativeResult && typeof options.onConfirm === 'function') {
+          options.onConfirm();
+        } else if (!nativeResult && typeof options.onCancel === 'function') {
+          options.onCancel();
+        }
+        resolve(nativeResult);
+        return;
+      }
+
+      const iconWrap = document.getElementById('genericConfirmIconWrap');
+      const subtitleEl = document.getElementById('genericConfirmSubtitle');
+      const titleEl = document.getElementById('genericConfirmTitle');
+      const msgEl = document.getElementById('genericConfirmMessage');
+      const okBtn = document.getElementById('genericConfirmOkBtn');
+      const okLabel = document.getElementById('genericConfirmOkLabel');
+      const cancelBtn = document.getElementById('genericConfirmCancelBtn');
+
+      if (titleEl) titleEl.textContent = options.title || 'Are you sure?';
+      if (subtitleEl) subtitleEl.textContent = options.subtitle || 'Confirmation Required';
+      if (msgEl) msgEl.innerHTML = options.message || 'Please confirm that you want to proceed with this action.';
+      if (okLabel) okLabel.textContent = options.confirmText || 'Confirm';
+      if (cancelBtn) cancelBtn.textContent = options.cancelText || 'Cancel';
+
+      const isDanger = options.isDanger !== false;
+
+      const iconMap = {
+        shield: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+        warning: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+        logout: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+        trash: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
+        info: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+      };
+
+      const iconType = options.icon || (isDanger ? 'shield' : 'info');
+      if (iconWrap) {
+        if (isDanger) {
+          iconWrap.style.background = '#FEF2F2';
+          iconWrap.style.color = '#DC2626';
+          iconWrap.style.boxShadow = '0 2px 6px rgba(220, 38, 38, 0.12)';
+        } else {
+          iconWrap.style.background = '#EFF6FF';
+          iconWrap.style.color = '#2563EB';
+          iconWrap.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.12)';
+        }
+        iconWrap.innerHTML = iconMap[iconType] || iconMap.shield;
+      }
+
+      if (okBtn) {
+        if (isDanger) {
+          okBtn.style.background = '#DC2626';
+          okBtn.style.borderColor = '#DC2626';
+          okBtn.style.color = '#FFFFFF';
+          okBtn.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.25)';
+        } else {
+          okBtn.style.background = '#0F172A';
+          okBtn.style.borderColor = '#0F172A';
+          okBtn.style.color = '#FFFFFF';
+          okBtn.style.boxShadow = '0 4px 12px rgba(15, 23, 42, 0.2)';
+        }
+      }
+
+      let resolved = false;
+      const closeButtons = modal.querySelectorAll('[data-close-modal="genericConfirmModal"]');
+
+      const cleanup = () => {
+        modal.classList.remove('show');
+        if (okBtn) okBtn.removeEventListener('click', handleOk);
+        if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
+        closeButtons.forEach(btn => btn.removeEventListener('click', handleCancel));
+        document.removeEventListener('keydown', handleKey);
+      };
+
+      const handleOk = async () => {
+        if (resolved) return;
+        resolved = true;
+        cleanup();
+        if (typeof options.onConfirm === 'function') {
+          await options.onConfirm();
+        }
+        resolve(true);
+      };
+
+      const handleCancel = () => {
+        if (resolved) return;
+        resolved = true;
+        cleanup();
+        if (typeof options.onCancel === 'function') {
+          options.onCancel();
+        }
+        resolve(false);
+      };
+
+      const handleKey = (e) => {
+        if (e.key === 'Escape') {
+          handleCancel();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          handleOk();
+        }
+      };
+
+      if (okBtn) okBtn.addEventListener('click', handleOk);
+      if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
+      closeButtons.forEach(btn => btn.addEventListener('click', handleCancel));
+      document.addEventListener('keydown', handleKey);
+
+      modal.classList.add('show');
+    });
+  }
+  window.showConfirmDialog = showConfirmDialog;
+  if (window.SignDepotApp) {
+    if (!window.SignDepotApp.utils) window.SignDepotApp.utils = {};
+    window.SignDepotApp.utils.showConfirmDialog = showConfirmDialog;
+  }
+
   function deleteSalesRequest(id) {
     if (!isCurrentUserSuperAdmin()) {
       showToast('Permission Denied: Only Super Admin can delete records.', 'error');
@@ -2647,8 +2855,14 @@
               state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
               saveStateToStorage();
               renderCurrentView(state.activeView);
-              updateDashboardKPIs();
-              updateDeadlineAlertCenter();
+              if (typeof updateDashboardKPIs === 'function') {
+                updateDashboardKPIs();
+              } else if (window.SignDepotApp && typeof window.SignDepotApp.updateDashboardKPIs === 'function') {
+                window.SignDepotApp.updateDashboardKPIs();
+              }
+              if (typeof updateDeadlineAlertCenter === 'function') {
+                updateDeadlineAlertCenter();
+              }
               showToast(`Request ${reqLabel} deleted successfully.`);
               return true;
             } else {
@@ -2672,8 +2886,14 @@
             state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
             saveStateToStorage();
             renderCurrentView(state.activeView);
-            updateDashboardKPIs();
-            updateDeadlineAlertCenter();
+            if (typeof updateDashboardKPIs === 'function') {
+              updateDashboardKPIs();
+            } else if (window.SignDepotApp && typeof window.SignDepotApp.updateDashboardKPIs === 'function') {
+              window.SignDepotApp.updateDashboardKPIs();
+            }
+            if (typeof updateDeadlineAlertCenter === 'function') {
+              updateDeadlineAlertCenter();
+            }
             showToast(`Deleted ${reqLabel} locally.`, 'info');
             return true;
           }
@@ -2681,8 +2901,14 @@
           state.requests = state.requests.filter(r => r.id !== id && r.requestId !== id);
           saveStateToStorage();
           renderCurrentView(state.activeView);
-          updateDashboardKPIs();
-          updateDeadlineAlertCenter();
+          if (typeof updateDashboardKPIs === 'function') {
+            updateDashboardKPIs();
+          } else if (window.SignDepotApp && typeof window.SignDepotApp.updateDashboardKPIs === 'function') {
+            window.SignDepotApp.updateDashboardKPIs();
+          }
+          if (typeof updateDeadlineAlertCenter === 'function') {
+            updateDeadlineAlertCenter();
+          }
           showToast(`Request ${reqLabel} deleted successfully.`);
           return true;
         }
@@ -2828,46 +3054,38 @@
         const id = document.getElementById('salesFormId').value;
         const rawReqId = document.getElementById('salesFormReqId').value.trim();
         const reqId = formatRequestIdInput(rawReqId) || getNextRequestId();
-        const jo = document.getElementById('salesFormJo').value.trim();
+        const jo = (document.getElementById('salesFormJo')?.value.trim()) || 'TF';
         const project = document.getElementById('salesFormProject').value.trim();
         const client = document.getElementById('salesFormClient').value.trim();
         const artist = document.getElementById('salesFormArtist').value;
         const salesRep = toTitleCase(document.getElementById('salesFormSalesRep').value);
         const deadline = document.getElementById('salesFormDeadline').value;
-        const releasingDate = (document.getElementById('salesFormReleasingDate') || document.getElementById('salesFormReleasing'))?.value || '';
+        let releasingDate = (document.getElementById('salesFormReleasingDate') || document.getElementById('salesFormReleasing'))?.value || '';
+        if (!releasingDate && deadline) releasingDate = deadline;
         const fileSentRaw = document.getElementById('salesFormFileSent')?.value || '';
-        const fileSent = (fileSentRaw === 'Blank' || fileSentRaw === 'N/A' || !fileSentRaw) ? '' : fileSentRaw;
-        const clientApproval = document.getElementById('salesFormClientApproval')?.value || '';
-        const priority = document.getElementById('salesFormPriority')?.value || '';
+        const fileSent = (fileSentRaw === 'Blank' || !fileSentRaw) ? 'File Sent' : fileSentRaw;
+        const statusEl = document.getElementById('salesFormProjectStatus') || document.getElementById('salesFormClientApproval');
+        const projectStatus = (statusEl && statusEl.value) ? statusEl.value.trim() : 'Pending Approval';
+        const clientApproval = projectStatus;
+        const priority = document.getElementById('salesFormPriority')?.value || 'Normal';
         const relModeRaw = (document.getElementById('salesFormRelMode') || document.getElementById('salesFormReleasingMode'))?.value || '';
-        const mode = (relModeRaw === 'Blank' || relModeRaw === 'N/A' || !relModeRaw) ? '' : relModeRaw;
+        const mode = (relModeRaw === 'Blank' || !relModeRaw) ? 'Pickup' : relModeRaw;
         const locRaw = document.getElementById('salesFormLocation')?.value || '';
-        const location = (locRaw === 'Blank' || locRaw === 'N/A' || !locRaw) ? '' : locRaw;
-        const contactPerson = document.getElementById('salesFormContactPerson').value.trim();
-        const contactNumber = document.getElementById('salesFormContactNumber').value.trim();
-        const address = document.getElementById('salesFormAddress').value.trim();
+        const location = (locRaw === 'Blank' || !locRaw) ? 'Indoor' : locRaw;
+        const contactPerson = document.getElementById('salesFormContactPerson')?.value.trim() || 'N/A';
+        const contactNumber = document.getElementById('salesFormContactNumber')?.value.trim() || 'N/A';
+        const address = document.getElementById('salesFormAddress')?.value.trim() || 'N/A';
         const nowStamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
         const orderDateEl = document.getElementById('salesFormOrderDate');
         const orderDate = (orderDateEl && orderDateEl.value) ? orderDateEl.value.trim() : nowStamp.substring(0, 10);
 
         const requiredChecks = [
           { val: reqId, id: 'salesFormReqId', name: 'Request ID' },
-          { val: jo, id: 'salesFormJo', name: 'JO Number' },
-          ...(orderDateEl ? [{ val: orderDate, id: 'salesFormOrderDate', name: 'Date Encoded' }] : []),
           { val: salesRep, id: 'salesFormSalesRep', name: 'Sales Representative' },
           { val: client, id: 'salesFormClient', name: 'Client Name' },
           { val: project, id: 'salesFormProject', name: 'Project Name' },
           { val: deadline, id: 'salesFormDeadline', name: 'Design Deadline' },
-          { val: releasingDate, id: 'salesFormReleasing', name: 'Production Due' },
-          { val: artist, id: 'salesFormArtist', name: 'Assigned Artist' },
-          { val: priority, id: 'salesFormPriority', name: 'Priority Level' },
-          { val: mode, id: 'salesFormRelMode', name: 'Mode of Releasing' },
-          { val: location, id: 'salesFormLocation', name: 'Placement' },
-          { val: fileSent, id: 'salesFormFileSent', name: 'File Status' },
-          { val: clientApproval, id: 'salesFormClientApproval', name: 'Client Approval' },
-          { val: contactPerson, id: 'salesFormContactPerson', name: 'Contact Person' },
-          { val: contactNumber, id: 'salesFormContactNumber', name: 'Contact Number' },
-          { val: address, id: 'salesFormAddress', name: 'Complete Address' }
+          { val: artist, id: 'salesFormArtist', name: 'Assigned Artist' }
         ];
 
         const missingModal = [];
@@ -2906,10 +3124,10 @@
 
         let newRec = null;
         if (id) {
-          const rec = state.requests.find(r => r.id === id);
+          const rec = state.requests.find(r => String(r.id) === String(id) || r.requestId === id);
           if (rec) {
             rec.requestId = reqId;
-            rec.joNumber = jo || 'N/A';
+            rec.joNumber = jo || 'TF';
             rec.orderDate = orderDate || rec.orderDate;
             rec.projectName = project || 'N/A';
             rec.client = client || 'N/A';
@@ -2920,6 +3138,7 @@
             rec.fileSent = fileSent;
             rec.location = location;
             rec.clientApproval = clientApproval;
+            rec.projectStatus = clientApproval;
             rec.priority = priority;
             rec.releasingMode = mode;
             rec.contactPerson = contactPerson;
@@ -2940,7 +3159,7 @@
           newRec = {
             id: `req-${Date.now()}`,
             requestId: reqId,
-            joNumber: jo || 'N/A',
+            joNumber: jo || 'TF',
             projectName: project || 'N/A',
             client: client || 'N/A',
             artist: artist || 'N/A',
@@ -2961,7 +3180,9 @@
             installers: '2 Installers',
             duration: '1 Day',
             notes: 'N/A',
-            projectStatus: clientApproval === 'Approved' ? 'Completed' : 'On-going',
+            projectStatus: clientApproval || 'Pending Approval',
+            artistAccepted: 'Pending',
+            artistAcceptedDate: null,
             designStatus: 'On Queue',
             headApproval: 'Pending',
             countStandard: 0,
@@ -3218,9 +3439,12 @@
   const AppUtils = {
     escapeHTML,
     toTitleCase,
+    normalizeReleasingMode,
     isOverdue,
     getDeadlineAlertStatus,
     getAvailabilityBadge,
+    isProjectArtistAccepted,
+    getStatusBadgeClass,
     normalizeRequestItem,
     saveStateToStorage,
     showToast,
@@ -3244,7 +3468,13 @@
     editSalesRequest,
     deleteSalesRequest,
     downloadCsv,
-    bindRowsSelects
+    bindRowsSelects,
+    openNewSalesRequestModal,
+    getNextRequestId,
+    formatRequestIdInput,
+    getStoredRowsPerPage,
+    renderDraftSalesRowHTML,
+    populateSalesFiltersDropdowns
   };
 
   const AppConstants = {
@@ -3326,7 +3556,11 @@
         .catch(err => console.error('Accept project network error:', err));
       }
       if (window.SignDepotApp && window.SignDepotApp.renderCreativesTracker) window.SignDepotApp.renderCreativesTracker();
-      updateDashboardKPIs();
+      if (typeof updateDashboardKPIs === 'function') {
+        updateDashboardKPIs();
+      } else if (window.SignDepotApp && typeof window.SignDepotApp.updateDashboardKPIs === 'function') {
+        window.SignDepotApp.updateDashboardKPIs();
+      }
       showToast('Project ' + rec.requestId + ' accepted! Moved to Accepted Projects.', 'success');
     },
     handleKpiCardClick: (type) => {
@@ -3458,6 +3692,7 @@
     canUserAccessTab: canUserAccessTab,
     getCurrentUserPermissions: getCurrentUserPermissions,
     openNewSalesRequestModal: openNewSalesRequestModal,
+    openPrintRequest: (...args) => (window.SignDepotApp && typeof window.SignDepotApp.openPrintRequest === 'function' ? window.SignDepotApp.openPrintRequest(...args) : (window.openPrintRequest ? window.openPrintRequest(...args) : null)),
     editSalesRequest: editSalesRequest,
     deleteSalesRequest: deleteSalesRequest,
     formatRequestIdInput: formatRequestIdInput,
@@ -3934,7 +4169,11 @@
           showToast(`Task ${rec.requestId} marked as Completed!`);
         }
         saveStateToStorage();
-        renderDashboard();
+        if (typeof renderDashboard === 'function') {
+          renderDashboard();
+        } else if (window.SignDepotApp && typeof window.SignDepotApp.renderDashboard === 'function') {
+          window.SignDepotApp.renderDashboard();
+        }
       }
     },
 
@@ -3951,6 +4190,10 @@
       } else {
         window.location.href = getPageUrl('directives-details.html') + '?id=' + encodeURIComponent(identifier);
       }
+    },
+    openPrintRequest: (identifier) => {
+      if (!identifier) return;
+      window.location.href = getPageUrl('print-request.php') + '?id=' + encodeURIComponent(identifier);
     },
     selectAutocompleteJo: (joOrReq) => {
       const box = document.getElementById('directiveAutocompleteBox');
@@ -4365,7 +4608,13 @@
     const handleNewRequestTrigger = (e) => {
       if (e) e.preventDefault();
       if (document.getElementById('salesModal')) {
-        openNewSalesRequestModal();
+        if (window.SignDepotApp && typeof window.SignDepotApp.openNewSalesRequestModal === 'function') {
+          window.SignDepotApp.openNewSalesRequestModal();
+        } else if (typeof openNewSalesRequestModal === 'function') {
+          openNewSalesRequestModal();
+        } else if (typeof window.openNewSalesRequestModal === 'function') {
+          window.openNewSalesRequestModal();
+        }
       } else {
         const pagesPrefix = window.location.pathname.includes('/pages/') ? './' : './pages/';
         window.location.href = pagesPrefix + 'sales-requests.php?action=add_new';
@@ -4909,9 +5158,16 @@
     loadStateFromStorage();
     initEventListeners();
     if (typeof setupDirectiveControlsSync === "function") setupDirectiveControlsSync();
+    else if (window.SignDepotApp && typeof window.SignDepotApp.setupDirectiveControlsSync === "function") window.SignDepotApp.setupDirectiveControlsSync();
+
     if (typeof setupDirectiveAutocomplete === "function") setupDirectiveAutocomplete();
+    else if (window.SignDepotApp && typeof window.SignDepotApp.setupDirectiveAutocomplete === "function") window.SignDepotApp.setupDirectiveAutocomplete();
+
     if (typeof setupDirectiveActions === "function") setupDirectiveActions();
+    else if (window.SignDepotApp && typeof window.SignDepotApp.setupDirectiveActions === "function") window.SignDepotApp.setupDirectiveActions();
+
     if (typeof setupDirectiveZoomControls === "function") setupDirectiveZoomControls();
+    else if (window.SignDepotApp && typeof window.SignDepotApp.setupDirectiveZoomControls === "function") window.SignDepotApp.setupDirectiveZoomControls();
     setupGlobalSearch();
     setupModals();
 
@@ -4937,13 +5193,25 @@
     switchView(currentView);
 
     if (currentView === 'view-directives-details') {
-      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      if (typeof renderDirectivePreview === 'function') {
+        renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      } else if (window.SignDepotApp && typeof window.SignDepotApp.renderDirectivePreview === 'function') {
+        window.SignDepotApp.renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      }
     }
 
     // Initialize Dedicated Vector Studio Editor if on directive-editor.php
     if (document.getElementById('studioPropertyInspector')) {
-      renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
-      setTimeout(initStudioVectorEditor, 50);
+      if (typeof renderDirectivePreview === 'function') {
+        renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      } else if (window.SignDepotApp && typeof window.SignDepotApp.renderDirectivePreview === 'function') {
+        window.SignDepotApp.renderDirectivePreview(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY || '');
+      }
+      if (typeof initStudioVectorEditor === 'function') {
+        setTimeout(initStudioVectorEditor, 50);
+      } else if (window.SignDepotApp && typeof window.SignDepotApp.initVectorStudioEditor === 'function') {
+        setTimeout(window.SignDepotApp.initVectorStudioEditor, 50);
+      }
     }
 
     updateDeadlineAlertCenter();

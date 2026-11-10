@@ -41,6 +41,29 @@
     downloadCsv
   } = App.utils || App;
 
+  // Safe fallback helpers
+  function getStoredRowsPerPage() {
+    if (App.utils && typeof App.utils.getStoredRowsPerPage === 'function') {
+      return App.utils.getStoredRowsPerPage();
+    }
+    try {
+      const saved = localStorage.getItem('SIGN_DEPOT_PER_PAGE');
+      return saved ? parseInt(saved, 10) : 10;
+    } catch (e) {
+      return 10;
+    }
+  }
+
+  function renderDraftSalesRowHTML(d) {
+    if (App.utils && typeof App.utils.renderDraftSalesRowHTML === 'function') {
+      return App.utils.renderDraftSalesRowHTML(d);
+    }
+    if (typeof window.renderDraftSalesRowHTML === 'function') {
+      return window.renderDraftSalesRowHTML(d);
+    }
+    return '';
+  }
+
   const {
     STORAGE_KEY,
     DEFAULT_ARTISTS,
@@ -267,8 +290,8 @@
             <td>${renderInlineSelect(r.id, 'priority', r.priority || 'Normal', PRIORITY_LEVELS)}</td>
             <td>
               <div style="display:inline-flex; gap:5px; align-items:center; justify-content:center; white-space:nowrap;">
-                <button class="btn btn-secondary btn-sm" onclick="window.SignDepotApp.openDirectiveForJo('${r.joNumber}')" title="Open Job Directive">
-                  Directive
+                <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.openPrintRequest('${r.requestId || r.joNumber || r.id}')" title="Print Request">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                 </button>
                 <button class="btn btn-secondary btn-sm btn-icon-only" onclick="window.SignDepotApp.editSalesRequest('${r.id}')" title="Edit Full Details">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -387,8 +410,106 @@
   }
 
 
+  function openNewSalesRequestModal() {
+    if (App && typeof App.openNewSalesRequestModal === 'function' && App.openNewSalesRequestModal !== openNewSalesRequestModal) {
+      return App.openNewSalesRequestModal();
+    }
+    const form = document.getElementById('salesRequestForm');
+    if (form) {
+      form.reset();
+      form.querySelectorAll('.is-invalid-detail').forEach(el => el.classList.remove('is-invalid-detail'));
+    }
+    const idField = document.getElementById('salesFormId');
+    if (idField) idField.value = '';
+    const titleEl = document.getElementById('salesModalTitle');
+    if (titleEl) titleEl.textContent = 'New Sales Request';
+
+    // Auto-generate sequential Request ID with separator dash (e.g. LR-26-2104 / LR-26-2105)
+    const getNextIdFn = (App && App.getNextRequestId) || (App && App.utils && App.utils.getNextRequestId);
+    const nextId = typeof getNextIdFn === 'function' ? getNextIdFn() : 'LR-26-2101';
+    const reqInput = document.getElementById('salesFormReqId');
+    if (reqInput) reqInput.value = nextId;
+
+    if (window.PMS_API_URL) {
+      fetch(window.PMS_API_URL + '?action=get_next_request_id')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.nextRequestId && reqInput && (!reqInput.value || reqInput.value === nextId)) {
+            reqInput.value = res.nextRequestId;
+          }
+        })
+        .catch(() => {});
+    }
+
+    const joInput = document.getElementById('salesFormJo');
+    if (joInput) joInput.value = '';
+
+    const orderDateInput = document.getElementById('salesFormOrderDate');
+    if (orderDateInput) {
+      orderDateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    const deadlineInput = document.getElementById('salesFormDeadline');
+    if (deadlineInput && !deadlineInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 3);
+      deadlineInput.value = d.toISOString().split('T')[0];
+    }
+
+    const releasingInput = document.getElementById('salesFormReleasing');
+    if (releasingInput && !releasingInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 5);
+      releasingInput.value = d.toISOString().split('T')[0];
+    }
+
+    const locInput = document.getElementById('salesFormLocation');
+    if (locInput) locInput.value = 'Indoor';
+
+    const prioInput = document.getElementById('salesFormPriority');
+    if (prioInput) prioInput.value = 'Normal';
+
+    const appInput = document.getElementById('salesFormProjectStatus') || document.getElementById('salesFormClientApproval');
+    if (appInput) appInput.value = 'Pending Approval';
+
+    const relModeInput = document.getElementById('salesFormRelMode');
+    if (relModeInput) relModeInput.value = 'Pickup';
+
+    const fileSentInput = document.getElementById('salesFormFileSent');
+    if (fileSentInput) fileSentInput.value = 'File Sent';
+
+    populateSalesFiltersDropdowns();
+    const loggedInRep = typeof getLoggedInSalesRep === 'function' ? getLoggedInSalesRep() : null;
+    const salesRepSelect = document.getElementById('salesFormSalesRep');
+    if (loggedInRep && salesRepSelect && !salesRepSelect.value) {
+      salesRepSelect.value = toTitleCase(loggedInRep);
+    }
+    if (typeof upgradeAllFormSelects === 'function') upgradeAllFormSelects();
+    if (typeof syncAllFormDropdowns === 'function') syncAllFormDropdowns();
+
+    const modal = document.getElementById('salesModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => {
+        if (joInput) {
+          joInput.focus();
+        } else if (reqInput) {
+          reqInput.focus();
+        }
+      }, 100);
+    }
+  }
+
   // Sales Requests Specific Event Listeners
   function initSalesRequestsListeners() {
+    const btnSalesNewReq = document.getElementById('btnSalesNewRequest');
+    if (btnSalesNewReq) {
+      btnSalesNewReq.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
+        openNewSalesRequestModal();
+      });
+    }
+
     const salesSearch = document.getElementById('salesSearchInput');
     if (salesSearch) {
       if (salesSearch.value && (salesSearch.value.toLowerCase().startsWith('sup_') || salesSearch.value.toLowerCase().includes('angel') || salesSearch.value.toLowerCase() === 'superadmin')) {
@@ -477,6 +598,9 @@
   App.renderSalesRequestsTable = renderSalesRequests;
   App.populateSalesFiltersDropdowns = populateSalesFiltersDropdowns;
   App.resetSalesFilters = resetSalesRequestsFilters;
+  App.openNewSalesRequestModal = openNewSalesRequestModal;
+  window.openNewSalesRequestModal = openNewSalesRequestModal;
+  window.populateSalesFiltersDropdowns = populateSalesFiltersDropdowns;
   App.setSalesPage = (p) => {
     state.salesFilter.page = p;
     renderSalesRequests();

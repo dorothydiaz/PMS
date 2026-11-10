@@ -38,8 +38,32 @@
     openDirectiveForJo,
     editSalesRequest,
     deleteSalesRequest,
-    downloadCsv
+    downloadCsv,
+    normalizeReleasingMode: utilsNormalizeReleasingMode,
+    normalizeRequestItem: utilsNormalizeRequestItem
   } = App.utils || App;
+
+  const normalizeReleasingMode = typeof utilsNormalizeReleasingMode === 'function'
+    ? utilsNormalizeReleasingMode
+    : (window.normalizeReleasingMode || function (mode) {
+        if (!mode) return 'Pickup';
+        const m = String(mode).trim().toUpperCase();
+        if (m.startsWith('INST')) return 'Install';
+        if (m.startsWith('DELIV')) return 'Deliver';
+        if (m.startsWith('PICK')) return 'Pickup';
+        return 'Pickup';
+      });
+
+  const normalizeRequestItem = typeof utilsNormalizeRequestItem === 'function'
+    ? utilsNormalizeRequestItem
+    : (window.normalizeRequestItem || function (item) {
+        if (!item) return item;
+        item.requestId = item.requestId || item.request_id || '';
+        item.joNumber = item.joNumber || item.jo_number || '';
+        item.projectName = item.projectName || item.project_name || '';
+        item.client = item.client || '';
+        return item;
+      });
 
   const {
     STORAGE_KEY,
@@ -703,139 +727,9 @@
   }
 
   function openDirectiveDirectEditor(cell) {
-    if (!cell) return;
-    const cellId = cell.id;
-    const boxDef = DIRECTIVE_FIELD_BOXES[cellId];
-    const wrap = document.getElementById('directiveGridTable');
-    const svg = document.getElementById('directiveExactSvg');
-    if (!wrap || !svg) return;
-
-    if (activeDirectEditor && activeDirectEditor.__targetCell === cell) {
-      activeDirectEditor.focus();
-      return;
-    }
+    // In-place direct textarea overlay editing over the directive SVG has been removed.
+    // All dates and details are edited in the Live Directive Adjustment Controls form below.
     closeDirectiveDirectEditor(true);
-
-    const wrapRect = wrap.getBoundingClientRect();
-    const svgRect = svg.getBoundingClientRect();
-    const scaleX = svgRect.width / 904;
-    const scaleY = svgRect.height / 96;
-    const offsetX = svgRect.left - wrapRect.left;
-    const offsetY = svgRect.top - wrapRect.top;
-
-    let box = boxDef;
-    if (!box) {
-      const cRect = cell.getBoundingClientRect();
-      box = {
-        x: (cRect.left - svgRect.left) / scaleX,
-        y: (cRect.top - svgRect.top) / scaleY,
-        w: cRect.width / scaleX,
-        h: cRect.height / scaleY,
-        color: cell.getAttribute('fill') || '#000000',
-        bg: '#FFFFFF',
-        align: cell.getAttribute('text-anchor') === 'middle' ? 'center' : (cell.getAttribute('text-anchor') === 'end' ? 'right' : 'left'),
-        defaultSz: parseFloat(cell.getAttribute('font-size') || 12),
-        weight: 'normal'
-      };
-    }
-
-    const curSize = getCellCurrentFontSize(cell);
-    const rawVal = getFieldRawText(cell);
-
-    const savedBox = (state.customBoxSizes && state.customBoxSizes[cellId]) || {};
-    const boxW = savedBox.w || box.w;
-    const linesCount = (rawVal.match(/\n/g) || []).length + 1;
-    const autoH = Math.max(box.h, (linesCount * curSize * 1.15) + 6);
-    const boxH = savedBox.h || autoH;
-    const boxY = linesCount > 1 ? Math.max(0, box.y - ((linesCount - 1) * curSize * 0.45)) : box.y;
-
-    const editor = document.createElement('textarea');
-    editor.id = 'directiveDirectEditor';
-    editor.className = 'directive-direct-editor';
-    editor.__targetCell = cell;
-    editor.value = rawVal;
-    editor.spellcheck = false;
-
-    editor.style.left = Math.round(offsetX + box.x * scaleX) + 'px';
-    editor.style.top = Math.round(offsetY + boxY * scaleY) + 'px';
-    editor.style.width = Math.round(boxW * scaleX) + 'px';
-    editor.style.height = Math.round(boxH * scaleY) + 'px';
-    editor.style.minHeight = Math.round(box.h * scaleY) + 'px';
-    editor.style.fontSize = Math.round(curSize * scaleY) + 'px';
-    editor.style.textAlign = box.align;
-    editor.style.fontWeight = 'normal';
-    editor.style.color = box.color;
-    editor.style.background = box.bg === '#000000' ? 'rgba(0,0,0,0.92)' : (box.bg === '#E8EBED' ? '#E8EBED' : 'rgba(255,255,255,0.96)');
-
-    wrap.appendChild(editor);
-    activeDirectEditor = editor;
-
-    editor.focus();
-    editor.select();
-
-    syncToolbarBoxInputs(cell);
-
-    const updateLayout = () => {
-      const val = editor.value;
-      setFieldMultilineText(cell, val);
-      syncControlValues(cellId, val);
-
-      if (!state.customBoxSizes || !state.customBoxSizes[cellId] || !state.customBoxSizes[cellId].h) {
-        const lines = (val.match(/\n/g) || []).length + 1;
-        const dynH = Math.max(box.h, (lines * curSize * 1.15) + 6);
-        const dynY = lines > 1 ? Math.max(0, box.y - ((lines - 1) * curSize * 0.45)) : box.y;
-        editor.style.top = Math.round(offsetY + dynY * scaleY) + 'px';
-        editor.style.height = Math.round(dynH * scaleY) + 'px';
-        const inpH = document.getElementById('cellBoxHeightInput');
-        if (inpH) inpH.value = Math.round(dynH);
-      }
-    };
-
-    editor.addEventListener('input', updateLayout);
-
-    // Track user drag-resizing of the textbox
-    if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => {
-        if (!activeDirectEditor || activeDirectEditor !== editor) return;
-        const curW = Math.round(editor.offsetWidth / scaleX);
-        const curH = Math.round(editor.offsetHeight / scaleY);
-        if (!state.customBoxSizes) state.customBoxSizes = {};
-        state.customBoxSizes[cellId] = { w: curW, h: curH };
-        saveStateToStorage();
-        syncToolbarBoxInputs(cell);
-      });
-      ro.observe(editor);
-      editor.__resizeObserver = ro;
-    }
-
-    editor.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        // Support next line when user enters!
-        e.stopPropagation();
-        setTimeout(updateLayout, 10);
-        return;
-      }
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        closeDirectiveDirectEditor(true);
-        const keys = Object.keys(DIRECTIVE_FIELD_BOXES);
-        const idx = keys.indexOf(cellId);
-        const nextId = keys[(idx + (e.shiftKey ? -1 : 1) + keys.length) % keys.length];
-        const nextEl = document.getElementById(nextId);
-        if (nextEl) selectDirectiveCell(nextEl, true);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        closeDirectiveDirectEditor(true);
-      } else if (e.ctrlKey && (e.key === '[' || e.key === ']')) {
-        e.preventDefault();
-        const step = e.key === '[' ? -1 : 1;
-        const current = getCellCurrentFontSize(cell);
-        const next = Math.max(6, Math.min(72, current + step));
-        setCellCustomFontSize(cell, next);
-        editor.style.fontSize = Math.round(next * scaleY) + 'px';
-        updateLayout();
-      }
-    });
   }
 
   function closeDirectiveDirectEditor(commit = true) {
@@ -857,8 +751,9 @@
     }
   }
 
-  function selectDirectiveCell(cell, shouldOpenEditor = true) {
+  function selectDirectiveCell(cell, shouldFocusForm = true) {
     if (!cell) return;
+    closeDirectiveDirectEditor(true);
     const table = document.getElementById('directiveGridTable');
     if (table) {
       table.querySelectorAll('.directive-active-cell, .active-svg-cell').forEach(c => {
@@ -874,8 +769,40 @@
 
     syncToolbarBoxInputs(cell);
 
-    if (shouldOpenEditor && (window.SVGElement && cell instanceof SVGElement)) {
-      openDirectiveDirectEditor(cell);
+    if (shouldFocusForm && cell && cell.id) {
+      const ctrlMap = {
+        docFieldInstallers: 'ctrlInstallers',
+        docFieldDuration: 'ctrlDuration',
+        docFieldAddress: 'ctrlAddress',
+        bgFieldAddress: 'ctrlAddress',
+        docFieldOrderDate: 'ctrlOrderDate',
+        docFieldDueDate: 'ctrlDueDate',
+        bgFieldDueDate: 'ctrlDueDate',
+        docFieldReleasingDate: 'ctrlReleasingDate',
+        docFieldInCharge: 'ctrlInCharge',
+        docFieldDrawnBy: 'ctrlDrawnBy',
+        docFieldReleasingMode: 'ctrlReleasingMode',
+        docFieldEnvOption: 'ctrlEnvType',
+        bgFieldEnv: 'ctrlEnvType',
+        docEnvSvg: 'ctrlEnvType',
+        bgIndoor: 'ctrlLocation',
+        bgOutdoor: 'ctrlLocation',
+        lblIndoor: 'ctrlLocation',
+        lblOutdoor: 'ctrlLocation'
+      };
+      const ctrlId = ctrlMap[cell.id];
+      if (ctrlId) {
+        const ctrl = document.getElementById(ctrlId);
+        if (ctrl) {
+          ctrl.focus();
+          if (typeof ctrl.select === 'function' && ctrl.tagName === 'INPUT') {
+            ctrl.select();
+          }
+          try {
+            ctrl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } catch (e) {}
+        }
+      }
     }
   }
 
@@ -1072,21 +999,6 @@
     const ctrlInst = document.getElementById('ctrlInstallers');
     const ctrlDur = document.getElementById('ctrlDuration');
     const ctrlEnv = document.getElementById('ctrlEnvType');
-    if (ctrlEnv) {
-      ctrlEnv.addEventListener('change', () => {
-        setDirectiveEnvType(ctrlEnv.value);
-        showToast(ctrlEnv.value ? `Environment: ${ctrlEnv.options[ctrlEnv.selectedIndex]?.text}` : 'Environment cleared (Blank)');
-      });
-    }
-
-    const envContainer = document.getElementById('docFieldEnvOption');
-    if (envContainer) {
-      envContainer.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openEnvOptionMenu(envContainer);
-      });
-    }
-
     const ctrlMode = document.getElementById('ctrlReleasingMode');
     const ctrlNotes = document.getElementById('ctrlNotes');
     const ctrlInCharge = document.getElementById('ctrlInCharge');
@@ -1151,7 +1063,60 @@
     }
   }
 
+  function toggleDirectiveLocation(which, event) {
+    if (event) {
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    }
+    const bgIndoor = document.getElementById('bgIndoor');
+    const bgOutdoor = document.getElementById('bgOutdoor');
+    const isIndoorActive = (state.directiveLocation && state.directiveLocation.indoor !== undefined)
+      ? !!state.directiveLocation.indoor
+      : (bgIndoor ? bgIndoor.getAttribute('fill') === '#E10600' : false);
+    const isOutdoorActive = (state.directiveLocation && state.directiveLocation.outdoor !== undefined)
+      ? !!state.directiveLocation.outdoor
+      : (bgOutdoor ? bgOutdoor.getAttribute('fill') === '#E10600' : false);
+
+    let nextIndoor = isIndoorActive;
+    let nextOutdoor = isOutdoorActive;
+
+    if (which === 'indoor') {
+      nextIndoor = !isIndoorActive;
+    } else if (which === 'outdoor') {
+      nextOutdoor = !isOutdoorActive;
+    } else if (which === 'both') {
+      nextIndoor = true;
+      nextOutdoor = true;
+    } else if (which === 'none') {
+      nextIndoor = false;
+      nextOutdoor = false;
+    } else {
+      if (isIndoorActive && !isOutdoorActive) {
+        nextIndoor = false; nextOutdoor = true;
+      } else if (!isIndoorActive && isOutdoorActive) {
+        nextIndoor = true; nextOutdoor = true;
+      } else if (isIndoorActive && isOutdoorActive) {
+        nextIndoor = false; nextOutdoor = false;
+      } else {
+        nextIndoor = true; nextOutdoor = false;
+      }
+    }
+
+    setDirectiveLocation(nextIndoor, nextOutdoor);
+    let label = 'None';
+    if (nextIndoor && nextOutdoor) label = 'Both (Indoor & Outdoor)';
+    else if (nextIndoor) label = 'INDOOR';
+    else if (nextOutdoor) label = 'OUTDOOR';
+    showToast(`Placement: ${label}`);
+  }
+
+  window.toggleDirectiveLocation = toggleDirectiveLocation;
+  window.setDirectiveLocation = setDirectiveLocation;
+
+  let directiveControlsSyncAttached = false;
   function setupDirectiveControlsSync() {
+    if (directiveControlsSyncAttached) return;
+    directiveControlsSyncAttached = true;
     const bindSync = (controlId, docFieldId, fallback) => {
       const ctrl = document.getElementById(controlId);
       const target = document.getElementById(docFieldId);
@@ -1200,6 +1165,19 @@
       });
     }
 
+    const grpIndoor = document.getElementById('grpIndoor');
+    const grpOutdoor = document.getElementById('grpOutdoor');
+    if (grpIndoor) grpIndoor.onclick = (e) => toggleDirectiveLocation('indoor', e);
+    if (grpOutdoor) grpOutdoor.onclick = (e) => toggleDirectiveLocation('outdoor', e);
+    const bgIndoor = document.getElementById('bgIndoor');
+    const bgOutdoor = document.getElementById('bgOutdoor');
+    if (bgIndoor && !grpIndoor) bgIndoor.onclick = (e) => toggleDirectiveLocation('indoor', e);
+    if (bgOutdoor && !grpOutdoor) bgOutdoor.onclick = (e) => toggleDirectiveLocation('outdoor', e);
+    const lblIndoor = document.getElementById('lblIndoor');
+    const lblOutdoor = document.getElementById('lblOutdoor');
+    if (lblIndoor && !grpIndoor) lblIndoor.onclick = (e) => toggleDirectiveLocation('indoor', e);
+    if (lblOutdoor && !grpOutdoor) lblOutdoor.onclick = (e) => toggleDirectiveLocation('outdoor', e);
+
     const ctrlMode = document.getElementById('ctrlReleasingMode');
     if (ctrlMode) {
       ctrlMode.addEventListener('change', () => {
@@ -1235,7 +1213,10 @@
     }
   }
 
+  let directiveAutocompleteAttached = false;
   function setupDirectiveAutocomplete() {
+    if (directiveAutocompleteAttached) return;
+    directiveAutocompleteAttached = true;
     const input = document.getElementById('directiveLookupInput');
     const box = document.getElementById('directiveAutocompleteBox');
     const statusEl = document.getElementById('directiveLookupStatus');
@@ -1608,7 +1589,50 @@
 </svg>`;
   }
 
+  function closeAllExportMenus() {
+    document.querySelectorAll('.directive-export-menu.show').forEach(m => {
+      m.classList.remove('show');
+      m.classList.remove('open-on-top');
+    });
+    document.querySelectorAll('.directive-dropdown-container.show').forEach(c => c.classList.remove('show'));
+    document.querySelectorAll('.directive-dropdown-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  }
+  window.closeAllExportMenus = closeAllExportMenus;
+
+  function toggleDirectiveExportDropdown(btn, event) {
+    if (event) {
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+    }
+    const container = (btn && btn.closest) ? btn.closest('.directive-dropdown-container') : document.querySelector('.directive-dropdown-container');
+    const menu = container ? container.querySelector('.directive-export-menu') : (document.getElementById('directiveExportMenu') || document.getElementById('studioExportMenu') || document.getElementById('reqExportMenu'));
+    if (!menu) return;
+
+    const isOpen = menu.classList.contains('show');
+    closeAllExportMenus();
+
+    if (!isOpen) {
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        if (spaceBelow < 260 && spaceAbove > 220) {
+          menu.classList.add('open-on-top');
+        } else {
+          menu.classList.remove('open-on-top');
+        }
+        btn.setAttribute('aria-expanded', 'true');
+      }
+      menu.classList.add('show');
+      if (container) container.classList.add('show');
+    }
+  }
+  window.toggleDirectiveExportDropdown = toggleDirectiveExportDropdown;
+
+  let directiveActionsAttached = false;
   function setupDirectiveActions() {
+    if (directiveActionsAttached) return;
+    directiveActionsAttached = true;
     // COPY AS VECTOR GRAPHIC (Multi-Software Support: Photoshop, Illustrator, CorelDRAW, Affinity Designer)
     const handleCopyVector = async () => {
       const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
@@ -1818,92 +1842,79 @@
       img.src = url;
     }
     window.handleCopyImage4K = handleCopyImage4K;
+    window.handleCopyDirectiveSVG = handleCopyVector;
+
+    function handleDownloadDirectiveSVG() {
+      if (typeof window.closeAllExportMenus === 'function') window.closeAllExportMenus();
+      const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
+                  (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
+      const svgString = generateDirectiveSVG(cur);
+      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.', 'success');
+    }
+    window.handleDownloadDirectiveSVG = handleDownloadDirectiveSVG;
 
     // Export Dropdown menu bindings (Directives Details page)
     const btnExpDropdown = document.getElementById('btnDirectiveExportDropdown');
     const expMenu = document.getElementById('directiveExportMenu');
-    if (btnExpDropdown && expMenu) {
-      btnExpDropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isOpen = expMenu.classList.contains('show');
-        document.querySelectorAll('.directive-export-menu.show').forEach(m => m.classList.remove('show'));
-        if (!isOpen) {
-          const rect = btnExpDropdown.getBoundingClientRect();
-          const spaceBelow = window.innerHeight - rect.bottom;
-          const spaceAbove = rect.top;
-          if (spaceBelow < 260 && spaceAbove > 220) {
-            expMenu.classList.add('open-on-top');
-          } else {
-            expMenu.classList.remove('open-on-top');
-          }
-          expMenu.classList.add('show');
-          btnExpDropdown.setAttribute('aria-expanded', 'true');
-        } else {
-          expMenu.classList.remove('show');
-          expMenu.classList.remove('open-on-top');
-          btnExpDropdown.setAttribute('aria-expanded', 'false');
-        }
-      });
+    if (btnExpDropdown) {
+      btnExpDropdown.onclick = (e) => toggleDirectiveExportDropdown(btnExpDropdown, e);
     }
 
     if (!window.__directiveExportMenuGlobalListenerAttached) {
       window.__directiveExportMenuGlobalListenerAttached = true;
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.directive-dropdown-container')) {
-          document.querySelectorAll('.directive-export-menu.show').forEach(m => {
-            m.classList.remove('show');
-            const btn = m.parentElement ? m.parentElement.querySelector('.directive-dropdown-btn') : null;
-            if (btn) btn.setAttribute('aria-expanded', 'false');
-          });
+          if (typeof window.closeAllExportMenus === 'function') {
+            window.closeAllExportMenus();
+          } else {
+            document.querySelectorAll('.directive-export-menu.show').forEach(m => {
+              m.classList.remove('show');
+              m.classList.remove('open-on-top');
+            });
+            document.querySelectorAll('.directive-dropdown-btn[aria-expanded="true"]').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+          }
         }
       });
     }
 
     const optDownloadEMF = document.getElementById('optDirectiveDownloadEMF');
     if (optDownloadEMF) {
-      optDownloadEMF.addEventListener('click', () => {
-        if (expMenu) expMenu.classList.remove('show');
+      optDownloadEMF.onclick = (e) => {
+        if (typeof window.closeAllExportMenus === 'function') window.closeAllExportMenus();
         downloadDirectiveEMF();
-      });
+      };
     }
 
     const optCopyPNG = document.getElementById('optDirectiveCopyPNG');
     if (optCopyPNG) {
-      optCopyPNG.addEventListener('click', (e) => {
-        if (expMenu) expMenu.classList.remove('show');
+      optCopyPNG.onclick = (e) => {
+        if (typeof window.closeAllExportMenus === 'function') window.closeAllExportMenus();
         handleCopyImage4K(e);
-      });
+      };
     }
 
     const optCopySVG = document.getElementById('optDirectiveCopySVG');
     if (optCopySVG) {
-      optCopySVG.addEventListener('click', (e) => {
-        if (expMenu) expMenu.classList.remove('show');
+      optCopySVG.onclick = (e) => {
+        if (typeof window.closeAllExportMenus === 'function') window.closeAllExportMenus();
         handleCopyVector(e);
-      });
+      };
     }
 
     const optDownloadSVG = document.getElementById('optDirectiveDownloadSVG');
     if (optDownloadSVG) {
-      optDownloadSVG.addEventListener('click', () => {
-        if (expMenu) expMenu.classList.remove('show');
-        const legacyDl = document.getElementById('btnDirectiveDownloadSVG');
-        if (legacyDl) {
-          legacyDl.click();
-        } else {
-          const cur = (typeof getDirectiveRecord === 'function' ? getDirectiveRecord(state.currentDirectiveJo || window.__INITIAL_DIRECTIVE_KEY) : null) ||
-                      (state.requests ? (state.requests.find(r => r.joNumber === state.currentDirectiveJo || r.requestId === state.currentDirectiveJo || r.id == state.currentDirectiveJo) || state.requests[0]) : {});
-          const svgString = generateDirectiveSVG(cur);
-          const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Sign_Depot_Directive_${cur.joNumber || 'Job'}.svg`;
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast('Vector SVG downloaded! Drag & drop the file into CorelDRAW or press Ctrl+I.');
-        }
-      });
+      optDownloadSVG.onclick = (e) => {
+        handleDownloadDirectiveSVG();
+      };
     }
 
     const btnCopySVG = document.getElementById('btnDirectiveCopySVG');
@@ -1914,30 +1925,9 @@
     const svgEl = document.getElementById('directiveExactSvg');
     if (svgEl) {
       svgEl.addEventListener('click', (e) => {
-        const textNode = e.target.closest('text.interactive-field');
+        const textNode = e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
         if (!textNode) return;
-        const titleAttr = textNode.getAttribute('title') || '';
-        const fieldName = titleAttr.replace('Click to edit ', '') || textNode.id.replace('docField', '');
-        const currentVal = textNode.textContent.trim();
-        const newVal = prompt(`Edit ${fieldName}:`, (currentVal === '—' || currentVal === '-') ? '' : currentVal);
-        if (newVal !== null) {
-          const finalVal = newVal.trim() !== '' ? newVal.trim() : '—';
-          textNode.textContent = finalVal;
-          if (textNode.id === 'docFieldInstallers') {
-            const ctrl = document.getElementById('ctrlInstallers');
-            if (ctrl) ctrl.value = finalVal;
-          } else if (textNode.id === 'docFieldDuration') {
-            const ctrl = document.getElementById('ctrlDuration');
-            if (ctrl) ctrl.value = finalVal;
-          } else if (textNode.id === 'docFieldInCharge') {
-            const ctrl = document.getElementById('ctrlInCharge');
-            if (ctrl) ctrl.value = finalVal;
-          } else if (textNode.id === 'docFieldDrawnBy') {
-            const ctrl = document.getElementById('ctrlDrawnBy');
-            if (ctrl) ctrl.value = finalVal;
-          }
-          showToast(`Updated ${fieldName}`);
-        }
+        selectDirectiveCell(textNode, true);
       });
     }
 
@@ -2025,10 +2015,20 @@
     }
 
     // Interactive Checkboxes for Releasing Mode (Install, Deliver, Pick up)
-    const setMode = (modeStr) => {
+    let setModeToastTimer = null;
+    let lastReportedMode = null;
+    const setMode = (modeStr, silent = false) => {
+      const normalized = normalizeReleasingMode(modeStr);
       const ctrl = document.getElementById('ctrlReleasingMode');
-      if (ctrl) ctrl.value = modeStr;
-      const m = (modeStr || 'Pickup').toLowerCase();
+      if (ctrl && ctrl.value !== normalized) ctrl.value = normalized;
+
+      const target = document.getElementById('docFieldReleasingMode');
+      if (target) {
+        target.textContent = normalized;
+        autoFitCellText(target);
+      }
+
+      const m = normalized.toLowerCase();
       const isInstall = m === 'install';
       const isDeliver = m === 'deliver';
       const isPickup = m === 'pickup' || !m;
@@ -2054,15 +2054,31 @@
       if (chkD) { chkD.style.backgroundColor = isDeliver ? '#E10600' : 'transparent'; chkD.textContent = ''; }
       if (chkP) { chkP.style.backgroundColor = isPickup ? '#E10600' : 'transparent'; chkP.textContent = ''; }
 
-      showToast('Releasing Mode: ' + modeStr);
+      if (!silent) {
+        clearTimeout(setModeToastTimer);
+        setModeToastTimer = setTimeout(() => {
+          if (lastReportedMode !== normalized) {
+            lastReportedMode = normalized;
+            showToast('Releasing Mode: ' + normalized);
+          }
+        }, 50);
+      }
+    };
+
+    const handleCheckModeClick = (e, mode) => {
+      if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      }
+      setMode(mode);
     };
 
     const elChkI = document.getElementById('dfCheckInstall') || document.getElementById('grpCheckInstall');
     const elChkD = document.getElementById('dfCheckDeliver') || document.getElementById('grpCheckDeliver');
     const elChkP = document.getElementById('dfCheckPickup') || document.getElementById('grpCheckPickup');
-    if (elChkI) elChkI.onclick = () => setMode('Install');
-    if (elChkD) elChkD.onclick = () => setMode('Deliver');
-    if (elChkP) elChkP.onclick = () => setMode('Pickup');
+    if (elChkI) elChkI.onclick = (e) => handleCheckModeClick(e, 'Install');
+    if (elChkD) elChkD.onclick = (e) => handleCheckModeClick(e, 'Deliver');
+    if (elChkP) elChkP.onclick = (e) => handleCheckModeClick(e, 'Pickup');
 
     const btnReset = document.getElementById('btnDirectiveReset');
     if (btnReset) {
@@ -2310,22 +2326,10 @@
         }
 
         // Check for Indoor / Outdoor toggle
-        const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
-        const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+        const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor, #grpIndoor');
+        const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor, #grpOutdoor');
         if (indoorTarget || outdoorTarget) {
-          const curState = state.directiveLocation || {
-            indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
-            outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
-          };
-          if (indoorTarget) {
-            const nextIndoor = !curState.indoor;
-            setDirectiveLocation(nextIndoor, curState.outdoor);
-            showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
-          } else {
-            const nextOutdoor = !curState.outdoor;
-            setDirectiveLocation(curState.indoor, nextOutdoor);
-            showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
-          }
+          toggleDirectiveLocation(indoorTarget ? 'indoor' : 'outdoor', e);
           return;
         }
 
@@ -2359,19 +2363,7 @@
             // Indoor / Outdoor header (row 1 of column 3, y <= 18)
             if (svgX >= 340 && svgX <= 564 && svgY <= 18) {
               const isIndoorClick = svgX <= 452;
-              const curState = state.directiveLocation || {
-                indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
-                outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
-              };
-              if (isIndoorClick) {
-                const nextIndoor = !curState.indoor;
-                setDirectiveLocation(nextIndoor, curState.outdoor);
-                showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
-              } else {
-                const nextOutdoor = !curState.outdoor;
-                setDirectiveLocation(curState.indoor, nextOutdoor);
-                showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
-              }
+              toggleDirectiveLocation(isIndoorClick ? 'indoor' : 'outdoor', e);
               return;
             }
 
@@ -2499,7 +2491,10 @@
     }
   }
 
+  let directiveZoomControlsAttached = false;
   function setupDirectiveZoomControls() {
+    if (directiveZoomControlsAttached) return;
+    directiveZoomControlsAttached = true;
     const btnZoomOut = document.getElementById('btnDirectiveZoomOut');
     const btnZoomIn = document.getElementById('btnDirectiveZoomIn');
     const btnZoomReset = document.getElementById('btnDirectiveZoomReset');
@@ -3325,40 +3320,16 @@
 
     // 5. Direct Artboard Click to Select Field
     svg.addEventListener('click', (e) => {
-      const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor');
-      const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor');
+      const indoorTarget = e.target.closest('#lblIndoor, #bgIndoor, #grpIndoor');
+      const outdoorTarget = e.target.closest('#lblOutdoor, #bgOutdoor, #grpOutdoor');
       if (indoorTarget || outdoorTarget) {
-        const curState = state.directiveLocation || {
-          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
-          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
-        };
-        if (indoorTarget) {
-          const nextIndoor = !curState.indoor;
-          setDirectiveLocation(nextIndoor, curState.outdoor);
-          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
-        } else {
-          const nextOutdoor = !curState.outdoor;
-          setDirectiveLocation(curState.indoor, nextOutdoor);
-          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
-        }
+        toggleDirectiveLocation(indoorTarget ? 'indoor' : 'outdoor', e);
         return;
       }
       const coords = getArtboardCoords(e);
       if (coords.x >= 340 && coords.x <= 564 && coords.y <= 18) {
         const isIndoorClick = coords.x <= 452;
-        const curState = state.directiveLocation || {
-          indoor: document.getElementById('bgIndoor')?.getAttribute('fill') === '#E10600',
-          outdoor: document.getElementById('bgOutdoor')?.getAttribute('fill') === '#E10600'
-        };
-        if (isIndoorClick) {
-          const nextIndoor = !curState.indoor;
-          setDirectiveLocation(nextIndoor, curState.outdoor);
-          showToast(`Directive Location: ${nextIndoor ? 'INDOOR' : 'None'}${curState.outdoor ? ' & OUTDOOR' : ''}`);
-        } else {
-          const nextOutdoor = !curState.outdoor;
-          setDirectiveLocation(curState.indoor, nextOutdoor);
-          showToast(`Directive Location: ${curState.indoor ? 'INDOOR & ' : ''}${nextOutdoor ? 'OUTDOOR' : 'None'}`);
-        }
+        toggleDirectiveLocation(isIndoorClick ? 'indoor' : 'outdoor', e);
         return;
       }
       const targetCell = e.target.closest('text.interactive-field') || e.target.closest('.bebas-field');
@@ -3605,19 +3576,48 @@
   App.generateDirectiveSVG = generateDirectiveSVG;
   App.openEnvOptionMenu = openEnvOptionMenu;
   App.setDirectiveEnvType = setDirectiveEnvType;
+  App.setDirectiveLocation = setDirectiveLocation;
+  App.toggleDirectiveLocation = toggleDirectiveLocation;
+  App.setupDirectiveControlsSync = setupDirectiveControlsSync;
+  App.setupDirectiveAutocomplete = setupDirectiveAutocomplete;
+  App.setupDirectiveActions = setupDirectiveActions;
+  App.setupDirectiveZoomControls = setupDirectiveZoomControls;
   App.initVectorStudioEditor = (typeof initStudioVectorEditor === 'function') ? initStudioVectorEditor : null;
   App.previewAttachment = (typeof previewAttachment === 'function') ? previewAttachment : null;
   App.deleteAttachment = (typeof deleteAttachment === 'function') ? deleteAttachment : null;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (document.getElementById('view-directives-details') || document.getElementById('directiveDocSheet')) {
-        renderDirectivePreview();
-      }
-    });
-  } else {
-    if (document.getElementById('view-directives-details') || document.getElementById('directiveDocSheet')) {
-      renderDirectivePreview();
+  let directivesInitialized = false;
+  function initDirectivesPage() {
+    const isDirectivesPage = document.getElementById('view-directives-details') ||
+                             document.getElementById('directiveDocSheet') ||
+                             document.getElementById('directiveExactSvg') ||
+                             document.getElementById('directiveGridTable') ||
+                             document.getElementById('studioPropertyInspector') ||
+                             document.getElementById('directiveLookupInput');
+    if (!isDirectivesPage) return;
+
+    if (!directivesInitialized) {
+      directivesInitialized = true;
+      if (typeof setupDirectiveControlsSync === 'function') setupDirectiveControlsSync();
+      if (typeof setupDirectiveAutocomplete === 'function') setupDirectiveAutocomplete();
+      if (typeof setupDirectiveActions === 'function') setupDirectiveActions();
+      if (typeof setupDirectiveZoomControls === 'function') setupDirectiveZoomControls();
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetKey = urlParams.get('id') || urlParams.get('jo') || urlParams.get('req') || urlParams.get('requestId') || window.__INITIAL_DIRECTIVE_KEY || sessionStorage.getItem('SIGN_DEPOT_CURRENT_DIRECTIVE') || state.currentDirectiveJo || '';
+    renderDirectivePreview(targetKey);
+
+    if (document.getElementById('studioPropertyInspector') && typeof initStudioVectorEditor === 'function') {
+      setTimeout(initStudioVectorEditor, 50);
+    }
+  }
+
+  App.initDirectivesPage = initDirectivesPage;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDirectivesPage);
+  } else {
+    initDirectivesPage();
   }
 })(window);

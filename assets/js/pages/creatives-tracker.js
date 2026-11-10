@@ -24,6 +24,8 @@
     isOverdue,
     getDeadlineAlertStatus,
     getAvailabilityBadge,
+    isProjectArtistAccepted,
+    getStatusBadgeClass,
     canUserAccessTab,
     canUserAccessModule,
     hasPermission,
@@ -171,7 +173,7 @@
     if (elBadgeAll) elBadgeAll.textContent = countAll.toLocaleString();
 
     // Sync active acceptance tab styling
-    const curAcceptanceTab = state.trackerAcceptanceTab || 'accepted';
+    const curAcceptanceTab = state.trackerAcceptanceTab || 'pending';
     document.querySelectorAll('.tracker-acceptance-tabs .tracker-acceptance-tab').forEach(btn => {
       const tabKey = btn.getAttribute('data-tracker-tab');
       const isAct = (tabKey === curAcceptanceTab);
@@ -244,10 +246,10 @@
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(r => 
-        r.requestId.toLowerCase().includes(q) ||
-        r.artist.toLowerCase().includes(q) ||
-        r.projectName.toLowerCase().includes(q) ||
-        r.remarks.toLowerCase().includes(q)
+        (r.requestId && String(r.requestId).toLowerCase().includes(q)) ||
+        (r.artist && String(r.artist).toLowerCase().includes(q)) ||
+        (r.projectName && String(r.projectName).toLowerCase().includes(q)) ||
+        (r.remarks && typeof r.remarks === 'string' && r.remarks.toLowerCase().includes(q))
       );
     }
     if (projectStatus) list = list.filter(r => r.projectStatus === projectStatus);

@@ -312,18 +312,36 @@ function canUserEditField($user, $field, $module = null) {
     // Normalize field name to camelCase or SQL column
     $fieldMap = [
         'request_id' => 'requestId', 'jo_number' => 'joNumber', 'order_date' => 'orderDate',
-        'sales_rep' => 'salesRep', 'project_name' => 'projectName', 'design_deadline' => 'designDeadline',
-        'releasing_date' => 'releasingDate', 'file_sent' => 'fileSent', 'complete_address' => 'completeAddress',
+        'sales_rep' => 'salesRep', 'project_name' => 'projectName', 'project' => 'projectName',
+        'design_deadline' => 'designDeadline', 'deadline' => 'deadline',
+        'releasing_date' => 'releasingDate', 'releasing' => 'releasing',
+        'file_sent' => 'fileSent', 'reference' => 'reference',
+        'complete_address' => 'completeAddress',
         'releasing_mode' => 'releasingMode', 'contact_person' => 'contactPerson', 'contact_number' => 'contactNumber',
         'project_status' => 'projectStatus', 'head_approval' => 'headApproval',
         'count_standard' => 'countStandard', 'count_special' => 'countSpecial', 'count_printing' => 'countPrinting',
         'design_status' => 'designStatus', 'revision_count' => 'revisionCount', 'remarks' => 'remarks',
-        'client' => 'client', 'location' => 'location'
+        'client' => 'client', 'location' => 'location',
+        'date_req' => 'dateReq', 'dateReq' => 'dateReq', 'date_requested' => 'dateReq', 'dateRequested' => 'dateReq'
     ];
     $normField = $fieldMap[$field] ?? $field;
 
+    // Field aliases map for matching column definitions across modules
+    $fieldAliases = [
+        'projectName' => ['project', 'projectName', 'project_name'],
+        'project' => ['project', 'projectName', 'project_name'],
+        'dateReq' => ['dateReq', 'date_req', 'orderDate', 'order_date', 'dateRequested'],
+        'orderDate' => ['dateReq', 'date_req', 'orderDate', 'order_date', 'dateRequested'],
+        'deadline' => ['deadline', 'designDeadline', 'design_deadline'],
+        'designDeadline' => ['deadline', 'designDeadline', 'design_deadline'],
+        'releasing' => ['releasing', 'releasingDate', 'releasing_date'],
+        'releasingDate' => ['releasing', 'releasingDate', 'releasing_date'],
+        'reference' => ['reference', 'fileSent', 'file_sent'],
+        'fileSent' => ['reference', 'fileSent', 'file_sent'],
+    ];
+
     // If module not provided, check across known editable tables
-    $modulesToCheck = $module ? [$module] : ['sales-requests', 'creatives-tracker', 'artist-workload', 'directives-details', 'dashboard'];
+    $modulesToCheck = $module ? [$module] : ['sales-requests', 'print-request', 'creatives-tracker', 'artist-workload', 'directives-details', 'dashboard'];
 
     foreach ($modulesToCheck as $mod) {
         if (!empty($perms[$mod]['u'])) {
@@ -332,8 +350,17 @@ function canUserEditField($user, $field, $module = null) {
             if ($editableCols === null || $editableCols === '*' || (is_array($editableCols) && (empty($editableCols) || in_array('*', $editableCols)))) {
                 return true;
             }
-            if (is_array($editableCols) && (in_array($normField, $editableCols) || in_array($field, $editableCols))) {
-                return true;
+            if (is_array($editableCols)) {
+                if (in_array($normField, $editableCols) || in_array($field, $editableCols)) {
+                    return true;
+                }
+                // Check aliases
+                $checkList = $fieldAliases[$normField] ?? ($fieldAliases[$field] ?? []);
+                foreach ($checkList as $alias) {
+                    if (in_array($alias, $editableCols)) {
+                        return true;
+                    }
+                }
             }
         }
     }
@@ -607,6 +634,7 @@ function loginOAuthUser($provider, $oauthId, $email, $fullName, $avatarUrl = nul
         $defaultPerms = [
             'dashboard' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'sales-requests' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
+            'print-request' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'creatives-tracker' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'artist-workload' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],
             'directives-details' => ['c' => false, 'r' => true, 'u' => false, 'd' => false],

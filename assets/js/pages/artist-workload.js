@@ -24,6 +24,7 @@
     isOverdue,
     getDeadlineAlertStatus,
     getAvailabilityBadge,
+    getStatusBadgeClass,
     canUserAccessTab,
     canUserAccessModule,
     hasPermission,
@@ -254,6 +255,8 @@
   // Expose Artist Workload Public API
   App.renderArtistWorkload = renderArtistWorkload;
   App.selectWorkloadArtist = (artist) => {
+    if (!state.workloadFilter) state.workloadFilter = {};
+    state.workloadFilter.selectedArtist = artist;
     state.workloadSelectedArtist = artist;
     renderArtistWorkload();
   };
