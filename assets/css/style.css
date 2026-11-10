@@ -3,7 +3,7 @@
 @font-face {
   font-family: 'Bebas Kai';
   src: url('../fonts/BebasKai.otf') format('opentype'),
-       url('../fonts/BebasKai.ttf') format('truetype');
+      url('../fonts/BebasKai.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -12,17 +12,17 @@
 @font-face {
   font-family: 'BebasKai';
   src: url('../fonts/BebasKai.otf') format('opentype'),
-       url('../fonts/BebasKai.ttf') format('truetype');
+      url('../fonts/BebasKai.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-/* ==========================================================================
-   Sign Depot Creative Operations — Stylesheet
-   Pure Clean, Minimalist Studio Theme with Realistic Drop Shadows
-   (NO Glassmorphism, NO Blur — 100% Solid Surfaces & Crisp Vector Rendering)
-   ========================================================================== */
+/*==========================================================================
+  Sign Depot Creative Operations — Stylesheet
+  Pure Clean, Minimalist Studio Theme with Realistic Drop Shadows
+  (NO Glassmorphism, NO Blur — 100% Solid Surfaces & Crisp Vector Rendering)
+  ========================================================================== */
 
 :root {
   /* Sign Depot Official Design System (signdepot.ph) */

@@ -33,6 +33,7 @@ if ($justLoggedIn) {
     $pageScriptMap = [
         'dashboard' => 'dashboard.js',
         'sales-requests' => 'sales-requests.js',
+        'print-request' => 'print-request.js',
         'creatives-tracker' => 'creatives-tracker.js',
         'creatives-production' => 'creatives-tracker.js',
         'artist-workload' => 'artist-workload.js',

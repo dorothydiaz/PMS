@@ -475,7 +475,8 @@
     const pending = reqs.filter(r => r.projectStatus === 'Pending').length;
     const revising = reqs.filter(r => r.projectStatus === 'Revising' || r.designStatus === 'Revising').length;
 
-    const total = completed + inProgress + pending + revising || 1;
+    const total = completed + inProgress + pending + revising;
+    const divisor = total || 1;
 
     // Donut SVG Parameters
     const size = 200;
@@ -484,10 +485,10 @@
     const strokeWidth = 24;
     const circumference = 2 * Math.PI * radius;
 
-    const segCompleted = (completed / total) * circumference;
-    const segInProgress = (inProgress / total) * circumference;
-    const segPending = (pending / total) * circumference;
-    const segRevising = (revising / total) * circumference;
+    const segCompleted = (completed / divisor) * circumference;
+    const segInProgress = (inProgress / divisor) * circumference;
+    const segPending = (pending / divisor) * circumference;
+    const segRevising = (revising / divisor) * circumference;
 
     const offsetCompleted = 0;
     const offsetInProgress = -segCompleted;
@@ -496,6 +497,7 @@
 
     container.innerHTML = `
       <svg width="100%" height="100%" viewBox="0 0 ${size} ${size}">
+        ${total === 0 ? `<circle cx="${center}" cy="${center}" r="${radius}" fill="transparent" stroke="#E2E8F0" stroke-width="${strokeWidth}" />` : ''}
         <!-- Completed (Green) -->
         <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent"
           stroke="#10B981" stroke-width="${strokeWidth}"

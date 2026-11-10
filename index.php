@@ -306,7 +306,7 @@ require_once __DIR__ . '/pages/includes/sidebar.php';
           <div style="border-top: 1px solid var(--border-light); padding-top: 16px; margin-top: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 12.5px; font-weight: 700;">2026 Production Pace</span>
-              <span style="font-size: 12px; font-weight: 800; color: var(--primary-green);">High Output</span>
+              <span id="dashboardProductionPace" style="font-size: 12px; font-weight: 800; color: var(--primary-green);">High Output</span>
             </div>
           </div>
         </div>

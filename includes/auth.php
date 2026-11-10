@@ -35,6 +35,12 @@ function getSystemModules() {
             'desc' => 'Order intake, multi-field filters, and manual JO number entry',
             'category' => 'Sales'
         ],
+        'print-request' => [
+            'label' => 'Print Request',
+            'icon' => 'printer',
+            'desc' => 'Printable request vector card generator and sales specifications',
+            'category' => 'Sales'
+        ],
         'creatives-tracker' => [
             'label' => 'Creatives Tracker',
             'icon' => 'table',
@@ -211,6 +217,14 @@ function hasPermission($module, $action = 'r') {
             return !empty($perms['settings'][$action]);
         }
         return false;
+    }
+
+    // Support alias and fallback for print-request / sales-requests
+    if ($module === 'print-request') {
+        if (isset($perms['print-request'][$action])) {
+            return !empty($perms['print-request'][$action]);
+        }
+        return !empty($perms['sales-requests'][$action]);
     }
 
     // Support alias for creatives-production / creatives-tracker

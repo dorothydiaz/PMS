@@ -20,6 +20,28 @@ $wrapperFooter = "\n})(window);\n";
 // 1. DASHBOARD (1709-2216 AND 2303-2434)
 // ==========================================
 $dashBody = getSlice($lines, 1709, 2216) . "\n" . getSlice($lines, 2303, 2434);
+$dashBody = str_replace(
+    'const total = completed + inProgress + pending + revising || 1;',
+    "const total = completed + inProgress + pending + revising;\n    const divisor = total || 1;",
+    $dashBody
+);
+$dashBody = str_replace(
+    [
+        '(completed / total)',
+        '(inProgress / total)',
+        '(pending / total)',
+        '(revising / total)',
+        '<svg width="100%" height="100%" viewBox="0 0 ${size} ${size}">'
+    ],
+    [
+        '(completed / divisor)',
+        '(inProgress / divisor)',
+        '(pending / divisor)',
+        '(revising / divisor)',
+        '<svg width="100%" height="100%" viewBox="0 0 ${size} ${size}">' . "\n" . '        ${total === 0 ? `<circle cx="${center}" cy="${center}" r="${radius}" fill="transparent" stroke="#E2E8F0" stroke-width="${strokeWidth}" />` : \'\'}'
+    ],
+    $dashBody
+);
 $dashListeners = <<<'JS'
 
   // Dashboard Specific Event Listeners

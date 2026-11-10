@@ -52,7 +52,7 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
     <?php endif; ?>
 
     <!-- 2. SALES -->
-    <?php if (hasPermission('sales-requests', 'r')): ?>
+    <?php if (hasPermission('sales-requests', 'r') || hasPermission('print-request', 'r')): ?>
     <div class="nav-section-label">SALES</div>
 
     <a class="nav-item <?= ($cur === 'sales-requests') ? 'active' : '' ?>" href="<?= $pagesBase ?>sales-requests.php" data-view="view-sales-requests" data-page="view-sales-requests" title="Sales Requests">
@@ -67,6 +67,19 @@ $roleName = $u ? ucfirst(str_replace('_', ' ', $u['role'])) : 'Guest';
       </span>
       <span class="nav-label">Sales Requests</span>
     </a>
+
+    <?php if (hasPermission('print-request', 'r')): ?>
+    <a class="nav-item <?= ($cur === 'print-request') ? 'active' : '' ?>" href="<?= $pagesBase ?>print-request.php" data-view="view-print-request" data-page="view-print-request" title="Print Request">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+      </span>
+      <span class="nav-label">Print Request</span>
+    </a>
+    <?php endif; ?>
     <?php endif; ?>
 
     <!-- 3. DESIGN -->
